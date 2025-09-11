@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Mic, Square, Play, Pause, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import ShareDialog from "./ShareDialog";
 
 const VoiceRecorder = () => {
   const [isRecording, setIsRecording] = useState(false);
@@ -155,10 +156,12 @@ const VoiceRecorder = () => {
                 {isPlaying ? 'Pause' : 'Play'}
               </Button>
               
-              <Button variant="success" size="sm">
-                <Upload className="w-4 h-4" />
-                Share Story
-              </Button>
+              <ShareDialog audioUrl={audioUrl}>
+                <Button variant="success" size="sm">
+                  <Upload className="w-4 h-4" />
+                  Share Story
+                </Button>
+              </ShareDialog>
             </div>
           </div>
         )}
