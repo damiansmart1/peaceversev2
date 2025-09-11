@@ -4,6 +4,8 @@ import CommunityMap from "@/components/CommunityMap";
 import GamificationDashboard from "@/components/GamificationDashboard";
 import AccessibilityFeatures from "@/components/AccessibilityFeatures";
 import DonorShowcase from "@/components/DonorShowcase";
+import ContentUpload from "@/components/ContentUpload";
+import ContentFeed from "@/components/ContentFeed";
 
 const Index = () => {
   return (
@@ -24,6 +26,35 @@ const Index = () => {
       </section>
 
       <CommunityMap />
+      
+      {/* Content Sharing Section */}
+      <section className="py-16 bg-background">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold mb-4 text-foreground">Share Your Story</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Upload videos, images, or audio content to inspire and connect with the community
+            </p>
+          </div>
+          <ContentUpload />
+        </div>
+      </section>
+
+      {/* Community Content Feed */}
+      <section className="py-16 bg-muted/30">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold mb-4 text-foreground">Community Stories</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Discover inspiring content shared by community members worldwide
+            </p>
+          </div>
+          <div className="max-w-4xl mx-auto">
+            <ContentFeed />
+          </div>
+        </div>
+      </section>
+
       <GamificationDashboard />
       <AccessibilityFeatures />
       <DonorShowcase />
