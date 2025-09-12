@@ -6,7 +6,6 @@ import AccessibilityFeatures from "@/components/AccessibilityFeatures";
 import DonorShowcase from "@/components/DonorShowcase";
 import ContentUpload from "@/components/ContentUpload";
 import ContentFeed from "@/components/ContentFeed";
-import OfflineAccess from "@/components/OfflineAccess";
 
 const Index = () => {
   return (
@@ -55,8 +54,7 @@ const Index = () => {
           </div>
         </div>
       </section>
-      
-      <OfflineAccess />
+
       <GamificationDashboard />
       <AccessibilityFeatures />
       <DonorShowcase />
