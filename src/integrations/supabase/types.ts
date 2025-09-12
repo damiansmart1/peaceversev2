@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievements: {
+        Row: {
+          badge_icon: string
+          category: string
+          created_at: string
+          description: string
+          id: string
+          is_active: boolean | null
+          name: string
+          points_required: number
+        }
+        Insert: {
+          badge_icon: string
+          category: string
+          created_at?: string
+          description: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          points_required: number
+        }
+        Update: {
+          badge_icon?: string
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          points_required?: number
+        }
+        Relationships: []
+      }
       comments: {
         Row: {
           content_id: string
@@ -91,6 +124,63 @@ export type Database = {
         }
         Relationships: []
       }
+      content_moderation: {
+        Row: {
+          ai_confidence_score: number | null
+          comment_id: string | null
+          content_id: string | null
+          created_at: string
+          flag_description: string | null
+          flag_reason: string
+          flagged_by: string | null
+          id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string | null
+        }
+        Insert: {
+          ai_confidence_score?: number | null
+          comment_id?: string | null
+          content_id?: string | null
+          created_at?: string
+          flag_description?: string | null
+          flag_reason: string
+          flagged_by?: string | null
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+        }
+        Update: {
+          ai_confidence_score?: number | null
+          comment_id?: string | null
+          content_id?: string | null
+          created_at?: string
+          flag_description?: string | null
+          flag_reason?: string
+          flagged_by?: string | null
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_moderation_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_moderation_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "content"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       likes: {
         Row: {
           content_id: string
@@ -116,6 +206,179 @@ export type Database = {
             columns: ["content_id"]
             isOneToOne: false
             referencedRelation: "content"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      peace_actions: {
+        Row: {
+          action_type: string
+          created_at: string
+          description: string | null
+          id: string
+          metadata: Json | null
+          points_awarded: number | null
+          user_id: string
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          points_awarded?: number | null
+          user_id: string
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          points_awarded?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          accessibility_needs: Json | null
+          age_group: string | null
+          anonymous_mode: boolean | null
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          is_peace_champion: boolean | null
+          is_verified: boolean | null
+          location: string | null
+          peace_points: number | null
+          preferred_language: string | null
+          total_actions: number | null
+          total_stories: number | null
+          updated_at: string
+          user_id: string
+          user_type: string | null
+          username: string | null
+        }
+        Insert: {
+          accessibility_needs?: Json | null
+          age_group?: string | null
+          anonymous_mode?: boolean | null
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          is_peace_champion?: boolean | null
+          is_verified?: boolean | null
+          location?: string | null
+          peace_points?: number | null
+          preferred_language?: string | null
+          total_actions?: number | null
+          total_stories?: number | null
+          updated_at?: string
+          user_id: string
+          user_type?: string | null
+          username?: string | null
+        }
+        Update: {
+          accessibility_needs?: Json | null
+          age_group?: string | null
+          anonymous_mode?: boolean | null
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          is_peace_champion?: boolean | null
+          is_verified?: boolean | null
+          location?: string | null
+          peace_points?: number | null
+          preferred_language?: string | null
+          total_actions?: number | null
+          total_stories?: number | null
+          updated_at?: string
+          user_id?: string
+          user_type?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
+      safe_spaces: {
+        Row: {
+          active_users_count: number | null
+          contact_info: Json | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          latitude: number | null
+          location_name: string
+          longitude: number | null
+          name: string
+          space_type: string
+          updated_at: string
+          verified: boolean | null
+        }
+        Insert: {
+          active_users_count?: number | null
+          contact_info?: Json | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          latitude?: number | null
+          location_name: string
+          longitude?: number | null
+          name: string
+          space_type: string
+          updated_at?: string
+          verified?: boolean | null
+        }
+        Update: {
+          active_users_count?: number | null
+          contact_info?: Json | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          latitude?: number | null
+          location_name?: string
+          longitude?: number | null
+          name?: string
+          space_type?: string
+          updated_at?: string
+          verified?: boolean | null
+        }
+        Relationships: []
+      }
+      user_achievements: {
+        Row: {
+          achievement_id: string
+          earned_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          earned_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string
+          earned_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_achievements_achievement_id_fkey"
+            columns: ["achievement_id"]
+            isOneToOne: false
+            referencedRelation: "achievements"
             referencedColumns: ["id"]
           },
         ]
