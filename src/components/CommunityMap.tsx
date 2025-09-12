@@ -22,8 +22,8 @@ const CommunityMap = () => {
   const safeHubs: SafeHub[] = [
     {
       id: '1',
-      name: 'Riverside Community Center',
-      location: 'Downtown District',
+      name: 'Amani Community Center',
+      location: 'Kibera',
       type: 'community_center',
       activeUsers: 23,
       verified: true,
@@ -32,8 +32,8 @@ const CommunityMap = () => {
     },
     {
       id: '2',
-      name: 'Hope Youth Hub',
-      location: 'Northside Village',
+      name: 'Tumaini Youth Hub',
+      location: 'Mathare',
       type: 'youth_center',
       activeUsers: 15,
       verified: true,
@@ -42,8 +42,8 @@ const CommunityMap = () => {
     },
     {
       id: '3',
-      name: 'Peace Library',
-      location: 'Central Square',
+      name: 'Uhuru Library',
+      location: 'Eastlands',
       type: 'library',
       activeUsers: 8,
       verified: true,
@@ -52,8 +52,8 @@ const CommunityMap = () => {
     },
     {
       id: '4',
-      name: 'Unity School',
-      location: 'East Quarter',
+      name: 'Harambee Secondary School',
+      location: 'Kasarani',
       type: 'school',
       activeUsers: 31,
       verified: true,
