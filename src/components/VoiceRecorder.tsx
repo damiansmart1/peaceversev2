@@ -92,9 +92,9 @@ const VoiceRecorder = () => {
   return (
     <Card className="p-8 max-w-md mx-auto bg-card/80 backdrop-blur-sm border-accent/20 shadow-story">
       <div className="text-center space-y-6">
-        <h3 className="text-2xl font-semibold text-card-foreground">Share Your Voice</h3>
+        <h3 className="text-2xl font-semibold text-card-foreground">Shiriki Sauti Yako | Share Your Voice</h3>
         <p className="text-muted-foreground">
-          Record your story to inspire peace and understanding
+          Rekodi hadithi yako ili kuongoza amani na uelewa huko Kenya
         </p>
 
         {/* Recording Indicator */}

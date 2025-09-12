@@ -23,21 +23,21 @@ const AccessibilityFeatures = () => {
   const [screenReader, setScreenReader] = useState(false);
 
   const languages = [
-    { code: 'en', name: 'English', flag: '🇺🇸' },
-    { code: 'es', name: 'Español', flag: '🇪🇸' },
-    { code: 'fr', name: 'Français', flag: '🇫🇷' },
-    { code: 'ar', name: 'العربية', flag: '🇸🇦' },
     { code: 'sw', name: 'Kiswahili', flag: '🇰🇪' },
-    { code: 'hi', name: 'हिंदी', flag: '🇮🇳' }
+    { code: 'en', name: 'English', flag: '🇬🇧' },
+    { code: 'kik', name: 'Gĩkũyũ', flag: '🇰🇪' },
+    { code: 'luo', name: 'Dholuo', flag: '🇰🇪' },
+    { code: 'kam', name: 'Kamba', flag: '🇰🇪' },
+    { code: 'ar', name: 'العربية', flag: '🇸🇦' }
   ];
 
   return (
     <section className="py-16 bg-muted/20">
       <div className="container mx-auto px-6">
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold mb-4 text-foreground">Inclusive by Design</h2>
+          <h2 className="text-4xl font-bold mb-4 text-foreground">Kujumuisha kwa Muundo | Inclusive by Design</h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            PeaceVerse is built to welcome everyone, regardless of literacy level, physical ability, or language
+            Amani Verse imeundwa kukaribishia kila mtu, bila kujali kiwango cha ujuzi wa kusoma, uwezo wa kimwili, au lugha
           </p>
         </div>
 
