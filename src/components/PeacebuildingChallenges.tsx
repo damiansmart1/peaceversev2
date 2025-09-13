@@ -2,11 +2,8 @@ import React from 'react';
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, Shield, Users, MessageSquareWarning, Zap, Target } from "lucide-react";
-import { useTranslation } from "@/hooks/useTranslation";
 
 const PeacebuildingChallenges = () => {
-  const { t } = useTranslation();
-  
   const challenges = [
     {
       id: "hate-speech",
@@ -78,10 +75,10 @@ const PeacebuildingChallenges = () => {
       <div className="container mx-auto px-6">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold mb-4 text-foreground">
-            {t('challenges.title')}
+            Changamoto za Kujenga Amani | Peacebuilding Challenges
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            {t('challenges.description')}
+            Amani Verse inashughulikia changamoto maalum za kujenga amani Kenya kwa kutumia teknolojia ya kisasa na mbinu za kitamaduni
           </p>
         </div>
 
