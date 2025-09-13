@@ -6,11 +6,23 @@ import AccessibilityFeatures from "@/components/AccessibilityFeatures";
 import DonorShowcase from "@/components/DonorShowcase";
 import ContentUpload from "@/components/ContentUpload";
 import ContentFeed from "@/components/ContentFeed";
+import PeacebuildingChallenges from "@/components/PeacebuildingChallenges";
+import ContentModerationSection from "@/components/ContentModerationSection";
+import OfflineAccessSection from "@/components/OfflineAccessSection";
+import SafetyProtectionSection from "@/components/SafetyProtectionSection";
+import CommunityTrustSection from "@/components/CommunityTrustSection";
 
 const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <HeroSection />
+      
+      {/* Critical Peacebuilding Areas */}
+      <PeacebuildingChallenges />
+      <ContentModerationSection />
+      <OfflineAccessSection />
+      <SafetyProtectionSection />
+      <CommunityTrustSection />
       
       {/* Voice Recording Section */}
       <section className="py-16 bg-muted/30">
