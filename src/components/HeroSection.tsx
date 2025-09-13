@@ -1,10 +1,19 @@
 import { Button } from "@/components/ui/button";
+import { LanguageToggle } from "@/components/LanguageToggle";
 import { Mic, Users, Award, Map } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
 import heroImage from "@/assets/hero-image.jpg";
 
 const HeroSection = () => {
+  const { t } = useTranslation();
+  
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background">
+      {/* Language Toggle */}
+      <div className="absolute top-6 right-6 z-20">
+        <LanguageToggle />
+      </div>
+      
       {/* Background Image with Overlay */}
       <div className="absolute inset-0 z-0">
         <img
@@ -20,27 +29,26 @@ const HeroSection = () => {
         <div className="max-w-4xl mx-auto text-center animate-fade-in-up">
           {/* Main Heading */}
           <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-peace-gradient bg-clip-text text-transparent leading-tight">
-            Amani Verse
+            {t('hero.title')}
           </h1>
           
           <p className="text-xl md:text-2xl text-foreground/80 mb-4 font-medium">
-            Kuongoza Sauti za Vijana kwa Amani | Empowering Youth Voices for Peace
+            {t('hero.tagline')}
           </p>
           
           <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
-            Jiunge na jumuiya ya vijana kutoka maeneo ya vijijini, maeneo ya mbali, na maeneo yenye migogoro hapa Kenya. 
-            Shiriki hadithi zako, jenga uhusiano, na unda mabadiliko mazuri kupitia sauti, ubunifu, na ushirikiano.
+            {t('hero.description')}
           </p>
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
             <Button variant="peace" size="lg" className="text-lg px-8 py-6">
-              <Mic className="w-5 h-5" />
-              Shiriki Hadithi Yako | Share Your Story
+              <Mic className="w-5 h-5 mr-2" />
+              {t('hero.shareStory')}
             </Button>
             <Button variant="community" size="lg" className="text-lg px-8 py-6">
-              <Users className="w-5 h-5" />
-              Jiunge na Jumuiya | Join Community
+              <Users className="w-5 h-5 mr-2" />
+              {t('hero.joinCommunity')}
             </Button>
           </div>
 
@@ -50,9 +58,9 @@ const HeroSection = () => {
               <div className="w-12 h-12 bg-voice-active rounded-full flex items-center justify-center mb-4 mx-auto">
                 <Mic className="w-6 h-6 text-primary-foreground" />
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-card-foreground">Hadithi za Sauti | Voice-First Stories</h3>
+              <h3 className="text-xl font-semibold mb-3 text-card-foreground">{t('hero.feature1.title')}</h3>
               <p className="text-muted-foreground">
-                Shiriki uzoefu wako kupitia rekodi za sauti, zinazoweza kufikiwa na watu wote bila kujali kiwango cha ujuzi wa kusoma
+                {t('hero.feature1.desc')}
               </p>
             </div>
 
@@ -60,9 +68,9 @@ const HeroSection = () => {
               <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center mb-4 mx-auto">
                 <Map className="w-6 h-6 text-accent-foreground" />
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-card-foreground">Maeneo Salama ya Kijamii | Safe Community Hubs</h3>
+              <h3 className="text-xl font-semibold mb-3 text-card-foreground">{t('hero.feature2.title')}</h3>
               <p className="text-muted-foreground">
-                Pata na unganike na maeneo ya mazungumzo ya kuaminika katika eneo lako huko Kenya
+                {t('hero.feature2.desc')}
               </p>
             </div>
 
@@ -70,9 +78,9 @@ const HeroSection = () => {
               <div className="w-12 h-12 bg-warning rounded-full flex items-center justify-center mb-4 mx-auto">
                 <Award className="w-6 h-6 text-warning-foreground" />
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-card-foreground">Pata Utambulisho | Earn Recognition</h3>
+              <h3 className="text-xl font-semibold mb-3 text-card-foreground">{t('hero.feature3.title')}</h3>
               <p className="text-muted-foreground">
-                Pata vibeti na utambulisho kwa michango yako mizuri katika kujenga amani Kenya
+                {t('hero.feature3.desc')}
               </p>
             </div>
           </div>
