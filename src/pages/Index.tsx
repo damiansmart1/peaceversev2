@@ -13,10 +13,19 @@ import SafetyProtectionSection from "@/components/SafetyProtectionSection";
 import CommunityTrustSection from "@/components/CommunityTrustSection";
 import OnlineRadio from "@/components/OnlineRadio";
 import RadioAccessibilityFeatures from "@/components/RadioAccessibilityFeatures";
+import FunctionalRadio from "@/components/FunctionalRadio";
+import LanguageToggle from "@/components/LanguageToggle";
+import { useTranslationContext } from "@/components/TranslationProvider";
 
 const Index = () => {
+  const { t } = useTranslationContext();
   return (
     <div className="min-h-screen bg-background">
+      {/* Language Toggle - Fixed Position */}
+      <div className="fixed top-4 right-4 z-50">
+        <LanguageToggle />
+      </div>
+      
       <HeroSection />
       
       {/* Critical Peacebuilding Areas */}
@@ -30,9 +39,9 @@ const Index = () => {
       <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-6">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4 text-foreground">Sauti Yako Ina Maana | Your Voice Matters</h2>
+            <h2 className="text-4xl font-bold mb-4 text-foreground">{t('voice.title')}</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Shiriki hadithi yako na uongeze mabadiliko mazuri katika jamii yako na zaidi huko Kenya
+              {t('voice.subtitle')}
             </p>
           </div>
           <VoiceRecorder />
@@ -45,12 +54,12 @@ const Index = () => {
       <section className="py-16 bg-gradient-to-br from-primary/5 to-secondary/5">
         <div className="container mx-auto px-6">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4 text-foreground">Amani Community Radio | راډیو ټولنه امان</h2>
+            <h2 className="text-4xl font-bold mb-4 text-foreground">{t('radio.title')}</h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Connect with peace voices across Kenya through our live radio platform. Share your story, listen to community voices, and join the conversation for positive change.
+              {t('radio.subtitle')}
             </p>
           </div>
-          <OnlineRadio />
+          <FunctionalRadio />
         </div>
       </section>
 
@@ -58,9 +67,9 @@ const Index = () => {
       <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-6">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4 text-foreground">Accessible for Everyone</h2>
+            <h2 className="text-4xl font-bold mb-4 text-foreground">{t('accessibility.title')}</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Our radio platform is designed to reach everyone, including marginalized communities with limited internet access
+              {t('accessibility.subtitle')}
             </p>
           </div>
           <div className="max-w-6xl mx-auto">
@@ -73,9 +82,9 @@ const Index = () => {
       <section className="py-16 bg-background">
         <div className="container mx-auto px-6">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4 text-foreground">Shiriki Hadithi Yako | Share Your Story</h2>
+            <h2 className="text-4xl font-bold mb-4 text-foreground">{t('content.share.title')}</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Pakia video, picha, au maudhui ya sauti ili kuongoza na kuunganisha na jamii
+              {t('content.share.subtitle')}
             </p>
           </div>
           <ContentUpload />
@@ -86,9 +95,9 @@ const Index = () => {
       <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-6">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4 text-foreground">Hadithi za Kijamii | Community Stories</h2>
+            <h2 className="text-4xl font-bold mb-4 text-foreground">{t('community.stories.title')}</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Gundua maudhui ya kuongoza yaliyoshirikiwa na wanajamii kutoka Kenya na Afrika Mashariki
+              {t('community.stories.subtitle')}
             </p>
           </div>
           <div className="max-w-4xl mx-auto">
@@ -107,36 +116,36 @@ const Index = () => {
           <div className="grid md:grid-cols-3 gap-8">
             <div className="space-y-4">
               <h3 className="text-2xl font-bold bg-peace-gradient bg-clip-text text-transparent">
-                Amani Verse
+                {t('hero.title')}
               </h3>
               <p className="text-primary-foreground/80">
-                Kuongoza sauti za vijana kwa amani, hadithi moja kwa wakati.
+                {t('footer.tagline')}
               </p>
             </div>
             
             <div className="space-y-4">
-              <h4 className="font-semibold">Vipengele | Features</h4>
+              <h4 className="font-semibold">{t('footer.features')}</h4>
               <ul className="space-y-2 text-primary-foreground/80">
-                <li>Hadithi za Sauti | Voice Storytelling</li>
-                <li>Ramani za Kijamii | Community Mapping</li>
-                <li>Changamoto za Amani | Peace Challenges</li>
-                <li>Maeneo Salama ya Mazungumzo | Safe Dialogue Spaces</li>
+                <li>{t('footer.features.voice')}</li>
+                <li>{t('footer.features.mapping')}</li>
+                <li>{t('footer.features.challenges')}</li>
+                <li>{t('footer.features.dialogue')}</li>
               </ul>
             </div>
             
             <div className="space-y-4">
-              <h4 className="font-semibold">Msaada | Support</h4>
+              <h4 className="font-semibold">{t('footer.support')}</h4>
               <ul className="space-y-2 text-primary-foreground/80">
-                <li>Vipengele vya Ufikivu | Accessibility Features</li>
-                <li>Msaada wa Lugha Nyingi | Multi-language Support</li>
-                <li>Usalama wa Kijamii 24/7 | 24/7 Community Safety</li>
-                <li>Rasilimali za Msaada wa Haraka | Crisis Resources</li>
+                <li>{t('footer.support.accessibility')}</li>
+                <li>{t('footer.support.multilang')}</li>
+                <li>{t('footer.support.safety')}</li>
+                <li>{t('footer.support.crisis')}</li>
               </ul>
             </div>
           </div>
           
           <div className="border-t border-primary-foreground/20 mt-8 pt-8 text-center text-primary-foreground/60">
-            <p>&copy; 2024 Amani Verse. Kujenga madaraja, kushiriki hadithi, kuunda amani Kenya.</p>
+            <p>&copy; 2024 {t('hero.title')}. {t('footer.tagline')}</p>
           </div>
         </div>
       </footer>
