@@ -11,6 +11,8 @@ import ContentModerationSection from "@/components/ContentModerationSection";
 import OfflineAccessSection from "@/components/OfflineAccessSection";
 import SafetyProtectionSection from "@/components/SafetyProtectionSection";
 import CommunityTrustSection from "@/components/CommunityTrustSection";
+import OnlineRadio from "@/components/OnlineRadio";
+import RadioAccessibilityFeatures from "@/components/RadioAccessibilityFeatures";
 
 const Index = () => {
   return (
@@ -38,6 +40,34 @@ const Index = () => {
       </section>
 
       <CommunityMap />
+
+      {/* Online Radio Section */}
+      <section className="py-16 bg-gradient-to-br from-primary/5 to-secondary/5">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold mb-4 text-foreground">Amani Community Radio | راډیو ټولنه امان</h2>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              Connect with peace voices across Kenya through our live radio platform. Share your story, listen to community voices, and join the conversation for positive change.
+            </p>
+          </div>
+          <OnlineRadio />
+        </div>
+      </section>
+
+      {/* Radio Accessibility Features */}
+      <section className="py-16 bg-muted/30">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold mb-4 text-foreground">Accessible for Everyone</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Our radio platform is designed to reach everyone, including marginalized communities with limited internet access
+            </p>
+          </div>
+          <div className="max-w-6xl mx-auto">
+            <RadioAccessibilityFeatures />
+          </div>
+        </div>
+      </section>
       
       {/* Content Sharing Section */}
       <section className="py-16 bg-background">
