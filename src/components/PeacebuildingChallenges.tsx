@@ -78,7 +78,7 @@ const PeacebuildingChallenges = () => {
             Changamoto za Kujenga Amani | Peacebuilding Challenges
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Amani Verse inashughulikia changamoto maalum za kujenga amani Kenya kwa kutumia teknolojia ya kisasa na mbinu za kitamaduni
+            Peace Verse inashughulikia changamoto maalum za kujenga amani Kenya kwa kutumia teknolojia ya kisasa na mbinu za kitamaduni
           </p>
         </div>
 
@@ -144,7 +144,7 @@ const PeacebuildingChallenges = () => {
           <div className="text-center text-primary-foreground">
             <h3 className="text-2xl font-bold mb-4">Our Targeted Response</h3>
             <p className="text-lg leading-relaxed">
-              Amani Verse haijengwi tu kama jukwaa la mazungumzo - ni silaha ya teknolojia iliyoundwa kukabiliana na changamoto hizi maalum. 
+              Peace Verse haijengwi tu kama jukwaa la mazungumzo - ni silaha ya teknolojia iliyoundwa kukabiliana na changamoto hizi maalum. 
               Tunatumia AI, sauti ya mtu, na ushirikiano wa jamii kujenga uongozi wa amani unaozuia na kushughilia matatizo haya ya kimsingi.
             </p>
           </div>

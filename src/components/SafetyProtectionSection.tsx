@@ -338,7 +338,7 @@ const SafetyProtectionSection = () => {
             <Crown className="w-16 h-16 text-primary mx-auto mb-4" />
             <h3 className="text-2xl font-bold text-card-foreground mb-4">Ahadi ya Ulinzi | Protection Guarantee</h3>
             <p className="text-muted-foreground leading-relaxed">
-              Kila kijana kwenye Amani Verse ana haki ya kujisikia salama wakati wa kushiriki mazungumzo ya amani. 
+              Kila kijana kwenye Peace Verse ana haki ya kujisikia salama wakati wa kushiriki mazungumzo ya amani. 
               Hatutoi ahadi za uwongo - tunatoa ulinzi wa kweli kupitia teknolojia ya kisasa na mkakati wa jamii.
             </p>
           </div>

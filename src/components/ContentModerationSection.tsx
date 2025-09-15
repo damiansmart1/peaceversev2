@@ -226,7 +226,7 @@ const ContentModerationSection = () => {
             <Shield className="w-16 h-16 text-success mx-auto mb-4" />
             <h3 className="text-2xl font-bold text-card-foreground mb-4">Ahadi ya Usalama | Safety Guarantee</h3>
             <p className="text-muted-foreground leading-relaxed">
-              Kila ujumbe, picha, na sauti inayoshirikiwa kwenye Amani Verse inapita katika mfumo wa uchunguzi mkali. 
+              Kila ujumbe, picha, na sauti inayoshirikiwa kwenye Peace Verse inapita katika mfumo wa uchunguzi mkali. 
               Tunahakikisha mazingira salama ya mazungumzo ya amani kwa vijana wa Kenya wote.
             </p>
           </div>

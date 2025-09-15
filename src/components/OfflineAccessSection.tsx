@@ -117,7 +117,7 @@ const OfflineAccessSection = () => {
             Ufikivu kwa Wote | Universal Access
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Amani Verse inafanya kazi kwa vijana wa pembezoni na maeneo ya vijijini yenye ufikivu mdogo wa mtandao wa intaneti
+            Peace Verse inafanya kazi kwa vijana wa pembezoni na maeneo ya vijijini yenye ufikivu mdogo wa mtandao wa intaneti
           </p>
         </div>
 
@@ -285,7 +285,7 @@ const OfflineAccessSection = () => {
             <h3 className="text-2xl font-bold text-card-foreground mb-4">Ahadi ya Ufikivu | Access Promise</h3>
             <p className="text-muted-foreground leading-relaxed">
               Hakuna kijana wa Kenya anayepaswa kutengwa katika mazungumzo ya amani kwa sababu ya kipimo cha teknolojia. 
-              Amani Verse inafanya kazi kwa simu za kawaida, simu za kisasa, na hata bila simu kabisa.
+              Peace Verse inafanya kazi kwa simu za kawaida, simu za kisasa, na hata bila simu kabisa.
             </p>
           </div>
         </Card>

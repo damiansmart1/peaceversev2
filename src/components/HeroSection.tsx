@@ -1,8 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Mic, Users, Award, Map } from "lucide-react";
 import heroImage from "@/assets/hero-image.jpg";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const HeroSection = () => {
+  const { t } = useTranslation();
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background">
       {/* Background Image with Overlay */}
@@ -20,7 +22,7 @@ const HeroSection = () => {
         <div className="max-w-4xl mx-auto text-center animate-fade-in-up">
           {/* Main Heading */}
           <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-peace-gradient bg-clip-text text-transparent leading-tight">
-            Amani Verse
+            {t('hero.title')}
           </h1>
           
           <p className="text-xl md:text-2xl text-foreground/80 mb-4 font-medium">

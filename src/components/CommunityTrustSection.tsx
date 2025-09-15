@@ -126,7 +126,7 @@ const CommunityTrustSection = () => {
       impact: "40% reduction in youth conflicts",
       verified: true,
       endorsers: ["Area Chief", "Religious Leaders", "Women's Groups"],
-      quote: "Amani Verse ilitusaidia kuongea na kushiriki bila woga"
+      quote: "Peace Verse ilitusaidia kuongea na kushiriki bila woga"
     },
     {
       id: "nakuru-harmony",
@@ -307,7 +307,7 @@ const CommunityTrustSection = () => {
             <Handshake className="w-16 h-16 text-success mx-auto mb-4" />
             <h3 className="text-2xl font-bold text-card-foreground mb-4">Ahadi ya Uaminifu | Trust Commitment</h3>
             <p className="text-muted-foreground leading-relaxed">
-              Amani Verse si mradi wa kijana tu - ni ushirikiano wa kizazi cha vijana na uongozi wa kitamaduni. 
+              Peace Verse si mradi wa kijana tu - ni ushirikiano wa kizazi cha vijana na uongozi wa kitamaduni. 
               Tunaheshimu utamaduni, tunaongoza kwa uwazi, na tunatekeleza ahadi zetu kwa jamii.
             </p>
           </div>

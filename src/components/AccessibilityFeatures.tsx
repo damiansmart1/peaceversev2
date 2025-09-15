@@ -37,7 +37,7 @@ const AccessibilityFeatures = () => {
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold mb-4 text-foreground">Kujumuisha kwa Muundo | Inclusive by Design</h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Amani Verse imeundwa kukaribishia kila mtu, bila kujali kiwango cha ujuzi wa kusoma, uwezo wa kimwili, au lugha
+            Peace Verse imeundwa kukaribishia kila mtu, bila kujali kiwango cha ujuzi wa kusoma, uwezo wa kimwili, au lugha
           </p>
         </div>
 
