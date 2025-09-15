@@ -22,16 +22,16 @@ export const translations = {
     'common.close': 'Close',
     
     // Hero Section
-    'hero.title': 'Amani Verse',
+    'hero.title': 'Peace Verse',
     'hero.subtitle': 'Empowering Youth Voices for Peace Across Kenya',
     'hero.description': 'Join a transformative community where young peacebuilders share stories, build bridges, and create lasting change through voice-first storytelling and inclusive dialogue.',
     'hero.cta.primary': 'Share Your Story',
     'hero.cta.secondary': 'Explore Community',
     
     // Radio Section
-    'radio.title': 'Amani Community Radio',
+    'radio.title': 'Peace Community Radio',
     'radio.subtitle': 'Connect with peace voices across Kenya through our live radio platform. Share your story, listen to community voices, and join the conversation for positive change.',
-    'radio.station.peace': 'Amani Peace Radio',
+    'radio.station.peace': 'Peace Radio',
     'radio.station.peace.desc': 'Youth voices for peace and unity across Kenya',
     'radio.station.community': 'Community Stories FM',
     'radio.station.community.desc': 'Sharing stories that build bridges in communities',
@@ -121,16 +121,16 @@ export const translations = {
     'common.close': 'Funga',
     
     // Hero Section
-    'hero.title': 'Amani Verse',
+    'hero.title': 'Peace Verse',
     'hero.subtitle': 'Kuongeza Nguvu za Sauti za Vijana kwa Amani Kote Kenya',
     'hero.description': 'Jiunge na jamii ya mabadiliko ambapo wajenzi wa amani vijana hushiriki hadithi, kujenga madaraja, na kuunda mabadiliko ya kudumu kupitia hadithi za sauti na mazungumzo ya jumuishi.',
     'hero.cta.primary': 'Shiriki Hadithi Yako',
     'hero.cta.secondary': 'Chunguza Jamii',
     
     // Radio Section
-    'radio.title': 'Redio ya Jamii ya Amani',
+    'radio.title': 'Peace Community Radio',
     'radio.subtitle': 'Unganisha na sauti za amani kote Kenya kupitia jukwaa letu la redio ya moja kwa moja. Shiriki hadithi yako, sikiliza sauti za jamii, na jiunge na mazungumzo ya mabadiliko mazuri.',
-    'radio.station.peace': 'Redio ya Amani',
+    'radio.station.peace': 'Peace Radio',
     'radio.station.peace.desc': 'Sauti za vijana kwa amani na umoja kote Kenya',
     'radio.station.community': 'Hadithi za Jamii FM',
     'radio.station.community.desc': 'Kushiriki hadithi zinazojenga madaraja katika jamii',
@@ -220,16 +220,16 @@ export const translations = {
     'common.close': 'Fermer',
     
     // Hero Section
-    'hero.title': 'Amani Verse',
+    'hero.title': 'Peace Verse',
     'hero.subtitle': 'Amplifier les Voix des Jeunes pour la Paix à Travers le Kenya',
     'hero.description': 'Rejoignez une communauté transformatrice où les jeunes artisans de paix partagent des histoires, construisent des ponts et créent un changement durable grâce à la narration vocale et au dialogue inclusif.',
     'hero.cta.primary': 'Partagez Votre Histoire',
     'hero.cta.secondary': 'Explorer la Communauté',
     
     // Radio Section
-    'radio.title': 'Radio Communautaire Amani',
+    'radio.title': 'Radio Communautaire Peace',
     'radio.subtitle': 'Connectez-vous avec les voix de la paix à travers le Kenya grâce à notre plateforme radio en direct. Partagez votre histoire, écoutez les voix communautaires et rejoignez la conversation pour un changement positif.',
-    'radio.station.peace': 'Radio de la Paix Amani',
+    'radio.station.peace': 'Radio de la Paix',
     'radio.station.peace.desc': 'Voix des jeunes pour la paix et l\'unité à travers le Kenya',
     'radio.station.community': 'Histoires Communautaires FM',
     'radio.station.community.desc': 'Partager des histoires qui construisent des ponts dans les communautés',
@@ -308,16 +308,16 @@ export const translations = {
     'common.close': 'Xir',
     
     // Hero Section
-    'hero.title': 'Amani Verse',
+    'hero.title': 'Peace Verse',
     'hero.subtitle': 'Xoojinta Codadka Dhalinyarada Nabadda ee Dalka Kenya',
     'hero.description': 'Ku biir bulsho isbadal ah oo ay dhallinyarada dhisayaasha nabadda wada qaybiyaan sheekooyin, dhisaan buundooyin, oo abuuraan isbadal waara iyagoo u adeegsanaya sheekooyin codka ah iyo wadahadal guud.',
     'hero.cta.primary': 'Wadaag Sheekaadaada',
     'hero.cta.secondary': 'Sahami Bulshada',
     
     // Radio Section
-    'radio.title': 'Raadiyaha Bulshada Amani',
+    'radio.title': 'Peace Community Radio',
     'radio.subtitle': 'Ku xirmo codadka nabadda ee Kenya iyada oo loo adeegsado joogtada raadiyaha. Wadaag sheekaadaada, dhagayso codadka bulshada, oo ku biir wada hadalka isbadalka wanaagsan.',
-    'radio.station.peace': 'Raadiyaha Nabadda Amani',
+    'radio.station.peace': 'Peace Radio',
     'radio.station.peace.desc': 'Codadka dhalinyarada nabadda iyo midnimada Kenya',
     'radio.station.community': 'Sheekooyin Bulshada FM',
     'radio.station.community.desc': 'Wadaagista sheekooyin dhisa buundooyin bulshada gudaheeda',

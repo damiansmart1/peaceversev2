@@ -22,7 +22,7 @@ const CommunityMap = () => {
   const safeHubs: SafeHub[] = [
     {
       id: '1',
-      name: 'Amani Community Center',
+      name: 'Peace Community Center',
       location: 'Kibera',
       type: 'community_center',
       activeUsers: 23,

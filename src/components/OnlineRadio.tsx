@@ -44,7 +44,7 @@ const OnlineRadio = () => {
   const radioStations: RadioStation[] = [
     {
       id: '1',
-      name: 'Amani Peace Radio',
+      name: 'Peace Radio',
       description: 'Youth voices for peace and unity across Kenya',
       isLive: true,
       listeners: 1247,
@@ -215,7 +215,7 @@ const OnlineRadio = () => {
           <div className="flex items-center justify-center gap-2 mb-2">
             <Radio className="h-8 w-8 text-primary animate-pulse" />
             <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              Amani Community Radio
+              Peace Community Radio
             </CardTitle>
           </div>
           <p className="text-muted-foreground">
