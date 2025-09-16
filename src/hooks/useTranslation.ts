@@ -14,6 +14,13 @@ export const translations = {
     'nav.home': 'Home',
     'nav.about': 'About',
     'nav.contact': 'Contact',
+    'nav.voice': 'Voice Stories',
+    'nav.community': 'Community',
+    'nav.radio': 'Peace Radio',
+    'nav.map': 'Community Map',
+    'nav.challenges': 'Challenges',
+    'nav.safety': 'Safety & Trust',
+    'nav.footer.global': 'Global peace platform',
     'common.loading': 'Loading...',
     'common.error': 'Error occurred',
     'common.success': 'Success',
@@ -28,7 +35,25 @@ export const translations = {
     'hero.cta.primary': 'Share Your Story',
     'hero.cta.secondary': 'Explore Community',
     
+    // Features Overview
+    'features.badge': 'Platform Features',
+    'features.title': 'Everything You Need for Peace Building',
+    'features.subtitle': 'Discover powerful tools designed to amplify youth voices and foster meaningful connections across communities in Kenya.',
+    'features.voice.title': 'Voice-First Stories',
+    'features.voice.description': 'Share your experiences through voice recordings that are accessible to everyone, regardless of literacy level.',
+    'features.community.title': 'Safe Community Hubs',
+    'features.community.description': 'Find and connect with trusted dialogue spaces in your area across Kenya.',
+    'features.radio.title': 'Peace Community Radio',
+    'features.radio.description': 'Listen to inspiring stories and participate in live discussions about peace and unity.',
+    'features.map.title': 'Interactive Community Map',
+    'features.map.description': 'Discover peace initiatives, community centers, and safe spaces near you.',
+    'features.challenges.title': 'Peace Challenges',
+    'features.challenges.description': 'Participate in monthly challenges that promote dialogue, understanding, and positive action.',
+    'features.safety.title': 'Safety First',
+    'features.safety.description': 'Advanced moderation and safety features ensure a secure environment for all participants.',
+    
     // Radio Section
+    'radio.badge': 'Peace Radio',
     'radio.title': 'Peace Community Radio',
     'radio.subtitle': 'Connect with peace voices across Kenya through our live radio platform. Share your story, listen to community voices, and join the conversation for positive change.',
     'radio.station.peace': 'Peace Radio',
@@ -68,16 +93,34 @@ export const translations = {
     'accessibility.smsUpdates.desc': 'Receive program updates via SMS',
     
     // Voice Recording
+    'voice.badge': 'Voice Stories',
     'voice.title': 'Your Voice Matters',
     'voice.subtitle': 'Share your story and drive positive change in your community and beyond in Kenya',
     
     // Content Sharing
+    'content.badge': 'Content Sharing',
     'content.share.title': 'Share Your Story',
     'content.share.subtitle': 'Upload videos, photos, or audio content to lead and connect with the community',
     
     // Community Stories
+    'community.badge': 'Community Hub',
     'community.stories.title': 'Community Stories',
     'community.stories.subtitle': 'Discover inspiring content shared by community members from Kenya and East Africa',
+    
+    // Map Section
+    'map.badge': 'Community Mapping',
+    'map.title': 'Interactive Community Map',
+    'map.subtitle': 'Explore peace initiatives, community centers, and safe spaces across Kenya.',
+    
+    // Challenges Section
+    'challenges.badge': 'Peace Challenges',
+    'challenges.title': 'Monthly Peace Challenges',
+    'challenges.subtitle': 'Participate in activities that promote dialogue, understanding, and positive action in your community.',
+    
+    // Safety Section
+    'safety.badge': 'Safety & Trust',
+    'safety.title': 'Safe & Secure Platform',
+    'safety.subtitle': 'Advanced moderation and safety features ensure a secure environment for all participants.',
     
     // Peacebuilding Challenges
     'peacebuilding.title': 'Critical Peacebuilding Areas',

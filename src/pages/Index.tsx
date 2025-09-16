@@ -1,4 +1,7 @@
 import HeroSection from "@/components/HeroSection";
+import Navigation from "@/components/Navigation";
+import SectionHeader from "@/components/SectionHeader";
+import FeatureCard from "@/components/FeatureCard";
 import VoiceRecorder from "@/components/VoiceRecorder";
 import CommunityMap from "@/components/CommunityMap";
 import GamificationDashboard from "@/components/GamificationDashboard";
@@ -11,97 +14,200 @@ import ContentModerationSection from "@/components/ContentModerationSection";
 import OfflineAccessSection from "@/components/OfflineAccessSection";
 import SafetyProtectionSection from "@/components/SafetyProtectionSection";
 import CommunityTrustSection from "@/components/CommunityTrustSection";
-import OnlineRadio from "@/components/OnlineRadio";
 import RadioAccessibilityFeatures from "@/components/RadioAccessibilityFeatures";
 import FunctionalRadio from "@/components/FunctionalRadio";
-import LanguageToggle from "@/components/LanguageToggle";
 import { useTranslationContext } from "@/components/TranslationProvider";
+import { Mic, Users, Radio, Map, Award, Shield, Globe, Heart, Upload, MessageSquare } from "lucide-react";
 
 const Index = () => {
   const { t } = useTranslationContext();
+  
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+  
   return (
     <div className="min-h-screen bg-background">
-      {/* Language Toggle - Fixed Position */}
-      <div className="fixed top-4 right-4 z-50">
-        <LanguageToggle />
-      </div>
-      
+      <Navigation />
       <HeroSection />
       
-      {/* Critical Peacebuilding Areas */}
-      <PeacebuildingChallenges />
-      <ContentModerationSection />
-      <OfflineAccessSection />
-      <SafetyProtectionSection />
-      <CommunityTrustSection />
-      
-      {/* Voice Recording Section */}
-      <section className="py-16 bg-muted/30">
+      {/* Feature Overview Section */}
+      <section id="features" className="py-20 bg-muted/30">
         <div className="container mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4 text-foreground">{t('voice.title')}</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              {t('voice.subtitle')}
-            </p>
+          <SectionHeader
+            badge={t('features.badge')}
+            title={t('features.title')}
+            subtitle={t('features.subtitle')}
+            icon={<Heart className="w-4 h-4" />}
+          />
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            <FeatureCard
+              icon={<div className="w-12 h-12 bg-voice-active rounded-full flex items-center justify-center">
+                <Mic className="w-6 h-6 text-white" />
+              </div>}
+              title={t('features.voice.title')}
+              description={t('features.voice.description')}
+              onClick={() => scrollToSection('voice')}
+            />
+            
+            <FeatureCard
+              icon={<div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center">
+                <Users className="w-6 h-6 text-white" />
+              </div>}
+              title={t('features.community.title')}
+              description={t('features.community.description')}
+              onClick={() => scrollToSection('community')}
+            />
+            
+            <FeatureCard
+              icon={<div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
+                <Radio className="w-6 h-6 text-white" />
+              </div>}
+              title={t('features.radio.title')}
+              description={t('features.radio.description')}
+              onClick={() => scrollToSection('radio')}
+            />
+            
+            <FeatureCard
+              icon={<div className="w-12 h-12 bg-warning rounded-full flex items-center justify-center">
+                <Map className="w-6 h-6 text-white" />
+              </div>}
+              title={t('features.map.title')}
+              description={t('features.map.description')}
+              onClick={() => scrollToSection('map')}
+            />
+            
+            <FeatureCard
+              icon={<div className="w-12 h-12 bg-success rounded-full flex items-center justify-center">
+                <Award className="w-6 h-6 text-white" />
+              </div>}
+              title={t('features.challenges.title')}
+              description={t('features.challenges.description')}
+              onClick={() => scrollToSection('challenges')}
+            />
+            
+            <FeatureCard
+              icon={<div className="w-12 h-12 bg-destructive rounded-full flex items-center justify-center">
+                <Shield className="w-6 h-6 text-white" />
+              </div>}
+              title={t('features.safety.title')}
+              description={t('features.safety.description')}
+              onClick={() => scrollToSection('safety')}
+            />
           </div>
-          <VoiceRecorder />
         </div>
       </section>
 
-      <CommunityMap />
+      {/* Voice Recording Section */}
+      <section id="voice" className="py-20 bg-background">
+        <div className="container mx-auto px-6">
+          <SectionHeader
+            badge={t('voice.badge')}
+            title={t('voice.title')}
+            subtitle={t('voice.subtitle')}
+            icon={<Mic className="w-4 h-4" />}
+          />
+          <div className="max-w-4xl mx-auto">
+            <VoiceRecorder />
+          </div>
+        </div>
+      </section>
+
+      {/* Community Map Section */}
+      <section id="map" className="py-20 bg-gradient-to-br from-primary/5 to-accent/5">
+        <div className="container mx-auto px-6">
+          <SectionHeader
+            badge={t('map.badge')}
+            title={t('map.title')}
+            subtitle={t('map.subtitle')}
+            icon={<Map className="w-4 h-4" />}
+          />
+          <CommunityMap />
+        </div>
+      </section>
 
       {/* Online Radio Section */}
-      <section className="py-16 bg-gradient-to-br from-primary/5 to-secondary/5">
+      <section id="radio" className="py-20 bg-muted/30">
         <div className="container mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4 text-foreground">{t('radio.title')}</h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              {t('radio.subtitle')}
-            </p>
+          <SectionHeader
+            badge={t('radio.badge')}
+            title={t('radio.title')}
+            subtitle={t('radio.subtitle')}
+            icon={<Radio className="w-4 h-4" />}
+          />
+          <div className="max-w-4xl mx-auto">
+            <FunctionalRadio />
           </div>
-          <FunctionalRadio />
-        </div>
-      </section>
-
-      {/* Radio Accessibility Features */}
-      <section className="py-16 bg-muted/30">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4 text-foreground">{t('accessibility.title')}</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              {t('accessibility.subtitle')}
-            </p>
-          </div>
-          <div className="max-w-6xl mx-auto">
+          
+          {/* Radio Accessibility Features */}
+          <div className="mt-16 max-w-6xl mx-auto">
             <RadioAccessibilityFeatures />
           </div>
         </div>
       </section>
-      
+
       {/* Content Sharing Section */}
-      <section className="py-16 bg-background">
+      <section id="content" className="py-20 bg-background">
         <div className="container mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4 text-foreground">{t('content.share.title')}</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              {t('content.share.subtitle')}
-            </p>
+          <SectionHeader
+            badge={t('content.badge')}
+            title={t('content.share.title')}
+            subtitle={t('content.share.subtitle')}
+            icon={<Upload className="w-4 h-4" />}
+          />
+          <div className="max-w-4xl mx-auto">
+            <ContentUpload />
           </div>
-          <ContentUpload />
         </div>
       </section>
 
       {/* Community Content Feed */}
-      <section className="py-16 bg-muted/30">
+      <section id="community" className="py-20 bg-gradient-to-br from-accent/5 to-primary/5">
         <div className="container mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4 text-foreground">{t('community.stories.title')}</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              {t('community.stories.subtitle')}
-            </p>
-          </div>
+          <SectionHeader
+            badge={t('community.badge')}
+            title={t('community.stories.title')}
+            subtitle={t('community.stories.subtitle')}
+            icon={<MessageSquare className="w-4 h-4" />}
+          />
           <div className="max-w-4xl mx-auto">
             <ContentFeed />
+          </div>
+        </div>
+      </section>
+
+      {/* Peacebuilding Challenges Section */}
+      <section id="challenges" className="py-20 bg-muted/30">
+        <div className="container mx-auto px-6">
+          <SectionHeader
+            badge={t('challenges.badge')}
+            title={t('challenges.title')}
+            subtitle={t('challenges.subtitle')}
+            icon={<Award className="w-4 h-4" />}
+          />
+          <PeacebuildingChallenges />
+        </div>
+      </section>
+
+      {/* Safety & Trust Section */}
+      <section id="safety" className="py-20 bg-background">
+        <div className="container mx-auto px-6">
+          <SectionHeader
+            badge={t('safety.badge')}
+            title={t('safety.title')}
+            subtitle={t('safety.subtitle')}
+            icon={<Shield className="w-4 h-4" />}
+          />
+          
+          <div className="space-y-16">
+            <ContentModerationSection />
+            <SafetyProtectionSection />
+            <CommunityTrustSection />
+            <OfflineAccessSection />
           </div>
         </div>
       </section>
