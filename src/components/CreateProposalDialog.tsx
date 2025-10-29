@@ -59,22 +59,36 @@ const CreateProposalDialog = () => {
 
     setUploadingFile(true);
     try {
-      const fileName = `${Date.now()}-${file.name}`;
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('You must be logged in to upload files');
+      }
+
+      // RLS policy requires user ID as first folder
+      const fileName = `${user.id}/bills/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
       const { data, error } = await supabase.storage
         .from('content')
-        .upload(fileName, file);
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Upload error:', error);
+        throw error;
+      }
 
       const { data: { publicUrl } } = supabase.storage
         .from('content')
         .getPublicUrl(data.path);
 
+      toast.success('File uploaded successfully');
       setUploadingFile(false);
       return publicUrl;
-    } catch (error) {
+    } catch (error: any) {
+      console.error('File upload failed:', error);
       setUploadingFile(false);
-      toast.error('Failed to upload file');
+      toast.error(`Failed to upload file: ${error.message || 'Unknown error'}`);
       return null;
     }
   };
