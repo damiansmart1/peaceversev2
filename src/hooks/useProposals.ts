@@ -123,16 +123,18 @@ export const useVoteProposal = () => {
       displayAnonymous: boolean;
     }) => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      
+      // Allow anonymous voting by generating a temporary ID
+      const userId = user?.id || null;
 
       const { data, error } = await supabase
         .from('proposal_votes')
         .upsert({
           proposal_id: proposalId,
-          user_id: user.id,
+          user_id: userId,
           vote_value: voteValue,
-          display_anonymous: displayAnonymous,
-        })
+          display_anonymous: displayAnonymous || !user,
+        } as any)
         .select()
         .single();
 
@@ -166,17 +168,19 @@ export const useAddComment = () => {
       parentCommentId?: string;
     }) => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      
+      // Allow anonymous commenting
+      const userId = user?.id || null;
 
       const { data, error } = await supabase
         .from('proposal_comments')
         .insert({
           proposal_id: proposalId,
-          user_id: user.id,
+          user_id: userId,
           body,
-          display_anonymous: displayAnonymous,
+          display_anonymous: displayAnonymous || !user,
           parent_comment_id: parentCommentId || null,
-        })
+        } as any)
         .select()
         .single();
 

@@ -18,11 +18,12 @@ const ProposalVoting = ({ proposalId, supportCount, opposeCount }: ProposalVotin
   const { data: userVote } = useUserVote(proposalId);
   const voteProposal = useVoteProposal();
 
-  const handleVote = (value: 1 | -1) => {
+  const handleVote = async (value: 1 | -1) => {
+    // Allow voting even without auth (anonymous)
     voteProposal.mutate({
       proposalId,
       voteValue: value,
-      displayAnonymous,
+      displayAnonymous: true, // Always anonymous if not logged in
     });
   };
 

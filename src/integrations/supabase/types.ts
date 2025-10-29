@@ -412,7 +412,7 @@ export type Database = {
           parent_comment_id: string | null
           proposal_id: string
           updated_at: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           attachments?: Json | null
@@ -426,7 +426,7 @@ export type Database = {
           parent_comment_id?: string | null
           proposal_id: string
           updated_at?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           attachments?: Json | null
@@ -440,7 +440,7 @@ export type Database = {
           parent_comment_id?: string | null
           proposal_id?: string
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -487,6 +487,85 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "proposal_interactions_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proposal_poll_responses: {
+        Row: {
+          created_at: string | null
+          display_anonymous: boolean | null
+          id: string
+          option_index: number
+          poll_id: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          display_anonymous?: boolean | null
+          id?: string
+          option_index: number
+          poll_id: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          display_anonymous?: boolean | null
+          id?: string
+          option_index?: number
+          poll_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_poll_responses_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "proposal_polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proposal_polls: {
+        Row: {
+          allow_multiple: boolean | null
+          created_at: string | null
+          created_by: string | null
+          ends_at: string | null
+          id: string
+          is_active: boolean | null
+          options: Json
+          proposal_id: string
+          question: string
+        }
+        Insert: {
+          allow_multiple?: boolean | null
+          created_at?: string | null
+          created_by?: string | null
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          options?: Json
+          proposal_id: string
+          question: string
+        }
+        Update: {
+          allow_multiple?: boolean | null
+          created_at?: string | null
+          created_by?: string | null
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          options?: Json
+          proposal_id?: string
+          question?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_polls_proposal_id_fkey"
             columns: ["proposal_id"]
             isOneToOne: false
             referencedRelation: "proposals"
@@ -578,7 +657,7 @@ export type Database = {
           location_hidden: boolean
           proposal_id: string
           updated_at: string
-          user_id: string
+          user_id: string | null
           vote_value: number
         }
         Insert: {
@@ -588,7 +667,7 @@ export type Database = {
           location_hidden?: boolean
           proposal_id: string
           updated_at?: string
-          user_id: string
+          user_id?: string | null
           vote_value: number
         }
         Update: {
@@ -598,7 +677,7 @@ export type Database = {
           location_hidden?: boolean
           proposal_id?: string
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
           vote_value?: number
         }
         Relationships: [

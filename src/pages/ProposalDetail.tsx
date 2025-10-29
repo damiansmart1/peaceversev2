@@ -4,6 +4,8 @@ import { useProposalDetail } from '@/hooks/useProposalDetail';
 import ProposalVoting from '@/components/ProposalVoting';
 import ProposalComments from '@/components/ProposalComments';
 import ProposalShareButtons from '@/components/ProposalShareButtons';
+import ProposalPolls from '@/components/ProposalPolls';
+import ProposalReportDownload from '@/components/ProposalReportDownload';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Users, Eye, Heart } from 'lucide-react';
@@ -107,6 +109,19 @@ const ProposalDetail = () => {
             supportCount={proposal.vote_support_count}
             opposeCount={proposal.vote_oppose_count}
           />
+
+          <ProposalPolls proposalId={proposal.id} />
+
+          <div className="border-t pt-6">
+            <h3 className="text-lg font-semibold mb-4">Download Reports</h3>
+            <ProposalReportDownload
+              proposal={proposal}
+              voteStats={{
+                supportCount: proposal.vote_support_count || 0,
+                opposeCount: proposal.vote_oppose_count || 0,
+              }}
+            />
+          </div>
 
           <ProposalShareButtons
             proposalId={proposal.id}
