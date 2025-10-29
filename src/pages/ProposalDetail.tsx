@@ -65,6 +65,23 @@ const ProposalDetail = () => {
               <Badge variant="secondary">{proposal.status}</Badge>
             </div>
 
+            {proposal.bill_proposer_name && (
+              <div className="text-lg text-muted-foreground">
+                <span className="font-semibold text-foreground">Bill Proposer:</span> {proposal.bill_proposer_name}
+              </div>
+            )}
+
+            {proposal.parliamentary_stage && (
+              <div className="text-lg text-muted-foreground">
+                <span className="font-semibold text-foreground">Parliamentary Stage:</span>{' '}
+                <Badge variant="outline" className="ml-2">
+                  {proposal.parliamentary_stage.split('_').map(word => 
+                    word.charAt(0).toUpperCase() + word.slice(1)
+                  ).join(' ')}
+                </Badge>
+              </div>
+            )}
+
             <div className="flex flex-wrap gap-2">
               {proposal.tags.map((tag) => (
                 <Badge key={tag} variant="outline">

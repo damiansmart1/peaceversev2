@@ -6,6 +6,7 @@ import { CheckCircle, XCircle, MinusCircle } from 'lucide-react';
 import { useVoteProposal } from '@/hooks/useProposals';
 import { useUserVote } from '@/hooks/useProposalDetail';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface ProposalVotingProps {
   proposalId: string;
@@ -25,6 +26,10 @@ const ProposalVoting = ({ proposalId, supportCount, opposeCount, abstainCount }:
       proposalId,
       voteValue: value,
       displayAnonymous: true, // Always anonymous if not logged in
+    }, {
+      onSuccess: () => {
+        toast.success('Thank you for making your voice heard!');
+      }
     });
   };
 

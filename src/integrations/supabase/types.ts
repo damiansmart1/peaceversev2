@@ -694,6 +694,7 @@ export type Database = {
         Row: {
           attachments: Json | null
           author_id: string
+          bill_proposer_name: string | null
           body: string
           co_authors: string[] | null
           comment_count: number | null
@@ -703,6 +704,7 @@ export type Database = {
           is_archived: boolean | null
           like_count: number | null
           metadata: Json | null
+          parliamentary_stage: string | null
           share_count: number | null
           signature_count: number | null
           signature_goal: number | null
@@ -722,6 +724,7 @@ export type Database = {
         Insert: {
           attachments?: Json | null
           author_id: string
+          bill_proposer_name?: string | null
           body: string
           co_authors?: string[] | null
           comment_count?: number | null
@@ -731,6 +734,7 @@ export type Database = {
           is_archived?: boolean | null
           like_count?: number | null
           metadata?: Json | null
+          parliamentary_stage?: string | null
           share_count?: number | null
           signature_count?: number | null
           signature_goal?: number | null
@@ -750,6 +754,7 @@ export type Database = {
         Update: {
           attachments?: Json | null
           author_id?: string
+          bill_proposer_name?: string | null
           body?: string
           co_authors?: string[] | null
           comment_count?: number | null
@@ -759,6 +764,7 @@ export type Database = {
           is_archived?: boolean | null
           like_count?: number | null
           metadata?: Json | null
+          parliamentary_stage?: string | null
           share_count?: number | null
           signature_count?: number | null
           signature_goal?: number | null

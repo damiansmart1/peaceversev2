@@ -5,8 +5,11 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Plus, X } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Plus, X, Upload } from 'lucide-react';
 import { useCreateProposal, usePublishProposal } from '@/hooks/useProposals';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import { z } from 'zod';
 
 const proposalSchema = z.object({
@@ -14,6 +17,8 @@ const proposalSchema = z.object({
   summary: z.string().trim().min(20, 'Summary must be at least 20 characters').max(500),
   body: z.string().trim().min(50, 'Body must be at least 50 characters').max(10000),
   tags: z.array(z.string()).min(1, 'Add at least one tag').max(10),
+  billProposerName: z.string().trim().min(2, 'Bill proposer name is required').max(200),
+  parliamentaryStage: z.string().min(1, 'Parliamentary stage is required'),
 });
 
 const CreateProposalDialog = () => {
@@ -23,6 +28,10 @@ const CreateProposalDialog = () => {
   const [body, setBody] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
+  const [billProposerName, setBillProposerName] = useState('');
+  const [parliamentaryStage, setParliamentaryStage] = useState('first_reading');
+  const [billFile, setBillFile] = useState<File | null>(null);
+  const [uploadingFile, setUploadingFile] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const createProposal = useCreateProposal();
@@ -39,16 +48,64 @@ const CreateProposalDialog = () => {
     setTags(tags.filter((t) => t !== tag));
   };
 
+  const handleFileUpload = async (file: File) => {
+    const fileExt = file.name.split('.').pop();
+    const allowedTypes = ['pdf', 'doc', 'docx'];
+    
+    if (!fileExt || !allowedTypes.includes(fileExt.toLowerCase())) {
+      toast.error('Please upload a PDF or Word document');
+      return null;
+    }
+
+    setUploadingFile(true);
+    try {
+      const fileName = `${Date.now()}-${file.name}`;
+      const { data, error } = await supabase.storage
+        .from('content')
+        .upload(fileName, file);
+
+      if (error) throw error;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('content')
+        .getPublicUrl(data.path);
+
+      setUploadingFile(false);
+      return publicUrl;
+    } catch (error) {
+      setUploadingFile(false);
+      toast.error('Failed to upload file');
+      return null;
+    }
+  };
+
   const handleSubmit = async (publishNow: boolean) => {
     try {
-      const validated = proposalSchema.parse({ title, summary, body, tags });
+      const validated = proposalSchema.parse({ 
+        title, 
+        summary, 
+        body, 
+        tags, 
+        billProposerName,
+        parliamentaryStage 
+      });
       setErrors({});
+
+      // Upload file if provided
+      let billFileUrl = null;
+      if (billFile) {
+        billFileUrl = await handleFileUpload(billFile);
+        if (!billFileUrl) return; // Stop if file upload failed
+      }
 
       const proposal = await createProposal.mutateAsync({
         title: validated.title,
         summary: validated.summary,
         body: validated.body,
         tags: validated.tags,
+        billProposerName: validated.billProposerName,
+        parliamentaryStage: validated.parliamentaryStage,
+        billFileUrl,
       });
       
       if (publishNow && proposal) {
@@ -60,6 +117,9 @@ const CreateProposalDialog = () => {
       setSummary('');
       setBody('');
       setTags([]);
+      setBillProposerName('');
+      setParliamentaryStage('first_reading');
+      setBillFile(null);
     } catch (error) {
       if (error instanceof z.ZodError) {
         const newErrors: Record<string, string> = {};
@@ -87,6 +147,18 @@ const CreateProposalDialog = () => {
         </DialogHeader>
         <div className="space-y-4">
           <div>
+            <Label htmlFor="billProposer">Name of Bill Proposer *</Label>
+            <Input
+              id="billProposer"
+              value={billProposerName}
+              onChange={(e) => setBillProposerName(e.target.value)}
+              placeholder="Enter the name of the bill proposer"
+              className={errors.billProposerName ? 'border-destructive' : ''}
+            />
+            {errors.billProposerName && <p className="text-sm text-destructive mt-1">{errors.billProposerName}</p>}
+          </div>
+
+          <div>
             <Label htmlFor="title">Title *</Label>
             <Input
               id="title"
@@ -96,6 +168,25 @@ const CreateProposalDialog = () => {
               className={errors.title ? 'border-destructive' : ''}
             />
             {errors.title && <p className="text-sm text-destructive mt-1">{errors.title}</p>}
+          </div>
+
+          <div>
+            <Label htmlFor="stage">Parliamentary Stage *</Label>
+            <Select value={parliamentaryStage} onValueChange={setParliamentaryStage}>
+              <SelectTrigger className={errors.parliamentaryStage ? 'border-destructive' : ''}>
+                <SelectValue placeholder="Select parliamentary stage" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="first_reading">First Reading</SelectItem>
+                <SelectItem value="second_reading">Second Reading</SelectItem>
+                <SelectItem value="committee_stage">Committee Stage</SelectItem>
+                <SelectItem value="report_stage">Report Stage</SelectItem>
+                <SelectItem value="third_reading">Third Reading</SelectItem>
+                <SelectItem value="presidential_assent">Presidential Assent</SelectItem>
+                <SelectItem value="enacted">Enacted</SelectItem>
+              </SelectContent>
+            </Select>
+            {errors.parliamentaryStage && <p className="text-sm text-destructive mt-1">{errors.parliamentaryStage}</p>}
           </div>
 
           <div>
@@ -150,12 +241,41 @@ const CreateProposalDialog = () => {
             </div>
           </div>
 
+          <div>
+            <Label htmlFor="billFile">Upload Full Bill (PDF/Word)</Label>
+            <div className="flex items-center gap-2">
+              <Input
+                id="billFile"
+                type="file"
+                accept=".pdf,.doc,.docx"
+                onChange={(e) => setBillFile(e.target.files?.[0] || null)}
+                className="cursor-pointer"
+              />
+              {billFile && (
+                <Badge variant="secondary" className="gap-1">
+                  {billFile.name}
+                  <X className="w-3 h-3 cursor-pointer" onClick={() => setBillFile(null)} />
+                </Badge>
+              )}
+            </div>
+            <p className="text-sm text-muted-foreground mt-1">
+              Upload the complete bill document (PDF or Word format)
+            </p>
+          </div>
+
           <div className="flex gap-2 justify-end pt-4">
-            <Button variant="outline" onClick={() => handleSubmit(false)} disabled={createProposal.isPending}>
+            <Button 
+              variant="outline" 
+              onClick={() => handleSubmit(false)} 
+              disabled={createProposal.isPending || uploadingFile}
+            >
               Save Draft
             </Button>
-            <Button onClick={() => handleSubmit(true)} disabled={createProposal.isPending || publishProposal.isPending}>
-              Publish Now
+            <Button 
+              onClick={() => handleSubmit(true)} 
+              disabled={createProposal.isPending || publishProposal.isPending || uploadingFile}
+            >
+              {uploadingFile ? 'Uploading...' : 'Publish Now'}
             </Button>
           </div>
         </div>

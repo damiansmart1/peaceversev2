@@ -22,6 +22,9 @@ export interface Proposal {
   vote_support_count: number;
   vote_oppose_count: number;
   vote_abstain_count: number;
+  bill_proposer_name: string | null;
+  parliamentary_stage: string | null;
+  attachments: any[];
   created_at: string;
   updated_at: string;
   profiles?: {
@@ -80,6 +83,9 @@ export const useCreateProposal = () => {
       summary: string;
       body: string;
       tags: string[];
+      billProposerName: string;
+      parliamentaryStage: string;
+      billFileUrl?: string | null;
     }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
@@ -90,10 +96,18 @@ export const useCreateProposal = () => {
 
       if (slugError) throw slugError;
 
+      const attachments = proposal.billFileUrl ? [{ type: 'bill_document', url: proposal.billFileUrl }] : [];
+
       const { data, error } = await supabase
         .from('proposals')
         .insert({
-          ...proposal,
+          title: proposal.title,
+          summary: proposal.summary,
+          body: proposal.body,
+          tags: proposal.tags,
+          bill_proposer_name: proposal.billProposerName,
+          parliamentary_stage: proposal.parliamentaryStage,
+          attachments,
           slug: slugData,
           author_id: user.id,
           status: 'draft',

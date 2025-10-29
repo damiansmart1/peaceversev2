@@ -6,6 +6,7 @@ import { Proposal, useVoteProposal } from '@/hooks/useProposals';
 import { useUserVote } from '@/hooks/useProposalDetail';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface ProposalCardProps {
   proposal: Proposal;
@@ -23,6 +24,10 @@ const ProposalCard = ({ proposal, className }: ProposalCardProps) => {
       proposalId: proposal.id,
       voteValue: value,
       displayAnonymous: true,
+    }, {
+      onSuccess: () => {
+        toast.success('Thank you for making your voice heard!');
+      }
     });
   };
 
@@ -31,16 +36,21 @@ const ProposalCard = ({ proposal, className }: ProposalCardProps) => {
   const rejectPercentage = totalVotes > 0 ? (proposal.vote_oppose_count / totalVotes) * 100 : 0;
   const abstainPercentage = totalVotes > 0 ? (proposal.vote_abstain_count / totalVotes) * 100 : 0;
 
-  const getStatusLabel = (status: string) => {
+  const getStatusLabel = (status: string, stage?: string | null) => {
+    if (stage) {
+      return stage.split('_').map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1)
+      ).join(' ');
+    }
     const statusMap: Record<string, string> = {
       'draft': 'Draft',
-      'published': 'First Reading',
+      'published': 'Published',
       'archived': 'Archived'
     };
     return statusMap[status] || status;
   };
 
-  const authorName = proposal.profiles?.display_name || proposal.profiles?.username || 'Anonymous';
+  const authorName = proposal.bill_proposer_name || proposal.profiles?.display_name || proposal.profiles?.username || 'Anonymous';
 
   return (
     <Card
@@ -56,7 +66,7 @@ const ProposalCard = ({ proposal, className }: ProposalCardProps) => {
             {proposal.title}
           </CardTitle>
           <Badge variant="secondary" className="shrink-0">
-            {getStatusLabel(proposal.status)}
+            {getStatusLabel(proposal.status, proposal.parliamentary_stage)}
           </Badge>
         </div>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
