@@ -18,6 +18,7 @@ import Safety from "./pages/Safety";
 import About from "./pages/About";
 import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
+import Profile from "./pages/Profile";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
                 <Route path="/community" element={<Community />} />
                 <Route path="/radio" element={<Radio />} />
                 <Route path="/challenges" element={<Challenges />} />
+                <Route path="/profile" element={<Profile />} />
                 <Route path="/safety" element={<Safety />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/proposals" element={<Proposals />} />

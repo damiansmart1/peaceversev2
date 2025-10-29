@@ -42,6 +42,7 @@ const Navigation = () => {
     { path: '/community', label: t('nav.community'), icon: Users },
     { path: '/radio', label: t('nav.radio'), icon: Radio },
     { path: '/challenges', label: t('nav.challenges'), icon: Award },
+    { path: '/profile', label: 'Profile', icon: User },
     { path: '/proposals', label: 'Proposals', icon: Globe },
     { path: '/safety', label: t('nav.safety'), icon: Shield },
     { path: '/about', label: 'About', icon: Heart },

@@ -4,6 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Award, Star, Users, Mic, Heart, Shield } from "lucide-react";
+import { useUserGamificationProfile } from "@/hooks/useGamification";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Skeleton } from "@/components/ui/skeleton";
 import gamificationIcon from "@/assets/gamification-icon.jpg";
 
 interface Achievement {
@@ -18,6 +22,34 @@ interface Achievement {
 }
 
 const GamificationDashboard = () => {
+  const { data: profile, isLoading: profileLoading } = useUserGamificationProfile();
+  
+  const { data: userAchievements, isLoading: achievementsLoading } = useQuery({
+    queryKey: ['userAchievements'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      const { data, error } = await supabase
+        .from('user_achievements')
+        .select('achievement_id, earned_at, achievements(*)')
+        .eq('user_id', user.id);
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  if (profileLoading || achievementsLoading) {
+    return (
+      <div className="py-8">
+        <div className="container mx-auto px-4">
+          <Skeleton className="h-96 w-full" />
+        </div>
+      </div>
+    );
+  }
+
   const achievements: Achievement[] = [
     {
       id: '1',
@@ -91,8 +123,9 @@ const GamificationDashboard = () => {
     }
   };
 
-  const totalEarned = achievements.filter(a => a.earned).length;
-  const totalPoints = achievements.reduce((sum, a) => sum + (a.earned ? 100 : Math.floor((a.progress / a.maxProgress) * 100)), 0);
+  const totalEarned = userAchievements?.length || achievements.filter(a => a.earned).length;
+  const totalPoints = profile?.peace_points || 0;
+  const livesImpacted = profile ? (profile.total_stories * 10) + (profile.total_actions * 5) : 127;
 
   return (
     <section className="py-8">
@@ -132,7 +165,7 @@ const GamificationDashboard = () => {
                 <Users className="w-8 h-8 text-warning-foreground" />
               </div>
               <div>
-                <div className="text-3xl md:text-4xl font-bold text-warning">127</div>
+                <div className="text-3xl md:text-4xl font-bold text-warning">{livesImpacted}</div>
                 <div className="text-sm text-muted-foreground font-medium">Lives Impacted</div>
               </div>
             </div>
