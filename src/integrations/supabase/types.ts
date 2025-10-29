@@ -715,6 +715,7 @@ export type Database = {
           unique_contributors: number | null
           updated_at: string
           view_count: number | null
+          vote_abstain_count: number | null
           vote_oppose_count: number | null
           vote_support_count: number | null
         }
@@ -742,6 +743,7 @@ export type Database = {
           unique_contributors?: number | null
           updated_at?: string
           view_count?: number | null
+          vote_abstain_count?: number | null
           vote_oppose_count?: number | null
           vote_support_count?: number | null
         }
@@ -769,6 +771,7 @@ export type Database = {
           unique_contributors?: number | null
           updated_at?: string
           view_count?: number | null
+          vote_abstain_count?: number | null
           vote_oppose_count?: number | null
           vote_support_count?: number | null
         }

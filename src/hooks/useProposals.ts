@@ -21,22 +21,52 @@ export interface Proposal {
   share_count: number;
   vote_support_count: number;
   vote_oppose_count: number;
+  vote_abstain_count: number;
   created_at: string;
   updated_at: string;
+  profiles?: {
+    display_name: string | null;
+    username: string | null;
+  };
 }
 
 export const useProposals = () => {
   return useQuery({
     queryKey: ['proposals'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // First get all proposals
+      const { data: proposalsData, error: proposalsError } = await supabase
         .from('proposals')
         .select('*')
         .eq('status', 'published')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      return data as Proposal[];
+      if (proposalsError) throw proposalsError;
+      if (!proposalsData) return [];
+
+      // Get unique author IDs
+      const authorIds = [...new Set(proposalsData.map(p => p.author_id))];
+
+      // Fetch author profiles
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('user_id, display_name, username')
+        .in('user_id', authorIds);
+
+      if (profilesError) throw profilesError;
+
+      // Create a map of profiles by user_id
+      const profilesMap = new Map(
+        (profilesData || []).map(p => [p.user_id, p])
+      );
+
+      // Merge profiles with proposals
+      const enrichedProposals = proposalsData.map(proposal => ({
+        ...proposal,
+        profiles: profilesMap.get(proposal.author_id) || null
+      }));
+
+      return enrichedProposals as Proposal[];
     },
   });
 };
@@ -119,7 +149,7 @@ export const useVoteProposal = () => {
       displayAnonymous,
     }: {
       proposalId: string;
-      voteValue: 1 | -1;
+      voteValue: 1 | -1 | 0;
       displayAnonymous: boolean;
     }) => {
       const { data: { user } } = await supabase.auth.getUser();

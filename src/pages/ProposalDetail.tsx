@@ -108,6 +108,7 @@ const ProposalDetail = () => {
             proposalId={proposal.id}
             supportCount={proposal.vote_support_count}
             opposeCount={proposal.vote_oppose_count}
+            abstainCount={proposal.vote_abstain_count || 0}
           />
 
           <ProposalPolls proposalId={proposal.id} />
