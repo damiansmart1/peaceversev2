@@ -89,6 +89,7 @@ export type Database = {
           file_type: string
           file_url: string
           id: string
+          is_archived: boolean | null
           like_count: number | null
           thumbnail_url: string | null
           title: string
@@ -102,6 +103,7 @@ export type Database = {
           file_type: string
           file_url: string
           id?: string
+          is_archived?: boolean | null
           like_count?: number | null
           thumbnail_url?: string | null
           title: string
@@ -115,6 +117,7 @@ export type Database = {
           file_type?: string
           file_url?: string
           id?: string
+          is_archived?: boolean | null
           like_count?: number | null
           thumbnail_url?: string | null
           title?: string
@@ -618,6 +621,7 @@ export type Database = {
           created_at: string
           end_at: string | null
           id: string
+          is_archived: boolean | null
           like_count: number | null
           metadata: Json | null
           share_count: number | null
@@ -644,6 +648,7 @@ export type Database = {
           created_at?: string
           end_at?: string | null
           id?: string
+          is_archived?: boolean | null
           like_count?: number | null
           metadata?: Json | null
           share_count?: number | null
@@ -670,6 +675,7 @@ export type Database = {
           created_at?: string
           end_at?: string | null
           id?: string
+          is_archived?: boolean | null
           like_count?: number | null
           metadata?: Json | null
           share_count?: number | null
@@ -697,6 +703,7 @@ export type Database = {
           created_by: string | null
           description: string | null
           id: string
+          is_archived: boolean | null
           latitude: number | null
           location_name: string
           longitude: number | null
@@ -712,6 +719,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           id?: string
+          is_archived?: boolean | null
           latitude?: number | null
           location_name: string
           longitude?: number | null
@@ -727,6 +735,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           id?: string
+          is_archived?: boolean | null
           latitude?: number | null
           location_name?: string
           longitude?: number | null

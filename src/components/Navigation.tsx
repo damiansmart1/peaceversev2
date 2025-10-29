@@ -2,13 +2,14 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
-import { Menu, X, Mic, Users, Radio, Map, Award, Shield, Globe, Heart, User, LogOut } from "lucide-react";
+import { Menu, X, Mic, Users, Radio, Map, Award, Shield, Globe, Heart, User, LogOut, Settings } from "lucide-react";
 import { useTranslationContext } from "@/components/TranslationProvider";
 import LanguageToggle from "@/components/LanguageToggle";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAdminCheck } from "@/hooks/useAdminCheck";
 
 const Navigation = () => {
   const { t } = useTranslationContext();
@@ -17,6 +18,7 @@ const Navigation = () => {
   const { user, isAnonymous } = useAuth();
   const { toast } = useToast();
   const [isScrolled, setIsScrolled] = useState(false);
+  const { data: isAdmin } = useAdminCheck();
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -99,6 +101,17 @@ const Navigation = () => {
                 {isAnonymous && (
                   <span className="text-xs text-muted-foreground">Guest</span>
                 )}
+                {isAdmin && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate('/admin')}
+                    className="gap-2"
+                  >
+                    <Settings className="w-4 h-4" />
+                    Admin
+                  </Button>
+                )}
                 <Button
                   variant="ghost"
                   size="sm"
@@ -171,14 +184,28 @@ const Navigation = () => {
                 
                 <div className="mt-8 pt-8 border-t border-border space-y-4">
                   {user ? (
-                    <Button
-                      variant="ghost"
-                      onClick={handleSignOut}
-                      className="w-full justify-start gap-2"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      {isAnonymous ? 'Sign Out (Guest)' : 'Sign Out'}
-                    </Button>
+                    <>
+                      {isAdmin && (
+                        <SheetClose asChild>
+                          <Button
+                            variant="outline"
+                            onClick={() => navigate('/admin')}
+                            className="w-full justify-start gap-2"
+                          >
+                            <Settings className="w-4 h-4" />
+                            Admin Portal
+                          </Button>
+                        </SheetClose>
+                      )}
+                      <Button
+                        variant="ghost"
+                        onClick={handleSignOut}
+                        className="w-full justify-start gap-2"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        {isAnonymous ? 'Sign Out (Guest)' : 'Sign Out'}
+                      </Button>
+                    </>
                   ) : (
                     <SheetClose asChild>
                       <Button
