@@ -2,34 +2,13 @@ import HeroSection from "@/components/HeroSection";
 import Navigation from "@/components/Navigation";
 import SectionHeader from "@/components/SectionHeader";
 import FeatureCard from "@/components/FeatureCard";
-import VoiceRecorder from "@/components/VoiceRecorder";
-import CommunityMap from "@/components/CommunityMap";
-import GamificationDashboard from "@/components/GamificationDashboard";
-import AccessibilityFeatures from "@/components/AccessibilityFeatures";
-import DonorShowcase from "@/components/DonorShowcase";
-import ContentUpload from "@/components/ContentUpload";
-import ContentFeed from "@/components/ContentFeed";
-import PeacebuildingChallenges from "@/components/PeacebuildingChallenges";
-import ContentModerationSection from "@/components/ContentModerationSection";
-import OfflineAccessSection from "@/components/OfflineAccessSection";
-import SafetyProtectionSection from "@/components/SafetyProtectionSection";
-import CommunityTrustSection from "@/components/CommunityTrustSection";
-import RadioAccessibilityFeatures from "@/components/RadioAccessibilityFeatures";
-import FunctionalRadio from "@/components/FunctionalRadio";
 import { useTranslationContext } from "@/components/TranslationProvider";
 import { useNavigate } from "react-router-dom";
-import { Mic, Users, Radio, Map, Award, Shield, Globe, Heart, Upload, MessageSquare, Vote } from "lucide-react";
+import { Mic, Users, Radio, Award, Shield, Heart, Vote } from "lucide-react";
 
 const Index = () => {
   const { t } = useTranslationContext();
   const navigate = useNavigate();
-  
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
   
   return (
     <div className="min-h-screen bg-background">
@@ -46,14 +25,14 @@ const Index = () => {
             icon={<Heart className="w-4 h-4" />}
           />
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
             <FeatureCard
               icon={<div className="w-12 h-12 bg-voice-active rounded-full flex items-center justify-center">
                 <Mic className="w-6 h-6 text-white" />
               </div>}
               title={t('features.voice.title')}
               description={t('features.voice.description')}
-              onClick={() => scrollToSection('voice')}
+              onClick={() => navigate('/voice')}
             />
             
             <FeatureCard
@@ -62,7 +41,7 @@ const Index = () => {
               </div>}
               title={t('features.community.title')}
               description={t('features.community.description')}
-              onClick={() => scrollToSection('community')}
+              onClick={() => navigate('/community')}
             />
             
             <FeatureCard
@@ -71,16 +50,7 @@ const Index = () => {
               </div>}
               title={t('features.radio.title')}
               description={t('features.radio.description')}
-              onClick={() => scrollToSection('radio')}
-            />
-            
-            <FeatureCard
-              icon={<div className="w-12 h-12 bg-warning rounded-full flex items-center justify-center">
-                <Map className="w-6 h-6 text-white" />
-              </div>}
-              title={t('features.map.title')}
-              description={t('features.map.description')}
-              onClick={() => scrollToSection('map')}
+              onClick={() => navigate('/radio')}
             />
             
             <FeatureCard
@@ -89,7 +59,7 @@ const Index = () => {
               </div>}
               title={t('features.challenges.title')}
               description={t('features.challenges.description')}
-              onClick={() => scrollToSection('challenges')}
+              onClick={() => navigate('/challenges')}
             />
             
             <FeatureCard
@@ -107,163 +77,11 @@ const Index = () => {
               </div>}
               title={t('features.safety.title')}
               description={t('features.safety.description')}
-              onClick={() => scrollToSection('safety')}
+              onClick={() => navigate('/safety')}
             />
           </div>
         </div>
       </section>
-
-      {/* Voice Recording Section */}
-      <section id="voice" className="py-20 bg-background">
-        <div className="container mx-auto px-6">
-          <SectionHeader
-            badge={t('voice.badge')}
-            title={t('voice.title')}
-            subtitle={t('voice.subtitle')}
-            icon={<Mic className="w-4 h-4" />}
-          />
-          <div className="max-w-4xl mx-auto">
-            <VoiceRecorder />
-          </div>
-        </div>
-      </section>
-
-      {/* Community Map Section */}
-      <section id="map" className="py-20 bg-gradient-to-br from-primary/5 to-accent/5">
-        <div className="container mx-auto px-6">
-          <SectionHeader
-            badge={t('map.badge')}
-            title={t('map.title')}
-            subtitle={t('map.subtitle')}
-            icon={<Map className="w-4 h-4" />}
-          />
-          <CommunityMap />
-        </div>
-      </section>
-
-      {/* Online Radio Section */}
-      <section id="radio" className="py-20 bg-muted/30">
-        <div className="container mx-auto px-6">
-          <SectionHeader
-            badge={t('radio.badge')}
-            title={t('radio.title')}
-            subtitle={t('radio.subtitle')}
-            icon={<Radio className="w-4 h-4" />}
-          />
-          <div className="max-w-4xl mx-auto">
-            <FunctionalRadio />
-          </div>
-          
-          {/* Radio Accessibility Features */}
-          <div className="mt-16 max-w-6xl mx-auto">
-            <RadioAccessibilityFeatures />
-          </div>
-        </div>
-      </section>
-
-      {/* Content Sharing Section */}
-      <section id="content" className="py-20 bg-background">
-        <div className="container mx-auto px-6">
-          <SectionHeader
-            badge={t('content.badge')}
-            title={t('content.share.title')}
-            subtitle={t('content.share.subtitle')}
-            icon={<Upload className="w-4 h-4" />}
-          />
-          <div className="max-w-4xl mx-auto">
-            <ContentUpload />
-          </div>
-        </div>
-      </section>
-
-      {/* Community Content Feed */}
-      <section id="community" className="py-20 bg-gradient-to-br from-accent/5 to-primary/5">
-        <div className="container mx-auto px-6">
-          <SectionHeader
-            badge={t('community.badge')}
-            title={t('community.stories.title')}
-            subtitle={t('community.stories.subtitle')}
-            icon={<MessageSquare className="w-4 h-4" />}
-          />
-          <div className="max-w-4xl mx-auto">
-            <ContentFeed />
-          </div>
-        </div>
-      </section>
-
-      {/* Peacebuilding Challenges Section */}
-      <section id="challenges" className="py-20 bg-muted/30">
-        <div className="container mx-auto px-6">
-          <SectionHeader
-            badge={t('challenges.badge')}
-            title={t('challenges.title')}
-            subtitle={t('challenges.subtitle')}
-            icon={<Award className="w-4 h-4" />}
-          />
-          <PeacebuildingChallenges />
-        </div>
-      </section>
-
-      {/* Public Participation Preview Section */}
-      <section className="py-20 bg-gradient-to-br from-purple-500/5 to-primary/5">
-        <div className="container mx-auto px-6">
-          <SectionHeader
-            badge="Participate"
-            title="Public Participation"
-            subtitle="Your voice matters. Propose bills, discuss policies, and vote on issues that shape your community"
-            icon={<Vote className="w-4 h-4" />}
-          />
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-card p-8 rounded-lg border border-border shadow-lg space-y-6">
-              <div className="grid md:grid-cols-3 gap-6 text-center">
-                <div className="space-y-2">
-                  <div className="text-3xl font-bold text-primary">Propose</div>
-                  <p className="text-sm text-muted-foreground">Create and submit policy proposals</p>
-                </div>
-                <div className="space-y-2">
-                  <div className="text-3xl font-bold text-primary">Discuss</div>
-                  <p className="text-sm text-muted-foreground">Engage in meaningful dialogue</p>
-                </div>
-                <div className="space-y-2">
-                  <div className="text-3xl font-bold text-primary">Vote</div>
-                  <p className="text-sm text-muted-foreground">Cast your vote anonymously</p>
-                </div>
-              </div>
-              <div className="flex justify-center pt-4">
-                <button
-                  onClick={() => navigate('/proposals')}
-                  className="px-8 py-4 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-colors shadow-lg"
-                >
-                  Explore Proposals
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Safety & Trust Section */}
-      <section id="safety" className="py-20 bg-background">
-        <div className="container mx-auto px-6">
-          <SectionHeader
-            badge={t('safety.badge')}
-            title={t('safety.title')}
-            subtitle={t('safety.subtitle')}
-            icon={<Shield className="w-4 h-4" />}
-          />
-          
-          <div className="space-y-16">
-            <ContentModerationSection />
-            <SafetyProtectionSection />
-            <CommunityTrustSection />
-            <OfflineAccessSection />
-          </div>
-        </div>
-      </section>
-
-      <GamificationDashboard />
-      <AccessibilityFeatures />
-      <DonorShowcase />
       
       {/* Footer */}
       <footer className="bg-primary text-primary-foreground py-12">

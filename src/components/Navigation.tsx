@@ -5,9 +5,11 @@ import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/s
 import { Menu, X, Mic, Users, Radio, Map, Award, Shield, Globe, Heart } from "lucide-react";
 import { useTranslationContext } from "@/components/TranslationProvider";
 import LanguageToggle from "@/components/LanguageToggle";
+import { Link, useLocation } from "react-router-dom";
 
 const Navigation = () => {
   const { t } = useTranslationContext();
+  const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   
   useEffect(() => {
@@ -18,20 +20,14 @@ const Navigation = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
-
   const navItems = [
-    { id: 'voice', label: t('nav.voice'), icon: Mic },
-    { id: 'community', label: t('nav.community'), icon: Users },
-    { id: 'radio', label: t('nav.radio'), icon: Radio },
-    { id: 'map', label: t('nav.map'), icon: Map },
-    { id: 'challenges', label: t('nav.challenges'), icon: Award },
-    { id: 'safety', label: t('nav.safety'), icon: Shield },
+    { path: '/voice', label: t('nav.voice'), icon: Mic },
+    { path: '/community', label: t('nav.community'), icon: Users },
+    { path: '/radio', label: t('nav.radio'), icon: Radio },
+    { path: '/challenges', label: t('nav.challenges'), icon: Award },
+    { path: '/proposals', label: 'Proposals', icon: Globe },
+    { path: '/safety', label: t('nav.safety'), icon: Shield },
+    { path: '/about', label: 'About', icon: Heart },
   ];
 
   return (
@@ -43,7 +39,7 @@ const Navigation = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center space-x-2">
+          <Link to="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
             <div className="w-8 h-8 bg-peace-gradient rounded-full flex items-center justify-center">
               <Heart className="w-4 h-4 text-white" />
             </div>
@@ -53,22 +49,29 @@ const Navigation = () => {
             <Badge variant="secondary" className="text-xs hidden sm:inline-flex">
               v2.0
             </Badge>
-          </div>
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-1">
             {navItems.map((item) => {
               const Icon = item.icon;
+              const isActive = location.pathname === item.path;
               return (
                 <Button
-                  key={item.id}
+                  key={item.path}
                   variant="ghost"
                   size="sm"
-                  onClick={() => scrollToSection(item.id)}
-                  className="flex items-center space-x-1 text-foreground hover:text-primary hover:bg-primary/10 transition-all duration-200"
+                  asChild
+                  className={`flex items-center space-x-1 transition-all duration-200 ${
+                    isActive 
+                      ? 'text-primary bg-primary/10 font-medium' 
+                      : 'text-foreground hover:text-primary hover:bg-primary/10'
+                  }`}
                 >
-                  <Icon className="w-4 h-4" />
-                  <span>{item.label}</span>
+                  <Link to={item.path}>
+                    <Icon className="w-4 h-4" />
+                    <span>{item.label}</span>
+                  </Link>
                 </Button>
               );
             })}
@@ -105,15 +108,20 @@ const Navigation = () => {
                 <div className="space-y-2">
                   {navItems.map((item) => {
                     const Icon = item.icon;
+                    const isActive = location.pathname === item.path;
                     return (
-                      <SheetClose key={item.id} asChild>
+                      <SheetClose key={item.path} asChild>
                         <Button
                           variant="ghost"
-                          onClick={() => scrollToSection(item.id)}
-                          className="w-full justify-start space-x-3 h-12 text-left"
+                          asChild
+                          className={`w-full justify-start space-x-3 h-12 text-left ${
+                            isActive ? 'bg-primary/10 text-primary font-medium' : ''
+                          }`}
                         >
-                          <Icon className="w-5 h-5" />
-                          <span>{item.label}</span>
+                          <Link to={item.path}>
+                            <Icon className="w-5 h-5" />
+                            <span>{item.label}</span>
+                          </Link>
                         </Button>
                       </SheetClose>
                     );
