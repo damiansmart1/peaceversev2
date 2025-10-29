@@ -17,10 +17,12 @@ import CommunityTrustSection from "@/components/CommunityTrustSection";
 import RadioAccessibilityFeatures from "@/components/RadioAccessibilityFeatures";
 import FunctionalRadio from "@/components/FunctionalRadio";
 import { useTranslationContext } from "@/components/TranslationProvider";
-import { Mic, Users, Radio, Map, Award, Shield, Globe, Heart, Upload, MessageSquare } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Mic, Users, Radio, Map, Award, Shield, Globe, Heart, Upload, MessageSquare, Vote } from "lucide-react";
 
 const Index = () => {
   const { t } = useTranslationContext();
+  const navigate = useNavigate();
   
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -88,6 +90,15 @@ const Index = () => {
               title={t('features.challenges.title')}
               description={t('features.challenges.description')}
               onClick={() => scrollToSection('challenges')}
+            />
+            
+            <FeatureCard
+              icon={<div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center">
+                <Vote className="w-6 h-6 text-white" />
+              </div>}
+              title="Public Participation"
+              description="Propose bills, discuss policies, and vote on important issues"
+              onClick={() => navigate('/proposals')}
             />
             
             <FeatureCard
@@ -190,6 +201,44 @@ const Index = () => {
             icon={<Award className="w-4 h-4" />}
           />
           <PeacebuildingChallenges />
+        </div>
+      </section>
+
+      {/* Public Participation Preview Section */}
+      <section className="py-20 bg-gradient-to-br from-purple-500/5 to-primary/5">
+        <div className="container mx-auto px-6">
+          <SectionHeader
+            badge="Participate"
+            title="Public Participation"
+            subtitle="Your voice matters. Propose bills, discuss policies, and vote on issues that shape your community"
+            icon={<Vote className="w-4 h-4" />}
+          />
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-card p-8 rounded-lg border border-border shadow-lg space-y-6">
+              <div className="grid md:grid-cols-3 gap-6 text-center">
+                <div className="space-y-2">
+                  <div className="text-3xl font-bold text-primary">Propose</div>
+                  <p className="text-sm text-muted-foreground">Create and submit policy proposals</p>
+                </div>
+                <div className="space-y-2">
+                  <div className="text-3xl font-bold text-primary">Discuss</div>
+                  <p className="text-sm text-muted-foreground">Engage in meaningful dialogue</p>
+                </div>
+                <div className="space-y-2">
+                  <div className="text-3xl font-bold text-primary">Vote</div>
+                  <p className="text-sm text-muted-foreground">Cast your vote anonymously</p>
+                </div>
+              </div>
+              <div className="flex justify-center pt-4">
+                <button
+                  onClick={() => navigate('/proposals')}
+                  className="px-8 py-4 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-colors shadow-lg"
+                >
+                  Explore Proposals
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
