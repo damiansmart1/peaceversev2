@@ -2,15 +2,30 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
-import { Menu, X, Mic, Users, Radio, Map, Award, Shield, Globe, Heart } from "lucide-react";
+import { Menu, X, Mic, Users, Radio, Map, Award, Shield, Globe, Heart, User, LogOut } from "lucide-react";
 import { useTranslationContext } from "@/components/TranslationProvider";
 import LanguageToggle from "@/components/LanguageToggle";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Navigation = () => {
   const { t } = useTranslationContext();
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, isAnonymous } = useAuth();
+  const { toast } = useToast();
   const [isScrolled, setIsScrolled] = useState(false);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    toast({
+      title: 'Signed out',
+      description: 'You have been successfully signed out.',
+    });
+    navigate('/');
+  };
   
   useEffect(() => {
     const handleScroll = () => {
@@ -79,6 +94,32 @@ const Navigation = () => {
 
           {/* Right Side Actions */}
           <div className="flex items-center space-x-2">
+            {user ? (
+              <div className="hidden md:flex items-center gap-2">
+                {isAnonymous && (
+                  <span className="text-xs text-muted-foreground">Guest</span>
+                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleSignOut}
+                  className="gap-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Sign Out
+                </Button>
+              </div>
+            ) : (
+              <Button
+                variant="default"
+                size="sm"
+                onClick={() => navigate('/auth')}
+                className="gap-2 hidden md:flex"
+              >
+                <User className="w-4 h-4" />
+                Sign In
+              </Button>
+            )}
             <LanguageToggle />
             
             {/* Mobile Menu */}
@@ -128,7 +169,28 @@ const Navigation = () => {
                   })}
                 </div>
                 
-                <div className="mt-8 pt-8 border-t border-border">
+                <div className="mt-8 pt-8 border-t border-border space-y-4">
+                  {user ? (
+                    <Button
+                      variant="ghost"
+                      onClick={handleSignOut}
+                      className="w-full justify-start gap-2"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      {isAnonymous ? 'Sign Out (Guest)' : 'Sign Out'}
+                    </Button>
+                  ) : (
+                    <SheetClose asChild>
+                      <Button
+                        variant="default"
+                        onClick={() => navigate('/auth')}
+                        className="w-full gap-2"
+                      >
+                        <User className="w-4 h-4" />
+                        Sign In
+                      </Button>
+                    </SheetClose>
+                  )}
                   <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                     <Globe className="w-4 h-4" />
                     <span>{t('nav.footer.global')}</span>
