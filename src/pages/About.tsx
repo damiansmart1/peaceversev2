@@ -2,6 +2,7 @@ import Navigation from '@/components/Navigation';
 import SectionHeader from '@/components/SectionHeader';
 import AccessibilityFeatures from '@/components/AccessibilityFeatures';
 import DonorShowcase from '@/components/DonorShowcase';
+import TeamSection from '@/components/TeamSection';
 import { useTranslationContext } from '@/components/TranslationProvider';
 import { Heart } from 'lucide-react';
 
@@ -20,6 +21,7 @@ const About = () => {
         />
         
         <div className="space-y-16">
+          <TeamSection />
           <AccessibilityFeatures />
           <DonorShowcase />
         </div>
