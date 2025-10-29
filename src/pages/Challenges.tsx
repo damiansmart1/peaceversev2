@@ -9,9 +9,9 @@ const Challenges = () => {
   const { t } = useTranslationContext();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-hero-gradient">
       <Navigation />
-      <div className="container mx-auto px-4 py-24">
+      <div className="container mx-auto px-4 py-20">
         <SectionHeader
           badge={t('challenges.badge')}
           title={t('challenges.title')}
@@ -19,7 +19,7 @@ const Challenges = () => {
           icon={<Award className="w-4 h-4" />}
         />
         
-        <div className="space-y-12">
+        <div className="space-y-16">
           <PeacebuildingChallenges />
           <GamificationDashboard />
         </div>

@@ -71,32 +71,32 @@ const PeacebuildingChallenges = () => {
   };
 
   return (
-    <section className="py-16 bg-background">
-      <div className="container mx-auto px-6">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold mb-4 text-foreground">
+    <section className="py-8">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-10">
+          <h2 className="text-3xl md:text-4xl font-bold mb-3 text-foreground">
             Changamoto za Kujenga Amani | Peacebuilding Challenges
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
             Peace Verse inashughulikia changamoto maalum za kujenga amani Kenya kwa kutumia teknolojia ya kisasa na mbinu za kitamaduni
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 max-w-7xl mx-auto">
           {challenges.map((challenge) => {
             const IconComponent = challenge.icon;
             return (
               <Card 
                 key={challenge.id}
-                className="p-6 bg-card/80 backdrop-blur-sm border-accent/20 shadow-story hover:shadow-warm transition-all duration-300"
+                className="p-5 bg-card/90 backdrop-blur-sm border-border/40 shadow-story hover:shadow-elevated hover:-translate-y-1 transition-all duration-300 rounded-xl"
               >
                 <div className="space-y-4">
                   {/* Header */}
                   <div className="flex items-start justify-between">
-                    <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                      <IconComponent className="w-6 h-6 text-primary" />
+                    <div className="w-14 h-14 bg-gradient-to-br from-primary/20 to-accent/20 rounded-2xl flex items-center justify-center">
+                      <IconComponent className="w-7 h-7 text-primary" />
                     </div>
-                    <Badge className={getSeverityColor(challenge.severity)}>
+                    <Badge className={`${getSeverityColor(challenge.severity)} rounded-full px-3`}>
                       {challenge.severity}
                     </Badge>
                   </div>
@@ -111,8 +111,8 @@ const PeacebuildingChallenges = () => {
                     </p>
                     
                     {/* Statistics */}
-                    <div className="bg-accent-light/50 rounded-lg p-3 mb-3">
-                      <p className="text-xs font-medium text-accent-foreground">
+                    <div className="bg-gradient-to-br from-accent-light/60 to-accent-light/30 rounded-xl p-3 mb-3 border border-accent/10">
+                      <p className="text-xs font-medium text-card-foreground">
                         {challenge.stats}
                       </p>
                     </div>
@@ -140,10 +140,10 @@ const PeacebuildingChallenges = () => {
         </div>
 
         {/* Impact Statement */}
-        <Card className="max-w-4xl mx-auto mt-12 p-8 bg-peace-gradient border-0 shadow-peace">
+        <Card className="max-w-4xl mx-auto mt-10 p-6 md:p-8 bg-peace-gradient border-0 shadow-elevated rounded-2xl">
           <div className="text-center text-primary-foreground">
-            <h3 className="text-2xl font-bold mb-4">Our Targeted Response</h3>
-            <p className="text-lg leading-relaxed">
+            <h3 className="text-xl md:text-2xl font-bold mb-3">Our Targeted Response</h3>
+            <p className="text-base md:text-lg leading-relaxed">
               Peace Verse haijengwi tu kama jukwaa la mazungumzo - ni silaha ya teknolojia iliyoundwa kukabiliana na changamoto hizi maalum. 
               Tunatumia AI, sauti ya mtu, na ushirikiano wa jamii kujenga uongozi wa amani unaozuia na kushughilia matatizo haya ya kimsingi.
             </p>

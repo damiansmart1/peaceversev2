@@ -77,16 +77,20 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        xl: "calc(var(--radius) + 4px)",
+        '2xl': "calc(var(--radius) + 8px)",
       },
       backgroundImage: {
         'peace-gradient': 'var(--peace-gradient)',
         'community-gradient': 'var(--community-gradient)',
         'story-gradient': 'var(--story-gradient)',
+        'hero-gradient': 'var(--hero-gradient)',
       },
       boxShadow: {
         'peace': 'var(--shadow-peace)',
         'warm': 'var(--shadow-warm)',
         'story': 'var(--shadow-story)',
+        'elevated': 'var(--shadow-elevated)',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],

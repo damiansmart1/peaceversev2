@@ -95,45 +95,45 @@ const GamificationDashboard = () => {
   const totalPoints = achievements.reduce((sum, a) => sum + (a.earned ? 100 : Math.floor((a.progress / a.maxProgress) * 100)), 0);
 
   return (
-    <section className="py-16 bg-background">
-      <div className="container mx-auto px-6">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold mb-4 text-foreground">Your Peace Journey</h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+    <section className="py-8">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-10">
+          <h2 className="text-3xl md:text-4xl font-bold mb-3 text-foreground">Your Peace Journey</h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Track your progress and celebrate your contributions to building a more peaceful world
           </p>
         </div>
 
         {/* Progress Overview */}
-        <Card className="max-w-4xl mx-auto mb-12 p-8 bg-card/80 backdrop-blur-sm border-accent/20 shadow-warm">
-          <div className="grid md:grid-cols-3 gap-8 text-center">
-            <div className="space-y-3">
-              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto">
+        <Card className="max-w-4xl mx-auto mb-10 p-6 md:p-8 bg-gradient-to-br from-card/95 to-accent-light/20 backdrop-blur-sm border-border/40 shadow-elevated rounded-2xl">
+          <div className="grid md:grid-cols-3 gap-6 md:gap-8 text-center">
+            <div className="space-y-2">
+              <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary-glow rounded-2xl flex items-center justify-center mx-auto shadow-peace">
                 <Award className="w-8 h-8 text-primary-foreground" />
               </div>
               <div>
-                <div className="text-3xl font-bold text-primary">{totalEarned}</div>
-                <div className="text-sm text-muted-foreground">Badges Earned</div>
+                <div className="text-3xl md:text-4xl font-bold text-primary">{totalEarned}</div>
+                <div className="text-sm text-muted-foreground font-medium">Badges Earned</div>
               </div>
             </div>
 
-            <div className="space-y-3">
-              <div className="w-16 h-16 bg-accent rounded-full flex items-center justify-center mx-auto">
+            <div className="space-y-2">
+              <div className="w-16 h-16 bg-gradient-to-br from-accent to-accent-light rounded-2xl flex items-center justify-center mx-auto shadow-story">
                 <Star className="w-8 h-8 text-accent-foreground" />
               </div>
               <div>
-                <div className="text-3xl font-bold text-accent">{totalPoints}</div>
-                <div className="text-sm text-muted-foreground">Peace Points</div>
+                <div className="text-3xl md:text-4xl font-bold text-accent">{totalPoints}</div>
+                <div className="text-sm text-muted-foreground font-medium">Peace Points</div>
               </div>
             </div>
 
-            <div className="space-y-3">
-              <div className="w-16 h-16 bg-warning rounded-full flex items-center justify-center mx-auto">
+            <div className="space-y-2">
+              <div className="w-16 h-16 bg-gradient-to-br from-warning to-warning/70 rounded-2xl flex items-center justify-center mx-auto shadow-warm">
                 <Users className="w-8 h-8 text-warning-foreground" />
               </div>
               <div>
-                <div className="text-3xl font-bold text-warning">127</div>
-                <div className="text-sm text-muted-foreground">Lives Impacted</div>
+                <div className="text-3xl md:text-4xl font-bold text-warning">127</div>
+                <div className="text-sm text-muted-foreground font-medium">Lives Impacted</div>
               </div>
             </div>
           </div>
@@ -141,31 +141,31 @@ const GamificationDashboard = () => {
 
         {/* Achievements Grid */}
         <div className="max-w-6xl mx-auto">
-          <h3 className="text-2xl font-semibold mb-8 text-center text-foreground">Achievements & Challenges</h3>
+          <h3 className="text-2xl font-semibold mb-6 text-center text-foreground">Achievements & Challenges</h3>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
             {achievements.map((achievement) => (
               <Card
                 key={achievement.id}
-                className={`p-6 transition-all duration-300 hover:shadow-warm ${
+                className={`p-5 transition-all duration-300 hover:shadow-elevated hover:-translate-y-1 rounded-xl ${
                   achievement.earned
-                    ? 'bg-card border-success shadow-peace'
-                    : 'bg-card/80 backdrop-blur-sm border-accent/20 shadow-story'
+                    ? 'bg-gradient-to-br from-success/10 to-success/5 border-success/40 shadow-peace'
+                    : 'bg-card/90 backdrop-blur-sm border-border/40 shadow-story'
                 }`}
               >
                 <div className="space-y-4">
                   <div className="flex items-start justify-between">
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                      achievement.earned ? 'bg-success' : getCategoryColor(achievement.category)
+                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-sm ${
+                      achievement.earned ? 'bg-gradient-to-br from-success to-success/70' : getCategoryColor(achievement.category)
                     }`}>
                       {achievement.earned ? (
-                        <Award className="w-6 h-6 text-success-foreground" />
+                        <Award className="w-7 h-7 text-success-foreground" />
                       ) : (
                         <div className="text-primary-foreground">{achievement.icon}</div>
                       )}
                     </div>
                     {achievement.earned && (
-                      <Badge className="bg-success text-success-foreground">
+                      <Badge className="bg-success text-success-foreground rounded-full px-3">
                         Earned!
                       </Badge>
                     )}
@@ -197,15 +197,15 @@ const GamificationDashboard = () => {
         </div>
 
         {/* Call to Action */}
-        <div className="text-center mt-12">
-          <Card className="max-w-2xl mx-auto p-8 bg-community-gradient border-none shadow-warm">
-            <div className="space-y-4">
-              <h3 className="text-2xl font-bold text-warning-foreground">Keep Building Peace!</h3>
-              <p className="text-warning-foreground/80">
+        <div className="text-center mt-10">
+          <Card className="max-w-2xl mx-auto p-6 md:p-8 bg-community-gradient border-none shadow-elevated rounded-2xl">
+            <div className="space-y-3">
+              <h3 className="text-xl md:text-2xl font-bold text-warning-foreground">Keep Building Peace!</h3>
+              <p className="text-warning-foreground/90 text-base">
                 Every story shared, every connection made, every voice heard brings us closer to a peaceful world.
               </p>
-              <Button variant="secondary" size="lg" className="mt-4">
-                <Mic className="w-5 h-5" />
+              <Button variant="secondary" size="lg" className="mt-3 rounded-full shadow-sm">
+                <Mic className="w-5 h-5 mr-2" />
                 Share Another Story
               </Button>
             </div>
