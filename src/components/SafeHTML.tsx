@@ -10,8 +10,8 @@ export default function SafeHTML({ html, className = '', allowedTags }: SafeHTML
   const config = allowedTags
     ? { ALLOWED_TAGS: allowedTags }
     : {
-        ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'a', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
-        ALLOWED_ATTR: ['href', 'target', 'rel'],
+        ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'a', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'hr'],
+        ALLOWED_ATTR: ['href', 'target', 'rel', 'class'],
       };
 
   const sanitized = DOMPurify.sanitize(html, config);

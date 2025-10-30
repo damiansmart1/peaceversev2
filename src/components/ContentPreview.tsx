@@ -49,10 +49,10 @@ export default function ContentPreview({
         )}
 
         {body && (
-          <div className="prose prose-sm max-w-none">
+          <div>
             <SafeHTML 
               html={body || '<p class="text-muted-foreground italic">Start writing to see preview...</p>'}
-              className="text-foreground"
+              className="prose-content"
             />
           </div>
         )}

@@ -6,6 +6,7 @@ import ProposalComments from '@/components/ProposalComments';
 import ProposalShareButtons from '@/components/ProposalShareButtons';
 import ProposalPolls from '@/components/ProposalPolls';
 import ProposalReportDownload from '@/components/ProposalReportDownload';
+import SafeHTML from '@/components/SafeHTML';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Users, Eye, Heart } from 'lucide-react';
@@ -116,9 +117,10 @@ const ProposalDetail = () => {
 
           <div className="p-6 bg-card border border-border rounded-lg">
             <h2 className="text-xl font-semibold mb-4">Full Proposal</h2>
-            <div className="prose prose-sm max-w-none text-foreground whitespace-pre-wrap">
-              {proposal.body}
-            </div>
+            <SafeHTML 
+              html={proposal.body}
+              className="prose-content"
+            />
           </div>
 
           <ProposalVoting
