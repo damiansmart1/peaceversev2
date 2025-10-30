@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useAdminContent, useCreateContent, useUpdateContent, useDeleteContent, useArchiveContent } from '@/hooks/useAdminContent';
 import { useApproveContent, useRejectContent } from '@/hooks/useApproveContent';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Plus, Edit, Trash, Archive, ArchiveRestore, Loader2, Upload, X, Link as LinkIcon, CheckCircle2, XCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import RichTextEditor from '@/components/RichTextEditor';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -231,6 +232,17 @@ export const AdminContentManager = () => {
     }
   };
 
+  // Filter content by status
+  const filteredContent = useMemo(() => {
+    if (!content) return { all: [], pending: [], approved: [], rejected: [] };
+    return {
+      all: content,
+      pending: content.filter(c => c.approval_status === 'pending_approval'),
+      approved: content.filter(c => c.approval_status === 'approved'),
+      rejected: content.filter(c => c.approval_status === 'rejected'),
+    };
+  }, [content]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-8">
@@ -239,10 +251,113 @@ export const AdminContentManager = () => {
     );
   }
 
+  const renderContentTable = (items: any[]) => (
+    <div className="rounded-md border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Title</TableHead>
+            <TableHead>Type</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Views</TableHead>
+            <TableHead>Likes</TableHead>
+            <TableHead>Archived</TableHead>
+            <TableHead>Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {items.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                No content found
+              </TableCell>
+            </TableRow>
+          ) : (
+            items.map((item) => (
+              <TableRow key={item.id}>
+                <TableCell className="font-medium">{item.title}</TableCell>
+                <TableCell>
+                  <Badge variant="outline">{item.file_type}</Badge>
+                </TableCell>
+                <TableCell>
+                  <Badge 
+                    variant={
+                      item.approval_status === 'approved' ? 'default' : 
+                      item.approval_status === 'rejected' ? 'destructive' : 
+                      'secondary'
+                    }
+                  >
+                    {item.approval_status === 'pending_approval' && 'Pending'}
+                    {item.approval_status === 'approved' && 'Approved'}
+                    {item.approval_status === 'rejected' && 'Rejected'}
+                    {item.approval_status === 'draft' && 'Draft'}
+                  </Badge>
+                </TableCell>
+                <TableCell>{item.view_count}</TableCell>
+                <TableCell>{item.like_count}</TableCell>
+                <TableCell>
+                  {item.is_archived ? (
+                    <Badge variant="secondary">Archived</Badge>
+                  ) : (
+                    <Badge variant="default">Active</Badge>
+                  )}
+                </TableCell>
+                <TableCell>
+                  <div className="flex gap-2">
+                    {item.approval_status === 'pending_approval' && (
+                      <>
+                        <Button variant="ghost" size="sm" onClick={() => approveMutation.mutate(item.id)} title="Approve">
+                          <CheckCircle2 className="h-4 w-4 text-green-600" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setReviewingContent(item.id);
+                            setReviewDialogOpen(true);
+                          }}
+                          title="Reject"
+                        >
+                          <XCircle className="h-4 w-4 text-red-600" />
+                        </Button>
+                      </>
+                    )}
+                    <Button variant="ghost" size="sm" onClick={() => handleEdit(item)}>
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => archiveMutation.mutate({ id: item.id, archived: !item.is_archived })}
+                    >
+                      {item.is_archived ? (
+                        <ArchiveRestore className="h-4 w-4" />
+                      ) : (
+                        <Archive className="h-4 w-4" />
+                      )}
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => setDeleteId(item.id)}>
+                      <Trash className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
+    </div>
+  );
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Content Stories</h2>
+        <div>
+          <h2 className="text-2xl font-bold">Content Stories</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            {filteredContent.pending.length} pending approval
+          </p>
+        </div>
         <Dialog open={dialogOpen} onOpenChange={(open) => {
           setDialogOpen(open);
           if (!open) resetForm();
@@ -445,93 +560,38 @@ export const AdminContentManager = () => {
         </Dialog>
       </div>
 
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Title</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Views</TableHead>
-              <TableHead>Likes</TableHead>
-              <TableHead>Archived</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {content?.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell className="font-medium">{item.title}</TableCell>
-                <TableCell>
-                  <Badge variant="outline">{item.file_type}</Badge>
-                </TableCell>
-                <TableCell>
-                  <Badge 
-                    variant={
-                      item.approval_status === 'approved' ? 'default' : 
-                      item.approval_status === 'rejected' ? 'destructive' : 
-                      'secondary'
-                    }
-                  >
-                    {item.approval_status === 'pending_approval' && 'Pending'}
-                    {item.approval_status === 'approved' && 'Approved'}
-                    {item.approval_status === 'rejected' && 'Rejected'}
-                    {item.approval_status === 'draft' && 'Draft'}
-                  </Badge>
-                </TableCell>
-                <TableCell>{item.view_count}</TableCell>
-                <TableCell>{item.like_count}</TableCell>
-                <TableCell>
-                  {item.is_archived ? (
-                    <Badge variant="secondary">Archived</Badge>
-                  ) : (
-                    <Badge variant="default">Active</Badge>
-                  )}
-                </TableCell>
-                <TableCell>
-                  <div className="flex gap-2">
-                    {item.approval_status === 'pending_approval' && (
-                      <>
-                        <Button variant="ghost" size="sm" onClick={() => approveMutation.mutate(item.id)} title="Approve">
-                          <CheckCircle2 className="h-4 w-4 text-green-600" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setReviewingContent(item.id);
-                            setReviewDialogOpen(true);
-                          }}
-                          title="Reject"
-                        >
-                          <XCircle className="h-4 w-4 text-red-600" />
-                        </Button>
-                      </>
-                    )}
-                    <Button variant="ghost" size="sm" onClick={() => handleEdit(item)}>
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => archiveMutation.mutate({ id: item.id, archived: !item.is_archived })}
-                    >
-                      {item.is_archived ? (
-                        <ArchiveRestore className="h-4 w-4" />
-                      ) : (
-                        <Archive className="h-4 w-4" />
-                      )}
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={() => setDeleteId(item.id)}>
-                      <Trash className="h-4 w-4 text-destructive" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+      <Tabs defaultValue="pending" className="w-full">
+        <TabsList>
+          <TabsTrigger value="pending">
+            Pending Approval ({filteredContent.pending.length})
+          </TabsTrigger>
+          <TabsTrigger value="approved">
+            Approved ({filteredContent.approved.length})
+          </TabsTrigger>
+          <TabsTrigger value="rejected">
+            Rejected ({filteredContent.rejected.length})
+          </TabsTrigger>
+          <TabsTrigger value="all">
+            All ({filteredContent.all.length})
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="pending">
+          {renderContentTable(filteredContent.pending)}
+        </TabsContent>
+
+        <TabsContent value="approved">
+          {renderContentTable(filteredContent.approved)}
+        </TabsContent>
+
+        <TabsContent value="rejected">
+          {renderContentTable(filteredContent.rejected)}
+        </TabsContent>
+
+        <TabsContent value="all">
+          {renderContentTable(filteredContent.all)}
+        </TabsContent>
+      </Tabs>
 
       <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
         <AlertDialogContent>

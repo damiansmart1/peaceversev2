@@ -1,14 +1,16 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useAdminProposals, useCreateProposal, useUpdateProposal, useDeleteProposal, useArchiveProposal } from '@/hooks/useAdminProposals';
 import { useApproveProposal, useRejectProposal } from '@/hooks/useApproveContent';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Label } from '@/components/ui/label';
 import { Plus, Edit, Trash, Archive, ArchiveRestore, Loader2, CheckCircle2, XCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
 import RichTextEditor from '@/components/RichTextEditor';
 
 export const AdminProposalsManager = () => {
@@ -87,6 +89,18 @@ export const AdminProposalsManager = () => {
     }
   };
 
+  // Filter proposals by status
+  const filteredProposals = useMemo(() => {
+    if (!proposals) return { all: [], pending: [], published: [], rejected: [], draft: [] };
+    return {
+      all: proposals,
+      pending: proposals.filter(p => p.status === 'pending_approval'),
+      published: proposals.filter(p => p.status === 'published'),
+      rejected: proposals.filter(p => p.status === 'rejected'),
+      draft: proposals.filter(p => p.status === 'draft'),
+    };
+  }, [proposals]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-8">
@@ -95,10 +109,109 @@ export const AdminProposalsManager = () => {
     );
   }
 
+  const renderProposalsTable = (items: any[]) => (
+    <div className="rounded-md border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Title</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Signatures</TableHead>
+            <TableHead>Views</TableHead>
+            <TableHead>Archive Status</TableHead>
+            <TableHead>Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {items.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                No proposals found
+              </TableCell>
+            </TableRow>
+          ) : (
+            items.map((item) => (
+              <TableRow key={item.id}>
+                <TableCell className="font-medium">{item.title}</TableCell>
+                <TableCell>
+                  <Badge 
+                    variant={
+                      item.status === 'published' ? 'default' : 
+                      item.status === 'rejected' ? 'destructive' : 
+                      'secondary'
+                    }
+                  >
+                    {item.status === 'pending_approval' && 'Pending Review'}
+                    {item.status === 'published' && 'Published'}
+                    {item.status === 'rejected' && 'Rejected'}
+                    {item.status === 'draft' && 'Draft'}
+                  </Badge>
+                </TableCell>
+                <TableCell>{item.signature_count}</TableCell>
+                <TableCell>{item.view_count}</TableCell>
+                <TableCell>
+                  {item.is_archived ? (
+                    <Badge variant="secondary">Archived</Badge>
+                  ) : (
+                    <Badge variant="default">Active</Badge>
+                  )}
+                </TableCell>
+                <TableCell>
+                  <div className="flex gap-2">
+                    {item.status === 'pending_approval' && (
+                      <>
+                        <Button variant="ghost" size="sm" onClick={() => approveMutation.mutate(item.id)} title="Approve & Publish">
+                          <CheckCircle2 className="h-4 w-4 text-green-600" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setReviewingProposal(item.id);
+                            setReviewDialogOpen(true);
+                          }}
+                          title="Reject"
+                        >
+                          <XCircle className="h-4 w-4 text-red-600" />
+                        </Button>
+                      </>
+                    )}
+                    <Button variant="ghost" size="sm" onClick={() => handleEdit(item)}>
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => archiveMutation.mutate({ id: item.id, archived: !item.is_archived })}
+                    >
+                      {item.is_archived ? (
+                        <ArchiveRestore className="h-4 w-4" />
+                      ) : (
+                        <Archive className="h-4 w-4" />
+                      )}
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => setDeleteId(item.id)}>
+                      <Trash className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
+    </div>
+  );
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Proposals</h2>
+        <div>
+          <h2 className="text-2xl font-bold">Proposals</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            {filteredProposals.pending.length} pending approval
+          </p>
+        </div>
         <Dialog open={dialogOpen} onOpenChange={(open) => {
           setDialogOpen(open);
           if (!open) resetForm();
@@ -171,89 +284,45 @@ export const AdminProposalsManager = () => {
         </Dialog>
       </div>
 
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Title</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Signatures</TableHead>
-              <TableHead>Views</TableHead>
-              <TableHead>Archive Status</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {proposals?.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell className="font-medium">{item.title}</TableCell>
-                <TableCell>
-                  <Badge 
-                    variant={
-                      item.status === 'published' ? 'default' : 
-                      item.status === 'rejected' ? 'destructive' : 
-                      'secondary'
-                    }
-                  >
-                    {item.status === 'pending_approval' && 'Pending Review'}
-                    {item.status === 'published' && 'Published'}
-                    {item.status === 'rejected' && 'Rejected'}
-                    {item.status === 'draft' && 'Draft'}
-                  </Badge>
-                </TableCell>
-                <TableCell>{item.signature_count}</TableCell>
-                <TableCell>{item.view_count}</TableCell>
-                <TableCell>
-                  {item.is_archived ? (
-                    <Badge variant="secondary">Archived</Badge>
-                  ) : (
-                    <Badge variant="default">Active</Badge>
-                  )}
-                </TableCell>
-                <TableCell>
-                  <div className="flex gap-2">
-                    {item.status === 'pending_approval' && (
-                      <>
-                        <Button variant="ghost" size="sm" onClick={() => approveMutation.mutate(item.id)} title="Approve & Publish">
-                          <CheckCircle2 className="h-4 w-4 text-green-600" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setReviewingProposal(item.id);
-                            setReviewDialogOpen(true);
-                          }}
-                          title="Reject"
-                        >
-                          <XCircle className="h-4 w-4 text-red-600" />
-                        </Button>
-                      </>
-                    )}
-                    <Button variant="ghost" size="sm" onClick={() => handleEdit(item)}>
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => archiveMutation.mutate({ id: item.id, archived: !item.is_archived })}
-                    >
-                      {item.is_archived ? (
-                        <ArchiveRestore className="h-4 w-4" />
-                      ) : (
-                        <Archive className="h-4 w-4" />
-                      )}
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={() => setDeleteId(item.id)}>
-                      <Trash className="h-4 w-4 text-destructive" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+      <Tabs defaultValue="pending" className="w-full">
+        <TabsList>
+          <TabsTrigger value="pending">
+            Pending Approval ({filteredProposals.pending.length})
+          </TabsTrigger>
+          <TabsTrigger value="published">
+            Published ({filteredProposals.published.length})
+          </TabsTrigger>
+          <TabsTrigger value="rejected">
+            Rejected ({filteredProposals.rejected.length})
+          </TabsTrigger>
+          <TabsTrigger value="draft">
+            Draft ({filteredProposals.draft.length})
+          </TabsTrigger>
+          <TabsTrigger value="all">
+            All ({filteredProposals.all.length})
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="pending">
+          {renderProposalsTable(filteredProposals.pending)}
+        </TabsContent>
+
+        <TabsContent value="published">
+          {renderProposalsTable(filteredProposals.published)}
+        </TabsContent>
+
+        <TabsContent value="rejected">
+          {renderProposalsTable(filteredProposals.rejected)}
+        </TabsContent>
+
+        <TabsContent value="draft">
+          {renderProposalsTable(filteredProposals.draft)}
+        </TabsContent>
+
+        <TabsContent value="all">
+          {renderProposalsTable(filteredProposals.all)}
+        </TabsContent>
+      </Tabs>
 
       <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
         <AlertDialogContent>
@@ -281,15 +350,16 @@ export const AdminProposalsManager = () => {
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="reason">Rejection Reason</Label>
-              <Input
+              <Textarea
                 id="reason"
                 placeholder="Explain why this proposal cannot be approved..."
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
+                rows={4}
               />
             </div>
           </div>
-          <div className="flex justify-end gap-2">
+          <DialogFooter>
             <Button variant="outline" onClick={() => setReviewDialogOpen(false)}>
               Cancel
             </Button>
@@ -310,7 +380,7 @@ export const AdminProposalsManager = () => {
             >
               Reject Proposal
             </Button>
-          </div>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
