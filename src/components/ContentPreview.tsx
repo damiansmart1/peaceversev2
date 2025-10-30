@@ -36,7 +36,7 @@ export default function ContentPreview({
         {title && (
           <div>
             <h2 className="text-2xl font-bold text-foreground mb-2">
-              {title || 'Untitled'}
+              {title}
             </h2>
           </div>
         )}
@@ -44,14 +44,17 @@ export default function ContentPreview({
         {summary && (
           <div className="bg-muted/50 p-4 rounded-lg border border-border">
             <p className="text-sm font-medium mb-1 text-muted-foreground">Summary</p>
-            <p className="text-foreground">{summary}</p>
+            <SafeHTML 
+              html={summary}
+              className="text-foreground"
+            />
           </div>
         )}
 
         {body && (
           <div>
             <SafeHTML 
-              html={body || '<p class="text-muted-foreground italic">Start writing to see preview...</p>'}
+              html={body}
               className="prose-content"
             />
           </div>
