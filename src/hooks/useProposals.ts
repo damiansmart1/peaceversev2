@@ -110,7 +110,7 @@ export const useCreateProposal = () => {
           attachments,
           slug: slugData,
           author_id: user.id,
-          status: 'draft',
+          status: 'pending_approval',
         })
         .select()
         .single();
@@ -120,7 +120,7 @@ export const useCreateProposal = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['proposals'] });
-      toast.success('Proposal created successfully');
+      toast.success('Proposal submitted for admin approval');
     },
     onError: (error) => {
       toast.error('Failed to create proposal: ' + error.message);
