@@ -35,7 +35,7 @@ interface Comment {
 const ContentFeed = () => {
   const [content, setContent] = useState<ContentItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [playingVideo, setPlayingVideo] = useState<string | null>(null);
+  const [expandedContent, setExpandedContent] = useState<string | null>(null);
   const [commentTexts, setCommentTexts] = useState<Record<string, string>>({});
   const { toast } = useToast();
 
@@ -222,38 +222,73 @@ const ContentFeed = () => {
     }
   };
 
-  const renderMediaPlayer = (item: ContentItem) => {
+  const getMediaIcon = (type: string) => {
+    switch (type) {
+      case 'video': return <Volume2 className="w-5 h-5" />;
+      case 'image': return <Eye className="w-5 h-5" />;
+      case 'audio': return <Volume2 className="w-5 h-5" />;
+      default: return <Sparkles className="w-5 h-5" />;
+    }
+  };
+
+  const getThumbnail = (item: ContentItem) => {
+    if (item.file_type === 'image') {
+      return (
+        <img
+          src={item.file_url}
+          alt={item.title}
+          className="w-full h-full object-cover"
+        />
+      );
+    }
+    
+    return (
+      <div className={`w-full h-full flex items-center justify-center ${
+        item.file_type === 'video' ? 'bg-gradient-to-br from-primary/20 to-primary/5' :
+        item.file_type === 'audio' ? 'bg-gradient-to-br from-accent/20 to-accent/5' :
+        'bg-gradient-to-br from-muted to-muted/50'
+      }`}>
+        <div className="text-center space-y-2">
+          {getMediaIcon(item.file_type)}
+          <p className="text-xs font-medium capitalize">{item.file_type}</p>
+        </div>
+      </div>
+    );
+  };
+
+  const getExcerpt = (html: string, maxLength: number = 150) => {
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    const text = div.textContent || div.innerText || '';
+    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+  };
+
+  const renderFullContent = (item: ContentItem) => {
     if (item.file_type === 'video') {
       return (
         <div className="relative group overflow-hidden rounded-xl">
           <video
             controls
-            className="w-full aspect-video object-cover rounded-xl transition-transform duration-300 group-hover:scale-105"
-            poster=""
+            className="w-full aspect-video object-cover rounded-xl"
           >
             <source src={item.file_url} type="video/mp4" />
             Your browser does not support the video tag.
           </video>
-          <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
         </div>
       );
     } else if (item.file_type === 'image') {
       return (
-        <div className="relative group overflow-hidden rounded-xl">
+        <div className="relative overflow-hidden rounded-xl">
           <img
             src={item.file_url}
             alt={item.title}
-            className="w-full aspect-video object-cover rounded-xl transition-transform duration-300 group-hover:scale-105"
+            className="w-full max-h-[600px] object-contain rounded-xl bg-muted/20"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
       );
     } else if (item.file_type === 'audio') {
       return (
-        <div className="relative bg-gradient-to-br from-primary/5 via-accent/5 to-secondary/10 p-8 rounded-xl border border-border/50 backdrop-blur-sm">
-          <div className="absolute top-4 right-4">
-            <Sparkles className="w-6 h-6 text-primary/40 animate-pulse" />
-          </div>
+        <div className="relative bg-gradient-to-br from-primary/5 via-accent/5 to-secondary/10 p-8 rounded-xl border border-border/50">
           <div className="flex items-center gap-4 mb-6">
             <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
               <Volume2 className="w-7 h-7 text-primary" />
@@ -285,7 +320,7 @@ const ContentFeed = () => {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       {content.length === 0 ? (
         <div className="text-center py-16">
           <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center mx-auto mb-6">
@@ -298,177 +333,192 @@ const ContentFeed = () => {
           </p>
         </div>
       ) : (
-        content.map((item, index) => (
-          <Card 
-            key={item.id} 
-            className="overflow-hidden border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-[var(--shadow-elevated)] animate-fade-in"
-            style={{ animationDelay: `${index * 100}ms` }}
-          >
-            <CardContent className="p-0">
-              {/* Header with user info */}
-              <div className="p-6 pb-4 space-y-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-11 w-11 ring-2 ring-primary/10">
-                      <AvatarImage src="" />
-                      <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground">
-                        <User className="w-5 h-5" />
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-semibold text-foreground">Peace Storyteller</p>
-                      <div className="flex items-center gap-2">
-                        <p className="text-xs text-muted-foreground">
-                          {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}
-                        </p>
-                        <span className="text-muted-foreground/50">•</span>
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Eye className="w-3 h-3" />
-                          {item.view_count}
-                        </div>
+        content.map((item, index) => {
+          const isExpanded = expandedContent === item.id;
+          
+          return (
+            <Card 
+              key={item.id} 
+              className="overflow-hidden border-border/50 hover:border-primary/20 transition-all duration-300 hover:shadow-lg animate-fade-in"
+              style={{ animationDelay: `${index * 50}ms` }}
+            >
+              <CardContent className="p-0">
+                <div className={`grid ${isExpanded ? 'grid-cols-1' : 'md:grid-cols-[200px_1fr]'} gap-0`}>
+                  {/* Thumbnail/Media Preview */}
+                  {!isExpanded && (
+                    <div 
+                      className="relative h-48 md:h-auto overflow-hidden bg-muted/30 cursor-pointer group"
+                      onClick={() => setExpandedContent(item.id)}
+                    >
+                      {getThumbnail(item)}
+                      <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <Button size="sm" variant="secondary" className="shadow-lg">
+                          <Eye className="w-4 h-4 mr-2" />
+                          View Full Story
+                        </Button>
                       </div>
-                    </div>
-                  </div>
-                  <Badge variant="outline" className={getCategoryColor(item.file_type)}>
-                    {item.file_type.charAt(0).toUpperCase() + item.file_type.slice(1)}
-                  </Badge>
-                </div>
-
-                {/* Title and description */}
-                <div className="space-y-3">
-                  <h3 className="font-bold text-xl text-foreground leading-tight hover-scale cursor-default">
-                    {item.title}
-                  </h3>
-                  {item.description && (
-                    <SafeHTML 
-                      html={item.description}
-                      className="text-muted-foreground leading-relaxed prose-content"
-                    />
-                  )}
-                </div>
-              </div>
-
-              {/* Media content */}
-              <div className="px-6 pb-4">
-                {renderMediaPlayer(item)}
-              </div>
-
-              {/* Engagement metrics bar */}
-              <div className="px-6 py-4 bg-muted/30 backdrop-blur-sm border-y border-border/50">
-                <div className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-4">
-                    <span className="flex items-center gap-1.5 text-muted-foreground">
-                      <Heart className={`w-4 h-4 ${item.like_count > 0 ? 'text-red-500' : ''}`} />
-                      <span className="font-medium">{item.like_count}</span>
-                      <span className="hidden sm:inline">
-                        {item.like_count === 1 ? 'like' : 'likes'}
-                      </span>
-                    </span>
-                    <span className="flex items-center gap-1.5 text-muted-foreground">
-                      <MessageCircle className="w-4 h-4" />
-                      <span className="font-medium">{item.comments.length}</span>
-                      <span className="hidden sm:inline">
-                        {item.comments.length === 1 ? 'comment' : 'comments'}
-                      </span>
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Action buttons */}
-              <div className="px-6 py-3 flex items-center gap-2 border-b border-border/50">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleLike(item.id)}
-                  className={`flex-1 transition-colors ${
-                    item.user_liked 
-                      ? 'text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20' 
-                      : 'hover:bg-primary/5'
-                  }`}
-                >
-                  <Heart className={`w-4 h-4 mr-2 transition-transform hover:scale-110 ${item.user_liked ? 'fill-current' : ''}`} />
-                  {item.user_liked ? 'Liked' : 'Like'}
-                </Button>
-
-                <Button variant="ghost" size="sm" className="flex-1 hover:bg-accent/10">
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  Comment
-                </Button>
-
-                <ShareDialog audioUrl={item.file_url}>
-                  <Button variant="ghost" size="sm" className="flex-1 hover:bg-secondary/20">
-                    <Share className="w-4 h-4 mr-2" />
-                    Share
-                  </Button>
-                </ShareDialog>
-              </div>
-
-              {/* Comments section */}
-              <div className="px-6 py-4 space-y-4 bg-gradient-to-b from-background to-muted/20">
-                {item.comments.length > 0 && (
-                  <div className="space-y-3">
-                    {item.comments.map((comment) => (
-                      <div 
-                        key={comment.id} 
-                        className="bg-card/50 backdrop-blur-sm p-4 rounded-xl border border-border/30 hover:border-primary/20 transition-colors"
+                      <Badge 
+                        variant="outline" 
+                        className={`absolute top-3 right-3 ${getCategoryColor(item.file_type)}`}
                       >
-                        <div className="flex items-start gap-3">
-                          <Avatar className="h-8 w-8 ring-1 ring-border/50">
-                            <AvatarFallback className="bg-muted text-xs">
-                              <User className="w-4 h-4" />
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-foreground mb-1">Community Member</p>
-                            <p className="text-sm text-foreground/90 leading-relaxed">{comment.text}</p>
-                            <p className="text-xs text-muted-foreground mt-2">
-                              {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
-                            </p>
+                        {item.file_type}
+                      </Badge>
+                    </div>
+                  )}
+
+                  {/* Content Preview/Full */}
+                  <div className="p-5 space-y-3">
+                    {/* User Info */}
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-2">
+                        <Avatar className="h-8 w-8 ring-1 ring-primary/10">
+                          <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground text-xs">
+                            <User className="w-4 h-4" />
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-foreground truncate">Peace Storyteller</p>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <span>{formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}</span>
+                            <span>•</span>
+                            <span className="flex items-center gap-1">
+                              <Eye className="w-3 h-3" />
+                              {item.view_count}
+                            </span>
                           </div>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )}
+                      {isExpanded && (
+                        <Badge variant="outline" className={getCategoryColor(item.file_type)}>
+                          {item.file_type}
+                        </Badge>
+                      )}
+                    </div>
 
-                {/* Add comment */}
-                <div className="flex gap-2 pt-2">
-                  <Avatar className="h-9 w-9 ring-1 ring-border/50">
-                    <AvatarFallback className="bg-gradient-to-br from-primary/20 to-accent/20">
-                      <User className="w-4 h-4" />
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 flex gap-2">
-                    <Input
-                      placeholder="Share your thoughts..."
-                      value={commentTexts[item.id] || ''}
-                      onChange={(e) => setCommentTexts(prev => ({ 
-                        ...prev, 
-                        [item.id]: e.target.value 
-                      }))}
-                      onKeyPress={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                          e.preventDefault();
-                          handleComment(item.id);
-                        }
-                      }}
-                      className="flex-1 bg-card/50 border-border/50 focus:border-primary/50 focus:ring-primary/20"
-                    />
-                    <Button 
-                      size="sm"
-                      onClick={() => handleComment(item.id)}
-                      disabled={!commentTexts[item.id]?.trim()}
-                      className="px-6"
+                    {/* Title */}
+                    <h3 
+                      className="font-bold text-lg text-foreground leading-tight cursor-pointer hover:text-primary transition-colors line-clamp-2"
+                      onClick={() => setExpandedContent(isExpanded ? null : item.id)}
                     >
-                      Post
-                    </Button>
+                      {item.title}
+                    </h3>
+
+                    {/* Description Preview or Full */}
+                    {item.description && (
+                      <div className={isExpanded ? '' : 'line-clamp-2'}>
+                        <SafeHTML 
+                          html={isExpanded ? item.description : getExcerpt(item.description)}
+                          className="text-sm text-muted-foreground leading-relaxed prose-content"
+                        />
+                      </div>
+                    )}
+
+                    {/* Full Media (when expanded) */}
+                    {isExpanded && (
+                      <div className="pt-2">
+                        {renderFullContent(item)}
+                      </div>
+                    )}
+
+                    {/* Engagement Bar */}
+                    <div className="flex items-center justify-between pt-2 border-t border-border/50">
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <button
+                          onClick={() => handleLike(item.id)}
+                          className={`flex items-center gap-1.5 hover:text-primary transition-colors ${
+                            item.user_liked ? 'text-red-500' : ''
+                          }`}
+                        >
+                          <Heart className={`w-4 h-4 ${item.user_liked ? 'fill-current' : ''}`} />
+                          <span className="font-medium">{item.like_count}</span>
+                        </button>
+                        <span className="flex items-center gap-1.5">
+                          <MessageCircle className="w-4 h-4" />
+                          <span className="font-medium">{item.comments.length}</span>
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        <ShareDialog audioUrl={item.file_url}>
+                          <Button variant="ghost" size="sm" className="h-8">
+                            <Share className="w-4 h-4" />
+                          </Button>
+                        </ShareDialog>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => setExpandedContent(isExpanded ? null : item.id)}
+                          className="h-8 text-primary hover:text-primary"
+                        >
+                          {isExpanded ? 'Show Less' : 'Read More'}
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Comments Section (only when expanded) */}
+                    {isExpanded && (
+                      <div className="pt-4 space-y-3 border-t border-border/50">
+                        {item.comments.length > 0 && (
+                          <div className="space-y-2">
+                            <p className="text-sm font-medium text-foreground">Comments ({item.comments.length})</p>
+                            {item.comments.map((comment) => (
+                              <div 
+                                key={comment.id} 
+                                className="bg-muted/30 p-3 rounded-lg"
+                              >
+                                <div className="flex items-start gap-2">
+                                  <Avatar className="h-7 w-7 ring-1 ring-border/30">
+                                    <AvatarFallback className="bg-muted text-xs">
+                                      <User className="w-3 h-3" />
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-xs font-medium text-foreground">Community Member</p>
+                                    <p className="text-sm text-foreground/90 mt-1">{comment.text}</p>
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                      {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Add comment */}
+                        <div className="flex gap-2">
+                          <Input
+                            placeholder="Add a comment..."
+                            value={commentTexts[item.id] || ''}
+                            onChange={(e) => setCommentTexts(prev => ({ 
+                              ...prev, 
+                              [item.id]: e.target.value 
+                            }))}
+                            onKeyPress={(e) => {
+                              if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                handleComment(item.id);
+                              }
+                            }}
+                            className="flex-1 h-9 text-sm"
+                          />
+                          <Button 
+                            size="sm"
+                            onClick={() => handleComment(item.id)}
+                            disabled={!commentTexts[item.id]?.trim()}
+                            className="h-9"
+                          >
+                            Post
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))
+              </CardContent>
+            </Card>
+          );
+        })
       )}
     </div>
   );
