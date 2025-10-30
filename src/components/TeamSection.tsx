@@ -17,36 +17,36 @@ interface TeamMember {
 
 const teamMembers: TeamMember[] = [
   {
-    name: "Dr. Sarah Kimani",
-    role: "Founder & Executive Director",
-    bio: "Former UN peacebuilding officer with 15 years of experience empowering youth in conflict zones.",
+    name: "Damian Kajwang",
+    role: "Project Lead",
+    bio: "Leading PeaceVerse's mission to amplify youth voices and build bridges across communities.",
     social: {
       linkedin: "#",
-      email: "sarah@peaceverse.org"
+      email: "damian@peaceverse.org"
     }
   },
   {
-    name: "James Ochieng",
-    role: "Head of Technology",
-    bio: "Tech innovator focused on building accessible platforms for underserved communities.",
+    name: "Morris Mwangi",
+    role: "Tech Lead",
+    bio: "Building scalable, accessible technology solutions for youth in low-bandwidth environments.",
     social: {
       linkedin: "#",
       twitter: "#"
     }
   },
   {
-    name: "Amina Hassan",
-    role: "Community Manager",
-    bio: "Youth advocate connecting grassroots movements across East Africa.",
+    name: "Brian Kinuthia",
+    role: "Visuals & Design Lead",
+    bio: "Creating engaging, youth-centered experiences that make peacebuilding fun and accessible.",
     social: {
       linkedin: "#",
-      email: "amina@peaceverse.org"
+      email: "brian@peaceverse.org"
     }
   },
   {
-    name: "David Mwangi",
-    role: "Content & Safety Lead",
-    bio: "Expert in digital safety and content moderation for youth platforms.",
+    name: "Stanley Kinuthia",
+    role: "Tech Engineer",
+    bio: "Engineering innovative features that empower communities to connect and collaborate.",
     social: {
       linkedin: "#"
     }
