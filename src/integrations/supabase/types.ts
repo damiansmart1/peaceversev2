@@ -134,6 +134,7 @@ export type Database = {
       }
       content: {
         Row: {
+          attachments: Json | null
           category: string
           created_at: string
           description: string | null
@@ -149,6 +150,7 @@ export type Database = {
           view_count: number | null
         }
         Insert: {
+          attachments?: Json | null
           category?: string
           created_at?: string
           description?: string | null
@@ -164,6 +166,7 @@ export type Database = {
           view_count?: number | null
         }
         Update: {
+          attachments?: Json | null
           category?: string
           created_at?: string
           description?: string | null

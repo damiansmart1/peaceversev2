@@ -15,6 +15,8 @@ const ContentUpload = () => {
   const [description, setDescription] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [category, setCategory] = useState<string>('general');
+  const [attachments, setAttachments] = useState<File[]>([]);
+  const [webLinks, setWebLinks] = useState<string[]>(['']);
   const { toast } = useToast();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,6 +51,27 @@ const ContentUpload = () => {
     }
   };
 
+  const handleAttachmentsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    setAttachments(prev => [...prev, ...files]);
+  };
+
+  const removeAttachment = (index: number) => {
+    setAttachments(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const addWebLink = () => {
+    setWebLinks(prev => [...prev, '']);
+  };
+
+  const updateWebLink = (index: number, value: string) => {
+    setWebLinks(prev => prev.map((link, i) => i === index ? value : link));
+  };
+
+  const removeWebLink = (index: number) => {
+    setWebLinks(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleUpload = async () => {
     if (!file || !title.trim()) {
       toast({
@@ -73,7 +96,7 @@ const ContentUpload = () => {
     setUploading(true);
     
     try {
-      // Upload file to storage
+      // Upload main file to storage
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
       
@@ -88,6 +111,41 @@ const ContentUpload = () => {
         .from('content')
         .getPublicUrl(fileName);
 
+      // Upload additional attachments
+      const uploadedAttachments = [];
+      for (const attachment of attachments) {
+        const attExt = attachment.name.split('.').pop();
+        const attFileName = `${user.id}/attachments/${Date.now()}-${Math.random().toString(36).substring(7)}.${attExt}`;
+        
+        const { error: attError } = await supabase.storage
+          .from('content')
+          .upload(attFileName, attachment);
+
+        if (!attError) {
+          const { data: { publicUrl: attUrl } } = supabase.storage
+            .from('content')
+            .getPublicUrl(attFileName);
+          
+          uploadedAttachments.push({
+            type: attachment.type.startsWith('image/') ? 'image' : 
+                  attachment.type.startsWith('video/') ? 'video' :
+                  attachment.type === 'application/pdf' ? 'pdf' : 'file',
+            url: attUrl,
+            name: attachment.name
+          });
+        }
+      }
+
+      // Add valid web links
+      const validLinks = webLinks.filter(link => link.trim() !== '');
+      validLinks.forEach(link => {
+        uploadedAttachments.push({
+          type: 'link',
+          url: link,
+          name: link
+        });
+      });
+
       // Save content metadata to database
       const { error: dbError } = await supabase
         .from('content')
@@ -98,6 +156,7 @@ const ContentUpload = () => {
           file_url: publicUrl,
           file_type: getFileType(file),
           category: category,
+          attachments: uploadedAttachments
         });
 
       if (dbError) throw dbError;
@@ -112,9 +171,13 @@ const ContentUpload = () => {
       setDescription('');
       setFile(null);
       setCategory('general');
+      setAttachments([]);
+      setWebLinks(['']);
       // Reset file input
       const fileInput = document.getElementById('file-upload') as HTMLInputElement;
       if (fileInput) fileInput.value = '';
+      const attInput = document.getElementById('attachments-upload') as HTMLInputElement;
+      if (attInput) attInput.value = '';
 
     } catch (error) {
       console.error('Upload error:', error);
@@ -198,7 +261,7 @@ const ContentUpload = () => {
 
             <div>
               <label htmlFor="file-upload" className="block text-sm font-medium mb-2">
-                Upload File *
+                Main Content File *
               </label>
               <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
                 <input
@@ -232,7 +295,84 @@ const ContentUpload = () => {
               </div>
             </div>
 
-            <Button 
+            <div>
+              <label htmlFor="attachments-upload" className="block text-sm font-medium mb-2">
+                Additional Attachments (Images/Videos/PDFs)
+              </label>
+              <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-4">
+                <input
+                  id="attachments-upload"
+                  type="file"
+                  onChange={handleAttachmentsChange}
+                  accept="image/*,video/*,application/pdf"
+                  multiple
+                  className="hidden"
+                />
+                <label htmlFor="attachments-upload" className="cursor-pointer block text-center">
+                  <Upload className="w-6 h-6 mx-auto text-muted-foreground mb-2" />
+                  <p className="text-sm text-muted-foreground">
+                    Click to add attachments
+                  </p>
+                </label>
+                
+                {attachments.length > 0 && (
+                  <div className="mt-4 space-y-2">
+                    {attachments.map((att, idx) => (
+                      <div key={idx} className="flex items-center justify-between bg-muted p-2 rounded">
+                        <span className="text-sm truncate">{att.name}</span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeAttachment(idx)}
+                        >
+                          ×
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Web Links & Embedded Links
+              </label>
+              <div className="space-y-2">
+                {webLinks.map((link, idx) => (
+                  <div key={idx} className="flex gap-2">
+                    <Input
+                      value={link}
+                      onChange={(e) => updateWebLink(idx, e.target.value)}
+                      placeholder="https://example.com"
+                      type="url"
+                    />
+                    {webLinks.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeWebLink(idx)}
+                      >
+                        ×
+                      </Button>
+                    )}
+                  </div>
+                ))}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={addWebLink}
+                  className="w-full"
+                >
+                  + Add Link
+                </Button>
+              </div>
+            </div>
+
+            <Button
               onClick={handleUpload} 
               disabled={uploading || !file || !title.trim()}
               className="w-full"

@@ -2,6 +2,7 @@ import HeroSection from "@/components/HeroSection";
 import Navigation from "@/components/Navigation";
 import SectionHeader from "@/components/SectionHeader";
 import FeatureCard from "@/components/FeatureCard";
+import SponsorsCarousel from "@/components/SponsorsCarousel";
 import { useTranslationContext } from "@/components/TranslationProvider";
 import { useNavigate } from "react-router-dom";
 import { Mic, Users, Radio, Award, Shield, Heart, Vote } from "lucide-react";
@@ -82,6 +83,9 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* Sponsors & Partners Carousel */}
+      <SponsorsCarousel />
       
       {/* Footer */}
       <footer className="bg-primary text-primary-foreground py-12">
