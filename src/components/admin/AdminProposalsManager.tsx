@@ -2,13 +2,13 @@ import { useState } from 'react';
 import { useAdminProposals, useCreateProposal, useUpdateProposal, useDeleteProposal, useArchiveProposal } from '@/hooks/useAdminProposals';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Label } from '@/components/ui/label';
 import { Plus, Edit, Trash, Archive, ArchiveRestore, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import RichTextEditor from '@/components/RichTextEditor';
 
 export const AdminProposalsManager = () => {
   const { data: proposals, isLoading } = useAdminProposals();
@@ -102,9 +102,10 @@ export const AdminProposalsManager = () => {
               Add Proposal
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editingItem ? 'Edit Proposal' : 'Create New Proposal'}</DialogTitle>
+              <DialogDescription>Use the rich text editor for formatting the proposal content.</DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div>
@@ -118,22 +119,20 @@ export const AdminProposalsManager = () => {
               </div>
               <div>
                 <Label htmlFor="summary">Summary</Label>
-                <Textarea
+                <Input
                   id="summary"
                   value={formData.summary}
                   onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
                   placeholder="Brief summary"
-                  rows={2}
                 />
               </div>
               <div>
                 <Label htmlFor="body">Body</Label>
-                <Textarea
-                  id="body"
-                  value={formData.body}
-                  onChange={(e) => setFormData({ ...formData, body: e.target.value })}
-                  placeholder="Full proposal content"
-                  rows={6}
+                <RichTextEditor
+                  content={formData.body}
+                  onChange={(html) => setFormData({ ...formData, body: html })}
+                  placeholder="Full proposal content with formatting..."
+                  minHeight="250px"
                 />
               </div>
               <div>

@@ -1,16 +1,18 @@
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, X, Upload } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Plus, X, Eye, FileEdit } from 'lucide-react';
 import { useCreateProposal, usePublishProposal } from '@/hooks/useProposals';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { z } from 'zod';
+import RichTextEditor from '@/components/RichTextEditor';
+import ContentPreview from '@/components/ContentPreview';
 
 const proposalSchema = z.object({
   title: z.string().trim().min(5, 'Title must be at least 5 characters').max(200),
@@ -155,11 +157,26 @@ const CreateProposalDialog = () => {
           Create Proposal
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-7xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle>Create New Proposal</DialogTitle>
+          <DialogDescription>Fill in the details below and preview how your proposal will appear.</DialogDescription>
         </DialogHeader>
-        <div className="space-y-4">
+        
+        <Tabs defaultValue="edit" className="flex-1 flex flex-col overflow-hidden">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="edit" className="gap-2">
+              <FileEdit className="w-4 h-4" />
+              Edit
+            </TabsTrigger>
+            <TabsTrigger value="preview" className="gap-2">
+              <Eye className="w-4 h-4" />
+              Preview
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="edit" className="flex-1 overflow-y-auto mt-4">
+            <div className="space-y-4 pr-2">
           <div>
             <Label htmlFor="billProposer">Name of Bill Proposer *</Label>
             <Input
@@ -203,31 +220,28 @@ const CreateProposalDialog = () => {
             {errors.parliamentaryStage && <p className="text-sm text-destructive mt-1">{errors.parliamentaryStage}</p>}
           </div>
 
-          <div>
-            <Label htmlFor="summary">Summary *</Label>
-            <Textarea
-              id="summary"
-              value={summary}
-              onChange={(e) => setSummary(e.target.value)}
-              placeholder="Brief summary (20-500 characters)"
-              rows={3}
-              className={errors.summary ? 'border-destructive' : ''}
-            />
-            {errors.summary && <p className="text-sm text-destructive mt-1">{errors.summary}</p>}
-          </div>
+              <div>
+                <Label htmlFor="summary">Summary *</Label>
+                <Input
+                  id="summary"
+                  value={summary}
+                  onChange={(e) => setSummary(e.target.value)}
+                  placeholder="Brief summary (20-500 characters)"
+                  className={errors.summary ? 'border-destructive' : ''}
+                />
+                {errors.summary && <p className="text-sm text-destructive mt-1">{errors.summary}</p>}
+              </div>
 
-          <div>
-            <Label htmlFor="body">Full Proposal *</Label>
-            <Textarea
-              id="body"
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              placeholder="Detailed description of your proposal..."
-              rows={10}
-              className={errors.body ? 'border-destructive' : ''}
-            />
-            {errors.body && <p className="text-sm text-destructive mt-1">{errors.body}</p>}
-          </div>
+              <div>
+                <Label htmlFor="body">Full Proposal *</Label>
+                <RichTextEditor
+                  content={body}
+                  onChange={setBody}
+                  placeholder="Write the detailed description of your proposal..."
+                  minHeight="300px"
+                />
+                {errors.body && <p className="text-sm text-destructive mt-1">{errors.body}</p>}
+              </div>
 
           <div>
             <Label htmlFor="tags">Tags *</Label>
@@ -277,22 +291,53 @@ const CreateProposalDialog = () => {
             </p>
           </div>
 
-          <div className="flex gap-2 justify-end pt-4">
-            <Button 
-              variant="outline" 
-              onClick={() => handleSubmit(false)} 
-              disabled={createProposal.isPending || uploadingFile}
-            >
-              Save Draft
-            </Button>
-            <Button 
-              onClick={() => handleSubmit(true)} 
-              disabled={createProposal.isPending || publishProposal.isPending || uploadingFile}
-            >
-              {uploadingFile ? 'Uploading...' : 'Publish Now'}
-            </Button>
-          </div>
-        </div>
+              <div className="flex gap-2 justify-end pt-4 border-t">
+                <Button 
+                  variant="outline" 
+                  onClick={() => handleSubmit(false)} 
+                  disabled={createProposal.isPending || uploadingFile}
+                >
+                  Save Draft
+                </Button>
+                <Button 
+                  onClick={() => handleSubmit(true)} 
+                  disabled={createProposal.isPending || publishProposal.isPending || uploadingFile}
+                >
+                  {uploadingFile ? 'Uploading...' : 'Publish Now'}
+                </Button>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="preview" className="flex-1 overflow-hidden mt-4">
+            <ContentPreview
+              title={title}
+              summary={summary}
+              body={body}
+              tags={tags}
+              additionalInfo={
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Proposer:</span>
+                    <span className="font-medium">{billProposerName || 'Not specified'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Stage:</span>
+                    <span className="font-medium capitalize">
+                      {parliamentaryStage.replace(/_/g, ' ')}
+                    </span>
+                  </div>
+                  {billFile && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Attached File:</span>
+                      <span className="font-medium">{billFile.name}</span>
+                    </div>
+                  )}
+                </div>
+              }
+            />
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );

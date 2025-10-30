@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Upload, Video, Image, Music } from "lucide-react";
+import { Upload, Video, Image, Music, Eye, FileEdit } from "lucide-react";
+import RichTextEditor from '@/components/RichTextEditor';
+import ContentPreview from '@/components/ContentPreview';
 
 const ContentUpload = () => {
   const [uploading, setUploading] = useState(false);
@@ -124,84 +126,117 @@ const ContentUpload = () => {
   };
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
+    <Card className="w-full max-w-6xl mx-auto">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Upload className="w-5 h-5" />
           Share Your Content
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div>
-          <label htmlFor="title" className="block text-sm font-medium mb-2">
-            Title *
-          </label>
-          <Input
-            id="title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Give your content a catchy title..."
-            maxLength={100}
-          />
-        </div>
+      <CardContent>
+        <Tabs defaultValue="edit" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsTrigger value="edit" className="gap-2">
+              <FileEdit className="w-4 h-4" />
+              Edit
+            </TabsTrigger>
+            <TabsTrigger value="preview" className="gap-2">
+              <Eye className="w-4 h-4" />
+              Preview
+            </TabsTrigger>
+          </TabsList>
 
-        <div>
-          <label htmlFor="description" className="block text-sm font-medium mb-2">
-            Description
-          </label>
-          <Textarea
-            id="description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Tell us about your content..."
-            maxLength={500}
-            rows={3}
-          />
-        </div>
+          <TabsContent value="edit" className="space-y-4">
+            <div>
+              <label htmlFor="title" className="block text-sm font-medium mb-2">
+                Title *
+              </label>
+              <Input
+                id="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Give your content a catchy title..."
+                maxLength={100}
+              />
+            </div>
 
-        <div>
-          <label htmlFor="file-upload" className="block text-sm font-medium mb-2">
-            Upload File *
-          </label>
-          <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
-            <input
-              id="file-upload"
-              type="file"
-              onChange={handleFileChange}
-              accept="video/*,image/*,audio/*"
-              className="hidden"
+            <div>
+              <label htmlFor="description" className="block text-sm font-medium mb-2">
+                Description
+              </label>
+              <RichTextEditor
+                content={description}
+                onChange={setDescription}
+                placeholder="Tell us about your content..."
+                minHeight="200px"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="file-upload" className="block text-sm font-medium mb-2">
+                Upload File *
+              </label>
+              <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
+                <input
+                  id="file-upload"
+                  type="file"
+                  onChange={handleFileChange}
+                  accept="video/*,image/*,audio/*"
+                  className="hidden"
+                />
+                <label htmlFor="file-upload" className="cursor-pointer">
+                  {file ? (
+                    <div className="flex items-center justify-center gap-2 text-primary">
+                      {getFileIcon(getFileType(file))}
+                      <span className="font-medium">{file.name}</span>
+                      <span className="text-sm text-muted-foreground">
+                        ({(file.size / 1024 / 1024).toFixed(1)} MB)
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <Upload className="w-8 h-8 mx-auto text-muted-foreground" />
+                      <p className="text-muted-foreground">
+                        Click to upload video, image, or audio
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Max file size: 100MB
+                      </p>
+                    </div>
+                  )}
+                </label>
+              </div>
+            </div>
+
+            <Button 
+              onClick={handleUpload} 
+              disabled={uploading || !file || !title.trim()}
+              className="w-full"
+            >
+              {uploading ? "Uploading..." : "Share Content"}
+            </Button>
+          </TabsContent>
+
+          <TabsContent value="preview">
+            <ContentPreview
+              title={title}
+              body={description}
+              additionalInfo={
+                file && (
+                  <div className="flex items-center gap-2">
+                    {getFileIcon(getFileType(file))}
+                    <div>
+                      <p className="font-medium">{file.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {getFileType(file)} • {(file.size / 1024 / 1024).toFixed(1)} MB
+                      </p>
+                    </div>
+                  </div>
+                )
+              }
             />
-            <label htmlFor="file-upload" className="cursor-pointer">
-              {file ? (
-                <div className="flex items-center justify-center gap-2 text-primary">
-                  {getFileIcon(getFileType(file))}
-                  <span className="font-medium">{file.name}</span>
-                  <span className="text-sm text-muted-foreground">
-                    ({(file.size / 1024 / 1024).toFixed(1)} MB)
-                  </span>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <Upload className="w-8 h-8 mx-auto text-muted-foreground" />
-                  <p className="text-muted-foreground">
-                    Click to upload video, image, or audio
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Max file size: 100MB
-                  </p>
-                </div>
-              )}
-            </label>
-          </div>
-        </div>
-
-        <Button 
-          onClick={handleUpload} 
-          disabled={uploading || !file || !title.trim()}
-          className="w-full"
-        >
-          {uploading ? "Uploading..." : "Share Content"}
-        </Button>
+          </TabsContent>
+        </Tabs>
       </CardContent>
     </Card>
   );

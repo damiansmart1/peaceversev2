@@ -2,13 +2,13 @@ import { useState } from 'react';
 import { useAdminContent, useCreateContent, useUpdateContent, useDeleteContent, useArchiveContent } from '@/hooks/useAdminContent';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Label } from '@/components/ui/label';
 import { Plus, Edit, Trash, Archive, ArchiveRestore, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import RichTextEditor from '@/components/RichTextEditor';
 
 export const AdminContentManager = () => {
   const { data: content, isLoading } = useAdminContent();
@@ -94,9 +94,10 @@ export const AdminContentManager = () => {
               Add Content
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editingItem ? 'Edit Content' : 'Create New Content'}</DialogTitle>
+              <DialogDescription>Use the rich text editor for formatting the content description.</DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div>
@@ -110,12 +111,11 @@ export const AdminContentManager = () => {
               </div>
               <div>
                 <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Enter description"
-                  rows={3}
+                <RichTextEditor
+                  content={formData.description}
+                  onChange={(html) => setFormData({ ...formData, description: html })}
+                  placeholder="Enter formatted description..."
+                  minHeight="200px"
                 />
               </div>
               <div>
