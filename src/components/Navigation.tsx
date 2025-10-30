@@ -2,7 +2,10 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
-import { Menu, X, Mic, Users, Radio, Map, Award, Shield, Globe, Heart, User, LogOut, Settings } from "lucide-react";
+import { Menu, X, Mic, Users, Radio, Map, Award, Shield, Globe, Heart, User, LogOut, Settings, Search, HelpCircle } from "lucide-react";
+import GlobalSearch from '@/components/GlobalSearch';
+import KeyboardShortcuts from '@/components/KeyboardShortcuts';
+import NotificationCenter from '@/components/NotificationCenter';
 import { useTranslationContext } from "@/components/TranslationProvider";
 import LanguageToggle from "@/components/LanguageToggle";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -18,6 +21,7 @@ const Navigation = () => {
   const { user, isAnonymous } = useAuth();
   const { toast } = useToast();
   const [isScrolled, setIsScrolled] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const { data: isAdmin } = useAdminCheck();
 
   const handleSignOut = async () => {
@@ -49,6 +53,9 @@ const Navigation = () => {
   ];
 
   return (
+    <>
+      <KeyboardShortcuts onSearchOpen={() => setSearchOpen(true)} />
+      <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
       isScrolled 
         ? 'bg-background/95 backdrop-blur-md border-b border-border shadow-sm' 
@@ -97,6 +104,24 @@ const Navigation = () => {
 
           {/* Right Side Actions */}
           <div className="flex items-center space-x-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSearchOpen(true)}
+              className="gap-2 hidden md:flex"
+            >
+              <Search className="w-4 h-4" />
+              <span className="text-xs text-muted-foreground">⌘K</span>
+            </Button>
+            <NotificationCenter />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/help')}
+              className="gap-2 hidden md:flex"
+            >
+              <HelpCircle className="w-4 h-4" />
+            </Button>
             {user ? (
               <div className="hidden md:flex items-center gap-2">
                 {isAnonymous && (
@@ -230,6 +255,7 @@ const Navigation = () => {
         </div>
       </div>
     </nav>
+    </>
   );
 };
 
