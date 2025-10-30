@@ -36,6 +36,8 @@ export const AdminContentManager = () => {
   const [webLinks, setWebLinks] = useState<string[]>([]);
   const [newWebLink, setNewWebLink] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [mainFileUploading, setMainFileUploading] = useState(false);
+  const [mainFile, setMainFile] = useState<File | null>(null);
 
   const resetForm = () => {
     setFormData({
@@ -50,6 +52,57 @@ export const AdminContentManager = () => {
     setWebLinks([]);
     setNewWebLink('');
     setEditingItem(null);
+    setMainFile(null);
+  };
+
+  const handleMainFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Check file size (max 100MB)
+    if (file.size > 100 * 1024 * 1024) {
+      toast.error('File too large. Maximum size is 100MB');
+      return;
+    }
+
+    setMainFileUploading(true);
+    setMainFile(file);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('content')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('content')
+        .getPublicUrl(fileName);
+
+      // Determine file type
+      let fileType = 'video';
+      if (file.type.startsWith('image/')) fileType = 'image';
+      else if (file.type.startsWith('audio/')) fileType = 'audio';
+
+      setFormData({
+        ...formData,
+        file_url: publicUrl,
+        file_type: fileType,
+      });
+      
+      toast.success('Main file uploaded successfully');
+    } catch (error: any) {
+      toast.error('Failed to upload main file: ' + error.message);
+      setMainFile(null);
+    } finally {
+      setMainFileUploading(false);
+    }
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -198,27 +251,59 @@ export const AdminContentManager = () => {
                   minHeight="200px"
                 />
               </div>
+
               <div>
-                <Label htmlFor="file_url">File URL</Label>
-                <Input
-                  id="file_url"
-                  value={formData.file_url}
-                  onChange={(e) => setFormData({ ...formData, file_url: e.target.value })}
-                  placeholder="https://example.com/file.mp4"
-                />
-              </div>
-              <div>
-                <Label htmlFor="file_type">File Type</Label>
-                <select
-                  id="file_type"
-                  className="w-full rounded-md border border-input bg-background px-3 py-2"
-                  value={formData.file_type}
-                  onChange={(e) => setFormData({ ...formData, file_type: e.target.value })}
-                >
-                  <option value="video">Video</option>
-                  <option value="image">Image</option>
-                  <option value="audio">Audio</option>
-                </select>
+                <Label>Main Content File (Image/Video/Audio) *</Label>
+                <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6">
+                  <input
+                    id="main-file-upload"
+                    type="file"
+                    accept="video/*,image/*,audio/*"
+                    className="hidden"
+                    onChange={handleMainFileUpload}
+                  />
+                  <label htmlFor="main-file-upload" className="cursor-pointer">
+                    {mainFile || formData.file_url ? (
+                      <div className="text-center space-y-2">
+                        <div className="flex items-center justify-center gap-2 text-primary">
+                          <Upload className="h-5 w-5" />
+                          <span className="font-medium">
+                            {mainFile ? mainFile.name : 'File uploaded'}
+                          </span>
+                        </div>
+                        {mainFile && (
+                          <p className="text-sm text-muted-foreground">
+                            {(mainFile.size / 1024 / 1024).toFixed(1)} MB
+                          </p>
+                        )}
+                        <p className="text-xs text-muted-foreground">
+                          Click to change file
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="text-center space-y-2">
+                        <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
+                        <p className="text-muted-foreground">
+                          Click to upload main content file
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Video, Image, or Audio (Max 100MB)
+                        </p>
+                      </div>
+                    )}
+                  </label>
+                  {mainFileUploading && (
+                    <div className="flex items-center justify-center gap-2 mt-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span className="text-sm">Uploading...</span>
+                    </div>
+                  )}
+                </div>
+                {formData.file_url && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Type: {formData.file_type}
+                  </p>
+                )}
               </div>
               <div>
                 <Label htmlFor="thumbnail_url">Thumbnail URL (optional)</Label>
@@ -315,8 +400,19 @@ export const AdminContentManager = () => {
                 )}
               </div>
 
-              <Button onClick={handleSubmit} className="w-full">
-                {editingItem ? 'Update' : 'Create'} Content
+              <Button 
+                onClick={handleSubmit} 
+                className="w-full"
+                disabled={!formData.title || !formData.file_url || mainFileUploading || uploading}
+              >
+                {mainFileUploading || uploading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Uploading...
+                  </>
+                ) : (
+                  <>{editingItem ? 'Update' : 'Create'} Content</>
+                )}
               </Button>
             </div>
           </DialogContent>
