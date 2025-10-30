@@ -154,11 +154,23 @@ export const translations: Record<Language, Record<string, string>> = {
     // Footer
     'footer.tagline': 'Building bridges, sharing stories, creating peace.',
     'footer.features': 'Features',
+    'footer.features.voice': 'Voice Stories',
+    'footer.features.mapping': 'Community Mapping',
+    'footer.features.challenges': 'Peace Challenges',
+    'footer.features.dialogue': 'Safe Dialogue Spaces',
     'footer.support': 'Support',
+    'footer.support.accessibility': '24/7 Accessibility',
+    'footer.support.multilang': 'Multi-language Support',
+    'footer.support.safety': 'Safety Resources',
+    'footer.support.crisis': 'Crisis Support',
     'footer.about': 'About Us',
     'footer.contact': 'Contact',
     'footer.privacy': 'Privacy Policy',
     'footer.terms': 'Terms of Service',
+    
+    // Proposals (additional)
+    'proposals.publicParticipation': 'Public Participation',
+    'proposals.publicParticipationDesc': 'Propose bills, discuss policies, and vote on important issues',
   },
 
   sw: {
@@ -306,11 +318,23 @@ export const translations: Record<Language, Record<string, string>> = {
     // Footer
     'footer.tagline': 'Kujenga madaraja, kushiriki hadithi, kuunda amani.',
     'footer.features': 'Vipengele',
+    'footer.features.voice': 'Hadithi za Sauti',
+    'footer.features.mapping': 'Ramani ya Jamii',
+    'footer.features.challenges': 'Changamoto za Amani',
+    'footer.features.dialogue': 'Maeneo Salama ya Mazungumzo',
     'footer.support': 'Msaada',
+    'footer.support.accessibility': 'Ufikiaji wa Saa 24/7',
+    'footer.support.multilang': 'Msaada wa Lugha Nyingi',
+    'footer.support.safety': 'Rasilimali za Usalama',
+    'footer.support.crisis': 'Msaada wa Dharura',
     'footer.about': 'Kuhusu Sisi',
     'footer.contact': 'Wasiliana',
     'footer.privacy': 'Sera ya Faragha',
     'footer.terms': 'Masharti ya Huduma',
+    
+    // Proposals (additional)
+    'proposals.publicParticipation': 'Ushiriki wa Umma',
+    'proposals.publicParticipationDesc': 'Pendekeza miswada, jadili sera, na piga kura kwenye masuala muhimu',
   },
 
   fr: {
@@ -458,11 +482,23 @@ export const translations: Record<Language, Record<string, string>> = {
     // Footer
     'footer.tagline': 'Construire des ponts, partager des histoires, créer la paix.',
     'footer.features': 'Fonctionnalités',
+    'footer.features.voice': 'Histoires Vocales',
+    'footer.features.mapping': 'Cartographie Communautaire',
+    'footer.features.challenges': 'Défis de Paix',
+    'footer.features.dialogue': 'Espaces de Dialogue Sûrs',
     'footer.support': 'Support',
+    'footer.support.accessibility': 'Accessibilité 24/7',
+    'footer.support.multilang': 'Support Multilingue',
+    'footer.support.safety': 'Ressources de Sécurité',
+    'footer.support.crisis': 'Support de Crise',
     'footer.about': 'À propos',
     'footer.contact': 'Contact',
     'footer.privacy': 'Politique de Confidentialité',
     'footer.terms': 'Conditions d\'Utilisation',
+    
+    // Proposals (additional)
+    'proposals.publicParticipation': 'Participation Publique',
+    'proposals.publicParticipationDesc': 'Proposer des projets de loi, discuter des politiques et voter sur des questions importantes',
   },
 
   ar: {
@@ -610,11 +646,23 @@ export const translations: Record<Language, Record<string, string>> = {
     // Footer
     'footer.tagline': 'بناء الجسور، مشاركة القصص، خلق السلام.',
     'footer.features': 'الميزات',
+    'footer.features.voice': 'القصص الصوتية',
+    'footer.features.mapping': 'رسم خرائط المجتمع',
+    'footer.features.challenges': 'تحديات السلام',
+    'footer.features.dialogue': 'مساحات حوار آمنة',
     'footer.support': 'الدعم',
+    'footer.support.accessibility': 'الوصول على مدار الساعة',
+    'footer.support.multilang': 'دعم متعدد اللغات',
+    'footer.support.safety': 'موارد السلامة',
+    'footer.support.crisis': 'دعم الأزمات',
     'footer.about': 'معلومات عنا',
     'footer.contact': 'اتصل',
     'footer.privacy': 'سياسة الخصوصية',
     'footer.terms': 'شروط الخدمة',
+    
+    // Proposals (additional)
+    'proposals.publicParticipation': 'المشاركة العامة',
+    'proposals.publicParticipationDesc': 'اقتراح مشاريع القوانين ومناقشة السياسات والتصويت على القضايا المهمة',
   },
 
   so: {
@@ -762,11 +810,23 @@ export const translations: Record<Language, Record<string, string>> = {
     // Footer
     'footer.tagline': 'Dhisidda buundooyin, wadaagida sheekooyin, abuurida nabadda.',
     'footer.features': 'Astaamaha',
+    'footer.features.voice': 'Sheekooyinka Codka',
+    'footer.features.mapping': 'Khariidadda Bulshada',
+    'footer.features.challenges': 'Caqabadaha Nabadda',
+    'footer.features.dialogue': 'Meelaha Ammaan ah ee Wada-hadallada',
     'footer.support': 'Taageero',
+    'footer.support.accessibility': 'Helitaanka 24/7',
+    'footer.support.multilang': 'Taageerada Luqadaha Badan',
+    'footer.support.safety': 'Kheyraadka Amniga',
+    'footer.support.crisis': 'Taageerada Dhibaatada',
     'footer.about': 'Nagu saabsan',
     'footer.contact': 'La xiriir',
     'footer.privacy': 'Xeerka Asturnaanta',
     'footer.terms': 'Shuruudaha Adeegga',
+    
+    // Proposals (additional)
+    'proposals.publicParticipation': 'Ka-qaybgalka Dadweynaha',
+    'proposals.publicParticipationDesc': 'Soo jeedinta sharciyada, ka wada-hadlida siyaasadaha iyo codeynta arrimaha muhiimka ah',
   },
 
   am: {
@@ -914,11 +974,23 @@ export const translations: Record<Language, Record<string, string>> = {
     // Footer
     'footer.tagline': 'ድልድዮችን መገንባት፣ ታሪኮችን ማጋራት፣ ሰላምን መፍጠር።',
     'footer.features': 'ባህሪያት',
+    'footer.features.voice': 'የድምጽ ታሪኮች',
+    'footer.features.mapping': 'የማህበረሰብ ካርታ',
+    'footer.features.challenges': 'የሰላም ፈተናዎች',
+    'footer.features.dialogue': 'ደህንነታማ የውይይት ቦታዎች',
     'footer.support': 'ድጋፍ',
+    'footer.support.accessibility': '24/7 ተደራሽነት',
+    'footer.support.multilang': 'ባለብዙ-ቋንቋ ድጋፍ',
+    'footer.support.safety': 'የደህንነት ግብአቶች',
+    'footer.support.crisis': 'የቀውስ ድጋፍ',
     'footer.about': 'ስለ እኛ',
     'footer.contact': 'ያግኙን',
     'footer.privacy': 'የግል ፖሊሲ',
     'footer.terms': 'የአገልግሎት ሁኔታዎች',
+    
+    // Proposals (additional)
+    'proposals.publicParticipation': 'የህዝብ ተሳትፎ',
+    'proposals.publicParticipationDesc': 'ሕጎችን ያቅርቡ፣ ፖሊሲዎችን ይወያዩ እና አስፈላጊ ጉዳዮች ላይ ድምጽ ይስጡ',
   },
 
   es: {
@@ -964,6 +1036,18 @@ export const translations: Record<Language, Record<string, string>> = {
     'auth.login': 'Iniciar Sesión',
     'auth.signup': 'Registrarse',
     'footer.tagline': 'Construyendo puentes, compartiendo historias, creando paz.',
+    'footer.features': 'Características',
+    'footer.features.voice': 'Historias de Voz',
+    'footer.features.mapping': 'Mapeo Comunitario',
+    'footer.features.challenges': 'Desafíos de Paz',
+    'footer.features.dialogue': 'Espacios de Diálogo Seguros',
+    'footer.support': 'Soporte',
+    'footer.support.accessibility': 'Accesibilidad 24/7',
+    'footer.support.multilang': 'Soporte Multilingüe',
+    'footer.support.safety': 'Recursos de Seguridad',
+    'footer.support.crisis': 'Apoyo en Crisis',
+    'proposals.publicParticipation': 'Participación Pública',
+    'proposals.publicParticipationDesc': 'Proponer proyectos de ley, discutir políticas y votar sobre temas importantes',
   },
 
   pt: {
@@ -1005,6 +1089,18 @@ export const translations: Record<Language, Record<string, string>> = {
     'auth.login': 'Entrar',
     'auth.signup': 'Cadastrar',
     'footer.tagline': 'Construindo pontes, compartilhando histórias, criando paz.',
+    'footer.features': 'Recursos',
+    'footer.features.voice': 'Histórias de Voz',
+    'footer.features.mapping': 'Mapeamento Comunitário',
+    'footer.features.challenges': 'Desafios de Paz',
+    'footer.features.dialogue': 'Espaços de Diálogo Seguros',
+    'footer.support': 'Suporte',
+    'footer.support.accessibility': 'Acessibilidade 24/7',
+    'footer.support.multilang': 'Suporte Multilíngue',
+    'footer.support.safety': 'Recursos de Segurança',
+    'footer.support.crisis': 'Apoio em Crise',
+    'proposals.publicParticipation': 'Participação Pública',
+    'proposals.publicParticipationDesc': 'Propor projetos de lei, discutir políticas e votar em questões importantes',
   },
 
   zh: {
@@ -1046,6 +1142,18 @@ export const translations: Record<Language, Record<string, string>> = {
     'auth.login': '登录',
     'auth.signup': '注册',
     'footer.tagline': '搭建桥梁，分享故事，创造和平。',
+    'footer.features': '功能',
+    'footer.features.voice': '语音故事',
+    'footer.features.mapping': '社区地图',
+    'footer.features.challenges': '和平挑战',
+    'footer.features.dialogue': '安全对话空间',
+    'footer.support': '支持',
+    'footer.support.accessibility': '全天候访问',
+    'footer.support.multilang': '多语言支持',
+    'footer.support.safety': '安全资源',
+    'footer.support.crisis': '危机支持',
+    'proposals.publicParticipation': '公众参与',
+    'proposals.publicParticipationDesc': '提出法案、讨论政策并对重要问题投票',
   },
 
   hi: {
@@ -1087,6 +1195,18 @@ export const translations: Record<Language, Record<string, string>> = {
     'auth.login': 'लॉगिन',
     'auth.signup': 'साइन अप',
     'footer.tagline': 'पुल बनाना, कहानियां साझा करना, शांति बनाना।',
+    'footer.features': 'विशेषताएं',
+    'footer.features.voice': 'वॉइस स्टोरीज',
+    'footer.features.mapping': 'सामुदायिक मानचित्रण',
+    'footer.features.challenges': 'शांति चुनौतियां',
+    'footer.features.dialogue': 'सुरक्षित संवाद स्थान',
+    'footer.support': 'समर्थन',
+    'footer.support.accessibility': '24/7 पहुंच',
+    'footer.support.multilang': 'बहुभाषी समर्थन',
+    'footer.support.safety': 'सुरक्षा संसाधन',
+    'footer.support.crisis': 'संकट समर्थन',
+    'proposals.publicParticipation': 'सार्वजनिक भागीदारी',
+    'proposals.publicParticipationDesc': 'विधेयक प्रस्तावित करें, नीतियों पर चर्चा करें और महत्वपूर्ण मुद्दों पर मतदान करें',
   },
 
   de: {
@@ -1128,6 +1248,18 @@ export const translations: Record<Language, Record<string, string>> = {
     'auth.login': 'Anmelden',
     'auth.signup': 'Registrieren',
     'footer.tagline': 'Brücken bauen, Geschichten teilen, Frieden schaffen.',
+    'footer.features': 'Funktionen',
+    'footer.features.voice': 'Sprachgeschichten',
+    'footer.features.mapping': 'Gemeinschaftskartierung',
+    'footer.features.challenges': 'Friedensherausforderungen',
+    'footer.features.dialogue': 'Sichere Dialogräume',
+    'footer.support': 'Unterstützung',
+    'footer.support.accessibility': '24/7 Zugänglichkeit',
+    'footer.support.multilang': 'Mehrsprachiger Support',
+    'footer.support.safety': 'Sicherheitsressourcen',
+    'footer.support.crisis': 'Krisenunterstützung',
+    'proposals.publicParticipation': 'Öffentliche Beteiligung',
+    'proposals.publicParticipationDesc': 'Gesetze vorschlagen, Richtlinien diskutieren und über wichtige Themen abstimmen',
   },
 };
 

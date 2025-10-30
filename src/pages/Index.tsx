@@ -66,8 +66,8 @@ const Index = () => {
               icon={<div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center">
                 <Vote className="w-6 h-6 text-white" />
               </div>}
-              title="Public Participation"
-              description="Propose bills, discuss policies, and vote on important issues"
+              title={t('proposals.publicParticipation')}
+              description={t('proposals.publicParticipationDesc')}
               onClick={() => navigate('/proposals')}
             />
             
