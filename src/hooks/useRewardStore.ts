@@ -66,93 +66,25 @@ export const useUserPurchases = () => {
   });
 };
 
-// Purchase an item
+// Purchase an item using secure server-side function
 export const usePurchaseItem = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (itemId: string) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      const { data, error } = await supabase.rpc('purchase_reward_item', {
+        p_item_id: itemId
+      });
 
-      // Get item details
-      const { data: item, error: itemError } = await supabase
-        .from('reward_store_items')
-        .select('*')
-        .eq('id', itemId)
-        .single();
-
-      if (itemError) throw itemError;
-      if (!item) throw new Error('Item not found');
-
-      // Check if user has enough points
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('peace_points')
-        .eq('user_id', user.id)
-        .single();
-
-      if (profileError) throw profileError;
-      if (profile.peace_points < item.cost_points) {
-        throw new Error('Not enough Peace Points');
+      if (error) throw error;
+      
+      const result = data as { success: boolean; error?: string; purchase_id?: string; message?: string };
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Purchase failed');
       }
 
-      // Create purchase record
-      const { data: purchase, error: purchaseError } = await supabase
-        .from('user_purchases')
-        .insert({
-          user_id: user.id,
-          item_id: itemId,
-          points_spent: item.cost_points
-        })
-        .select()
-        .single();
-
-      if (purchaseError) throw purchaseError;
-
-      // Deduct points
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ peace_points: profile.peace_points - item.cost_points })
-        .eq('user_id', user.id);
-
-      if (updateError) throw updateError;
-
-      // Update item quantity if limited
-      if (item.limited_quantity && item.quantity_remaining !== null) {
-        const { error: quantityError } = await supabase
-          .from('reward_store_items')
-          .update({ quantity_remaining: item.quantity_remaining - 1 })
-          .eq('id', itemId);
-
-        if (quantityError) throw quantityError;
-      }
-
-      // Apply the item to user profile based on type
-      if (item.item_type === 'profile_frame') {
-        await supabase
-          .from('profiles')
-          .update({ profile_frame: item.image_url })
-          .eq('user_id', user.id);
-      } else if (item.item_type === 'accessory') {
-        const { data: currentProfile } = await supabase
-          .from('profiles')
-          .select('avatar_accessories')
-          .eq('user_id', user.id)
-          .single();
-
-        const accessories = Array.isArray(currentProfile?.avatar_accessories) 
-          ? currentProfile.avatar_accessories 
-          : [];
-        const newAccessories = [...accessories, item.metadata];
-        
-        await supabase
-          .from('profiles')
-          .update({ avatar_accessories: newAccessories })
-          .eq('user_id', user.id);
-      }
-
-      return purchase;
+      return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['userPurchases'] });

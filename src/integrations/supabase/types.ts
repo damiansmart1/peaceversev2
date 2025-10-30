@@ -1237,7 +1237,24 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      proposal_vote_summary: {
+        Row: {
+          abstain_count: number | null
+          oppose_count: number | null
+          proposal_id: string | null
+          support_count: number | null
+          total_voters: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_votes_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       award_points: {
@@ -1257,6 +1274,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      purchase_reward_item: { Args: { p_item_id: string }; Returns: Json }
       update_user_streak: { Args: { p_user_id: string }; Returns: undefined }
     }
     Enums: {
