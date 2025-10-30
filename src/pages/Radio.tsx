@@ -2,8 +2,10 @@ import Navigation from '@/components/Navigation';
 import SectionHeader from '@/components/SectionHeader';
 import FunctionalRadio from '@/components/FunctionalRadio';
 import RadioAccessibilityFeatures from '@/components/RadioAccessibilityFeatures';
+import { RadioSchedule } from '@/components/RadioSchedule';
 import { useTranslationContext } from '@/components/TranslationProvider';
-import { Radio as RadioIcon } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Radio as RadioIcon, Waves, Calendar, Settings } from 'lucide-react';
 
 const Radio = () => {
   const { t } = useTranslationContext();
@@ -19,10 +21,34 @@ const Radio = () => {
           icon={<RadioIcon className="w-4 h-4" />}
         />
         
-        <div className="max-w-4xl mx-auto space-y-12">
-          <FunctionalRadio />
-          <RadioAccessibilityFeatures />
-        </div>
+        <Tabs defaultValue="live" className="max-w-6xl mx-auto">
+          <TabsList className="grid w-full grid-cols-3 mb-8">
+            <TabsTrigger value="live" className="gap-2">
+              <Waves className="w-4 h-4" />
+              Live Radio
+            </TabsTrigger>
+            <TabsTrigger value="schedule" className="gap-2">
+              <Calendar className="w-4 h-4" />
+              Schedule
+            </TabsTrigger>
+            <TabsTrigger value="accessibility" className="gap-2">
+              <Settings className="w-4 h-4" />
+              Accessibility
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="live" className="space-y-8">
+            <FunctionalRadio />
+          </TabsContent>
+
+          <TabsContent value="schedule" className="space-y-8">
+            <RadioSchedule />
+          </TabsContent>
+
+          <TabsContent value="accessibility" className="space-y-8">
+            <RadioAccessibilityFeatures />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

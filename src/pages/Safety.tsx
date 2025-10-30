@@ -4,8 +4,10 @@ import ContentModerationSection from '@/components/ContentModerationSection';
 import SafetyProtectionSection from '@/components/SafetyProtectionSection';
 import CommunityTrustSection from '@/components/CommunityTrustSection';
 import OfflineAccessSection from '@/components/OfflineAccessSection';
+import { SafetyResourceLibrary } from '@/components/SafetyResourceLibrary';
 import { useTranslationContext } from '@/components/TranslationProvider';
-import { Shield } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Shield, AlertTriangle, Users, Wifi, BookOpen } from 'lucide-react';
 
 const Safety = () => {
   const { t } = useTranslationContext();
@@ -21,12 +23,50 @@ const Safety = () => {
           icon={<Shield className="w-4 h-4" />}
         />
         
-        <div className="max-w-6xl mx-auto space-y-12">
-          <ContentModerationSection />
-          <SafetyProtectionSection />
-          <CommunityTrustSection />
-          <OfflineAccessSection />
-        </div>
+        <Tabs defaultValue="moderation" className="max-w-6xl mx-auto">
+          <TabsList className="grid w-full grid-cols-5 mb-8">
+            <TabsTrigger value="moderation" className="gap-2">
+              <Shield className="w-4 h-4" />
+              Moderation
+            </TabsTrigger>
+            <TabsTrigger value="protection" className="gap-2">
+              <AlertTriangle className="w-4 h-4" />
+              Protection
+            </TabsTrigger>
+            <TabsTrigger value="trust" className="gap-2">
+              <Users className="w-4 h-4" />
+              Trust
+            </TabsTrigger>
+            <TabsTrigger value="offline" className="gap-2">
+              <Wifi className="w-4 h-4" />
+              Offline
+            </TabsTrigger>
+            <TabsTrigger value="resources" className="gap-2">
+              <BookOpen className="w-4 h-4" />
+              Resources
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="moderation">
+            <ContentModerationSection />
+          </TabsContent>
+
+          <TabsContent value="protection">
+            <SafetyProtectionSection />
+          </TabsContent>
+
+          <TabsContent value="trust">
+            <CommunityTrustSection />
+          </TabsContent>
+
+          <TabsContent value="offline">
+            <OfflineAccessSection />
+          </TabsContent>
+
+          <TabsContent value="resources">
+            <SafetyResourceLibrary />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

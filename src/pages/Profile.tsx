@@ -4,8 +4,9 @@ import LeaderboardSection from '@/components/LeaderboardSection';
 import RewardStoreSection from '@/components/RewardStoreSection';
 import WeeklyChallengesSection from '@/components/WeeklyChallengesSection';
 import GamificationDashboard from '@/components/GamificationDashboard';
+import { ProfileActivityTimeline } from '@/components/ProfileActivityTimeline';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { User, Trophy, ShoppingBag, Target } from 'lucide-react';
+import { User, Trophy, ShoppingBag, Target, Activity, Settings } from 'lucide-react';
 
 const Profile = () => {
   return (
@@ -25,7 +26,7 @@ const Profile = () => {
           <UserProgressCard />
 
           <Tabs defaultValue="achievements" className="w-full">
-            <TabsList className="grid w-full grid-cols-4 mb-8">
+            <TabsList className="grid w-full grid-cols-6 mb-8">
               <TabsTrigger value="achievements">
                 <Trophy className="w-4 h-4 mr-2" />
                 Achievements
@@ -34,6 +35,10 @@ const Profile = () => {
                 <Target className="w-4 h-4 mr-2" />
                 Challenges
               </TabsTrigger>
+              <TabsTrigger value="activity">
+                <Activity className="w-4 h-4 mr-2" />
+                Activity
+              </TabsTrigger>
               <TabsTrigger value="leaderboard">
                 <User className="w-4 h-4 mr-2" />
                 Rankings
@@ -41,6 +46,10 @@ const Profile = () => {
               <TabsTrigger value="store">
                 <ShoppingBag className="w-4 h-4 mr-2" />
                 Store
+              </TabsTrigger>
+              <TabsTrigger value="settings">
+                <Settings className="w-4 h-4 mr-2" />
+                Settings
               </TabsTrigger>
             </TabsList>
 
@@ -52,12 +61,20 @@ const Profile = () => {
               <WeeklyChallengesSection />
             </TabsContent>
 
+            <TabsContent value="activity">
+              <ProfileActivityTimeline />
+            </TabsContent>
+
             <TabsContent value="leaderboard">
               <LeaderboardSection />
             </TabsContent>
 
             <TabsContent value="store">
               <RewardStoreSection />
+            </TabsContent>
+
+            <TabsContent value="settings" className="text-center py-12">
+              <p className="text-muted-foreground">Profile settings coming soon</p>
             </TabsContent>
           </Tabs>
         </div>
