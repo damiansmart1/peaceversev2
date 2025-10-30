@@ -233,6 +233,82 @@ All colors MUST be HSL.
     }
   }
 
+  /* Dyslexia-Friendly Font */
+  @import url('https://fonts.googleapis.com/css2?family=OpenDyslexic&display=swap');
+
+  .dyslexic-font {
+    font-family: 'OpenDyslexic', sans-serif !important;
+  }
+
+  .dyslexic-font * {
+    font-family: 'OpenDyslexic', sans-serif !important;
+  }
+
+  /* Enhanced Focus Indicators for Accessibility */
+  .enhanced-focus *:focus-visible {
+    @apply outline-none ring-4 ring-primary ring-offset-4 ring-offset-background;
+    outline: 3px solid hsl(var(--primary));
+    outline-offset: 3px;
+  }
+
+  /* High Contrast Mode */
+  .high-contrast {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+    --primary: 210 100% 40%;
+    --primary-foreground: 0 0% 100%;
+    --border: 0 0% 20%;
+  }
+
+  .dark.high-contrast {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 100%;
+    --primary: 210 100% 70%;
+    --primary-foreground: 0 0% 0%;
+    --border: 0 0% 80%;
+  }
+
+  /* Simplified Mode - Reduce visual complexity */
+  .simplified-mode {
+    --radius: 0.25rem;
+  }
+
+  .simplified-mode * {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .simplified-mode [class*="gradient"] {
+    background: hsl(var(--background)) !important;
+  }
+
+  /* Reading Mode - Clean reading experience */
+  .reading-mode {
+    font-size: 118% !important;
+    line-height: 1.8 !important;
+  }
+
+  .reading-mode * {
+    max-width: 70ch !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  /* Skip to main content link (visible on focus) */
+  .sr-only:not(:focus):not(:active) {
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+  }
+
   /* Rich Content Prose Styling */
   .prose-content {
     @apply text-foreground leading-relaxed;
