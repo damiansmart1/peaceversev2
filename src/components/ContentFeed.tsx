@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Heart, MessageCircle, Share, Play, Pause, Volume2 } from "lucide-react";
 import ShareDialog from "@/components/ShareDialog";
+import SafeHTML from "@/components/SafeHTML";
 import { formatDistanceToNow } from "date-fns";
 
 interface ContentItem {
@@ -265,7 +266,10 @@ const ContentFeed = () => {
                 <div>
                   <h3 className="font-semibold text-lg">{item.title}</h3>
                   {item.description && (
-                    <p className="text-muted-foreground mt-1">{item.description}</p>
+                    <SafeHTML 
+                      html={item.description}
+                      className="text-muted-foreground mt-1 prose-content"
+                    />
                   )}
                   <p className="text-xs text-muted-foreground mt-2">
                     {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}
