@@ -14,19 +14,19 @@ const Proposals = () => {
       <Navigation />
       <div className="container mx-auto px-4 py-24">
         <div className="max-w-6xl mx-auto space-y-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-4xl font-bold text-foreground mb-2">
-                Public Participation
-              </h1>
-              <p className="text-muted-foreground text-lg">
-                Propose bills, discuss policies, and make your voice heard
-              </p>
-            </div>
-            <CreateProposalDialog />
+          <div>
+            <h1 className="text-4xl font-bold text-foreground mb-2">
+              Public Participation
+            </h1>
+            <p className="text-muted-foreground text-lg">
+              Propose bills, discuss policies, and make your voice heard
+            </p>
           </div>
 
-          <ProposalFilters />
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <ProposalFilters />
+            <CreateProposalDialog />
+          </div>
 
           <Tabs defaultValue="all" className="w-full">
             <TabsList className="grid w-full grid-cols-4 mb-6">
