@@ -27,6 +27,7 @@ export const AdminContentManager = () => {
     file_url: '',
     file_type: 'video',
     thumbnail_url: '',
+    category: 'general',
   });
 
   const resetForm = () => {
@@ -36,6 +37,7 @@ export const AdminContentManager = () => {
       file_url: '',
       file_type: 'video',
       thumbnail_url: '',
+      category: 'general',
     });
     setEditingItem(null);
   };
@@ -61,6 +63,7 @@ export const AdminContentManager = () => {
       file_url: item.file_url,
       file_type: item.file_type,
       thumbnail_url: item.thumbnail_url || '',
+      category: item.category || 'general',
     });
     setDialogOpen(true);
   };
@@ -148,6 +151,21 @@ export const AdminContentManager = () => {
                   onChange={(e) => setFormData({ ...formData, thumbnail_url: e.target.value })}
                   placeholder="https://example.com/thumbnail.jpg"
                 />
+              </div>
+              <div>
+                <Label htmlFor="category">Content Category</Label>
+                <select
+                  id="category"
+                  className="w-full rounded-md border border-input bg-background px-3 py-2"
+                  value={formData.category}
+                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                >
+                  <option value="general">General Content</option>
+                  <option value="peace_stories">Peace Stories</option>
+                  <option value="voice_stories">Voice Stories</option>
+                  <option value="community">Community</option>
+                  <option value="radio">Radio Content</option>
+                </select>
               </div>
               <Button onClick={handleSubmit} className="w-full">
                 {editingItem ? 'Update' : 'Create'} Content

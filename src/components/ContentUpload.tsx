@@ -14,6 +14,7 @@ const ContentUpload = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [file, setFile] = useState<File | null>(null);
+  const [category, setCategory] = useState<string>('general');
   const { toast } = useToast();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -96,6 +97,7 @@ const ContentUpload = () => {
           description: description.trim() || null,
           file_url: publicUrl,
           file_type: getFileType(file),
+          category: category,
         });
 
       if (dbError) throw dbError;
@@ -109,6 +111,7 @@ const ContentUpload = () => {
       setTitle('');
       setDescription('');
       setFile(null);
+      setCategory('general');
       // Reset file input
       const fileInput = document.getElementById('file-upload') as HTMLInputElement;
       if (fileInput) fileInput.value = '';
@@ -170,6 +173,27 @@ const ContentUpload = () => {
                 placeholder="Tell us about your content..."
                 minHeight="200px"
               />
+            </div>
+
+            <div>
+              <label htmlFor="category" className="block text-sm font-medium mb-2">
+                Content Category *
+              </label>
+              <select
+                id="category"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <option value="general">General Content</option>
+                <option value="peace_stories">Peace Stories</option>
+                <option value="voice_stories">Voice Stories</option>
+                <option value="community">Community</option>
+                <option value="radio">Radio Content</option>
+              </select>
+              <p className="text-xs text-muted-foreground mt-1">
+                Select where this content will appear on the platform
+              </p>
             </div>
 
             <div>

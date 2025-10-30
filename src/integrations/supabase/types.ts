@@ -134,6 +134,7 @@ export type Database = {
       }
       content: {
         Row: {
+          category: string
           created_at: string
           description: string | null
           file_type: string
@@ -148,6 +149,7 @@ export type Database = {
           view_count: number | null
         }
         Insert: {
+          category?: string
           created_at?: string
           description?: string | null
           file_type: string
@@ -162,6 +164,7 @@ export type Database = {
           view_count?: number | null
         }
         Update: {
+          category?: string
           created_at?: string
           description?: string | null
           file_type?: string
