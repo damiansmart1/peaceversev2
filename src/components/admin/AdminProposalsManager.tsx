@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useAdminProposals, useCreateProposal, useUpdateProposal, useDeleteProposal, useArchiveProposal } from '@/hooks/useAdminProposals';
+import { useApproveProposal, useRejectProposal } from '@/hooks/useApproveContent';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Label } from '@/components/ui/label';
-import { Plus, Edit, Trash, Archive, ArchiveRestore, Loader2 } from 'lucide-react';
+import { Plus, Edit, Trash, Archive, ArchiveRestore, Loader2, CheckCircle2, XCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import RichTextEditor from '@/components/RichTextEditor';
@@ -16,6 +17,12 @@ export const AdminProposalsManager = () => {
   const updateMutation = useUpdateProposal();
   const deleteMutation = useDeleteProposal();
   const archiveMutation = useArchiveProposal();
+  const approveMutation = useApproveProposal();
+  const rejectMutation = useRejectProposal();
+
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+  const [reviewingProposal, setReviewingProposal] = useState<string | null>(null);
+  const [rejectionReason, setRejectionReason] = useState("");
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
@@ -181,8 +188,17 @@ export const AdminProposalsManager = () => {
               <TableRow key={item.id}>
                 <TableCell className="font-medium">{item.title}</TableCell>
                 <TableCell>
-                  <Badge variant={item.status === 'published' ? 'default' : 'secondary'}>
-                    {item.status}
+                  <Badge 
+                    variant={
+                      item.status === 'published' ? 'default' : 
+                      item.status === 'rejected' ? 'destructive' : 
+                      'secondary'
+                    }
+                  >
+                    {item.status === 'pending_approval' && 'Pending Review'}
+                    {item.status === 'published' && 'Published'}
+                    {item.status === 'rejected' && 'Rejected'}
+                    {item.status === 'draft' && 'Draft'}
                   </Badge>
                 </TableCell>
                 <TableCell>{item.signature_count}</TableCell>
@@ -196,6 +212,24 @@ export const AdminProposalsManager = () => {
                 </TableCell>
                 <TableCell>
                   <div className="flex gap-2">
+                    {item.status === 'pending_approval' && (
+                      <>
+                        <Button variant="ghost" size="sm" onClick={() => approveMutation.mutate(item.id)} title="Approve & Publish">
+                          <CheckCircle2 className="h-4 w-4 text-green-600" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setReviewingProposal(item.id);
+                            setReviewDialogOpen(true);
+                          }}
+                          title="Reject"
+                        >
+                          <XCircle className="h-4 w-4 text-red-600" />
+                        </Button>
+                      </>
+                    )}
                     <Button variant="ghost" size="sm" onClick={() => handleEdit(item)}>
                       <Edit className="h-4 w-4" />
                     </Button>
@@ -235,6 +269,50 @@ export const AdminProposalsManager = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={reviewDialogOpen} onOpenChange={setReviewDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reject Proposal</DialogTitle>
+            <DialogDescription>
+              Please provide a reason for rejecting this proposal. The author will be notified.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="reason">Rejection Reason</Label>
+              <Input
+                id="reason"
+                placeholder="Explain why this proposal cannot be approved..."
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setReviewDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (reviewingProposal && rejectionReason.trim()) {
+                  rejectMutation.mutate({ 
+                    id: reviewingProposal, 
+                    reason: rejectionReason 
+                  });
+                  setReviewDialogOpen(false);
+                  setRejectionReason("");
+                  setReviewingProposal(null);
+                }
+              }}
+              disabled={!rejectionReason.trim()}
+            >
+              Reject Proposal
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useAdminContent, useCreateContent, useUpdateContent, useDeleteContent, useArchiveContent } from '@/hooks/useAdminContent';
+import { useApproveContent, useRejectContent } from '@/hooks/useApproveContent';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Label } from '@/components/ui/label';
-import { Plus, Edit, Trash, Archive, ArchiveRestore, Loader2, Upload, X, Link as LinkIcon } from 'lucide-react';
+import { Plus, Edit, Trash, Archive, ArchiveRestore, Loader2, Upload, X, Link as LinkIcon, CheckCircle2, XCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import RichTextEditor from '@/components/RichTextEditor';
@@ -18,6 +19,12 @@ export const AdminContentManager = () => {
   const updateMutation = useUpdateContent();
   const deleteMutation = useDeleteContent();
   const archiveMutation = useArchiveContent();
+  const approveMutation = useApproveContent();
+  const rejectMutation = useRejectContent();
+
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+  const [reviewingContent, setReviewingContent] = useState<string | null>(null);
+  const [rejectionReason, setRejectionReason] = useState("");
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
@@ -444,9 +451,10 @@ export const AdminContentManager = () => {
             <TableRow>
               <TableHead>Title</TableHead>
               <TableHead>Type</TableHead>
+              <TableHead>Status</TableHead>
               <TableHead>Views</TableHead>
               <TableHead>Likes</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead>Archived</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -457,17 +465,49 @@ export const AdminContentManager = () => {
                 <TableCell>
                   <Badge variant="outline">{item.file_type}</Badge>
                 </TableCell>
+                <TableCell>
+                  <Badge 
+                    variant={
+                      item.approval_status === 'approved' ? 'default' : 
+                      item.approval_status === 'rejected' ? 'destructive' : 
+                      'secondary'
+                    }
+                  >
+                    {item.approval_status === 'pending_approval' && 'Pending'}
+                    {item.approval_status === 'approved' && 'Approved'}
+                    {item.approval_status === 'rejected' && 'Rejected'}
+                    {item.approval_status === 'draft' && 'Draft'}
+                  </Badge>
+                </TableCell>
                 <TableCell>{item.view_count}</TableCell>
                 <TableCell>{item.like_count}</TableCell>
                 <TableCell>
                   {item.is_archived ? (
                     <Badge variant="secondary">Archived</Badge>
                   ) : (
-                    <Badge variant="default">Published</Badge>
+                    <Badge variant="default">Active</Badge>
                   )}
                 </TableCell>
                 <TableCell>
                   <div className="flex gap-2">
+                    {item.approval_status === 'pending_approval' && (
+                      <>
+                        <Button variant="ghost" size="sm" onClick={() => approveMutation.mutate(item.id)} title="Approve">
+                          <CheckCircle2 className="h-4 w-4 text-green-600" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setReviewingContent(item.id);
+                            setReviewDialogOpen(true);
+                          }}
+                          title="Reject"
+                        >
+                          <XCircle className="h-4 w-4 text-red-600" />
+                        </Button>
+                      </>
+                    )}
                     <Button variant="ghost" size="sm" onClick={() => handleEdit(item)}>
                       <Edit className="h-4 w-4" />
                     </Button>
@@ -507,6 +547,50 @@ export const AdminContentManager = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={reviewDialogOpen} onOpenChange={setReviewDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reject Content</DialogTitle>
+            <DialogDescription>
+              Please provide a reason for rejecting this content. The user will be notified.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="reason">Rejection Reason</Label>
+              <Input
+                id="reason"
+                placeholder="Explain why this content cannot be approved..."
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setReviewDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (reviewingContent && rejectionReason.trim()) {
+                  rejectMutation.mutate({ 
+                    id: reviewingContent, 
+                    reason: rejectionReason 
+                  });
+                  setReviewDialogOpen(false);
+                  setRejectionReason("");
+                  setReviewingContent(null);
+                }
+              }}
+              disabled={!rejectionReason.trim()}
+            >
+              Reject Content
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

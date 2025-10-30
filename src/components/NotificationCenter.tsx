@@ -1,76 +1,56 @@
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { Bell, Check, X, Award, MessageCircle, Users, Vote } from 'lucide-react';
-
-interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  type: 'achievement' | 'comment' | 'proposal' | 'community';
-  time: string;
-  read: boolean;
-}
-
-const mockNotifications: Notification[] = [
-  {
-    id: '1',
-    title: 'New Achievement!',
-    message: 'You earned the "First Voice" badge',
-    type: 'achievement',
-    time: '5m ago',
-    read: false,
-  },
-  {
-    id: '2',
-    title: 'New Comment',
-    message: 'Someone commented on your proposal',
-    type: 'comment',
-    time: '1h ago',
-    read: false,
-  },
-  {
-    id: '3',
-    title: 'Proposal Update',
-    message: 'Your proposal reached 100 votes!',
-    type: 'proposal',
-    time: '2h ago',
-    read: true,
-  },
-];
+import { Bell, Check, CheckCircle2, Info, FileCheck, FileX } from 'lucide-react';
+import { useNotifications, useMarkNotificationRead, useMarkAllNotificationsRead } from '@/hooks/useNotifications';
+import { formatDistanceToNow } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 
 const iconMap = {
-  achievement: Award,
-  comment: MessageCircle,
-  proposal: Vote,
-  community: Users,
+  content_approved: FileCheck,
+  content_rejected: FileX,
+  proposal_approved: CheckCircle2,
+  proposal_rejected: FileX,
+  system: Info,
 };
 
 const colorMap = {
-  achievement: 'text-success',
-  comment: 'text-primary',
-  proposal: 'text-purple-500',
-  community: 'text-accent',
+  content_approved: 'text-green-500',
+  content_rejected: 'text-red-500',
+  proposal_approved: 'text-green-500',
+  proposal_rejected: 'text-red-500',
+  system: 'text-blue-500',
 };
 
 export default function NotificationCenter() {
-  const [notifications, setNotifications] = useState(mockNotifications);
+  const navigate = useNavigate();
+  const { data: notifications = [], isLoading } = useNotifications();
+  const markReadMutation = useMarkNotificationRead();
+  const markAllReadMutation = useMarkAllNotificationsRead();
+
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const markAsRead = (id: string) => {
-    setNotifications(prev =>
-      prev.map(n => (n.id === id ? { ...n, read: true } : n))
-    );
+    markReadMutation.mutate(id);
   };
 
   const markAllAsRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    markAllReadMutation.mutate();
   };
 
-  const removeNotification = (id: string) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
+  const handleNotificationClick = (notification: typeof notifications[0]) => {
+    if (!notification.read) {
+      markAsRead(notification.id);
+    }
+    
+    if (notification.related_id) {
+      if (notification.type.includes('proposal')) {
+        navigate(`/proposals`);
+      } else if (notification.type.includes('content')) {
+        navigate(`/voice`);
+      }
+    }
   };
 
   return (
@@ -102,19 +82,25 @@ export default function NotificationCenter() {
         </SheetHeader>
         
         <ScrollArea className="h-[calc(100vh-8rem)] mt-4">
-          {notifications.length > 0 ? (
+          {isLoading ? (
+            <div className="p-8 text-center text-muted-foreground">
+              Loading notifications...
+            </div>
+          ) : notifications.length > 0 ? (
             <div className="space-y-2">
               {notifications.map((notification) => {
-                const Icon = iconMap[notification.type];
+                const Icon = iconMap[notification.type as keyof typeof iconMap] || Info;
+                const iconColor = colorMap[notification.type as keyof typeof colorMap] || 'text-gray-500';
                 return (
                   <div
                     key={notification.id}
-                    className={`p-4 rounded-lg border transition-colors ${
+                    className={`p-4 rounded-lg border transition-colors cursor-pointer ${
                       notification.read ? 'bg-background' : 'bg-primary/5 border-primary/20'
                     }`}
+                    onClick={() => handleNotificationClick(notification)}
                   >
                     <div className="flex gap-3">
-                      <div className={`w-10 h-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0 ${colorMap[notification.type]}`}>
+                      <div className={`w-10 h-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0 ${iconColor}`}>
                         <Icon className="w-5 h-5" />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -125,29 +111,22 @@ export default function NotificationCenter() {
                               {notification.message}
                             </p>
                             <p className="text-xs text-muted-foreground mt-2">
-                              {notification.time}
+                              {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
                             </p>
                           </div>
-                          <div className="flex gap-1">
-                            {!notification.read && (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-7 w-7"
-                                onClick={() => markAsRead(notification.id)}
-                              >
-                                <Check className="w-3 h-3" />
-                              </Button>
-                            )}
+                          {!notification.read && (
                             <Button
                               variant="ghost"
                               size="icon"
                               className="h-7 w-7"
-                              onClick={() => removeNotification(notification.id)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                markAsRead(notification.id);
+                              }}
                             >
-                              <X className="w-3 h-3" />
+                              <Check className="w-3 h-3" />
                             </Button>
-                          </div>
+                          )}
                         </div>
                       </div>
                     </div>

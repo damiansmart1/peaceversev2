@@ -11,6 +11,9 @@ export interface AdminProposal {
   status: string;
   author_id: string;
   is_archived: boolean;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  rejection_reason: string | null;
   signature_count: number;
   view_count: number;
   created_at: string;

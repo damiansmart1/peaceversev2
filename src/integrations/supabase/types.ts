@@ -134,6 +134,7 @@ export type Database = {
       }
       content: {
         Row: {
+          approval_status: string | null
           attachments: Json | null
           category: string
           created_at: string
@@ -143,6 +144,9 @@ export type Database = {
           id: string
           is_archived: boolean | null
           like_count: number | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           thumbnail_url: string | null
           title: string
           updated_at: string
@@ -150,6 +154,7 @@ export type Database = {
           view_count: number | null
         }
         Insert: {
+          approval_status?: string | null
           attachments?: Json | null
           category?: string
           created_at?: string
@@ -159,6 +164,9 @@ export type Database = {
           id?: string
           is_archived?: boolean | null
           like_count?: number | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           thumbnail_url?: string | null
           title: string
           updated_at?: string
@@ -166,6 +174,7 @@ export type Database = {
           view_count?: number | null
         }
         Update: {
+          approval_status?: string | null
           attachments?: Json | null
           category?: string
           created_at?: string
@@ -175,6 +184,9 @@ export type Database = {
           id?: string
           is_archived?: boolean | null
           like_count?: number | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           thumbnail_url?: string | null
           title?: string
           updated_at?: string
@@ -439,6 +451,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      notifications: {
+        Row: {
+          created_at: string | null
+          id: string
+          message: string
+          read: boolean | null
+          related_id: string | null
+          title: string
+          type: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          message: string
+          read?: boolean | null
+          related_id?: string | null
+          title: string
+          type: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          message?: string
+          read?: boolean | null
+          related_id?: string | null
+          title?: string
+          type?: string
+          user_id?: string | null
+        }
+        Relationships: []
       }
       peace_actions: {
         Row: {
@@ -863,6 +908,9 @@ export type Database = {
           like_count: number | null
           metadata: Json | null
           parliamentary_stage: string | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           share_count: number | null
           signature_count: number | null
           signature_goal: number | null
@@ -893,6 +941,9 @@ export type Database = {
           like_count?: number | null
           metadata?: Json | null
           parliamentary_stage?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           share_count?: number | null
           signature_count?: number | null
           signature_goal?: number | null
@@ -923,6 +974,9 @@ export type Database = {
           like_count?: number | null
           metadata?: Json | null
           parliamentary_stage?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           share_count?: number | null
           signature_count?: number | null
           signature_goal?: number | null
@@ -1281,7 +1335,13 @@ export type Database = {
       app_role: "admin" | "moderator" | "user"
       interaction_type: "like" | "support" | "oppose" | "idea" | "bookmark"
       moderation_status: "pending" | "approved" | "rejected" | "flagged"
-      proposal_status: "draft" | "published" | "closed" | "archived"
+      proposal_status:
+        | "draft"
+        | "published"
+        | "closed"
+        | "archived"
+        | "pending_approval"
+        | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1412,7 +1472,14 @@ export const Constants = {
       app_role: ["admin", "moderator", "user"],
       interaction_type: ["like", "support", "oppose", "idea", "bookmark"],
       moderation_status: ["pending", "approved", "rejected", "flagged"],
-      proposal_status: ["draft", "published", "closed", "archived"],
+      proposal_status: [
+        "draft",
+        "published",
+        "closed",
+        "archived",
+        "pending_approval",
+        "rejected",
+      ],
     },
   },
 } as const

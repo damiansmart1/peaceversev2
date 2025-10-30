@@ -11,6 +11,10 @@ export interface AdminContent {
   thumbnail_url: string | null;
   user_id: string;
   is_archived: boolean;
+  approval_status: 'pending_approval' | 'approved' | 'rejected' | 'draft';
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  rejection_reason: string | null;
   view_count: number;
   like_count: number;
   created_at: string;
