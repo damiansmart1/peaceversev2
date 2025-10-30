@@ -2,28 +2,21 @@ import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useSponsors } from '@/hooks/useAdminSponsors';
 
 interface Sponsor {
   id: string;
   name: string;
-  logo: string;
-  website?: string;
+  logo_url: string;
+  website_url?: string;
 }
 
-// Demo sponsors - in production, this would come from the database
-const demoSponsors: Sponsor[] = [
-  { id: '1', name: 'Partner 1', logo: 'https://via.placeholder.com/200x100/4F46E5/FFFFFF?text=Partner+1' },
-  { id: '2', name: 'Partner 2', logo: 'https://via.placeholder.com/200x100/7C3AED/FFFFFF?text=Partner+2' },
-  { id: '3', name: 'Partner 3', logo: 'https://via.placeholder.com/200x100/EC4899/FFFFFF?text=Partner+3' },
-  { id: '4', name: 'Partner 4', logo: 'https://via.placeholder.com/200x100/10B981/FFFFFF?text=Partner+4' },
-  { id: '5', name: 'Partner 5', logo: 'https://via.placeholder.com/200x100/F59E0B/FFFFFF?text=Partner+5' },
-  { id: '6', name: 'Partner 6', logo: 'https://via.placeholder.com/200x100/EF4444/FFFFFF?text=Partner+6' },
-];
-
 const SponsorsCarousel = () => {
+  const { data: dbSponsors, isLoading } = useSponsors();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [sponsors] = useState<Sponsor[]>(demoSponsors);
   const [isPaused, setIsPaused] = useState(false);
+
+  const sponsors = dbSponsors || [];
 
   const itemsPerView = 4;
   const maxIndex = Math.max(0, sponsors.length - itemsPerView);
@@ -46,7 +39,7 @@ const SponsorsCarousel = () => {
     setCurrentIndex((prev) => Math.max(prev - 1, 0));
   };
 
-  if (sponsors.length === 0) return null;
+  if (isLoading || sponsors.length === 0) return null;
 
   return (
     <div className="w-full py-12 bg-muted/30">
@@ -101,10 +94,10 @@ const SponsorsCarousel = () => {
                   key={sponsor.id}
                   className="flex-shrink-0 p-6 flex items-center justify-center hover:shadow-lg transition-shadow cursor-pointer bg-background"
                   style={{ width: `calc(${100 / itemsPerView}% - ${(24 * (itemsPerView - 1)) / itemsPerView}px)` }}
-                  onClick={() => sponsor.website && window.open(sponsor.website, '_blank')}
+                  onClick={() => sponsor.website_url && window.open(sponsor.website_url, '_blank')}
                 >
                   <img
-                    src={sponsor.logo}
+                    src={sponsor.logo_url}
                     alt={sponsor.name}
                     className="max-w-full max-h-20 object-contain grayscale hover:grayscale-0 transition-all"
                   />

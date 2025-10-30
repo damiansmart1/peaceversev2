@@ -12,6 +12,7 @@ import { AdminChallengesManager } from '@/components/admin/AdminChallengesManage
 import { AdminModerationManager } from '@/components/admin/AdminModerationManager';
 import { AdminGamificationManager } from '@/components/admin/AdminGamificationManager';
 import { AdminSettingsManager } from '@/components/admin/AdminSettingsManager';
+import { AdminSponsorsManager } from '@/components/admin/AdminSponsorsManager';
 import { Loader2 } from 'lucide-react';
 
 const Admin = () => {
@@ -41,7 +42,7 @@ const Admin = () => {
       <h1 className="text-4xl font-bold mb-8">Admin Portal</h1>
       
       <Tabs defaultValue="dashboard" className="w-full">
-        <TabsList className="grid w-full grid-cols-5 lg:grid-cols-9 mb-8">
+        <TabsList className="grid w-full grid-cols-5 lg:grid-cols-10 mb-8">
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="content">Content</TabsTrigger>
@@ -50,6 +51,7 @@ const Admin = () => {
           <TabsTrigger value="challenges">Challenges</TabsTrigger>
           <TabsTrigger value="moderation">Moderation</TabsTrigger>
           <TabsTrigger value="gamification">Gamification</TabsTrigger>
+          <TabsTrigger value="sponsors">Sponsors</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
 
@@ -98,6 +100,12 @@ const Admin = () => {
         <TabsContent value="gamification">
           <Card className="p-6">
             <AdminGamificationManager />
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="sponsors">
+          <Card className="p-6">
+            <AdminSponsorsManager />
           </Card>
         </TabsContent>
 

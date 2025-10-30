@@ -5,10 +5,12 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Label } from '@/components/ui/label';
-import { Plus, Edit, Trash, Archive, ArchiveRestore, Loader2 } from 'lucide-react';
+import { Plus, Edit, Trash, Archive, ArchiveRestore, Loader2, Upload, X, Link as LinkIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import RichTextEditor from '@/components/RichTextEditor';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 export const AdminContentManager = () => {
   const { data: content, isLoading } = useAdminContent();
@@ -28,7 +30,12 @@ export const AdminContentManager = () => {
     file_type: 'video',
     thumbnail_url: '',
     category: 'general',
+    attachments: [] as any[],
   });
+  
+  const [webLinks, setWebLinks] = useState<string[]>([]);
+  const [newWebLink, setNewWebLink] = useState('');
+  const [uploading, setUploading] = useState(false);
 
   const resetForm = () => {
     setFormData({
@@ -38,8 +45,77 @@ export const AdminContentManager = () => {
       file_type: 'video',
       thumbnail_url: '',
       category: 'general',
+      attachments: [],
     });
+    setWebLinks([]);
+    setNewWebLink('');
     setEditingItem(null);
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    setUploading(true);
+    const uploadedFiles: any[] = [];
+
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+        const filePath = `attachments/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('content')
+          .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('content')
+          .getPublicUrl(filePath);
+
+        uploadedFiles.push({
+          type: 'file',
+          url: publicUrl,
+          name: file.name,
+          file_type: file.type,
+        });
+      }
+
+      setFormData({
+        ...formData,
+        attachments: [...formData.attachments, ...uploadedFiles],
+      });
+      toast.success(`${uploadedFiles.length} file(s) uploaded successfully`);
+    } catch (error: any) {
+      toast.error('Failed to upload files: ' + error.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const addWebLink = () => {
+    if (newWebLink.trim()) {
+      const newAttachment = {
+        type: 'link',
+        url: newWebLink.trim(),
+        name: newWebLink.trim(),
+      };
+      setFormData({
+        ...formData,
+        attachments: [...formData.attachments, newAttachment],
+      });
+      setNewWebLink('');
+    }
+  };
+
+  const removeAttachment = (index: number) => {
+    setFormData({
+      ...formData,
+      attachments: formData.attachments.filter((_, i) => i !== index),
+    });
   };
 
   const handleSubmit = async () => {
@@ -64,6 +140,7 @@ export const AdminContentManager = () => {
       file_type: item.file_type,
       thumbnail_url: item.thumbnail_url || '',
       category: item.category || 'general',
+      attachments: item.attachments || [],
     });
     setDialogOpen(true);
   };
@@ -167,6 +244,77 @@ export const AdminContentManager = () => {
                   <option value="radio">Radio Content</option>
                 </select>
               </div>
+
+              <div className="space-y-4">
+                <Label>Additional Attachments (Images/Videos/PDFs)</Label>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => document.getElementById('attachment-upload')?.click()}
+                    disabled={uploading}
+                  >
+                    {uploading ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <Upload className="h-4 w-4 mr-2" />
+                    )}
+                    Upload Files
+                  </Button>
+                  <input
+                    id="attachment-upload"
+                    type="file"
+                    multiple
+                    accept="image/*,video/*,application/pdf"
+                    className="hidden"
+                    onChange={handleFileUpload}
+                  />
+                </div>
+
+                <div>
+                  <Label>Add Web Link</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      value={newWebLink}
+                      onChange={(e) => setNewWebLink(e.target.value)}
+                      placeholder="https://example.com"
+                      onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addWebLink())}
+                    />
+                    <Button type="button" variant="outline" onClick={addWebLink}>
+                      <LinkIcon className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                {formData.attachments.length > 0 && (
+                  <div className="space-y-2">
+                    <Label>Attachments:</Label>
+                    <div className="border rounded p-2 space-y-2">
+                      {formData.attachments.map((attachment, index) => (
+                        <div key={index} className="flex items-center justify-between p-2 bg-muted rounded">
+                          <div className="flex items-center gap-2 truncate flex-1">
+                            {attachment.type === 'link' ? (
+                              <LinkIcon className="h-4 w-4 flex-shrink-0" />
+                            ) : (
+                              <Upload className="h-4 w-4 flex-shrink-0" />
+                            )}
+                            <span className="text-sm truncate">{attachment.name}</span>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeAttachment(index)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <Button onClick={handleSubmit} className="w-full">
                 {editingItem ? 'Update' : 'Create'} Content
               </Button>
