@@ -80,6 +80,22 @@ export const translations: Record<Language, Record<string, string>> = {
     'radio.controls.volume': 'Volume',
     'radio.status.live': 'LIVE',
     'radio.status.offline': 'OFFLINE',
+    'radio.station.peace': 'Peace Building FM',
+    'radio.station.peace.desc': 'Stories of reconciliation and community healing',
+    'radio.station.community': 'Community Voices',
+    'radio.station.community.desc': 'Local stories and youth perspectives',
+    'radio.station.unity': 'Unity Radio',
+    'radio.station.unity.desc': 'Bringing communities together through dialogue',
+    'radio.share.title': 'Share Your Voice',
+    'radio.share.description': 'Record your thoughts and share them live with the community',
+    'radio.share.start': 'Start Broadcasting',
+    'radio.share.stop': 'Stop Broadcasting',
+    'radio.share.live': 'LIVE',
+    
+    // Content
+    'content.badge': 'Community Content',
+    'content.share.title': 'Share Your Content',
+    'content.share.subtitle': 'Upload videos, images, and stories to inspire the community',
     
     // Community
     'community.badge': 'Community Hub',
@@ -244,6 +260,22 @@ export const translations: Record<Language, Record<string, string>> = {
     'radio.controls.volume': 'Sauti',
     'radio.status.live': 'MOJA KWA MOJA',
     'radio.status.offline': 'IMEONDOKA',
+    'radio.station.peace': 'Redio ya Kujenga Amani',
+    'radio.station.peace.desc': 'Hadithi za upatanisho na uponyaji wa jamii',
+    'radio.station.community': 'Sauti za Jamii',
+    'radio.station.community.desc': 'Hadithi za mitaa na mtazamo wa vijana',
+    'radio.station.unity': 'Redio ya Umoja',
+    'radio.station.unity.desc': 'Kuunganisha jamii kupitia mazungumzo',
+    'radio.share.title': 'Shiriki Sauti Yako',
+    'radio.share.description': 'Rekodi mawazo yako na uyashiriki moja kwa moja na jamii',
+    'radio.share.start': 'Anza Kutangaza',
+    'radio.share.stop': 'Acha Kutangaza',
+    'radio.share.live': 'MOJA KWA MOJA',
+    
+    // Content
+    'content.badge': 'Maudhui ya Jamii',
+    'content.share.title': 'Shiriki Maudhui Yako',
+    'content.share.subtitle': 'Pakia video, picha, na hadithi za kuhamasisha jamii',
     
     // Community
     'community.badge': 'Kituo cha Jamii',

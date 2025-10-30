@@ -19,19 +19,38 @@ const ContentUpload = () => {
   const [webLinks, setWebLinks] = useState<string[]>(['']);
   const { toast } = useToast();
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
-    if (selectedFile) {
-      // Check file size (max 100MB)
-      if (selectedFile.size > 100 * 1024 * 1024) {
+    if (!selectedFile) return;
+
+    try {
+      // For images, resize and compress; for videos/audio, check size only
+      if (selectedFile.type.startsWith('image/')) {
+        const { processUploadedImage } = await import('@/lib/imageUtils');
+        const processedFile = await processUploadedImage(selectedFile, 2);
+        setFile(processedFile);
         toast({
-          title: "File too large",
-          description: "Please select a file smaller than 100MB",
-          variant: "destructive",
+          title: "Image processed",
+          description: "Image has been optimized for upload",
         });
-        return;
+      } else {
+        // For videos and audio, enforce 100MB limit
+        if (selectedFile.size > 100 * 1024 * 1024) {
+          toast({
+            title: "File too large",
+            description: "Videos/audio must be smaller than 100MB",
+            variant: "destructive",
+          });
+          return;
+        }
+        setFile(selectedFile);
       }
-      setFile(selectedFile);
+    } catch (error) {
+      toast({
+        title: "Error processing file",
+        description: error instanceof Error ? error.message : "Failed to process file",
+        variant: "destructive",
+      });
     }
   };
 

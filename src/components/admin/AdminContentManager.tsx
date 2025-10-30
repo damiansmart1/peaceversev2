@@ -59,25 +59,36 @@ export const AdminContentManager = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Check file size (max 100MB)
-    if (file.size > 100 * 1024 * 1024) {
-      toast.error('File too large. Maximum size is 100MB');
-      return;
-    }
-
     setMainFileUploading(true);
-    setMainFile(file);
-
+    
     try {
+      let processedFile = file;
+      
+      // For images, resize and compress to 2MB max
+      if (file.type.startsWith('image/')) {
+        const { processUploadedImage } = await import('@/lib/imageUtils');
+        processedFile = await processUploadedImage(file, 2);
+        toast.success('Image optimized for upload');
+      } else {
+        // For videos and audio, enforce 100MB limit
+        if (file.size > 100 * 1024 * 1024) {
+          toast.error('Videos/audio must be smaller than 100MB');
+          setMainFileUploading(false);
+          return;
+        }
+      }
+
+      setMainFile(processedFile);
+
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      const fileExt = file.name.split('.').pop();
+      const fileExt = processedFile.name.split('.').pop();
       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
       
       const { error: uploadError } = await supabase.storage
         .from('content')
-        .upload(fileName, file);
+        .upload(fileName, processedFile);
 
       if (uploadError) throw uploadError;
 
@@ -87,8 +98,8 @@ export const AdminContentManager = () => {
 
       // Determine file type
       let fileType = 'video';
-      if (file.type.startsWith('image/')) fileType = 'image';
-      else if (file.type.startsWith('audio/')) fileType = 'audio';
+      if (processedFile.type.startsWith('image/')) fileType = 'image';
+      else if (processedFile.type.startsWith('audio/')) fileType = 'audio';
 
       setFormData({
         ...formData,
@@ -115,13 +126,21 @@ export const AdminContentManager = () => {
     try {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        const fileExt = file.name.split('.').pop();
+        let processedFile = file;
+        
+        // For images, process and compress
+        if (file.type.startsWith('image/')) {
+          const { processUploadedImage } = await import('@/lib/imageUtils');
+          processedFile = await processUploadedImage(file, 2);
+        }
+        
+        const fileExt = processedFile.name.split('.').pop();
         const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
         const filePath = `attachments/${fileName}`;
 
         const { error: uploadError } = await supabase.storage
           .from('content')
-          .upload(filePath, file);
+          .upload(filePath, processedFile);
 
         if (uploadError) throw uploadError;
 
@@ -132,8 +151,8 @@ export const AdminContentManager = () => {
         uploadedFiles.push({
           type: 'file',
           url: publicUrl,
-          name: file.name,
-          file_type: file.type,
+          name: processedFile.name,
+          file_type: processedFile.type,
         });
       }
 

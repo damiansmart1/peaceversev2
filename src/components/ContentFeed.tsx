@@ -237,7 +237,8 @@ const ContentFeed = () => {
         <img
           src={item.file_url}
           alt={item.title}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover object-center"
+          loading="lazy"
         />
       );
     }
@@ -266,10 +267,11 @@ const ContentFeed = () => {
   const renderFullContent = (item: ContentItem) => {
     if (item.file_type === 'video') {
       return (
-        <div className="relative group overflow-hidden rounded-xl">
+        <div className="relative group overflow-hidden rounded-xl bg-muted/20">
           <video
             controls
-            className="w-full aspect-video object-cover rounded-xl"
+            className="w-full max-h-[600px] object-contain rounded-xl"
+            preload="metadata"
           >
             <source src={item.file_url} type="video/mp4" />
             Your browser does not support the video tag.
@@ -283,6 +285,7 @@ const ContentFeed = () => {
             src={item.file_url}
             alt={item.title}
             className="w-full max-h-[600px] object-contain rounded-xl bg-muted/20"
+            loading="lazy"
           />
         </div>
       );
@@ -298,7 +301,7 @@ const ContentFeed = () => {
               <p className="text-sm text-muted-foreground">Audio Story</p>
             </div>
           </div>
-          <audio controls className="w-full">
+          <audio controls className="w-full" preload="metadata">
             <source src={item.file_url} />
             Your browser does not support the audio tag.
           </audio>
