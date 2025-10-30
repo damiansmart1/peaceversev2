@@ -21,6 +21,11 @@ const LanguageToggle = () => {
     { code: 'ar', name: 'Arabic', nativeName: 'العربية' },
     { code: 'so', name: 'Somali', nativeName: 'Soomaali' },
     { code: 'am', name: 'Amharic', nativeName: 'አማርኛ' },
+    { code: 'es', name: 'Spanish', nativeName: 'Español' },
+    { code: 'pt', name: 'Portuguese', nativeName: 'Português' },
+    { code: 'zh', name: 'Chinese', nativeName: '中文' },
+    { code: 'hi', name: 'Hindi', nativeName: 'हिन्दी' },
+    { code: 'de', name: 'German', nativeName: 'Deutsch' },
   ];
 
   const currentLanguageName = languages.find(lang => lang.code === language)?.nativeName || 'English';
