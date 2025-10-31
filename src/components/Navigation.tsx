@@ -46,8 +46,10 @@ const Navigation = () => {
     { path: '/community', label: t('nav.community'), icon: Users },
     { path: '/radio', label: t('nav.radio'), icon: Radio },
     { path: '/challenges', label: t('nav.challenges'), icon: Award },
+    { path: '/peace-pulse', label: 'PeacePulse', icon: Globe },
+    { path: '/incidents', label: 'Incidents', icon: Shield },
     { path: '/profile', label: 'Profile', icon: User },
-    { path: '/proposals', label: 'Proposals', icon: Globe },
+    { path: '/proposals', label: 'Proposals', icon: Map },
     { path: '/safety', label: t('nav.safety'), icon: Shield },
     { path: '/about', label: 'About', icon: Heart },
   ];

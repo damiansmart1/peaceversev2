@@ -31,6 +31,8 @@ import Admin from "./pages/Admin";
 import Profile from "./pages/Profile";
 import Help from "./pages/Help";
 import AccessibilityPage from "./pages/Accessibility";
+import PeacePulse from "./pages/PeacePulse";
+import Incidents from "./pages/Incidents";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -73,6 +75,8 @@ const App = () => (
                     <Route path="/admin" element={<Admin />} />
                     <Route path="/help" element={<Help />} />
                     <Route path="/accessibility" element={<AccessibilityPage />} />
+                    <Route path="/peace-pulse" element={<PeacePulse />} />
+                    <Route path="/incidents" element={<Incidents />} />
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>
