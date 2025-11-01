@@ -5,7 +5,10 @@ import FeatureCard from "@/components/FeatureCard";
 import SponsorsCarousel from "@/components/SponsorsCarousel";
 import { useTranslationContext } from "@/components/TranslationProvider";
 import { useNavigate } from "react-router-dom";
-import { Mic, Users, Radio, Award, Shield, Heart, Vote } from "lucide-react";
+import { Mic, Users, Radio, Award, Shield, Heart, Vote, Activity, AlertCircle, TrendingUp, MapPin } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const { t } = useTranslationContext();
@@ -80,6 +83,109 @@ const Index = () => {
               description={t('features.safety.description')}
               onClick={() => navigate('/safety')}
             />
+            
+            <FeatureCard
+              icon={<div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
+                <Activity className="w-6 h-6 text-white" />
+              </div>}
+              title="Peace Pulse"
+              description="Real-time peace intelligence and analytics dashboard tracking sentiment, tension, and regional stability."
+              onClick={() => navigate('/peace-pulse')}
+            />
+            
+            <FeatureCard
+              icon={<div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center">
+                <AlertCircle className="w-6 h-6 text-white" />
+              </div>}
+              title="Incident Reporting"
+              description="Report and track incidents anonymously with geo-location, AI analysis, and institutional response tracking."
+              onClick={() => navigate('/incidents')}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Accountability & Transparency Section */}
+      <section className="py-20 bg-background">
+        <div className="container mx-auto px-6">
+          <SectionHeader
+            badge="Transparency"
+            title="Real-Time Peace Intelligence"
+            subtitle="Track incidents, monitor peace metrics, and hold institutions accountable"
+            icon={<TrendingUp className="w-4 h-4" />}
+          />
+          
+          <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto mt-12">
+            <Card className="border-2 hover:border-primary transition-all cursor-pointer" onClick={() => navigate('/peace-pulse')}>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 bg-blue-500/10 rounded-lg flex items-center justify-center">
+                    <Activity className="w-6 h-6 text-blue-500" />
+                  </div>
+                  <Badge variant="secondary">Live Data</Badge>
+                </div>
+                <h3 className="text-xl font-bold mb-2">Peace Pulse Dashboard</h3>
+                <p className="text-muted-foreground mb-4">
+                  Monitor real-time sentiment analysis, tension levels, risk scores, and trending topics across regions.
+                </p>
+                <div className="flex gap-2 flex-wrap">
+                  <Badge variant="outline" className="text-xs">Sentiment Analysis</Badge>
+                  <Badge variant="outline" className="text-xs">Risk Assessment</Badge>
+                  <Badge variant="outline" className="text-xs">Hotspot Tracking</Badge>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-2 hover:border-primary transition-all cursor-pointer" onClick={() => navigate('/incidents')}>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 bg-orange-500/10 rounded-lg flex items-center justify-center">
+                    <AlertCircle className="w-6 h-6 text-orange-500" />
+                  </div>
+                  <Badge variant="secondary">Anonymous</Badge>
+                </div>
+                <h3 className="text-xl font-bold mb-2">Incident Reporting</h3>
+                <p className="text-muted-foreground mb-4">
+                  Report incidents anonymously with geo-location, media evidence, and AI-powered verification.
+                </p>
+                <div className="flex gap-2 flex-wrap">
+                  <Badge variant="outline" className="text-xs">Anonymous Reporting</Badge>
+                  <Badge variant="outline" className="text-xs">Geo-Location</Badge>
+                  <Badge variant="outline" className="text-xs">AI Verification</Badge>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-2 hover:border-primary transition-all cursor-pointer" onClick={() => navigate('/incidents')}>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 bg-green-500/10 rounded-lg flex items-center justify-center">
+                    <MapPin className="w-6 h-6 text-green-500" />
+                  </div>
+                  <Badge variant="secondary">Accountability</Badge>
+                </div>
+                <h3 className="text-xl font-bold mb-2">Response Tracking</h3>
+                <p className="text-muted-foreground mb-4">
+                  Track institutional responses, measure accountability indices, and monitor resolution progress.
+                </p>
+                <div className="flex gap-2 flex-wrap">
+                  <Badge variant="outline" className="text-xs">Response Time</Badge>
+                  <Badge variant="outline" className="text-xs">Resolution Status</Badge>
+                  <Badge variant="outline" className="text-xs">Accountability Index</Badge>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="text-center mt-12">
+            <Button 
+              size="lg" 
+              onClick={() => navigate('/peace-pulse')}
+              className="gap-2"
+            >
+              <Activity className="w-5 h-5" />
+              Explore Peace Intelligence
+            </Button>
           </div>
         </div>
       </section>
