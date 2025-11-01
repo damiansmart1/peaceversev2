@@ -28,7 +28,7 @@ export const usePeacePulseMetrics = (country?: string) => {
     queryKey: ['peace-pulse', country],
     queryFn: async () => {
       let query = supabase
-        .from('peace_pulse_metrics')
+        .from('peace_pulse_metrics' as any)
         .select('*')
         .order('time_period', { ascending: false })
         .limit(100);
@@ -39,7 +39,7 @@ export const usePeacePulseMetrics = (country?: string) => {
 
       const { data, error } = await query;
       if (error) throw error;
-      return data as PeaceMetrics[];
+      return data as unknown as PeaceMetrics[];
     },
     refetchInterval: 60000, // Refresh every minute
   });
@@ -50,7 +50,7 @@ export const useAccountabilityMetrics = (country?: string) => {
     queryKey: ['accountability', country],
     queryFn: async () => {
       let query = supabase
-        .from('peace_accountability_metrics')
+        .from('peace_accountability_metrics' as any)
         .select('*')
         .order('calculated_at', { ascending: false })
         .limit(50);
@@ -61,7 +61,7 @@ export const useAccountabilityMetrics = (country?: string) => {
 
       const { data, error } = await query;
       if (error) throw error;
-      return data as AccountabilityMetrics[];
+      return data as unknown as AccountabilityMetrics[];
     },
   });
 };
@@ -71,7 +71,7 @@ export const usePolicyResponses = (incidentId?: string, proposalId?: string) => 
     queryKey: ['policy-responses', incidentId, proposalId],
     queryFn: async () => {
       let query = supabase
-        .from('policy_responses')
+        .from('policy_responses' as any)
         .select('*')
         .eq('public_visibility', true)
         .order('created_at', { ascending: false });

@@ -41,7 +41,7 @@ export const useIncidents = (filters?: {
     queryKey: ['incidents', filters],
     queryFn: async () => {
       let query = supabase
-        .from('incidents')
+        .from('incidents' as any)
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -57,7 +57,7 @@ export const useIncidents = (filters?: {
 
       const { data, error } = await query;
       if (error) throw error;
-      return data as Incident[];
+      return data as unknown as Incident[];
     },
   });
 };
@@ -75,8 +75,8 @@ export const useCreateIncident = () => {
       };
 
       const { data, error } = await supabase
-        .from('incidents')
-        .insert(newIncident)
+        .from('incidents' as any)
+        .insert(newIncident as any)
         .select()
         .single();
 
@@ -115,8 +115,8 @@ export const useUpdateIncident = () => {
   return useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<Incident> }) => {
       const { data, error } = await supabase
-        .from('incidents')
-        .update(updates)
+        .from('incidents' as any)
+        .update(updates as any)
         .eq('id', id)
         .select()
         .single();
@@ -125,14 +125,14 @@ export const useUpdateIncident = () => {
 
       // Log to timeline
       const { data: { user } } = await supabase.auth.getUser();
-      await supabase.from('incident_timeline').insert({
+      await supabase.from('incident_timeline' as any).insert({
         incident_id: id,
         event_type: 'status_change',
         old_status: null,
         new_status: updates.status,
         actor_id: user?.id,
         notes: updates.resolution_notes || null,
-      });
+      } as any);
 
       return data;
     },
