@@ -13,6 +13,7 @@ import { AdminModerationManager } from '@/components/admin/AdminModerationManage
 import { AdminGamificationManager } from '@/components/admin/AdminGamificationManager';
 import { AdminSettingsManager } from '@/components/admin/AdminSettingsManager';
 import { AdminSponsorsManager } from '@/components/admin/AdminSponsorsManager';
+import { AdminIncidentsManager } from '@/components/admin/AdminIncidentsManager';
 import { Loader2 } from 'lucide-react';
 
 const Admin = () => {
@@ -42,11 +43,12 @@ const Admin = () => {
       <h1 className="text-4xl font-bold mb-8">Admin Portal</h1>
       
       <Tabs defaultValue="dashboard" className="w-full">
-        <TabsList className="grid w-full grid-cols-5 lg:grid-cols-10 mb-8">
+        <TabsList className="grid w-full grid-cols-5 lg:grid-cols-11 mb-8">
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="content">Content</TabsTrigger>
           <TabsTrigger value="proposals">Proposals</TabsTrigger>
+          <TabsTrigger value="incidents">Incidents</TabsTrigger>
           <TabsTrigger value="safe-spaces">Safe Spaces</TabsTrigger>
           <TabsTrigger value="challenges">Challenges</TabsTrigger>
           <TabsTrigger value="moderation">Moderation</TabsTrigger>
@@ -76,6 +78,12 @@ const Admin = () => {
         <TabsContent value="proposals">
           <Card className="p-6">
             <AdminProposalsManager />
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="incidents">
+          <Card className="p-6">
+            <AdminIncidentsManager />
           </Card>
         </TabsContent>
 

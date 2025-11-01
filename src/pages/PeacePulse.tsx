@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Activity, TrendingUp, AlertTriangle, BarChart3, Globe, MapPin } from 'lucide-react';
 import { usePeacePulseMetrics, useAccountabilityMetrics } from '@/hooks/usePeaceMetrics';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import { PeacePulseCharts } from '@/components/PeacePulseCharts';
 
 const COMESA_COUNTRIES = [
   { code: 'all', name: 'All COMESA' },
@@ -238,31 +239,17 @@ const PeacePulse = () => {
               </TabsContent>
 
               <TabsContent value="sentiment" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Sentiment Analysis</CardTitle>
-                    <CardDescription>Real-time peace sentiment tracking</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground">
-                      Detailed sentiment visualization will appear here
-                    </p>
-                  </CardContent>
-                </Card>
+                <PeacePulseCharts 
+                  pulseMetrics={pulseMetrics} 
+                  accountabilityMetrics={accountabilityMetrics}
+                />
               </TabsContent>
 
               <TabsContent value="trends" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Historical Trends</CardTitle>
-                    <CardDescription>Peace indicators over time</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground">
-                      Trend charts and predictive analytics will appear here
-                    </p>
-                  </CardContent>
-                </Card>
+                <PeacePulseCharts 
+                  pulseMetrics={pulseMetrics} 
+                  accountabilityMetrics={accountabilityMetrics}
+                />
               </TabsContent>
             </Tabs>
           )}

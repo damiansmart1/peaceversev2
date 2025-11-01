@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AlertCircle, CheckCircle2, Clock, Plus, MapPin } from 'lucide-react';
-import { useIncidents } from '@/hooks/useIncidents';
+import { useIncidents, Incident } from '@/hooks/useIncidents';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -14,10 +14,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useCreateIncident } from '@/hooks/useIncidents';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { toast } from 'sonner';
+import { IncidentDetailDialog } from '@/components/IncidentDetailDialog';
+import { IncidentStatsCards } from '@/components/IncidentStatsCards';
 
 const Incidents = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -75,7 +78,10 @@ const Incidents = () => {
   };
 
   const IncidentCard = ({ incident }: { incident: any }) => (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card 
+      className="hover:shadow-md transition-shadow cursor-pointer" 
+      onClick={() => setSelectedIncident(incident)}
+    >
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="flex-1">
@@ -205,6 +211,8 @@ const Incidents = () => {
           </Dialog>
         </div>
 
+        <IncidentStatsCards incidents={allIncidents} />
+
         <div className="max-w-7xl mx-auto">
           {isLoading ? (
             <LoadingSpinner />
@@ -291,6 +299,12 @@ const Incidents = () => {
             </Tabs>
           )}
         </div>
+
+        <IncidentDetailDialog 
+          incident={selectedIncident}
+          open={!!selectedIncident}
+          onOpenChange={(open) => !open && setSelectedIncident(null)}
+        />
       </div>
     </div>
   );
