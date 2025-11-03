@@ -8,153 +8,147 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* PeaceVerse Design System - Light Mode */
-    --background: 210 40% 97%;
-    --foreground: 215 25% 15%;
+    /* African-Inspired Design System - Light Mode */
+    --background: 35 45% 96%;
+    --foreground: 25 35% 18%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 215 25% 15%;
+    --card: 35 30% 98%;
+    --card-foreground: 25 35% 18%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 15%;
+    --popover: 35 30% 98%;
+    --popover-foreground: 25 35% 18%;
 
-    /* Peace-focused primary colors - more vibrant */
-    --primary: 210 80% 55%;
+    /* Terracotta & Burnt Sienna - African earth */
+    --primary: 18 75% 52%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 210 85% 70%;
+    --primary-glow: 25 85% 62%;
 
-    /* Community warmth - softer peach */
-    --secondary: 30 95% 88%;
-    --secondary-foreground: 25 60% 25%;
+    /* Warm Ochre & Gold - African sunsets */
+    --secondary: 42 78% 65%;
+    --secondary-foreground: 25 45% 20%;
     
-    /* Growth and hope - brighter mint */
-    --accent: 155 65% 58%;
+    /* Savanna Green - African landscape */
+    --accent: 95 45% 48%;
     --accent-foreground: 0 0% 100%;
-    --accent-light: 155 50% 90%;
+    --accent-light: 95 35% 85%;
 
-    /* Peaceful backgrounds */
-    --muted: 210 35% 94%;
-    --muted-foreground: 215 20% 50%;
+    /* Peaceful backgrounds - warm sand tones */
+    --muted: 35 35% 92%;
+    --muted-foreground: 25 25% 45%;
 
-    /* Trust and safety */
-    --success: 150 70% 50%;
+    /* Trust and safety - deep forest green */
+    --success: 145 55% 42%;
     --success-foreground: 0 0% 100%;
     
-    /* Inclusive warning - warm amber */
-    --warning: 38 95% 62%;
-    --warning-foreground: 38 40% 20%;
+    /* Warning - bright African gold */
+    --warning: 45 92% 58%;
+    --warning-foreground: 30 40% 18%;
 
-    --destructive: 5 80% 60%;
+    --destructive: 8 72% 52%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 210 30% 90%;
-    --input: 210 35% 96%;
-    --ring: 210 80% 55%;
+    --border: 35 30% 88%;
+    --input: 35 30% 94%;
+    --ring: 18 75% 52%;
 
-    /* PeaceVerse specific tokens - more vibrant gradients */
-    --peace-gradient: linear-gradient(135deg, hsl(210 80% 55%), hsl(155 65% 58%));
-    --community-gradient: linear-gradient(135deg, hsl(30 95% 75%), hsl(38 95% 65%));
-    --story-gradient: linear-gradient(135deg, hsl(155 50% 88%), hsl(210 40% 92%));
-    --hero-gradient: linear-gradient(180deg, hsl(210 40% 97%) 0%, hsl(155 50% 95%) 100%);
+    /* African-inspired gradients */
+    --peace-gradient: linear-gradient(135deg, hsl(18 75% 52%), hsl(95 45% 48%));
+    --community-gradient: linear-gradient(135deg, hsl(25 85% 62%), hsl(42 78% 65%));
+    --story-gradient: linear-gradient(135deg, hsl(95 35% 85%), hsl(35 45% 90%));
+    --hero-gradient: linear-gradient(180deg, hsl(35 45% 96%) 0%, hsl(42 50% 92%) 100%);
     
-    /* Accessible shadows - softer */
-    --shadow-peace: 0 8px 24px -6px hsl(210 80% 55% / 0.25);
-    --shadow-warm: 0 6px 20px -4px hsl(30 95% 60% / 0.35);
-    --shadow-story: 0 4px 16px -2px hsl(155 65% 58% / 0.2);
-    --shadow-elevated: 0 12px 32px -8px hsl(210 30% 40% / 0.15);
+    /* Warm African shadows */
+    --shadow-peace: 0 8px 24px -6px hsl(18 75% 52% / 0.3);
+    --shadow-warm: 0 6px 20px -4px hsl(42 78% 65% / 0.4);
+    --shadow-story: 0 4px 16px -2px hsl(95 45% 48% / 0.25);
+    --shadow-elevated: 0 12px 32px -8px hsl(25 40% 35% / 0.2);
 
     /* Voice interaction highlights */
-    --voice-active: 210 90% 65%;
-    --voice-recording: 5 85% 62%;
-    --voice-success: 150 80% 55%;
+    --voice-active: 18 80% 58%;
+    --voice-recording: 8 85% 60%;
+    --voice-success: 145 65% 48%;
 
     --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 35 40% 97%;
+    --sidebar-foreground: 25 35% 22%;
+    --sidebar-primary: 18 75% 52%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 35 35% 92%;
+    --sidebar-accent-foreground: 25 40% 20%;
+    --sidebar-border: 35 30% 88%;
+    --sidebar-ring: 18 75% 52%;
   }
 
   .dark {
-    /* PeaceVerse Design System - Dark Mode */
-    --background: 215 35% 10%;
-    --foreground: 210 30% 95%;
+    /* African-Inspired Design System - Dark Mode */
+    --background: 25 35% 12%;
+    --foreground: 35 30% 92%;
 
-    --card: 215 30% 14%;
-    --card-foreground: 210 30% 95%;
+    --card: 25 28% 16%;
+    --card-foreground: 35 30% 92%;
 
-    --popover: 215 30% 14%;
-    --popover-foreground: 210 30% 95%;
+    --popover: 25 28% 16%;
+    --popover-foreground: 35 30% 92%;
 
-    /* Peace-focused primary colors - enhanced for dark mode */
-    --primary: 210 85% 68%;
-    --primary-foreground: 215 35% 10%;
-    --primary-glow: 210 90% 75%;
+    /* Glowing terracotta & burnt orange - dark mode */
+    --primary: 18 78% 60%;
+    --primary-foreground: 25 35% 12%;
+    --primary-glow: 25 85% 68%;
 
-    /* Community warmth - adapted for dark mode */
-    --secondary: 30 45% 22%;
-    --secondary-foreground: 30 80% 90%;
+    /* Rich ochre & gold - dark mode warmth */
+    --secondary: 42 55% 35%;
+    --secondary-foreground: 42 85% 88%;
     
-    /* Growth and hope - dark mode friendly */
-    --accent: 155 70% 65%;
-    --accent-foreground: 215 35% 10%;
-    --accent-light: 155 40% 28%;
+    /* Deep savanna green - night landscape */
+    --accent: 95 50% 55%;
+    --accent-foreground: 25 35% 12%;
+    --accent-light: 95 35% 28%;
 
-    /* Peaceful backgrounds */
-    --muted: 215 25% 18%;
-    --muted-foreground: 210 20% 70%;
+    /* Dark earth backgrounds */
+    --muted: 25 25% 20%;
+    --muted-foreground: 35 20% 68%;
 
-    /* Trust and safety */
-    --success: 150 75% 58%;
-    --success-foreground: 215 35% 10%;
+    /* Forest green - trust in darkness */
+    --success: 145 58% 52%;
+    --success-foreground: 25 35% 12%;
     
-    /* Inclusive warning */
-    --warning: 38 90% 68%;
-    --warning-foreground: 38 30% 18%;
+    /* Bright gold warning */
+    --warning: 45 88% 62%;
+    --warning-foreground: 30 35% 15%;
 
-    --destructive: 5 80% 65%;
-    --destructive-foreground: 215 35% 10%;
+    --destructive: 8 75% 58%;
+    --destructive-foreground: 25 35% 12%;
 
-    --border: 215 25% 22%;
-    --input: 215 25% 18%;
-    --ring: 210 85% 68%;
+    --border: 25 25% 24%;
+    --input: 25 25% 20%;
+    --ring: 18 78% 60%;
 
-    /* PeaceVerse specific tokens - dark mode */
-    --peace-gradient: linear-gradient(135deg, hsl(210 85% 68%), hsl(155 70% 65%));
-    --community-gradient: linear-gradient(135deg, hsl(30 55% 40%), hsl(38 70% 50%));
-    --story-gradient: linear-gradient(135deg, hsl(155 40% 28%), hsl(215 25% 18%));
-    --hero-gradient: linear-gradient(180deg, hsl(215 35% 10%) 0%, hsl(155 40% 15%) 100%);
+    /* African night gradients */
+    --peace-gradient: linear-gradient(135deg, hsl(18 78% 60%), hsl(95 50% 55%));
+    --community-gradient: linear-gradient(135deg, hsl(25 65% 45%), hsl(42 70% 52%));
+    --story-gradient: linear-gradient(135deg, hsl(95 35% 28%), hsl(25 25% 20%));
+    --hero-gradient: linear-gradient(180deg, hsl(25 35% 12%) 0%, hsl(42 40% 18%) 100%);
     
-    /* Accessible shadows for dark mode */
-    --shadow-peace: 0 8px 24px -6px hsl(210 85% 68% / 0.4);
-    --shadow-warm: 0 6px 20px -4px hsl(30 55% 40% / 0.5);
-    --shadow-story: 0 4px 16px -2px hsl(155 70% 65% / 0.3);
-    --shadow-elevated: 0 12px 32px -8px hsl(0 0% 0% / 0.6);
+    /* Deep warm shadows */
+    --shadow-peace: 0 8px 24px -6px hsl(18 78% 60% / 0.45);
+    --shadow-warm: 0 6px 20px -4px hsl(42 55% 35% / 0.55);
+    --shadow-story: 0 4px 16px -2px hsl(95 50% 55% / 0.35);
+    --shadow-elevated: 0 12px 32px -8px hsl(0 0% 0% / 0.7);
 
-    /* Voice interaction highlights - dark mode */
-    --voice-active: 210 85% 70%;
-    --voice-recording: 0 80% 65%;
-    --voice-success: 145 80% 60%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    /* Voice interaction - warm night glow */
+    --voice-active: 18 80% 65%;
+    --voice-recording: 8 82% 62%;
+    --voice-success: 145 65% 58%;
+    
+    --sidebar-background: 25 30% 14%;
+    --sidebar-foreground: 35 25% 90%;
+    --sidebar-primary: 18 78% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 25 25% 20%;
+    --sidebar-accent-foreground: 35 25% 90%;
+    --sidebar-border: 25 25% 24%;
+    --sidebar-ring: 18 78% 60%;
   }
 }
 
