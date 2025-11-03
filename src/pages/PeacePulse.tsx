@@ -8,6 +8,7 @@ import { Activity, TrendingUp, AlertTriangle, BarChart3, Globe, MapPin } from 'l
 import { usePeacePulseMetrics, useAccountabilityMetrics } from '@/hooks/usePeaceMetrics';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { PeacePulseCharts } from '@/components/PeacePulseCharts';
+import InteractiveHeatmap from '@/components/InteractiveHeatmap';
 
 const COMESA_COUNTRIES = [
   { code: 'all', name: 'All COMESA' },
@@ -78,8 +79,9 @@ const PeacePulse = () => {
             <LoadingSpinner />
           ) : (
             <Tabs defaultValue="overview" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
+                <TabsTrigger value="heatmap">Heatmap</TabsTrigger>
                 <TabsTrigger value="sentiment">Sentiment</TabsTrigger>
                 <TabsTrigger value="accountability">Accountability</TabsTrigger>
                 <TabsTrigger value="trends">Trends</TabsTrigger>
@@ -193,6 +195,10 @@ const PeacePulse = () => {
                     )}
                   </CardContent>
                 </Card>
+              </TabsContent>
+
+              <TabsContent value="heatmap" className="space-y-6">
+                <InteractiveHeatmap />
               </TabsContent>
 
               <TabsContent value="accountability" className="space-y-6">
