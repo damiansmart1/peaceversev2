@@ -1,7 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAdminCheck } from '@/hooks/useAdminCheck';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
 import { AdminContentManager } from '@/components/admin/AdminContentManager';
@@ -14,11 +13,14 @@ import { AdminGamificationManager } from '@/components/admin/AdminGamificationMa
 import { AdminSettingsManager } from '@/components/admin/AdminSettingsManager';
 import { AdminSponsorsManager } from '@/components/admin/AdminSponsorsManager';
 import { AdminIncidentsManager } from '@/components/admin/AdminIncidentsManager';
-import { Loader2 } from 'lucide-react';
+import { AdminSidebar } from '@/components/admin/AdminSidebar';
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { Loader2, Menu } from 'lucide-react';
 
 const Admin = () => {
   const navigate = useNavigate();
   const { data: isAdmin, isLoading } = useAdminCheck();
+  const [activeSection, setActiveSection] = useState('dashboard');
 
   useEffect(() => {
     if (!isLoading && !isAdmin) {
@@ -38,92 +40,56 @@ const Admin = () => {
     return null;
   }
 
+  const renderContent = () => {
+    switch (activeSection) {
+      case 'dashboard':
+        return <AdminDashboard />;
+      case 'users':
+        return <AdminUsersManager />;
+      case 'content':
+        return <AdminContentManager />;
+      case 'proposals':
+        return <AdminProposalsManager />;
+      case 'incidents':
+        return <AdminIncidentsManager />;
+      case 'safe-spaces':
+        return <AdminSafeSpacesManager />;
+      case 'challenges':
+        return <AdminChallengesManager />;
+      case 'moderation':
+        return <AdminModerationManager />;
+      case 'gamification':
+        return <AdminGamificationManager />;
+      case 'sponsors':
+        return <AdminSponsorsManager />;
+      case 'settings':
+        return <AdminSettingsManager />;
+      default:
+        return <AdminDashboard />;
+    }
+  };
+
   return (
-    <div className="container mx-auto py-8 px-4">
-      <h1 className="text-4xl font-bold mb-8">Admin Portal</h1>
-      
-      <Tabs defaultValue="dashboard" className="w-full">
-        <TabsList className="grid w-full grid-cols-5 lg:grid-cols-11 mb-8">
-          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-          <TabsTrigger value="users">Users</TabsTrigger>
-          <TabsTrigger value="content">Content</TabsTrigger>
-          <TabsTrigger value="proposals">Proposals</TabsTrigger>
-          <TabsTrigger value="incidents">Incidents</TabsTrigger>
-          <TabsTrigger value="safe-spaces">Safe Spaces</TabsTrigger>
-          <TabsTrigger value="challenges">Challenges</TabsTrigger>
-          <TabsTrigger value="moderation">Moderation</TabsTrigger>
-          <TabsTrigger value="gamification">Gamification</TabsTrigger>
-          <TabsTrigger value="sponsors">Sponsors</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="dashboard">
-          <Card className="p-6">
-            <AdminDashboard />
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="users">
-          <Card className="p-6">
-            <AdminUsersManager />
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="content">
-          <Card className="p-6">
-            <AdminContentManager />
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="proposals">
-          <Card className="p-6">
-            <AdminProposalsManager />
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="incidents">
-          <Card className="p-6">
-            <AdminIncidentsManager />
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="safe-spaces">
-          <Card className="p-6">
-            <AdminSafeSpacesManager />
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="challenges">
-          <Card className="p-6">
-            <AdminChallengesManager />
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="moderation">
-          <Card className="p-6">
-            <AdminModerationManager />
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="gamification">
-          <Card className="p-6">
-            <AdminGamificationManager />
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="sponsors">
-          <Card className="p-6">
-            <AdminSponsorsManager />
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="settings">
-          <Card className="p-6">
-            <AdminSettingsManager />
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </div>
+    <SidebarProvider defaultOpen>
+      <div className="min-h-screen flex w-full">
+        <AdminSidebar activeSection={activeSection} onSectionChange={setActiveSection} />
+        
+        <main className="flex-1 overflow-auto">
+          <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background px-6">
+            <SidebarTrigger className="lg:hidden" />
+            <h1 className="text-xl font-semibold">
+              {activeSection.charAt(0).toUpperCase() + activeSection.slice(1).replace(/-/g, ' ')}
+            </h1>
+          </header>
+          
+          <div className="p-6">
+            <Card className="p-6">
+              {renderContent()}
+            </Card>
+          </div>
+        </main>
+      </div>
+    </SidebarProvider>
   );
 };
 

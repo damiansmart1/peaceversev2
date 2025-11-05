@@ -95,17 +95,17 @@ export default function OnboardingTour() {
           </Button>
 
           <CardHeader className="text-center pb-4">
-            <div className="mx-auto w-20 h-20 bg-gradient-to-br from-primary to-purple-500 rounded-full flex items-center justify-center text-4xl mb-4 shadow-lg">
-              {step.illustration}
+            <div className="mx-auto w-24 h-24 rounded-full flex items-center justify-center text-5xl mb-4 shadow-lg bg-gradient-to-br from-[#FF6B6B] via-[#9B4DCA] to-[#C77DFF]">
+              🌍
             </div>
             <CardTitle className="text-2xl flex items-center justify-center gap-2">
-              <Sparkles className="w-5 h-5 text-primary" />
+              <Sparkles className="w-5 h-5 text-[#FF6B6B]" />
               {step.title}
             </CardTitle>
           </CardHeader>
 
           <CardContent className="text-center space-y-4">
-            <CardDescription className="text-base leading-relaxed">
+            <CardDescription className="text-base leading-relaxed text-muted-foreground">
               {step.description}
             </CardDescription>
 
@@ -115,7 +115,7 @@ export default function OnboardingTour() {
                   key={index}
                   className={`h-2 rounded-full transition-all ${
                     index === currentStep
-                      ? 'w-8 bg-primary'
+                      ? 'w-8 bg-[#FF6B6B]'
                       : 'w-2 bg-muted'
                   }`}
                 />
@@ -133,7 +133,7 @@ export default function OnboardingTour() {
               <ChevronLeft className="w-4 h-4" />
               Back
             </Button>
-            <Button onClick={handleNext} className="gap-2">
+            <Button onClick={handleNext} className="gap-2 bg-[#FF6B6B] hover:bg-[#FF5252] text-white">
               {currentStep === steps.length - 1 ? "Get Started" : "Next"}
               {currentStep < steps.length - 1 && <ChevronRight className="w-4 h-4" />}
             </Button>
