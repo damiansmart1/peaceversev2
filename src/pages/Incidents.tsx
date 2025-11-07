@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navigation from '@/components/Navigation';
 import SectionHeader from '@/components/SectionHeader';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, CheckCircle2, Clock, Plus, MapPin } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Clock, Plus, MapPin, Bell } from 'lucide-react';
 import { useIncidents, Incident } from '@/hooks/useIncidents';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -16,6 +16,8 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import { toast } from 'sonner';
 import { IncidentDetailDialog } from '@/components/IncidentDetailDialog';
 import { IncidentStatsCards } from '@/components/IncidentStatsCards';
+import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
 
 const Incidents = () => {
   const [activeTab, setActiveTab] = useState('all');
@@ -31,12 +33,76 @@ const Incidents = () => {
     is_anonymous: false,
   });
 
+  const queryClient = useQueryClient();
   const { data: allIncidents, isLoading } = useIncidents();
   const { data: reportedIncidents } = useIncidents({ status: 'reported' });
   const { data: verifiedIncidents } = useIncidents({ status: 'verified' });
   const { data: resolvedIncidents } = useIncidents({ status: 'resolved' });
   
   const createIncident = useCreateIncident();
+
+  // Set up realtime subscription for incident updates
+  useEffect(() => {
+    console.log('Setting up realtime subscription for incidents');
+    
+    const channel = supabase
+      .channel('incidents-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'incidents'
+        },
+        (payload) => {
+          console.log('New incident reported:', payload);
+          const newIncident = payload.new as Incident;
+          
+          toast.success(
+            `New ${newIncident.severity} incident reported`,
+            {
+              description: `${newIncident.title} - ${newIncident.location_name || 'Location unknown'}`,
+              icon: <Bell className="w-4 h-4" />,
+            }
+          );
+          
+          // Invalidate queries to refetch data
+          queryClient.invalidateQueries({ queryKey: ['incidents'] });
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'incidents'
+        },
+        (payload) => {
+          console.log('Incident status changed:', payload);
+          const updatedIncident = payload.new as Incident;
+          const oldIncident = payload.old as Incident;
+          
+          if (oldIncident.status !== updatedIncident.status) {
+            toast.info(
+              `Incident status updated to ${updatedIncident.status}`,
+              {
+                description: updatedIncident.title,
+                icon: <AlertCircle className="w-4 h-4" />,
+              }
+            );
+          }
+          
+          // Invalidate queries to refetch data
+          queryClient.invalidateQueries({ queryKey: ['incidents'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      console.log('Cleaning up realtime subscription');
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
