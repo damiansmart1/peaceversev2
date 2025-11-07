@@ -252,6 +252,140 @@ export type Database = {
           },
         ]
       }
+      incident_timeline: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          event_type: string
+          id: string
+          incident_id: string
+          metadata: Json | null
+          new_status: string | null
+          notes: string | null
+          old_status: string | null
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          incident_id: string
+          metadata?: Json | null
+          new_status?: string | null
+          notes?: string | null
+          old_status?: string | null
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          incident_id?: string
+          metadata?: Json | null
+          new_status?: string | null
+          notes?: string | null
+          old_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incident_timeline_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "incidents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      incidents: {
+        Row: {
+          affected_population: number | null
+          ai_analysis: Json | null
+          assigned_to: string | null
+          country_code: string | null
+          created_at: string
+          description: string
+          escalated_to: string | null
+          geo_location: Json | null
+          id: string
+          incident_type: string
+          is_anonymous: boolean | null
+          location_name: string | null
+          metadata: Json | null
+          priority: number | null
+          region: string | null
+          related_content_ids: string[] | null
+          related_proposal_ids: string[] | null
+          reported_by: string | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          sentiment_data: Json | null
+          severity: string
+          status: string
+          title: string
+          updated_at: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          affected_population?: number | null
+          ai_analysis?: Json | null
+          assigned_to?: string | null
+          country_code?: string | null
+          created_at?: string
+          description: string
+          escalated_to?: string | null
+          geo_location?: Json | null
+          id?: string
+          incident_type: string
+          is_anonymous?: boolean | null
+          location_name?: string | null
+          metadata?: Json | null
+          priority?: number | null
+          region?: string | null
+          related_content_ids?: string[] | null
+          related_proposal_ids?: string[] | null
+          reported_by?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          sentiment_data?: Json | null
+          severity: string
+          status?: string
+          title: string
+          updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          affected_population?: number | null
+          ai_analysis?: Json | null
+          assigned_to?: string | null
+          country_code?: string | null
+          created_at?: string
+          description?: string
+          escalated_to?: string | null
+          geo_location?: Json | null
+          id?: string
+          incident_type?: string
+          is_anonymous?: boolean | null
+          location_name?: string | null
+          metadata?: Json | null
+          priority?: number | null
+          region?: string | null
+          related_content_ids?: string[] | null
+          related_proposal_ids?: string[] | null
+          reported_by?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          sentiment_data?: Json | null
+          severity?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: []
+      }
       leaderboard_cache: {
         Row: {
           avatar_url: string | null
