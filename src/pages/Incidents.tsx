@@ -18,8 +18,10 @@ import { IncidentDetailDialog } from '@/components/IncidentDetailDialog';
 import { IncidentStatsCards } from '@/components/IncidentStatsCards';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Incidents = () => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('all');
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
@@ -30,10 +32,17 @@ const Incidents = () => {
     severity: 'medium' as 'low' | 'medium' | 'high' | 'critical',
     location_name: '',
     country_code: '',
-    is_anonymous: false,
+    is_anonymous: !user, // Auto-set to anonymous if not logged in
   });
 
   const queryClient = useQueryClient();
+  
+  // Update is_anonymous when user login state changes
+  useEffect(() => {
+    if (!user) {
+      setFormData(prev => ({ ...prev, is_anonymous: true }));
+    }
+  }, [user]);
   const { data: allIncidents, isLoading } = useIncidents();
   const { data: reportedIncidents } = useIncidents({ status: 'reported' });
   const { data: verifiedIncidents } = useIncidents({ status: 'verified' });
@@ -112,7 +121,13 @@ const Incidents = () => {
       return;
     }
 
-    await createIncident.mutateAsync(formData);
+    // If not logged in, force anonymous reporting
+    const submissionData = {
+      ...formData,
+      is_anonymous: user ? formData.is_anonymous : true,
+    };
+
+    await createIncident.mutateAsync(submissionData);
     setIsCreateOpen(false);
     setFormData({
       title: '',
@@ -121,7 +136,7 @@ const Incidents = () => {
       severity: 'medium',
       location_name: '',
       country_code: '',
-      is_anonymous: false,
+      is_anonymous: !user, // Reset based on login state
     });
   };
 
@@ -258,16 +273,25 @@ const Incidents = () => {
                     onChange={(e) => setFormData({ ...formData, country_code: e.target.value })}
                   />
                 </div>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="anonymous"
-                    checked={formData.is_anonymous}
-                    onChange={(e) => setFormData({ ...formData, is_anonymous: e.target.checked })}
-                  />
-                  <label htmlFor="anonymous" className="text-sm">
-                    Report anonymously (for your safety)
-                  </label>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="anonymous"
+                      checked={formData.is_anonymous}
+                      onChange={(e) => setFormData({ ...formData, is_anonymous: e.target.checked })}
+                      disabled={!user}
+                      className="disabled:opacity-50"
+                    />
+                    <label htmlFor="anonymous" className="text-sm">
+                      Report anonymously (for your safety)
+                    </label>
+                  </div>
+                  {!user && (
+                    <p className="text-xs text-muted-foreground">
+                      You must be logged in to report non-anonymously. <a href="/auth" className="text-primary underline">Login here</a>
+                    </p>
+                  )}
                 </div>
                 <Button type="submit" className="w-full" disabled={createIncident.isPending}>
                   {createIncident.isPending ? 'Reporting...' : 'Submit Report'}
