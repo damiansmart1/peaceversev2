@@ -49,28 +49,28 @@ const DonorShowcase = () => {
   const featuredStories = [
     {
       id: 1,
-      title: "Kujenga Madaraja katika Vijijini vya Kenya",
+      title: "Building Bridges in Rural Kenya",
       author: "Amina, 19",
-      location: "Bonde la Ufa, Kenya",
-      impact: "Ameunganisha jamii 3 za makabila tofauti",
+      location: "Rift Valley, Kenya",
+      impact: "Connected 3 communities from different tribes",
       duration: "3:24",
       reactions: 89
     },
     {
       id: 2,
-      title: "Sauti za Vijana kwa Amani Kibera",
+      title: "Youth Voices for Peace in Kibera",
       author: "John, 17",
       location: "Kibera, Nairobi",
-      impact: "Ameongoza mazungumzo 50+ ya amani",
+      impact: "Led 50+ peace dialogues",
       duration: "4:12",
       reactions: 156
     },
     {
       id: 3,
-      title: "Kuvunja Mzunguko wa Vurugu Turkana",
+      title: "Breaking the Cycle of Violence in Turkana",
       author: "Grace, 20",
       location: "Lodwar, Turkana",
-      impact: "Amefika vijana 500+",
+      impact: "Reached 500+ youth",
       duration: "2:48",
       reactions: 203
     }
@@ -80,9 +80,9 @@ const DonorShowcase = () => {
     <section className="py-16 bg-background">
       <div className="container mx-auto px-6">
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold mb-4 text-foreground">Athari Zinazoweza Kupimwa | Measurable Impact</h2>
+          <h2 className="text-4xl font-bold mb-4 text-foreground">Measurable Impact</h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Ona jinsi msaada wako unavyounda mabadiliko halisi katika jamii za Kenya
+            See how your support creates real change in Kenyan communities
           </p>
         </div>
 

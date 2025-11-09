@@ -26,23 +26,22 @@ const HeroSection = () => {
           </h1>
           
           <p className="text-xl md:text-2xl text-foreground/80 mb-4 font-medium">
-            Kuongoza Sauti za Vijana kwa Amani | Empowering Youth Voices for Peace
+            {t('hero.subtitle')}
           </p>
           
           <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
-            Jiunge na jumuiya ya vijana kutoka maeneo ya vijijini, maeneo ya mbali, na maeneo yenye migogoro hapa Kenya. 
-            Shiriki hadithi zako, jenga uhusiano, na unda mabadiliko mazuri kupitia sauti, ubunifu, na ushirikiano.
+            {t('hero.description')}
           </p>
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
             <Button variant="peace" size="lg" className="text-lg px-8 py-6">
               <Mic className="w-5 h-5" />
-              Shiriki Hadithi Yako | Share Your Story
+              {t('hero.cta.primary')}
             </Button>
             <Button variant="community" size="lg" className="text-lg px-8 py-6">
               <Users className="w-5 h-5" />
-              Jiunge na Jumuiya | Join Community
+              {t('hero.cta.secondary')}
             </Button>
           </div>
 
@@ -52,9 +51,9 @@ const HeroSection = () => {
               <div className="w-12 h-12 bg-voice-active rounded-full flex items-center justify-center mb-4 mx-auto">
                 <Mic className="w-6 h-6 text-primary-foreground" />
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-card-foreground">Hadithi za Sauti | Voice-First Stories</h3>
+              <h3 className="text-xl font-semibold mb-3 text-card-foreground">{t('features.voice.title')}</h3>
               <p className="text-muted-foreground">
-                Shiriki uzoefu wako kupitia rekodi za sauti, zinazoweza kufikiwa na watu wote bila kujali kiwango cha ujuzi wa kusoma
+                {t('features.voice.description')}
               </p>
             </div>
 
@@ -62,9 +61,9 @@ const HeroSection = () => {
               <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center mb-4 mx-auto">
                 <Map className="w-6 h-6 text-accent-foreground" />
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-card-foreground">Maeneo Salama ya Kijamii | Safe Community Hubs</h3>
+              <h3 className="text-xl font-semibold mb-3 text-card-foreground">{t('features.community.title')}</h3>
               <p className="text-muted-foreground">
-                Pata na unganike na maeneo ya mazungumzo ya kuaminika katika eneo lako huko Kenya
+                {t('features.community.description')}
               </p>
             </div>
 
@@ -72,9 +71,9 @@ const HeroSection = () => {
               <div className="w-12 h-12 bg-warning rounded-full flex items-center justify-center mb-4 mx-auto">
                 <Award className="w-6 h-6 text-warning-foreground" />
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-card-foreground">Pata Utambulisho | Earn Recognition</h3>
+              <h3 className="text-xl font-semibold mb-3 text-card-foreground">{t('features.challenges.title')}</h3>
               <p className="text-muted-foreground">
-                Pata vibeti na utambulisho kwa michango yako mizuri katika kujenga amani Kenya
+                {t('features.challenges.description')}
               </p>
             </div>
           </div>

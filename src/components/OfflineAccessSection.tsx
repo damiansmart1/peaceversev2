@@ -26,7 +26,7 @@ const OfflineAccessSection = () => {
       id: "sms-ussd",
       icon: MessageSquare,
       title: "SMS & USSD",
-      description: "Ufikivu kupitia simu za kawaida bila mtandao wa intaneti",
+      description: "Accessible via basic phones without internet connectivity",
       features: [
         "Story sharing via SMS (160 chars)",
         "*555# USSD menu navigation", 
@@ -42,7 +42,7 @@ const OfflineAccessSection = () => {
       id: "voice-calls",
       icon: Phone,
       title: "Voice Hotline",
-      description: "Simu ya moja kwa moja kwa kushiriki hadithi na kupata msaada",
+      description: "Direct phone line for sharing stories and getting support",
       features: [
         "24/7 peace storytelling hotline",
         "Multi-language support",
@@ -58,7 +58,7 @@ const OfflineAccessSection = () => {
       id: "radio-integration",
       icon: Radio,
       title: "Community Radio",
-      description: "Unganiko na vituo vya redio vya kijamii kwa mawasiliano ya kipana",
+      description: "Integration with community radio stations for broad communication",
       features: [
         "Weekly peace dialogue broadcasts",
         "Story sharing sessions",
@@ -103,7 +103,7 @@ const OfflineAccessSection = () => {
     },
     {
       title: "Offline Content Packages",
-      description: "Vifurushi vya maudhui vinavyosambazwa kupitia Bluetooth na WiFi hotspots",
+      description: "Content packages distributed via Bluetooth and WiFi hotspots",
       size: "Weekly 5MB packages",
       icon: Download
     }
@@ -114,10 +114,10 @@ const OfflineAccessSection = () => {
       <div className="container mx-auto px-6">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold mb-4 text-foreground">
-            Ufikivu kwa Wote | Universal Access
+            Universal Access
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Peace Verse inafanya kazi kwa vijana wa pembezoni na maeneo ya vijijini yenye ufikivu mdogo wa mtandao wa intaneti
+            Peace Verse works for youth in marginalized and rural areas with limited internet access
           </p>
         </div>
 
@@ -282,10 +282,10 @@ const OfflineAccessSection = () => {
         <Card className="max-w-4xl mx-auto mt-12 p-8 bg-gradient-to-r from-accent/10 to-primary/10 border-accent/20">
           <div className="text-center">
             <Users className="w-16 h-16 text-accent mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-card-foreground mb-4">Ahadi ya Ufikivu | Access Promise</h3>
+            <h3 className="text-2xl font-bold text-card-foreground mb-4">Access Promise</h3>
             <p className="text-muted-foreground leading-relaxed">
-              Hakuna kijana wa Kenya anayepaswa kutengwa katika mazungumzo ya amani kwa sababu ya kipimo cha teknolojia. 
-              Peace Verse inafanya kazi kwa simu za kawaida, simu za kisasa, na hata bila simu kabisa.
+              No Kenyan youth should be excluded from peace conversations because of technology barriers. 
+              Peace Verse works on basic phones, smartphones, and even without any phone at all.
             </p>
           </div>
         </Card>

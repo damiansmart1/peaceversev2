@@ -9,55 +9,55 @@ const PeacebuildingChallenges = () => {
       id: "hate-speech",
       icon: MessageSquareWarning,
       title: "Hate Speech & Incitement",
-      description: "Mazungumzo ya kuchukiza na maneno ya uchochezi kupitia mitandao ya kijamii",
+      description: "Hate speech and incitement through social media",
       targets: ["Political tensions", "Ethnic stereotypes", "Religious intolerance"],
       severity: "critical",
-      stats: "65% ya vijana wameona maneno ya uchukizi mtandaoni"
+      stats: "65% of youth have encountered hate speech online"
     },
     {
       id: "ethnic-tensions",
       icon: Users,
       title: "Ethnic & Tribal Tensions",
-      description: "Mvutano wa kikabila na ugomvi wa kijamii unaozuka wakati wa uchaguzi",
+      description: "Ethnic and tribal tensions that emerge during elections",
       targets: ["Inter-community conflicts", "Land disputes", "Resource competition"],
       severity: "high",
-      stats: "78% ya makabila makuu huko Kenya yameguswa na mvutano"
+      stats: "78% of major tribes in Kenya have been affected by tensions"
     },
     {
       id: "political-violence",
       icon: AlertTriangle,
       title: "Political Violence & Extremism",
-      description: "Vurugu za kisiasa na mioyo ya kigomvi wakati wa uchaguzi",
+      description: "Political violence and extremism during elections",
       targets: ["Electoral violence", "Youth radicalization", "Political intimidation"],
       severity: "critical",
-      stats: "23% ya vijana wameguswa na vurugu za kisiasa"
+      stats: "23% of youth have been affected by political violence"
     },
     {
       id: "cyberbullying",
       icon: Shield,
       title: "Online Harassment & Cyberbullying",
-      description: "Udhalilishaji mtandaoni na fitina zinazolenga vijana na makundi maalum",
+      description: "Online harassment and slander targeting youth and specific groups",
       targets: ["Gender-based violence", "Youth targeting", "Minority harassment"],
       severity: "high",
-      stats: "45% ya wasichana wamepata udhalilishaji mtandaoni"
+      stats: "45% of girls have experienced online harassment"
     },
     {
       id: "disinformation",
       icon: Zap,
       title: "Disinformation & Fake News",
-      description: "Habari za uongo na misinformation inayoeneza ghadhaba na chuki",
+      description: "False news and misinformation spreading anger and hatred",
       targets: ["False narratives", "Manipulated media", "Conspiracy theories"],
       severity: "high",
-      stats: "89% ya Wakenya wamepokea habari za uongo WhatsApp"
+      stats: "89% of Kenyans have received fake news on WhatsApp"
     },
     {
       id: "social-exclusion",
       icon: Target,
       title: "Social Marginalization",
-      description: "Kutengwa kwa makundi maalum na upungufu wa ushiriki katika mazungumzo ya amani",
+      description: "Exclusion of specific groups and lack of participation in peace conversations",
       targets: ["PWDs exclusion", "Rural youth isolation", "Economic marginalization"],
       severity: "medium",
-      stats: "34% ya vijana vijijini wamehisi kutengwa"
+      stats: "34% of rural youth have felt excluded"
     }
   ];
 
@@ -75,10 +75,10 @@ const PeacebuildingChallenges = () => {
       <div className="container mx-auto px-4">
         <div className="text-center mb-10">
           <h2 className="text-3xl md:text-4xl font-bold mb-3 text-foreground">
-            Changamoto za Kujenga Amani | Peacebuilding Challenges
+            Peacebuilding Challenges
           </h2>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-            Peace Verse inashughulikia changamoto maalum za kujenga amani Kenya kwa kutumia teknolojia ya kisasa na mbinu za kitamaduni
+            Peace Verse addresses specific peacebuilding challenges in Kenya using modern technology and traditional approaches
           </p>
         </div>
 
@@ -144,8 +144,8 @@ const PeacebuildingChallenges = () => {
           <div className="text-center text-primary-foreground">
             <h3 className="text-xl md:text-2xl font-bold mb-3">Our Targeted Response</h3>
             <p className="text-base md:text-lg leading-relaxed">
-              Peace Verse haijengwi tu kama jukwaa la mazungumzo - ni silaha ya teknolojia iliyoundwa kukabiliana na changamoto hizi maalum. 
-              Tunatumia AI, sauti ya mtu, na ushirikiano wa jamii kujenga uongozi wa amani unaozuia na kushughilia matatizo haya ya kimsingi.
+              Peace Verse is not just built as a dialogue platform - it's a technology tool designed to tackle these specific challenges. 
+              We use AI, human voice, and community collaboration to build peace leadership that prevents and addresses these fundamental issues.
             </p>
           </div>
         </Card>

@@ -28,7 +28,7 @@ const SafetyProtectionSection = () => {
       id: "anonymous-participation",
       icon: EyeOff,
       title: "Anonymous Participation",
-      description: "Shiriki hadithi bila kutambulika",
+      description: "Share stories anonymously",
       details: [
         "Voice modification technology",
         "No personal data collection", 
@@ -85,7 +85,7 @@ const SafetyProtectionSection = () => {
   const crisisProtocols = [
     {
       title: "Immediate Threat Response",
-      description: "Hatua za haraka kwa mazingira ya hatari",
+      description: "Quick actions for dangerous situations",
       actions: [
         "Panic button for instant deletion",
         "Emergency contact alerts", 
@@ -146,17 +146,17 @@ const SafetyProtectionSection = () => {
       <div className="container mx-auto px-6">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold mb-4 text-foreground">
-            Usalama na Ulinzi | Safety & Protection
+            Safety & Protection
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Kulinda vijana walio kwenye hatari za kisiasa, ujamii, na za kimfumo
+            Protecting youth facing political, social, and systemic risks
           </p>
         </div>
 
         {/* Safety Controls Demo */}
         <Card className="max-w-4xl mx-auto mb-12 p-8 bg-card/80 backdrop-blur-sm shadow-story">
           <h3 className="text-xl font-semibold mb-6 text-card-foreground text-center">
-            Personal Safety Controls | Udhibiti wa Usalama
+            Personal Safety Controls
           </h3>
           
           <div className="grid md:grid-cols-3 gap-6">
@@ -336,10 +336,10 @@ const SafetyProtectionSection = () => {
         <Card className="max-w-4xl mx-auto mt-12 p-8 bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20">
           <div className="text-center">
             <Crown className="w-16 h-16 text-primary mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-card-foreground mb-4">Ahadi ya Ulinzi | Protection Guarantee</h3>
+            <h3 className="text-2xl font-bold text-card-foreground mb-4">Protection Guarantee</h3>
             <p className="text-muted-foreground leading-relaxed">
-              Kila kijana kwenye Peace Verse ana haki ya kujisikia salama wakati wa kushiriki mazungumzo ya amani. 
-              Hatutoi ahadi za uwongo - tunatoa ulinzi wa kweli kupitia teknolojia ya kisasa na mkakati wa jamii.
+              Every youth on Peace Verse has the right to feel safe while participating in peace conversations. 
+              We don't make false promises - we provide real protection through modern technology and community strategies.
             </p>
           </div>
         </Card>

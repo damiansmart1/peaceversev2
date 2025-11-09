@@ -35,9 +35,9 @@ const AccessibilityFeatures = () => {
     <section className="py-16 bg-muted/20">
       <div className="container mx-auto px-6">
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold mb-4 text-foreground">Kujumuisha kwa Muundo | Inclusive by Design</h2>
+          <h2 className="text-4xl font-bold mb-4 text-foreground">Inclusive by Design</h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Peace Verse imeundwa kukaribishia kila mtu, bila kujali kiwango cha ujuzi wa kusoma, uwezo wa kimwili, au lugha
+            Peace Verse is designed to welcome everyone, regardless of literacy level, physical ability, or language
           </p>
         </div>
 

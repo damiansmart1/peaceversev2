@@ -4,8 +4,10 @@ import { Card } from "@/components/ui/card";
 import { Mic, Square, Play, Pause, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ShareDialog from "./ShareDialog";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const VoiceRecorder = () => {
+  const { t } = useTranslation();
   const [isRecording, setIsRecording] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -92,9 +94,9 @@ const VoiceRecorder = () => {
   return (
     <Card className="p-8 max-w-md mx-auto bg-card/80 backdrop-blur-sm border-accent/20 shadow-story">
       <div className="text-center space-y-6">
-        <h3 className="text-2xl font-semibold text-card-foreground">Shiriki Sauti Yako | Share Your Voice</h3>
+        <h3 className="text-2xl font-semibold text-card-foreground">{t('voice.record')}</h3>
         <p className="text-muted-foreground">
-          Rekodi hadithi yako ili kuongoza amani na uelewa huko Kenya
+          Record your story to amplify peace and understanding in Kenya
         </p>
 
         {/* Recording Indicator */}

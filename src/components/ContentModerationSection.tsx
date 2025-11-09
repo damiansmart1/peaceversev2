@@ -224,10 +224,10 @@ const ContentModerationSection = () => {
         <Card className="max-w-4xl mx-auto mt-12 p-8 bg-gradient-to-r from-success/10 to-primary/10 border-success/20">
           <div className="text-center">
             <Shield className="w-16 h-16 text-success mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-card-foreground mb-4">Ahadi ya Usalama | Safety Guarantee</h3>
+            <h3 className="text-2xl font-bold text-card-foreground mb-4">Safety Guarantee</h3>
             <p className="text-muted-foreground leading-relaxed">
-              Kila ujumbe, picha, na sauti inayoshirikiwa kwenye Peace Verse inapita katika mfumo wa uchunguzi mkali. 
-              Tunahakikisha mazingira salama ya mazungumzo ya amani kwa vijana wa Kenya wote.
+              Every message, image, and voice shared on Peace Verse goes through a rigorous screening system. 
+              We ensure safe environments for peace conversations for all Kenyan youth.
             </p>
           </div>
         </Card>

@@ -25,8 +25,8 @@ const CommunityTrustSection = () => {
     {
       id: "elder-partnership",
       icon: Crown,
-      title: "Ushirikiano na Wazee",
-      description: "Uongozi wa pamoja na wazee wa jamii na viongozi wa dini",
+      title: "Elder Partnership",
+      description: "Collaborative leadership with community elders and religious leaders",
       features: [
         "Elder council advisory board",
         "Traditional wisdom integration", 
@@ -67,8 +67,8 @@ const CommunityTrustSection = () => {
     {
       id: "proven-results",
       icon: TrendingUp,
-      title: "Matokeo ya Uthibitisho",
-      description: "Ushahidi wa kufanikiwa katika kujenga amani",
+      title: "Proven Results",
+      description: "Evidence of success in peace building",
       features: [
         "Documented conflict reduction",
         "Successful mediation cases", 
@@ -122,20 +122,20 @@ const CommunityTrustSection = () => {
     {
       id: "kibera-peace",
       title: "Kibera Youth Peace Initiative",
-      description: "Vijana wa Kibera walijunga kutatua migogoro ya kijamii",
+      description: "Kibera youth united to resolve community conflicts",
       impact: "40% reduction in youth conflicts",
       verified: true,
       endorsers: ["Area Chief", "Religious Leaders", "Women's Groups"],
-      quote: "Peace Verse ilitusaidia kuongea na kushiriki bila woga"
+      quote: "Peace Verse helped us speak and share without fear"
     },
     {
       id: "nakuru-harmony",
       title: "Nakuru Ethnic Harmony Project", 
-      description: "Makabila mbalimbali yakaja pamoja baada ya migogoro",
+      description: "Different tribes came together after conflicts",
       impact: "35 families reconciled",
       verified: true,
       endorsers: ["County Commissioner", "Traditional Elders", "Youth Leaders"],
-      quote: "Tulipata nafasi ya kuelewa na kusamehana"
+      quote: "We got the opportunity to understand and forgive each other"
     }
   ];
 
@@ -144,10 +144,10 @@ const CommunityTrustSection = () => {
       <div className="container mx-auto px-6">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold mb-4 text-foreground">
-            Kujenga Imani ya Jamii | Building Community Trust  
+            Building Community Trust  
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Kuunganisha kizazi cha vijana na uongozi wa kitamaduni kwa ajili ya uongozi wa amani unaoheshimiwa
+            Bridging youth voices with cultural leadership for respected peace guidance
           </p>
         </div>
 
@@ -305,10 +305,10 @@ const CommunityTrustSection = () => {
         <Card className="max-w-4xl mx-auto mt-12 p-8 bg-gradient-to-r from-success/10 to-primary/10 border-success/20">
           <div className="text-center">
             <Handshake className="w-16 h-16 text-success mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-card-foreground mb-4">Ahadi ya Uaminifu | Trust Commitment</h3>
+            <h3 className="text-2xl font-bold text-card-foreground mb-4">Trust Commitment</h3>
             <p className="text-muted-foreground leading-relaxed">
-              Peace Verse si mradi wa kijana tu - ni ushirikiano wa kizazi cha vijana na uongozi wa kitamaduni. 
-              Tunaheshimu utamaduni, tunaongoza kwa uwazi, na tunatekeleza ahadi zetu kwa jamii.
+              Peace Verse is not just a youth project - it's a partnership between youth and cultural leadership. 
+              We respect culture, lead with transparency, and deliver on our commitments to the community.
             </p>
           </div>
         </Card>
