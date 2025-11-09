@@ -102,6 +102,47 @@ const Navigation = () => {
                 </Button>
               );
             })}
+            
+            {/* Authentication Section */}
+            <div className="flex items-center gap-2 ml-4 pl-4 border-l border-border">
+              {user ? (
+                <>
+                  {isAnonymous && (
+                    <span className="text-xs text-muted-foreground">Guest</span>
+                  )}
+                  {isAdmin && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate('/admin')}
+                      className="gap-2"
+                    >
+                      <Settings className="w-4 h-4" />
+                      Admin
+                    </Button>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleSignOut}
+                    className="gap-2"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Sign Out
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => navigate('/auth')}
+                  className="gap-2"
+                >
+                  <User className="w-4 h-4" />
+                  Sign In
+                </Button>
+              )}
+            </div>
           </div>
 
           {/* Right Side Actions */}
@@ -124,43 +165,6 @@ const Navigation = () => {
             >
               <HelpCircle className="w-4 h-4" />
             </Button>
-            {user ? (
-              <div className="hidden md:flex items-center gap-2">
-                {isAnonymous && (
-                  <span className="text-xs text-muted-foreground">Guest</span>
-                )}
-                {isAdmin && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => navigate('/admin')}
-                    className="gap-2"
-                  >
-                    <Settings className="w-4 h-4" />
-                    Admin
-                  </Button>
-                )}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleSignOut}
-                  className="gap-2"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Sign Out
-                </Button>
-              </div>
-            ) : (
-              <Button
-                variant="default"
-                size="sm"
-                onClick={() => navigate('/auth')}
-                className="gap-2 hidden md:flex"
-              >
-                <User className="w-4 h-4" />
-                Sign In
-              </Button>
-            )}
             <LanguageToggle />
             
             {/* Mobile Menu */}
