@@ -11,7 +11,7 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 
-const GOOGLE_MAPS_API_KEY = 'AIzaSyBpQxxxxxXXXXXXxxxXXXXXXxXXXxxxxxx'; // Temporary - should be from environment
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
 
 const COMESA_COUNTRIES = [
   { code: 'all', name: 'All COMESA' },
@@ -57,6 +57,12 @@ const InteractiveHeatmap = () => {
   useEffect(() => {
     if (!mapRef.current || mapLoaded) return;
 
+    if (!GOOGLE_MAPS_API_KEY) {
+      console.error('Google Maps API key is missing');
+      toast.error('Google Maps API key is not configured. Please add VITE_GOOGLE_MAPS_API_KEY to your environment variables.');
+      return;
+    }
+
     const loader = new Loader({
       apiKey: GOOGLE_MAPS_API_KEY,
       version: 'weekly',
@@ -83,7 +89,7 @@ const InteractiveHeatmap = () => {
       setMapLoaded(true);
     }).catch(error => {
       console.error('Error loading Google Maps:', error);
-      toast.error('Failed to load map. Please check your API key.');
+      toast.error('Failed to load map. Please check your API key configuration.');
     });
   }, [mapLoaded]);
 
@@ -253,6 +259,37 @@ const InteractiveHeatmap = () => {
 
   if (isLoading && !mapLoaded) {
     return <LoadingSpinner />;
+  }
+
+  if (!GOOGLE_MAPS_API_KEY) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-destructive">
+            <AlertTriangle className="w-5 h-5" />
+            Google Maps API Key Required
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-muted-foreground">
+            The interactive map requires a Google Maps API key to function. Please follow these steps:
+          </p>
+          <ol className="list-decimal list-inside space-y-2 text-sm">
+            <li>Visit the <a href="https://console.cloud.google.com/google/maps-apis" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Google Cloud Console</a></li>
+            <li>Create or select a project</li>
+            <li>Enable the Maps JavaScript API and Places API</li>
+            <li>Create an API key with appropriate restrictions</li>
+            <li>Add the API key to your <code className="bg-muted px-2 py-1 rounded">VITE_GOOGLE_MAPS_API_KEY</code> environment variable</li>
+          </ol>
+          <div className="bg-muted p-4 rounded-lg">
+            <p className="text-xs font-mono">
+              # Add to your .env file:<br />
+              VITE_GOOGLE_MAPS_API_KEY=your_api_key_here
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
