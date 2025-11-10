@@ -73,20 +73,33 @@ const InteractiveHeatmap = () => {
       if (!mapRef.current) return;
 
       const map = new google.maps.Map(mapRef.current, {
-        center: { lat: 0, lng: 35 }, // Center on COMESA region
+        center: { lat: -1.2921, lng: 36.8219 }, // Center on Kenya/COMESA region
         zoom: 5,
+        minZoom: 3,
+        maxZoom: 18,
         mapTypeId: 'roadmap',
+        streetViewControl: false,
+        mapTypeControl: true,
+        fullscreenControl: true,
+        zoomControl: true,
         styles: [
           {
             featureType: 'poi',
             stylers: [{ visibility: 'off' }],
           },
+          {
+            featureType: 'transit',
+            stylers: [{ visibility: 'simplified' }],
+          },
         ],
       });
 
       mapInstanceRef.current = map;
-      infoWindowRef.current = new google.maps.InfoWindow();
+      infoWindowRef.current = new google.maps.InfoWindow({
+        maxWidth: 320,
+      });
       setMapLoaded(true);
+      toast.success('Interactive map loaded successfully');
     }).catch(error => {
       console.error('Error loading Google Maps:', error);
       toast.error('Failed to load map. Please check your API key configuration.');
@@ -150,8 +163,24 @@ const InteractiveHeatmap = () => {
       heatmapLayerRef.current = new google.maps.visualization.HeatmapLayer({
         data: heatmapData,
         map: mapInstanceRef.current,
-        radius: 30,
-        opacity: 0.7,
+        radius: 35,
+        opacity: 0.75,
+        gradient: [
+          'rgba(0, 255, 255, 0)',
+          'rgba(0, 255, 255, 1)',
+          'rgba(0, 191, 255, 1)',
+          'rgba(0, 127, 255, 1)',
+          'rgba(0, 63, 255, 1)',
+          'rgba(0, 0, 255, 1)',
+          'rgba(0, 0, 223, 1)',
+          'rgba(0, 0, 191, 1)',
+          'rgba(0, 0, 159, 1)',
+          'rgba(0, 0, 127, 1)',
+          'rgba(63, 0, 91, 1)',
+          'rgba(127, 0, 63, 1)',
+          'rgba(191, 0, 31, 1)',
+          'rgba(255, 0, 0, 1)'
+        ]
       });
     }
 
@@ -174,14 +203,36 @@ const InteractiveHeatmap = () => {
     if (!infoWindowRef.current) return;
 
     const content = `
-      <div style="padding: 8px; max-width: 300px;">
-        <h3 style="font-weight: bold; margin-bottom: 8px; color: #1a1a1a;">${incident.title}</h3>
-        <p style="margin-bottom: 4px;"><strong>Type:</strong> ${incident.incident_type}</p>
-        <p style="margin-bottom: 4px;"><strong>Severity:</strong> <span style="color: ${getSeverityColor(incident.severity)}; font-weight: bold;">${incident.severity.toUpperCase()}</span></p>
-        <p style="margin-bottom: 4px;"><strong>Status:</strong> ${incident.status}</p>
-        <p style="margin-bottom: 4px;"><strong>Location:</strong> ${incident.geo_location?.location_name || 'Unknown'}</p>
-        ${incident.affected_population ? `<p style="margin-bottom: 4px;"><strong>Affected:</strong> ${incident.affected_population} people</p>` : ''}
-        <p style="margin-bottom: 4px;"><strong>Reported:</strong> ${new Date(incident.created_at).toLocaleDateString()}</p>
+      <div style="padding: 12px; max-width: 320px; font-family: system-ui, -apple-system, sans-serif;">
+        <h3 style="font-weight: 700; margin-bottom: 12px; color: #1a1a1a; font-size: 16px; line-height: 1.4;">${incident.title}</h3>
+        <div style="display: grid; gap: 8px;">
+          <div style="display: flex; gap: 8px;">
+            <span style="font-weight: 600; color: #666; min-width: 80px;">Type:</span>
+            <span style="color: #1a1a1a;">${incident.incident_type}</span>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <span style="font-weight: 600; color: #666; min-width: 80px;">Severity:</span>
+            <span style="color: ${getSeverityColor(incident.severity)}; font-weight: 700; text-transform: uppercase;">${incident.severity}</span>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <span style="font-weight: 600; color: #666; min-width: 80px;">Status:</span>
+            <span style="color: #1a1a1a; text-transform: capitalize;">${incident.status.replace('_', ' ')}</span>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <span style="font-weight: 600; color: #666; min-width: 80px;">Location:</span>
+            <span style="color: #1a1a1a;">${incident.geo_location?.location_name || 'Unknown'}</span>
+          </div>
+          ${incident.affected_population ? `
+          <div style="display: flex; gap: 8px;">
+            <span style="font-weight: 600; color: #666; min-width: 80px;">Affected:</span>
+            <span style="color: #1a1a1a;">${incident.affected_population.toLocaleString()} people</span>
+          </div>` : ''}
+          <div style="display: flex; gap: 8px;">
+            <span style="font-weight: 600; color: #666; min-width: 80px;">Reported:</span>
+            <span style="color: #1a1a1a;">${new Date(incident.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+          </div>
+        </div>
+        ${incident.description ? `<p style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e5e5; color: #666; font-size: 14px; line-height: 1.5;">${incident.description.substring(0, 150)}${incident.description.length > 150 ? '...' : ''}</p>` : ''}
       </div>
     `;
 
@@ -434,11 +485,18 @@ const InteractiveHeatmap = () => {
         <CardHeader>
           <CardTitle>Live Incident Map</CardTitle>
           <CardDescription>
-            Click on markers for detailed information. Red indicates critical severity.
+            {viewMode === 'markers' 
+              ? 'Click on markers for detailed information. Larger circles indicate higher severity incidents.'
+              : 'Heat intensity represents incident concentration and severity. Red areas require immediate attention.'}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div ref={mapRef} className="w-full h-[600px] rounded-lg" />
+          <div ref={mapRef} className="w-full h-[600px] rounded-lg border border-border" />
+          {isLoading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm rounded-lg">
+              <LoadingSpinner />
+            </div>
+          )}
         </CardContent>
       </Card>
 
