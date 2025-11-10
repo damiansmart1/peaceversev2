@@ -4,8 +4,9 @@ import { Loader } from '@googlemaps/js-api-loader';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Download, MapPin, AlertTriangle, Activity, Users, Calendar, FileText } from 'lucide-react';
+import { Download, MapPin, AlertTriangle, Activity, Users, Calendar, FileText, MapPinned } from 'lucide-react';
 import { useIncidentHeatmapData, HeatmapIncident } from '@/hooks/useIncidentHeatmapData';
+import { useIncidentNotifications } from '@/hooks/useIncidentNotifications';
 import { exportToJSON, exportToCSV, exportToPDF, exportToWord } from '@/lib/exportUtils';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { Badge } from '@/components/ui/badge';
@@ -41,6 +42,7 @@ const InteractiveHeatmap = () => {
   const markersRef = useRef<google.maps.Marker[]>([]);
   const heatmapLayerRef = useRef<google.maps.visualization.HeatmapLayer | null>(null);
   const infoWindowRef = useRef<google.maps.InfoWindow | null>(null);
+  const userMarkerRef = useRef<google.maps.Marker | null>(null);
 
   const [selectedCountry, setSelectedCountry] = useState('all');
   const [selectedSeverity, setSelectedSeverity] = useState('all');
@@ -52,6 +54,8 @@ const InteractiveHeatmap = () => {
     selectedCountry === 'all' ? undefined : selectedCountry,
     selectedSeverity === 'all' ? undefined : selectedSeverity
   );
+  
+  const { userLocation, locationPermission } = useIncidentNotifications(50);
 
   // Initialize Google Maps
   useEffect(() => {
@@ -98,13 +102,88 @@ const InteractiveHeatmap = () => {
       infoWindowRef.current = new google.maps.InfoWindow({
         maxWidth: 320,
       });
+      
+      // Add user location marker if available
+      if (userLocation) {
+        userMarkerRef.current = new google.maps.Marker({
+          position: { lat: userLocation.latitude, lng: userLocation.longitude },
+          map: map,
+          title: 'Your Location',
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 8,
+            fillColor: '#4F46E5',
+            fillOpacity: 1,
+            strokeColor: '#ffffff',
+            strokeWeight: 2,
+          },
+          zIndex: 1000,
+        });
+
+        const userInfoWindow = new google.maps.InfoWindow({
+          content: `
+            <div style="padding: 12px;">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                <span style="font-size: 18px;">📍</span>
+                <strong style="color: #4F46E5;">Your Location</strong>
+              </div>
+              <p style="color: #666; font-size: 14px; margin: 0;">
+                Monitoring critical incidents within 50km radius
+              </p>
+            </div>
+          `,
+        });
+
+        userMarkerRef.current.addListener('click', () => {
+          userInfoWindow.open(map, userMarkerRef.current);
+        });
+      }
+      
       setMapLoaded(true);
       toast.success('Interactive map loaded successfully');
     }).catch(error => {
       console.error('Error loading Google Maps:', error);
       toast.error('Failed to load map. Please check your API key configuration.');
     });
-  }, [mapLoaded]);
+  }, [mapLoaded, userLocation]);
+  
+  // Update user location marker when location changes
+  useEffect(() => {
+    if (userLocation && mapInstanceRef.current && mapLoaded && !userMarkerRef.current) {
+      userMarkerRef.current = new google.maps.Marker({
+        position: { lat: userLocation.latitude, lng: userLocation.longitude },
+        map: mapInstanceRef.current,
+        title: 'Your Location',
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 8,
+          fillColor: '#4F46E5',
+          fillOpacity: 1,
+          strokeColor: '#ffffff',
+          strokeWeight: 2,
+        },
+        zIndex: 1000,
+      });
+
+      const userInfoWindow = new google.maps.InfoWindow({
+        content: `
+          <div style="padding: 12px;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+              <span style="font-size: 18px;">📍</span>
+              <strong style="color: #4F46E5;">Your Location</strong>
+            </div>
+            <p style="color: #666; font-size: 14px; margin: 0;">
+              Monitoring critical incidents within 50km radius
+            </p>
+          </div>
+        `,
+      });
+
+      userMarkerRef.current.addListener('click', () => {
+        userInfoWindow.open(mapInstanceRef.current, userMarkerRef.current);
+      });
+    }
+  }, [userLocation, mapLoaded]);
 
   // Update markers and heatmap when data changes
   useEffect(() => {
@@ -348,11 +427,21 @@ const InteractiveHeatmap = () => {
       {/* Controls */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MapPin className="w-5 h-5" />
-            Interactive Heatmap Controls
-          </CardTitle>
-          <CardDescription>Filter and export incident data for early response planning</CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <MapPin className="w-5 h-5" />
+                Interactive Heatmap Controls
+              </CardTitle>
+              <CardDescription>Filter and export incident data for early response planning</CardDescription>
+            </div>
+            {locationPermission === 'granted' && (
+              <Badge variant="secondary" className="flex items-center gap-1.5">
+                <MapPinned className="h-3 w-3" />
+                <span>Live Alerts Active</span>
+              </Badge>
+            )}
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
