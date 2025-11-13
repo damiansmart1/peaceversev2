@@ -19,7 +19,7 @@ const Navigation = () => {
   const { t } = useTranslationContext();
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, isAnonymous } = useAuth();
+  const { user, isAnonymous, isLoading } = useAuth();
   const { toast } = useToast();
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -107,7 +107,12 @@ const Navigation = () => {
             
             {/* Authentication Section - Top Right Corner */}
             <div className="flex items-center gap-3 ml-4 pl-4 border-l border-border">
-              {user ? (
+              {isLoading ? (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                  <span className="text-sm">Loading...</span>
+                </div>
+              ) : user ? (
                 <>
                   {/* Welcome Message with User Name */}
                   <div className="hidden lg:flex flex-col items-end">
@@ -139,25 +144,26 @@ const Navigation = () => {
                     variant="ghost"
                     size="sm"
                     onClick={handleSignOut}
-                    className="gap-2"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    <span className="hidden xl:inline">Sign Out</span>
-                  </Button>
-                </>
-              ) : (
-                <Button
-                  variant="default"
-                  size="default"
-                  onClick={() => navigate('/auth')}
-                  className="gap-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg font-semibold px-6"
-                >
-                  <User className="w-4 h-4" />
-                  Sign In
-                </Button>
-              )}
-            </div>
-          </div>
+                     className="gap-2"
+                   >
+                     <LogOut className="w-4 h-4" />
+                     <span className="hidden xl:inline">Sign Out</span>
+                   </Button>
+                 </>
+               ) : (
+                 // Sign In Button - Always visible when not loading and not logged in
+                 <Button
+                   variant="default"
+                   size="lg"
+                   onClick={() => navigate('/auth')}
+                   className="gap-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg font-semibold px-8 py-2 text-base"
+                 >
+                   <User className="w-5 h-5" />
+                   Sign In
+                 </Button>
+               )}
+             </div>
+           </div>
 
           {/* Right Side Actions */}
           <div className="flex items-center space-x-2">
@@ -228,8 +234,13 @@ const Navigation = () => {
                   })}
                 </div>
                 
-                <div className="mt-8 pt-8 border-t border-border space-y-4">
-                  {user ? (
+                 <div className="mt-8 pt-8 border-t border-border space-y-4">
+                   {isLoading ? (
+                     <div className="flex items-center justify-center gap-2 text-muted-foreground py-4">
+                       <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                       <span>Loading...</span>
+                     </div>
+                   ) : user ? (
                     <>
                       {/* User Welcome Section */}
                       <div className="px-4 py-3 bg-primary/5 rounded-lg border border-primary/20">
@@ -274,13 +285,9 @@ const Navigation = () => {
                         <User className="w-4 h-4" />
                         Sign In
                       </Button>
-                    </SheetClose>
-                  )}
-                  <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                    <Globe className="w-4 h-4" />
-                    <span>{t('nav.footer.global')}</span>
-                  </div>
-                </div>
+                     </SheetClose>
+                   )}
+                 </div>
               </SheetContent>
             </Sheet>
           </div>
