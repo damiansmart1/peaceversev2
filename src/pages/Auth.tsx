@@ -32,7 +32,8 @@ export default function Auth() {
 
   useEffect(() => {
     if (user && !user.is_anonymous) {
-      navigate('/');
+      // Redirect to profile page after successful login
+      navigate('/profile');
     }
   }, [user, navigate]);
 
@@ -179,7 +180,11 @@ export default function Auth() {
         variant: 'destructive',
       });
     } else {
-      navigate('/');
+      toast({
+        title: 'Welcome Back!',
+        description: 'You have successfully signed in.',
+      });
+      navigate('/profile');
     }
   };
 

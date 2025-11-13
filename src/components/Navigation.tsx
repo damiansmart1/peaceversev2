@@ -13,6 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAdminCheck } from "@/hooks/useAdminCheck";
+import { useUserProfile } from "@/hooks/useUserProfile";
 
 const Navigation = () => {
   const { t } = useTranslationContext();
@@ -23,6 +24,7 @@ const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const { data: isAdmin } = useAdminCheck();
+  const { data: userProfile } = useUserProfile();
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -103,24 +105,36 @@ const Navigation = () => {
               );
             })}
             
-            {/* Authentication Section */}
-            <div className="flex items-center gap-2 ml-4 pl-4 border-l border-border">
+            {/* Authentication Section - Top Right Corner */}
+            <div className="flex items-center gap-3 ml-4 pl-4 border-l border-border">
               {user ? (
                 <>
-                  {isAnonymous && (
-                    <span className="text-xs text-muted-foreground">Guest</span>
-                  )}
+                  {/* Welcome Message with User Name */}
+                  <div className="hidden lg:flex flex-col items-end">
+                    <span className="text-sm font-semibold text-foreground">
+                      {isAnonymous ? 'Guest User' : `Welcome, ${userProfile?.display_name || userProfile?.username || 'User'}`}
+                    </span>
+                    {!isAnonymous && (
+                      <span className="text-xs text-muted-foreground">
+                        {userProfile?.user_type || 'Member'}
+                      </span>
+                    )}
+                  </div>
+                  
+                  {/* Admin Button */}
                   {isAdmin && (
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => navigate('/admin')}
-                      className="gap-2"
+                      className="gap-2 bg-primary/10 hover:bg-primary/20 border-primary/30"
                     >
                       <Settings className="w-4 h-4" />
-                      Admin
+                      <span className="hidden xl:inline">Admin Portal</span>
                     </Button>
                   )}
+                  
+                  {/* Sign Out Button */}
                   <Button
                     variant="ghost"
                     size="sm"
@@ -128,15 +142,15 @@ const Navigation = () => {
                     className="gap-2"
                   >
                     <LogOut className="w-4 h-4" />
-                    Sign Out
+                    <span className="hidden xl:inline">Sign Out</span>
                   </Button>
                 </>
               ) : (
                 <Button
                   variant="default"
-                  size="sm"
+                  size="default"
                   onClick={() => navigate('/auth')}
-                  className="gap-2"
+                  className="gap-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg font-semibold px-6"
                 >
                   <User className="w-4 h-4" />
                   Sign In
@@ -217,12 +231,24 @@ const Navigation = () => {
                 <div className="mt-8 pt-8 border-t border-border space-y-4">
                   {user ? (
                     <>
+                      {/* User Welcome Section */}
+                      <div className="px-4 py-3 bg-primary/5 rounded-lg border border-primary/20">
+                        <p className="text-sm font-semibold text-foreground">
+                          {isAnonymous ? 'Guest User' : `Welcome, ${userProfile?.display_name || userProfile?.username || 'User'}!`}
+                        </p>
+                        {!isAnonymous && userProfile?.user_type && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {userProfile.user_type}
+                          </p>
+                        )}
+                      </div>
+                      
                       {isAdmin && (
                         <SheetClose asChild>
                           <Button
                             variant="outline"
                             onClick={() => navigate('/admin')}
-                            className="w-full justify-start gap-2"
+                            className="w-full justify-start gap-2 bg-primary/10 border-primary/30"
                           >
                             <Settings className="w-4 h-4" />
                             Admin Portal
@@ -243,7 +269,7 @@ const Navigation = () => {
                       <Button
                         variant="default"
                         onClick={() => navigate('/auth')}
-                        className="w-full gap-2"
+                        className="w-full gap-2 bg-gradient-to-r from-primary to-primary/80 font-semibold"
                       >
                         <User className="w-4 h-4" />
                         Sign In
