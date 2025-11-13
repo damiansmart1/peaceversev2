@@ -47,6 +47,45 @@ export type Database = {
         }
         Relationships: []
       }
+      audit_logs: {
+        Row: {
+          action: string
+          changed_at: string
+          changed_by: string | null
+          id: string
+          ip_address: unknown
+          new_data: Json | null
+          old_data: Json | null
+          record_id: string
+          table_name: string
+          user_agent: string | null
+        }
+        Insert: {
+          action: string
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          ip_address?: unknown
+          new_data?: Json | null
+          old_data?: Json | null
+          record_id: string
+          table_name: string
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          ip_address?: unknown
+          new_data?: Json | null
+          old_data?: Json | null
+          record_id?: string
+          table_name?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       challenge_submissions: {
         Row: {
           challenge_id: string
@@ -147,6 +186,7 @@ export type Database = {
           rejection_reason: string | null
           reviewed_at: string | null
           reviewed_by: string | null
+          search_vector: unknown
           thumbnail_url: string | null
           title: string
           updated_at: string
@@ -167,6 +207,7 @@ export type Database = {
           rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          search_vector?: unknown
           thumbnail_url?: string | null
           title: string
           updated_at?: string
@@ -187,6 +228,7 @@ export type Database = {
           rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          search_vector?: unknown
           thumbnail_url?: string | null
           title?: string
           updated_at?: string
@@ -318,6 +360,7 @@ export type Database = {
           reported_by: string | null
           resolution_notes: string | null
           resolved_at: string | null
+          search_vector: unknown
           sentiment_data: Json | null
           severity: string
           status: string
@@ -347,6 +390,7 @@ export type Database = {
           reported_by?: string | null
           resolution_notes?: string | null
           resolved_at?: string | null
+          search_vector?: unknown
           sentiment_data?: Json | null
           severity: string
           status?: string
@@ -376,6 +420,7 @@ export type Database = {
           reported_by?: string | null
           resolution_notes?: string | null
           resolved_at?: string | null
+          search_vector?: unknown
           sentiment_data?: Json | null
           severity?: string
           status?: string
@@ -1045,6 +1090,7 @@ export type Database = {
           rejection_reason: string | null
           reviewed_at: string | null
           reviewed_by: string | null
+          search_vector: unknown
           share_count: number | null
           signature_count: number | null
           signature_goal: number | null
@@ -1078,6 +1124,7 @@ export type Database = {
           rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          search_vector?: unknown
           share_count?: number | null
           signature_count?: number | null
           signature_goal?: number | null
@@ -1111,6 +1158,7 @@ export type Database = {
           rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          search_vector?: unknown
           share_count?: number | null
           signature_count?: number | null
           signature_goal?: number | null
@@ -1425,6 +1473,21 @@ export type Database = {
       }
     }
     Views: {
+      platform_statistics: {
+        Row: {
+          active_challenges: number | null
+          completed_challenges: number | null
+          resolved_incidents: number | null
+          total_content: number | null
+          total_incidents: number | null
+          total_peace_points: number | null
+          total_proposals: number | null
+          total_users: number | null
+          total_votes: number | null
+          verified_safe_spaces: number | null
+        }
+        Relationships: []
+      }
       proposal_vote_summary: {
         Row: {
           abstain_count: number | null
@@ -1445,6 +1508,7 @@ export type Database = {
       }
     }
     Functions: {
+      archive_old_content: { Args: { p_days_old?: number }; Returns: number }
       award_points: {
         Args: {
           p_action_type: string
@@ -1454,7 +1518,9 @@ export type Database = {
         }
         Returns: undefined
       }
+      delete_user_safely: { Args: { p_user_id: string }; Returns: Json }
       generate_proposal_slug: { Args: { title: string }; Returns: string }
+      get_user_resource_stats: { Args: { p_user_id: string }; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
