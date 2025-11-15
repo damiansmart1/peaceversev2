@@ -130,7 +130,7 @@ Respond ONLY with a valid JSON object in this exact format:
   } catch (error) {
     console.error('Sentiment analysis error:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error instanceof Error ? error.message : 'Analysis failed' }),
       {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
