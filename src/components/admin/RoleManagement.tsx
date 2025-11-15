@@ -23,7 +23,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Shield, UserPlus, Trash2, Calendar, CheckCircle, XCircle } from 'lucide-react';
-import type { AppRole } from '@/hooks/useRoleCheck';
+import type { AppRole, UserRoleWithProfile } from '@/types/database';
 
 const roleColors: Record<AppRole, string> = {
   admin: 'bg-red-500',
@@ -56,7 +56,7 @@ export const RoleManagement = () => {
   const { data: userRoles, isLoading } = useQuery({
     queryKey: ['all-user-roles'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const result = await supabase
         .from('user_roles')
         .select(`
           *,
@@ -64,8 +64,8 @@ export const RoleManagement = () => {
         `)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      return data;
+      if (result.error) throw result.error;
+      return result.data as unknown as UserRoleWithProfile[];
     },
   });
 
@@ -97,10 +97,10 @@ export const RoleManagement = () => {
         .from('user_roles')
         .insert({
           user_id: userId,
-          role,
+          role: role as any,
           assigned_by: user.id,
           expires_at: expiresAt || null,
-        })
+        } as any)
         .select()
         .single();
 
@@ -131,7 +131,7 @@ export const RoleManagement = () => {
     mutationFn: async (roleId: string) => {
       const { error } = await supabase
         .from('user_roles')
-        .update({ is_active: false })
+        .update({ is_active: false } as any)
         .eq('id', roleId);
 
       if (error) throw error;
