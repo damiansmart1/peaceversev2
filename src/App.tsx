@@ -33,6 +33,8 @@ import Help from "./pages/Help";
 import AccessibilityPage from "./pages/Accessibility";
 import PeacePulse from "./pages/PeacePulse";
 import Incidents from "./pages/Incidents";
+import Reports from "./pages/Reports";
+import Verification from "./pages/Verification";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -77,6 +79,8 @@ const App = () => (
                     <Route path="/accessibility" element={<AccessibilityPage />} />
                     <Route path="/peace-pulse" element={<PeacePulse />} />
                     <Route path="/incidents" element={<Incidents />} />
+                    <Route path="/reports" element={<Reports />} />
+                    <Route path="/verification" element={<Verification />} />
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>
