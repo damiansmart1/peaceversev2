@@ -44,10 +44,13 @@ const menuItems = [
     singleItem: true,
   },
   {
-    id: 'users',
+    id: 'users-management',
     label: 'Users & Roles',
     icon: Users,
-    singleItem: true,
+    children: [
+      { id: 'users', label: 'Users' },
+      { id: 'roles', label: 'Role Management' },
+    ],
   },
   {
     id: 'content',

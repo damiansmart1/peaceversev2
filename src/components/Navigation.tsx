@@ -47,6 +47,8 @@ const Navigation = () => {
     { path: '/voice', label: t('nav.voice'), icon: Mic },
     { path: '/community', label: t('nav.community'), icon: Users },
     { path: '/radio', label: t('nav.radio'), icon: Radio },
+    { path: '/reports', label: 'Reports', icon: Shield },
+    { path: '/verification', label: 'Verification', icon: Shield },
     { path: '/challenges', label: t('nav.challenges'), icon: Award },
     { path: '/peace-pulse', label: 'PeacePulse', icon: Globe },
     { path: '/incidents', label: 'Incidents', icon: Shield },
