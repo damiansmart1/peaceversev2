@@ -27,7 +27,8 @@ serve(async (req) => {
       throw new Error('Text and target language are required');
     }
 
-    if (!SUPPORTED_LANGUAGES[toLang]) {
+    const supportedLang = toLang as keyof typeof SUPPORTED_LANGUAGES;
+    if (!SUPPORTED_LANGUAGES[supportedLang]) {
       throw new Error(`Unsupported language: ${toLang}`);
     }
 
@@ -47,7 +48,7 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `You are a professional translator specializing in peace and conflict contexts. Translate the following text to ${SUPPORTED_LANGUAGES[toLang]}. Preserve the tone, cultural nuances, and meaning. Respond ONLY with the translated text, no explanations.`
+            content: `You are a professional translator specializing in peace and conflict contexts. Translate the following text to ${SUPPORTED_LANGUAGES[supportedLang]}. Preserve the tone, cultural nuances, and meaning. Respond ONLY with the translated text, no explanations.`
           },
           {
             role: 'user',
@@ -104,7 +105,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Translation error:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error instanceof Error ? error.message : 'Translation failed' }),
       {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
