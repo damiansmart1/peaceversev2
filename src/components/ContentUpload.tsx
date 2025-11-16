@@ -166,7 +166,7 @@ const ContentUpload = () => {
       });
 
       // Save content metadata to database
-      const { error: dbError } = await supabase
+      const { error: dbError } = await (supabase as any)
         .from('content')
         .insert({
           user_id: user.id,

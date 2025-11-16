@@ -42,7 +42,7 @@ const RewardStoreSection = () => {
   };
 
   const isOwned = (itemId: string) => {
-    return purchases?.some(p => p.item_id === itemId);
+    return (purchases as any)?.some((p: any) => p.item_id === itemId);
   };
 
   if (itemsLoading) {

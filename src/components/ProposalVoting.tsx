@@ -17,7 +17,7 @@ interface ProposalVotingProps {
 
 const ProposalVoting = ({ proposalId, supportCount, opposeCount, abstainCount }: ProposalVotingProps) => {
   const [displayAnonymous, setDisplayAnonymous] = useState(false);
-  const { data: userVote } = useUserVote(proposalId);
+  const { data: userVote } = useUserVote(proposalId) as any;
   const voteProposal = useVoteProposal();
 
   const handleVote = async (value: 1 | -1 | 0) => {

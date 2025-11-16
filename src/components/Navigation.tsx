@@ -251,7 +251,7 @@ const Navigation = () => {
                         </p>
                         {!isAnonymous && userProfile?.user_type && (
                           <p className="text-xs text-muted-foreground mt-1">
-                            {userProfile.user_type}
+                            {userProfile?.user_type}
                           </p>
                         )}
                       </div>
