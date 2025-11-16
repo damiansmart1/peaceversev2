@@ -30,7 +30,7 @@ export const AdminChallengesManager = () => {
   const { data: challenges, isLoading } = useQuery({
     queryKey: ['admin-challenges'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('weekly_challenges')
         .select('*')
         .order('created_at', { ascending: false });
@@ -41,7 +41,7 @@ export const AdminChallengesManager = () => {
 
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
-      const { error } = await supabase.from('weekly_challenges').insert(data);
+      const { error } = await (supabase as any).from('weekly_challenges').insert(data);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -54,7 +54,7 @@ export const AdminChallengesManager = () => {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, updates }: any) => {
-      const { error } = await supabase.from('weekly_challenges').update(updates).eq('id', id);
+      const { error } = await (supabase as any).from('weekly_challenges').update(updates).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -67,7 +67,7 @@ export const AdminChallengesManager = () => {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('weekly_challenges').delete().eq('id', id);
+      const { error } = await (supabase as any).from('weekly_challenges').delete().eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -80,7 +80,7 @@ export const AdminChallengesManager = () => {
 
   const toggleActiveMutation = useMutation({
     mutationFn: async ({ id, isActive }: { id: string; isActive: boolean }) => {
-      const { error } = await supabase.from('weekly_challenges').update({ is_active: !isActive }).eq('id', id);
+      const { error } = await (supabase as any).from('weekly_challenges').update({ is_active: !isActive }).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {

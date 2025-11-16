@@ -19,8 +19,8 @@ export const IncidentDetailDialog = ({ incident, open, onOpenChange }: IncidentD
     queryKey: ['incident-timeline', incident?.id],
     queryFn: async () => {
       if (!incident?.id) return [];
-      const { data, error } = await supabase
-        .from('incident_timeline' as any)
+      const { data, error } = await (supabase as any)
+        .from('incident_timeline')
         .select('*')
         .eq('incident_id', incident.id)
         .order('created_at', { ascending: false });
@@ -34,8 +34,8 @@ export const IncidentDetailDialog = ({ incident, open, onOpenChange }: IncidentD
     queryKey: ['incident-responses', incident?.id],
     queryFn: async () => {
       if (!incident?.id) return [];
-      const { data, error } = await supabase
-        .from('incident_responses' as any)
+      const { data, error } = await (supabase as any)
+        .from('incident_responses')
         .select('*')
         .eq('incident_id', incident.id)
         .order('created_at', { ascending: false });

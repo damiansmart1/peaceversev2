@@ -73,7 +73,7 @@ const ContentFeed = () => {
       const { data: { user } } = await supabase.auth.getUser();
       
       // Fetch content with comments and like status
-      const { data: contentData, error } = await supabase
+      const { data: contentData, error } = await (supabase as any)
         .from('content')
         .select(`
           *,
@@ -89,12 +89,12 @@ const ContentFeed = () => {
           let user_liked = false;
           
           if (user) {
-            const { data: likeData } = await supabase
+            const { data: likeData } = await (supabase as any)
               .from('likes')
               .select('id')
               .eq('content_id', item.id)
               .eq('user_id', user.id)
-              .single();
+              .maybeSingle();
             
             user_liked = !!likeData;
           }
@@ -138,14 +138,14 @@ const ContentFeed = () => {
     try {
       if (contentItem.user_liked) {
         // Unlike
-        await supabase
+        await (supabase as any)
           .from('likes')
           .delete()
           .eq('content_id', contentId)
           .eq('user_id', user.id);
       } else {
         // Like
-        await supabase
+        await (supabase as any)
           .from('likes')
           .insert({ content_id: contentId, user_id: user.id });
       }
@@ -186,7 +186,7 @@ const ContentFeed = () => {
     if (!commentText) return;
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('comments')
         .insert({
           content_id: contentId,

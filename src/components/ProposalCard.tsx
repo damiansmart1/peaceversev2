@@ -15,7 +15,7 @@ interface ProposalCardProps {
 
 const ProposalCard = ({ proposal, className }: ProposalCardProps) => {
   const navigate = useNavigate();
-  const { data: userVote } = useUserVote(proposal.id);
+  const { data: userVote } = useUserVote(proposal.id) as any;
   const voteProposal = useVoteProposal();
 
   const handleVote = (e: React.MouseEvent, value: 1 | -1 | 0) => {
