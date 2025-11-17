@@ -56,7 +56,7 @@ export const RoleManagement = () => {
   const { data: userRoles, isLoading } = useQuery({
     queryKey: ['all-user-roles'],
     queryFn: async () => {
-      const result = await supabase
+      const result = await (supabase as any)
         .from('user_roles')
         .select(`
           *,
@@ -75,7 +75,7 @@ export const RoleManagement = () => {
     queryFn: async () => {
       if (!searchEmail || searchEmail.length < 3) return [];
       
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('profiles')
         .select('id, username, display_name, avatar_url')
         .or(`username.ilike.%${searchEmail}%,display_name.ilike.%${searchEmail}%`)
@@ -93,7 +93,7 @@ export const RoleManagement = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('user_roles')
         .insert({
           user_id: userId,
@@ -129,7 +129,7 @@ export const RoleManagement = () => {
   // Revoke role mutation
   const revokeRoleMutation = useMutation({
     mutationFn: async (roleId: string) => {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('user_roles')
         .update({ is_active: false } as any)
         .eq('id', roleId);

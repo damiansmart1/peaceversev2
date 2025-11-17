@@ -18,7 +18,7 @@ export const AdminModerationManager = () => {
   const { data: flags, isLoading } = useQuery({
     queryKey: ['admin-moderation-flags'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('moderation_flags')
         .select('*')
         .order('created_at', { ascending: false });
@@ -30,7 +30,7 @@ export const AdminModerationManager = () => {
   const resolveMutation = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: 'approved' | 'rejected' }) => {
       const { data: { user } } = await supabase.auth.getUser();
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('moderation_flags')
         .update({
           status,

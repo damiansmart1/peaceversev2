@@ -124,8 +124,8 @@ const CreateProposalDialog = () => {
         billFileUrl,
       });
       
-      if (publishNow && proposal) {
-        await publishProposal.mutateAsync(proposal.id);
+      if (publishNow && proposal && (proposal as any).id) {
+        await publishProposal.mutateAsync((proposal as any).id);
       }
 
       setOpen(false);
