@@ -25,6 +25,7 @@ const Navigation = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const { data: isAdmin } = useAdminCheck();
   const { data: userProfile } = useUserProfile();
+  const safeProfile: any = userProfile as any;
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
