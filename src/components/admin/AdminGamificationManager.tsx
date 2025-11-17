@@ -19,7 +19,7 @@ export const AdminGamificationManager = () => {
   const { data: achievements, isLoading: loadingAchievements } = useQuery({
     queryKey: ['admin-achievements'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('achievements').select('*').order('points_required');
+      const { data, error } = await (supabase as any).from('achievements').select('*').order('points_required');
       if (error) throw error;
       return data;
     },
@@ -28,7 +28,7 @@ export const AdminGamificationManager = () => {
   const { data: levels, isLoading: loadingLevels } = useQuery({
     queryKey: ['admin-levels'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('levels').select('*').order('level_number');
+      const { data, error } = await (supabase as any).from('levels').select('*').order('level_number');
       if (error) throw error;
       return data;
     },
@@ -37,7 +37,7 @@ export const AdminGamificationManager = () => {
   const { data: rewards, isLoading: loadingRewards } = useQuery({
     queryKey: ['admin-rewards'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('reward_store_items').select('*').order('cost_points');
+      const { data, error } = await (supabase as any).from('reward_store_items').select('*').order('cost_points');
       if (error) throw error;
       return data;
     },
@@ -45,7 +45,7 @@ export const AdminGamificationManager = () => {
 
   const createAchievementMutation = useMutation({
     mutationFn: async (data: any) => {
-      const { error } = await supabase.from('achievements').insert(data);
+      const { error } = await (supabase as any).from('achievements').insert(data);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -57,7 +57,7 @@ export const AdminGamificationManager = () => {
 
   const createRewardMutation = useMutation({
     mutationFn: async (data: any) => {
-      const { error } = await supabase.from('reward_store_items').insert(data);
+      const { error } = await (supabase as any).from('reward_store_items').insert(data);
       if (error) throw error;
     },
     onSuccess: () => {

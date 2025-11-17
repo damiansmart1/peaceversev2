@@ -27,7 +27,7 @@ export const AdminUsersManager = () => {
   const { data: users, isLoading } = useQuery({
     queryKey: ['admin-users'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('profiles')
         .select(`
           *,
@@ -42,10 +42,10 @@ export const AdminUsersManager = () => {
 
   const updateRoleMutation = useMutation({
     mutationFn: async ({ userId, role }: { userId: string; role: 'user' | 'moderator' | 'admin' }) => {
-      await supabase.from('user_roles').delete().eq('user_id', userId);
+      await (supabase as any).from('user_roles').delete().eq('user_id', userId);
       
       if (role !== 'user') {
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from('user_roles')
           .insert({ user_id: userId, role: role as any });
         if (error) throw error;
@@ -62,7 +62,7 @@ export const AdminUsersManager = () => {
 
   const updateProfileMutation = useMutation({
     mutationFn: async ({ userId, displayName, bio }: { userId: string; displayName: string; bio: string }) => {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('profiles')
         .update({ display_name: displayName, bio })
         .eq('user_id', userId);
@@ -80,7 +80,7 @@ export const AdminUsersManager = () => {
 
   const toggleVerificationMutation = useMutation({
     mutationFn: async ({ userId, isVerified }: { userId: string; isVerified: boolean }) => {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('profiles')
         .update({ is_verified: !isVerified })
         .eq('user_id', userId);
@@ -98,7 +98,7 @@ export const AdminUsersManager = () => {
   const deleteUserMutation = useMutation({
     mutationFn: async (userId: string) => {
       // Delete user profile and related data
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('profiles')
         .delete()
         .eq('user_id', userId);
@@ -127,7 +127,7 @@ export const AdminUsersManager = () => {
     setDeleteDialogOpen(true);
   };
 
-  const filteredUsers = users?.filter(user =>
+  const filteredUsers = users?.filter((user: any) =>
     user.display_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     user.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     user.user_id?.toLowerCase().includes(searchQuery.toLowerCase())

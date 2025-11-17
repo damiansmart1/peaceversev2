@@ -120,11 +120,11 @@ const Navigation = () => {
                   {/* Welcome Message with User Name */}
                   <div className="hidden lg:flex flex-col items-end">
                     <span className="text-sm font-semibold text-foreground">
-                      {isAnonymous ? 'Guest User' : `Welcome, ${userProfile?.display_name || userProfile?.username || 'User'}`}
+                      {isAnonymous ? 'Guest User' : `Welcome, ${safeProfile?.display_name || safeProfile?.username || 'User'}`}
                     </span>
-                    {!isAnonymous && (
+                    {!isAnonymous && safeProfile && (
                       <span className="text-xs text-muted-foreground">
-                        {userProfile?.user_type || 'Member'}
+                        {safeProfile.user_type || 'Member'}
                       </span>
                     )}
                   </div>
@@ -248,11 +248,11 @@ const Navigation = () => {
                       {/* User Welcome Section */}
                       <div className="px-4 py-3 bg-primary/5 rounded-lg border border-primary/20">
                         <p className="text-sm font-semibold text-foreground">
-                          {isAnonymous ? 'Guest User' : `Welcome, ${userProfile?.display_name || userProfile?.username || 'User'}!`}
+                          {isAnonymous ? 'Guest User' : `Welcome, ${safeProfile?.display_name || safeProfile?.username || 'User'}!`}
                         </p>
-                        {!isAnonymous && userProfile?.user_type && (
+                        {!isAnonymous && safeProfile?.user_type && (
                           <p className="text-xs text-muted-foreground mt-1">
-                            {userProfile?.user_type}
+                            {safeProfile.user_type}
                           </p>
                         )}
                       </div>

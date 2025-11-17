@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabase-typed';
 import { toast } from 'sonner';
 
 export type ReactionType = 'heart' | 'peace' | 'support' | 'inspire' | 'powerful';

@@ -244,7 +244,7 @@ export const AdminSponsorsManager = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {sponsors?.map((sponsor) => (
+            {sponsors?.map((sponsor: any) => (
               <TableRow key={sponsor.id}>
                 <TableCell>
                   <img 
