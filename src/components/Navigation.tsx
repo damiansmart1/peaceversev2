@@ -88,90 +88,33 @@ const Navigation = () => {
             </Badge>
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-1">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = location.pathname === item.path;
-              return (
-                <Button
-                  key={item.path}
-                  variant="ghost"
-                  size="sm"
-                  asChild
-                  className={`flex items-center space-x-1 transition-all duration-200 ${
-                    isActive 
-                      ? 'text-primary bg-primary/10 font-medium' 
-                      : 'text-foreground hover:text-primary hover:bg-primary/10'
-                  }`}
-                >
-                  <Link to={item.path}>
-                    <Icon className="w-4 h-4" />
-                    <span>{item.label}</span>
-                  </Link>
-                </Button>
-              );
-            })}
-            
-            {/* Authentication Section - Top Right Corner */}
-            <div className="flex items-center gap-3 ml-4 pl-4 border-l border-border">
-              {isLoading ? (
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                  <span className="text-sm">Loading...</span>
-                </div>
-              ) : user ? (
-                <>
-                  {/* Welcome Message with User Name */}
-                  <div className="hidden lg:flex flex-col items-end">
-                    <span className="text-sm font-semibold text-foreground">
-                      {isAnonymous ? 'Guest User' : `Welcome, ${safeProfile?.display_name || safeProfile?.username || 'User'}`}
-                    </span>
-                    {!isAnonymous && safeProfile && (
-                      <span className="text-xs text-muted-foreground">
-                        {safeProfile.user_type || 'Member'}
-                      </span>
-                    )}
-                  </div>
-                  
-                  {/* Admin Button */}
-                  {isAdmin && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => navigate('/admin')}
-                      className="gap-2 bg-primary/10 hover:bg-primary/20 border-primary/30"
-                    >
-                      <Settings className="w-4 h-4" />
-                      <span className="hidden xl:inline">Admin Portal</span>
-                    </Button>
-                  )}
-                  
-                  {/* Sign Out Button */}
+          {/* Desktop Navigation - Scrollable horizontal layout */}
+          <div className="hidden md:flex items-center overflow-x-auto max-w-2xl lg:max-w-4xl scrollbar-hide">
+            <div className="flex items-center space-x-1 px-2">
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = location.pathname === item.path;
+                return (
                   <Button
+                    key={item.path}
                     variant="ghost"
                     size="sm"
-                    onClick={handleSignOut}
-                     className="gap-2"
-                   >
-                     <LogOut className="w-4 h-4" />
-                     <span className="hidden xl:inline">Sign Out</span>
-                   </Button>
-                 </>
-               ) : (
-                 // Sign In Button - Always visible when not loading and not logged in
-                 <Button
-                   variant="default"
-                   size="lg"
-                   onClick={() => navigate('/auth')}
-                   className="gap-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg font-semibold px-8 py-2 text-base"
-                 >
-                   <User className="w-5 h-5" />
-                   Sign In
-                 </Button>
-               )}
-             </div>
-           </div>
+                    asChild
+                    className={`flex items-center space-x-1 transition-all duration-200 whitespace-nowrap flex-shrink-0 ${
+                      isActive 
+                        ? 'text-primary bg-primary/10 font-medium' 
+                        : 'text-foreground hover:text-primary hover:bg-primary/10'
+                    }`}
+                  >
+                    <Link to={item.path}>
+                      <Icon className="w-4 h-4" />
+                      <span>{item.label}</span>
+                    </Link>
+                  </Button>
+                );
+              })}
+            </div>
+          </div>
 
           {/* Right Side Actions */}
           <div className="flex items-center space-x-2">
@@ -179,7 +122,7 @@ const Navigation = () => {
               variant="ghost"
               size="sm"
               onClick={() => setSearchOpen(true)}
-              className="gap-2 hidden md:flex"
+              className="gap-2 hidden lg:flex"
             >
               <Search className="w-4 h-4" />
               <span className="text-xs text-muted-foreground">⌘K</span>
@@ -189,11 +132,54 @@ const Navigation = () => {
               variant="ghost"
               size="sm"
               onClick={() => navigate('/help')}
-              className="gap-2 hidden md:flex"
+              className="gap-2 hidden lg:flex"
             >
               <HelpCircle className="w-4 h-4" />
             </Button>
             <LanguageToggle />
+            
+            {/* Authentication Section */}
+            <div className="flex items-center gap-2 ml-2 pl-2 border-l border-border">
+              {isLoading ? (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : user ? (
+                <>
+                  {isAdmin && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate('/admin')}
+                      className="gap-2 bg-primary/10 hover:bg-primary/20 border-primary/30 hidden xl:flex"
+                    >
+                      <Settings className="w-4 h-4" />
+                      <span>Admin</span>
+                    </Button>
+                  )}
+                  
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleSignOut}
+                    className="gap-2"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span className="hidden xl:inline">Sign Out</span>
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => navigate('/auth')}
+                  className="gap-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 font-semibold"
+                >
+                  <User className="w-4 h-4" />
+                  <span>Sign In</span>
+                </Button>
+              )}
+            </div>
             
             {/* Mobile Menu */}
             <Sheet>
