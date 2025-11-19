@@ -44,20 +44,25 @@ const Navigation = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const navItems = [
-    { path: '/voice', label: t('nav.voice'), icon: Mic },
+  // Base navigation items (alphabetically ordered)
+  const baseNavItems = [
+    { path: '/about', label: 'About', icon: Heart },
+    { path: '/challenges', label: t('nav.challenges'), icon: Award },
     { path: '/community', label: t('nav.community'), icon: Users },
+    { path: '/incidents', label: 'Incidents', icon: Shield },
+    { path: '/peace-pulse', label: 'PeacePulse', icon: Globe },
+    { path: '/proposals', label: 'Proposals', icon: Map },
     { path: '/radio', label: t('nav.radio'), icon: Radio },
     { path: '/reports', label: 'Reports', icon: Shield },
-    { path: '/verification', label: 'Verification', icon: Shield },
-    { path: '/challenges', label: t('nav.challenges'), icon: Award },
-    { path: '/peace-pulse', label: 'PeacePulse', icon: Globe },
-    { path: '/incidents', label: 'Incidents', icon: Shield },
-    { path: '/profile', label: 'Profile', icon: User },
-    { path: '/proposals', label: 'Proposals', icon: Map },
     { path: '/safety', label: t('nav.safety'), icon: Shield },
-    { path: '/about', label: 'About', icon: Heart },
+    { path: '/verification', label: 'Verification', icon: Shield },
+    { path: '/voice', label: t('nav.voice'), icon: Mic },
   ];
+
+  // Add profile only if user is logged in
+  const navItems = user && !isAnonymous
+    ? [...baseNavItems, { path: '/profile', label: 'Profile', icon: User }].sort((a, b) => a.label.localeCompare(b.label))
+    : baseNavItems;
 
   return (
     <>
