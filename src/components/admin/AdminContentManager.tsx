@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import RichTextEditor from '@/components/RichTextEditor';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabase-typed';
 import { toast } from 'sonner';
 
 export const AdminContentManager = () => {

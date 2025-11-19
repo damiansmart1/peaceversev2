@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabase-typed';
 import { Users, FileText, MapPin, Trophy, Flag, Radio, Newspaper, AlertTriangle } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
@@ -9,13 +9,13 @@ export const AdminDashboard = () => {
     queryKey: ['admin-stats'],
     queryFn: async () => {
       const [users, content, proposals, safeSpaces, challenges, flags, incidents] = await Promise.all([
-        (supabase as any).from('profiles').select('*', { count: 'exact', head: true }),
-        (supabase as any).from('content').select('*', { count: 'exact', head: true }),
-        (supabase as any).from('proposals').select('*', { count: 'exact', head: true }),
-        (supabase as any).from('safe_spaces').select('*', { count: 'exact', head: true }),
-        (supabase as any).from('weekly_challenges').select('*', { count: 'exact', head: true }),
-        (supabase as any).from('moderation_flags').select('*', { count: 'exact', head: true }),
-        (supabase as any).from('incidents' as any).select('*', { count: 'exact', head: true }),
+        supabase.from('profiles').select('*', { count: 'exact', head: true }),
+        supabase.from('content').select('*', { count: 'exact', head: true }),
+        supabase.from('proposals').select('*', { count: 'exact', head: true }),
+        supabase.from('safe_spaces').select('*', { count: 'exact', head: true }),
+        supabase.from('weekly_challenges').select('*', { count: 'exact', head: true }),
+        supabase.from('moderation_flags').select('*', { count: 'exact', head: true }),
+        supabase.from('incidents').select('*', { count: 'exact', head: true }),
       ]);
 
       return {
@@ -33,7 +33,7 @@ export const AdminDashboard = () => {
   const { data: activityData } = useQuery({
     queryKey: ['activity-trends'],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('content')
         .select('created_at')
         .order('created_at', { ascending: false })
