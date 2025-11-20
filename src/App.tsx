@@ -35,6 +35,7 @@ import PeacePulse from "./pages/PeacePulse";
 import Incidents from "./pages/Incidents";
 import Reports from "./pages/Reports";
 import Verification from "./pages/Verification";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -69,12 +70,20 @@ const App = () => (
                     <Route path="/community" element={<Community />} />
                     <Route path="/radio" element={<Radio />} />
                     <Route path="/challenges" element={<Challenges />} />
-                    <Route path="/profile" element={<Profile />} />
                     <Route path="/safety" element={<Safety />} />
                     <Route path="/about" element={<About />} />
                     <Route path="/proposals" element={<Proposals />} />
                     <Route path="/proposals/:slug" element={<ProposalDetail />} />
-                    <Route path="/admin" element={<Admin />} />
+                    <Route path="/admin" element={
+                      <ProtectedRoute requiredRole="admin">
+                        <Admin />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/profile" element={
+                      <ProtectedRoute requireAuth>
+                        <Profile />
+                      </ProtectedRoute>
+                    } />
                     <Route path="/help" element={<Help />} />
                     <Route path="/accessibility" element={<AccessibilityPage />} />
                     <Route path="/peace-pulse" element={<PeacePulse />} />
