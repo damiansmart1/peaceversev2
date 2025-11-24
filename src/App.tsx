@@ -36,6 +36,11 @@ import Incidents from "./pages/Incidents";
 import Reports from "./pages/Reports";
 import Verification from "./pages/Verification";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { DashboardRouter } from "./components/DashboardRouter";
+import CitizenDashboard from "./pages/dashboards/CitizenDashboard";
+import VerifierDashboard from "./pages/dashboards/VerifierDashboard";
+import PartnerDashboard from "./pages/dashboards/PartnerDashboard";
+import GovernmentDashboard from "./pages/dashboards/GovernmentDashboard";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -82,6 +87,31 @@ const App = () => (
                     <Route path="/profile" element={
                       <ProtectedRoute requireAuth>
                         <Profile />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard" element={
+                      <ProtectedRoute requireAuth>
+                        <DashboardRouter />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/citizen" element={
+                      <ProtectedRoute requireAuth>
+                        <CitizenDashboard />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/verifier" element={
+                      <ProtectedRoute requiredRole="verifier">
+                        <VerifierDashboard />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/partner" element={
+                      <ProtectedRoute requiredRole="partner">
+                        <PartnerDashboard />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/dashboard/government" element={
+                      <ProtectedRoute requiredRole="government">
+                        <GovernmentDashboard />
                       </ProtectedRoute>
                     } />
                     <Route path="/help" element={<Help />} />

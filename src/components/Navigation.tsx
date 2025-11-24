@@ -61,7 +61,7 @@ const Navigation = () => {
 
   // Add profile only if user is logged in
   const navItems = user && !isAnonymous
-    ? [...baseNavItems, { path: '/profile', label: 'Profile', icon: User }].sort((a, b) => a.label.localeCompare(b.label))
+    ? [...baseNavItems, { path: '/dashboard', label: 'Dashboard', icon: User }].sort((a, b) => a.label.localeCompare(b.label))
     : baseNavItems;
 
   return (
