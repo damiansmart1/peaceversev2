@@ -37,6 +37,10 @@ const reportSchema = z.object({
   children_involved: z.boolean().default(false),
   vulnerable_groups: z.array(z.string()).optional(),
   
+  // Perpetrator Information
+  perpetrator_type: z.enum(['individual', 'group', 'organization', 'government', 'militia', 'unknown', 'other']).optional(),
+  perpetrator_description: z.string().optional(),
+  
   // Witness Information
   has_witnesses: z.boolean().default(false),
   witness_count: z.number().min(0).optional(),
@@ -50,6 +54,8 @@ const reportSchema = z.object({
   location_address: z.string().optional(),
   location_city: z.string().optional(),
   location_region: z.string().optional(),
+  location_country: z.string().optional(),
+  location_postal_code: z.string().optional(),
   location_accuracy: z.enum(['exact', 'approximate', 'general_area', 'unknown']).default('approximate'),
   location_type: z.enum(['public_space', 'residential', 'commercial', 'institutional', 'rural', 'urban', 'other']).optional(),
   
@@ -61,11 +67,22 @@ const reportSchema = z.object({
   immediate_needs: z.array(z.string()).optional(),
   community_impact_level: z.enum(['minimal', 'moderate', 'significant', 'severe', 'catastrophic']).optional(),
   services_disrupted: z.array(z.string()).optional(),
+  infrastructure_damage: z.array(z.string()).optional(),
+  economic_impact_estimate: z.number().min(0).optional(),
+  community_response: z.string().optional(),
+  immediate_actions_taken: z.array(z.string()).optional(),
+  
+  // Assistance
+  assistance_received: z.boolean().default(false),
+  assistance_type: z.array(z.string()).optional(),
+  assistance_provider: z.string().optional(),
   
   // Context
   historical_context: z.string().optional(),
   recurring_issue: z.boolean().default(false),
   first_occurrence: z.boolean().default(true),
+  previous_reports_filed: z.boolean().default(false),
+  related_incidents: z.string().optional(),
   
   // Authorities
   authorities_notified: z.boolean().default(false),
@@ -99,6 +116,10 @@ const CATEGORIES = [
 const VULNERABLE_GROUPS = ['children', 'elderly', 'disabled', 'women', 'minorities'];
 const IMMEDIATE_NEEDS = ['medical', 'shelter', 'food', 'water', 'security', 'legal', 'psychosocial'];
 const SERVICES_DISRUPTED = ['water', 'electricity', 'healthcare', 'education', 'transportation', 'communication'];
+const INFRASTRUCTURE_DAMAGE = ['roads', 'bridges', 'buildings', 'utilities', 'telecommunications', 'public_facilities'];
+const IMMEDIATE_ACTIONS = ['evacuation', 'first_aid', 'contacted_authorities', 'secured_area', 'documented_evidence', 'assisted_victims'];
+const ASSISTANCE_TYPES = ['medical', 'food', 'shelter', 'financial', 'legal', 'counseling', 'protection'];
+const PERPETRATOR_TYPES = ['individual', 'group', 'organization', 'government', 'militia', 'unknown', 'other'];
 
 export const ReportSubmissionForm = () => {
   const { submitReport, isSubmitting } = useCitizenReports();
@@ -121,8 +142,10 @@ export const ReportSubmissionForm = () => {
       has_physical_evidence: false,
       recurring_issue: false,
       first_occurrence: true,
+      previous_reports_filed: false,
       authorities_notified: false,
       authorities_responded: false,
+      assistance_received: false,
       follow_up_contact_consent: false,
       preferred_contact_method: 'none',
     },
@@ -172,6 +195,10 @@ export const ReportSubmissionForm = () => {
       children_involved: values.children_involved,
       vulnerable_groups_affected: values.vulnerable_groups,
       
+      // Perpetrator
+      perpetrator_type: values.perpetrator_type,
+      perpetrator_description: values.perpetrator_description,
+      
       // Witnesses
       has_witnesses: values.has_witnesses,
       witness_count: values.witness_count,
@@ -188,6 +215,8 @@ export const ReportSubmissionForm = () => {
         address: values.location_address,
         city: values.location_city,
         region: values.location_region,
+        country: values.location_country,
+        postal_code: values.location_postal_code,
         accuracy: values.location_accuracy,
         type: values.location_type,
       } : undefined,
@@ -200,11 +229,22 @@ export const ReportSubmissionForm = () => {
       immediate_needs: values.immediate_needs,
       community_impact_level: values.community_impact_level,
       services_disrupted: values.services_disrupted,
+      infrastructure_damage: values.infrastructure_damage,
+      economic_impact_estimate: values.economic_impact_estimate,
+      community_response: values.community_response,
+      immediate_actions_taken: values.immediate_actions_taken,
+      
+      // Assistance
+      assistance_received: values.assistance_received,
+      assistance_type: values.assistance_type,
+      assistance_provider: values.assistance_provider,
       
       // Context
       historical_context: values.historical_context,
       recurring_issue: values.recurring_issue,
       first_occurrence: values.first_occurrence,
+      previous_reports_filed: values.previous_reports_filed,
+      related_incidents: values.related_incidents,
       
       // Authorities
       authorities_notified: values.authorities_notified,
@@ -530,6 +570,116 @@ export const ReportSubmissionForm = () => {
                   )}
                 />
 
+                <FormField
+                  control={form.control}
+                  name="children_involved"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center space-x-2 space-y-0 rounded-lg border p-4">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormLabel className="font-normal">Children were involved in this incident</FormLabel>
+                    </FormItem>
+                  )}
+                />
+
+                <Separator />
+
+                <div className="space-y-2">
+                  <h4 className="font-medium">Perpetrator Information</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="perpetrator_type"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Perpetrator Type</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select type" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {PERPETRATOR_TYPES.map((type) => (
+                                <SelectItem key={type} value={type} className="capitalize">
+                                  {type.replace('_', ' ')}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="perpetrator_description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Perpetrator Description</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="Describe the individuals or groups responsible, if known..."
+                            className="min-h-20"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <Separator />
+
+                <div className="space-y-2">
+                  <h4 className="font-medium">Immediate Actions Taken</h4>
+                  <FormField
+                    control={form.control}
+                    name="immediate_actions_taken"
+                    render={() => (
+                      <FormItem>
+                        <div className="grid grid-cols-3 gap-2">
+                          {IMMEDIATE_ACTIONS.map((action) => (
+                            <FormField
+                              key={action}
+                              control={form.control}
+                              name="immediate_actions_taken"
+                              render={({ field }) => (
+                                <FormItem className="flex items-center space-x-2 space-y-0">
+                                  <FormControl>
+                                    <Checkbox
+                                      checked={field.value?.includes(action)}
+                                      onCheckedChange={(checked) => {
+                                        const current = field.value || [];
+                                        field.onChange(
+                                          checked
+                                            ? [...current, action]
+                                            : current.filter((v) => v !== action)
+                                        );
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormLabel className="font-normal capitalize text-xs">
+                                    {action.replace('_', ' ')}
+                                  </FormLabel>
+                                </FormItem>
+                              )}
+                            />
+                          ))}
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
                 <Separator />
 
                 <div className="space-y-2">
@@ -691,6 +841,34 @@ export const ReportSubmissionForm = () => {
                         <FormLabel>Region/County</FormLabel>
                         <FormControl>
                           <Input placeholder="Region or county" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="location_country"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Country</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Country" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="location_postal_code"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Postal Code</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Postal/ZIP code" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -904,6 +1082,180 @@ export const ReportSubmissionForm = () => {
                   )}
                 />
 
+                <FormField
+                  control={form.control}
+                  name="infrastructure_damage"
+                  render={() => (
+                    <FormItem>
+                      <FormLabel>Infrastructure Damage</FormLabel>
+                      <div className="grid grid-cols-3 gap-2">
+                        {INFRASTRUCTURE_DAMAGE.map((damage) => (
+                          <FormField
+                            key={damage}
+                            control={form.control}
+                            name="infrastructure_damage"
+                            render={({ field }) => (
+                              <FormItem className="flex items-center space-x-2 space-y-0">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value?.includes(damage)}
+                                    onCheckedChange={(checked) => {
+                                      const current = field.value || [];
+                                      field.onChange(
+                                        checked
+                                          ? [...current, damage]
+                                          : current.filter((v) => v !== damage)
+                                      );
+                                    }}
+                                  />
+                                </FormControl>
+                                <FormLabel className="font-normal capitalize text-xs">
+                                  {damage.replace('_', ' ')}
+                                </FormLabel>
+                              </FormItem>
+                            )}
+                          />
+                        ))}
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="economic_impact_estimate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Economic Impact Estimate (USD)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          min="0"
+                          placeholder="Estimated financial damage"
+                          {...field}
+                          onChange={e => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Rough estimate of economic/financial damage caused
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="community_response"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Community Response</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="How did the community respond to this incident?"
+                          className="min-h-20"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Separator />
+
+                <div className="space-y-2">
+                  <h4 className="font-medium">Assistance Information</h4>
+                  <FormField
+                    control={form.control}
+                    name="assistance_received"
+                    render={({ field }) => (
+                      <FormItem className="flex items-center space-x-2 space-y-0">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormLabel className="font-normal">Assistance was received</FormLabel>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="assistance_type"
+                    render={() => (
+                      <FormItem>
+                        <FormLabel>Types of Assistance</FormLabel>
+                        <div className="grid grid-cols-3 gap-2">
+                          {ASSISTANCE_TYPES.map((type) => (
+                            <FormField
+                              key={type}
+                              control={form.control}
+                              name="assistance_type"
+                              render={({ field }) => (
+                                <FormItem className="flex items-center space-x-2 space-y-0">
+                                  <FormControl>
+                                    <Checkbox
+                                      checked={field.value?.includes(type)}
+                                      onCheckedChange={(checked) => {
+                                        const current = field.value || [];
+                                        field.onChange(
+                                          checked
+                                            ? [...current, type]
+                                            : current.filter((v) => v !== type)
+                                        );
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormLabel className="font-normal capitalize text-xs">{type}</FormLabel>
+                                </FormItem>
+                              )}
+                            />
+                          ))}
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="assistance_provider"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Assistance Provider</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Organization or agency that provided assistance" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <Separator />
+
+                <FormField
+                  control={form.control}
+                  name="related_incidents"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Related Incidents</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="Describe any related incidents or provide incident IDs if known..."
+                          className="min-h-20"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <div className="flex gap-4">
                   <FormField
                     control={form.control}
@@ -933,6 +1285,22 @@ export const ReportSubmissionForm = () => {
                           />
                         </FormControl>
                         <FormLabel className="font-normal">First time occurrence</FormLabel>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="previous_reports_filed"
+                    render={({ field }) => (
+                      <FormItem className="flex items-center space-x-2 space-y-0">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormLabel className="font-normal">Previous reports filed</FormLabel>
                       </FormItem>
                     )}
                   />
