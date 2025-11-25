@@ -5,18 +5,16 @@ import { AlertTriangle, TrendingUp, Bell, Network, Users } from 'lucide-react';
 import RiskDashboard from '@/components/early-warning/RiskDashboard';
 import PredictiveHotspotMap from '@/components/early-warning/PredictiveHotspotMap';
 import AlertSystem from '@/components/early-warning/AlertSystem';
-
 const EarlyWarningDashboard = () => {
-  return (
-    <div className="min-h-screen bg-hero-gradient">
+  return <div className="min-h-screen bg-hero-gradient">
       <Navigation />
-      <div className="container mx-auto px-4 py-20">
+      <div className="container mx-auto px-4 py-20 text-lime-800">
         <div className="max-w-7xl mx-auto space-y-8">
           <div className="text-center mb-8">
-            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-3">
+            <h1 className="text-4xl md:text-5xl font-bold mb-3 text-yellow-400">
               Early Warning System
             </h1>
-            <p className="text-lg text-muted-foreground">
+            <p className="text-lg text-neutral-50 bg-transparent">
               AI-Powered Conflict Prevention & Risk Analysis
             </p>
           </div>
@@ -85,8 +83,6 @@ const EarlyWarningDashboard = () => {
           </Card>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default EarlyWarningDashboard;
