@@ -41,6 +41,7 @@ import CitizenDashboard from "./pages/dashboards/CitizenDashboard";
 import VerifierDashboard from "./pages/dashboards/VerifierDashboard";
 import PartnerDashboard from "./pages/dashboards/PartnerDashboard";
 import GovernmentDashboard from "./pages/dashboards/GovernmentDashboard";
+import EarlyWarningDashboard from "./pages/dashboards/EarlyWarningDashboard";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -114,6 +115,11 @@ const App = () => (
                     <Route path="/dashboard/government" element={
                       <ProtectedRoute requiredRole="government">
                         <GovernmentDashboard />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/early-warning" element={
+                      <ProtectedRoute requiredRole={["admin", "government", "partner"]}>
+                        <EarlyWarningDashboard />
                       </ProtectedRoute>
                     } />
                     <Route path="/help" element={<Help />} />

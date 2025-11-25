@@ -14,6 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      actor_networks: {
+        Row: {
+          activity_timeline: Json | null
+          actors: Json
+          centrality_scores: Json | null
+          countries_involved: string[] | null
+          created_at: string | null
+          expansion_trend: string | null
+          first_observed: string | null
+          id: string
+          influence_map: Json | null
+          key_actors: Json | null
+          last_activity: string | null
+          network_name: string | null
+          network_threat_level: string | null
+          network_type: string | null
+          primary_locations: string[] | null
+          relationships: Json
+          updated_at: string | null
+        }
+        Insert: {
+          activity_timeline?: Json | null
+          actors: Json
+          centrality_scores?: Json | null
+          countries_involved?: string[] | null
+          created_at?: string | null
+          expansion_trend?: string | null
+          first_observed?: string | null
+          id?: string
+          influence_map?: Json | null
+          key_actors?: Json | null
+          last_activity?: string | null
+          network_name?: string | null
+          network_threat_level?: string | null
+          network_type?: string | null
+          primary_locations?: string[] | null
+          relationships: Json
+          updated_at?: string | null
+        }
+        Update: {
+          activity_timeline?: Json | null
+          actors?: Json
+          centrality_scores?: Json | null
+          countries_involved?: string[] | null
+          created_at?: string | null
+          expansion_trend?: string | null
+          first_observed?: string | null
+          id?: string
+          influence_map?: Json | null
+          key_actors?: Json | null
+          last_activity?: string | null
+          network_name?: string | null
+          network_threat_level?: string | null
+          network_type?: string | null
+          primary_locations?: string[] | null
+          relationships?: Json
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       ai_analysis_logs: {
         Row: {
           analysis_type: Database["public"]["Enums"]["ai_analysis_type"]
@@ -172,6 +232,128 @@ export type Database = {
           record_count?: number | null
           report_type?: string
           status?: string | null
+        }
+        Relationships: []
+      }
+      alert_logs: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          alert_rule_id: string | null
+          alert_type: string
+          channels_sent: string[] | null
+          context_data: Json | null
+          correlation_ids: string[] | null
+          hotspot_ids: string[] | null
+          id: string
+          incident_ids: string[] | null
+          message: string
+          recipients: string[] | null
+          severity: string
+          status: string | null
+          title: string
+          triggered_at: string | null
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_rule_id?: string | null
+          alert_type: string
+          channels_sent?: string[] | null
+          context_data?: Json | null
+          correlation_ids?: string[] | null
+          hotspot_ids?: string[] | null
+          id?: string
+          incident_ids?: string[] | null
+          message: string
+          recipients?: string[] | null
+          severity: string
+          status?: string | null
+          title: string
+          triggered_at?: string | null
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_rule_id?: string | null
+          alert_type?: string
+          channels_sent?: string[] | null
+          context_data?: Json | null
+          correlation_ids?: string[] | null
+          hotspot_ids?: string[] | null
+          id?: string
+          incident_ids?: string[] | null
+          message?: string
+          recipients?: string[] | null
+          severity?: string
+          status?: string | null
+          title?: string
+          triggered_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alert_logs_alert_rule_id_fkey"
+            columns: ["alert_rule_id"]
+            isOneToOne: false
+            referencedRelation: "alert_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      alert_rules: {
+        Row: {
+          cooldown_minutes: number | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          geographic_scope: string[] | null
+          id: string
+          is_active: boolean | null
+          max_alerts_per_day: number | null
+          name: string
+          notification_channels: string[] | null
+          recipient_roles: string[] | null
+          recipient_users: string[] | null
+          severity: string
+          threshold_value: number | null
+          trigger_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          cooldown_minutes?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          geographic_scope?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          max_alerts_per_day?: number | null
+          name: string
+          notification_channels?: string[] | null
+          recipient_roles?: string[] | null
+          recipient_users?: string[] | null
+          severity: string
+          threshold_value?: number | null
+          trigger_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          cooldown_minutes?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          geographic_scope?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          max_alerts_per_day?: number | null
+          name?: string
+          notification_channels?: string[] | null
+          recipient_roles?: string[] | null
+          recipient_users?: string[] | null
+          severity?: string
+          threshold_value?: number | null
+          trigger_type?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -433,6 +615,337 @@ export type Database = {
         }
         Relationships: []
       }
+      external_data_records: {
+        Row: {
+          ai_extracted_entities: Json | null
+          ai_sentiment: string | null
+          content: Json
+          external_id: string | null
+          fetched_at: string | null
+          geographic_data: Json | null
+          id: string
+          linked_incident_ids: string[] | null
+          original_timestamp: string | null
+          processed_at: string | null
+          record_type: string
+          relevance_score: number | null
+          source_id: string
+        }
+        Insert: {
+          ai_extracted_entities?: Json | null
+          ai_sentiment?: string | null
+          content: Json
+          external_id?: string | null
+          fetched_at?: string | null
+          geographic_data?: Json | null
+          id?: string
+          linked_incident_ids?: string[] | null
+          original_timestamp?: string | null
+          processed_at?: string | null
+          record_type: string
+          relevance_score?: number | null
+          source_id: string
+        }
+        Update: {
+          ai_extracted_entities?: Json | null
+          ai_sentiment?: string | null
+          content?: Json
+          external_id?: string | null
+          fetched_at?: string | null
+          geographic_data?: Json | null
+          id?: string
+          linked_incident_ids?: string[] | null
+          original_timestamp?: string | null
+          processed_at?: string | null
+          record_type?: string
+          relevance_score?: number | null
+          source_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "external_data_records_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "external_data_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      external_data_sources: {
+        Row: {
+          api_endpoint: string | null
+          configuration: Json | null
+          created_at: string | null
+          credentials_key: string | null
+          fetch_frequency_minutes: number | null
+          id: string
+          is_active: boolean | null
+          last_sync_at: string | null
+          last_sync_status: string | null
+          source_name: string
+          source_type: string
+          total_records_fetched: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          api_endpoint?: string | null
+          configuration?: Json | null
+          created_at?: string | null
+          credentials_key?: string | null
+          fetch_frequency_minutes?: number | null
+          id?: string
+          is_active?: boolean | null
+          last_sync_at?: string | null
+          last_sync_status?: string | null
+          source_name: string
+          source_type: string
+          total_records_fetched?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          api_endpoint?: string | null
+          configuration?: Json | null
+          created_at?: string | null
+          credentials_key?: string | null
+          fetch_frequency_minutes?: number | null
+          id?: string
+          is_active?: boolean | null
+          last_sync_at?: string | null
+          last_sync_status?: string | null
+          source_name?: string
+          source_type?: string
+          total_records_fetched?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      incident_correlations: {
+        Row: {
+          ai_analysis: Json | null
+          correlation_strength: number | null
+          correlation_type: string
+          countries_involved: string[] | null
+          cross_border: boolean | null
+          detected_at: string | null
+          detected_by: string | null
+          escalation_chain: boolean | null
+          geographic_distance_km: number | null
+          id: string
+          pattern_detected: string | null
+          primary_incident_id: string
+          related_incident_id: string
+          shared_characteristics: Json | null
+          temporal_distance_hours: number | null
+        }
+        Insert: {
+          ai_analysis?: Json | null
+          correlation_strength?: number | null
+          correlation_type: string
+          countries_involved?: string[] | null
+          cross_border?: boolean | null
+          detected_at?: string | null
+          detected_by?: string | null
+          escalation_chain?: boolean | null
+          geographic_distance_km?: number | null
+          id?: string
+          pattern_detected?: string | null
+          primary_incident_id: string
+          related_incident_id: string
+          shared_characteristics?: Json | null
+          temporal_distance_hours?: number | null
+        }
+        Update: {
+          ai_analysis?: Json | null
+          correlation_strength?: number | null
+          correlation_type?: string
+          countries_involved?: string[] | null
+          cross_border?: boolean | null
+          detected_at?: string | null
+          detected_by?: string | null
+          escalation_chain?: boolean | null
+          geographic_distance_km?: number | null
+          id?: string
+          pattern_detected?: string | null
+          primary_incident_id?: string
+          related_incident_id?: string
+          shared_characteristics?: Json | null
+          temporal_distance_hours?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incident_correlations_primary_incident_id_fkey"
+            columns: ["primary_incident_id"]
+            isOneToOne: false
+            referencedRelation: "citizen_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incident_correlations_related_incident_id_fkey"
+            columns: ["related_incident_id"]
+            isOneToOne: false
+            referencedRelation: "citizen_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      incident_risk_scores: {
+        Row: {
+          ai_confidence: number | null
+          ai_reasoning: Json | null
+          calculated_by: string | null
+          contagion_risk: number | null
+          contributing_factors: Json | null
+          created_at: string | null
+          escalation_probability: number | null
+          escalation_timeline: string | null
+          id: string
+          impact_score: number | null
+          incident_id: string
+          overall_risk_score: number
+          predicted_impact_area: string[] | null
+          recommended_actions: Json | null
+          risk_indicators: Json | null
+          severity_score: number | null
+          threat_level: string
+          updated_at: string | null
+          urgency_score: number | null
+        }
+        Insert: {
+          ai_confidence?: number | null
+          ai_reasoning?: Json | null
+          calculated_by?: string | null
+          contagion_risk?: number | null
+          contributing_factors?: Json | null
+          created_at?: string | null
+          escalation_probability?: number | null
+          escalation_timeline?: string | null
+          id?: string
+          impact_score?: number | null
+          incident_id: string
+          overall_risk_score: number
+          predicted_impact_area?: string[] | null
+          recommended_actions?: Json | null
+          risk_indicators?: Json | null
+          severity_score?: number | null
+          threat_level: string
+          updated_at?: string | null
+          urgency_score?: number | null
+        }
+        Update: {
+          ai_confidence?: number | null
+          ai_reasoning?: Json | null
+          calculated_by?: string | null
+          contagion_risk?: number | null
+          contributing_factors?: Json | null
+          created_at?: string | null
+          escalation_probability?: number | null
+          escalation_timeline?: string | null
+          id?: string
+          impact_score?: number | null
+          incident_id?: string
+          overall_risk_score?: number
+          predicted_impact_area?: string[] | null
+          recommended_actions?: Json | null
+          risk_indicators?: Json | null
+          severity_score?: number | null
+          threat_level?: string
+          updated_at?: string | null
+          urgency_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incident_risk_scores_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "citizen_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      predictive_hotspots: {
+        Row: {
+          ai_model_used: string | null
+          confidence_level: number | null
+          country: string
+          environmental_factors: Json | null
+          historical_patterns: Json | null
+          hotspot_score: number
+          id: string
+          incident_count_30d: number | null
+          incident_trend: string | null
+          last_updated: string | null
+          latitude: number
+          longitude: number
+          monitoring_priority: string | null
+          predicted_at: string | null
+          prediction_factors: Json | null
+          prediction_window: string
+          radius_km: number
+          recommended_interventions: Json | null
+          region_name: string
+          risk_level: string
+          seasonal_factors: Json | null
+          similar_historical_events: Json | null
+          socioeconomic_indicators: Json | null
+          status: string | null
+          valid_until: string
+        }
+        Insert: {
+          ai_model_used?: string | null
+          confidence_level?: number | null
+          country: string
+          environmental_factors?: Json | null
+          historical_patterns?: Json | null
+          hotspot_score: number
+          id?: string
+          incident_count_30d?: number | null
+          incident_trend?: string | null
+          last_updated?: string | null
+          latitude: number
+          longitude: number
+          monitoring_priority?: string | null
+          predicted_at?: string | null
+          prediction_factors?: Json | null
+          prediction_window: string
+          radius_km: number
+          recommended_interventions?: Json | null
+          region_name: string
+          risk_level: string
+          seasonal_factors?: Json | null
+          similar_historical_events?: Json | null
+          socioeconomic_indicators?: Json | null
+          status?: string | null
+          valid_until: string
+        }
+        Update: {
+          ai_model_used?: string | null
+          confidence_level?: number | null
+          country?: string
+          environmental_factors?: Json | null
+          historical_patterns?: Json | null
+          hotspot_score?: number
+          id?: string
+          incident_count_30d?: number | null
+          incident_trend?: string | null
+          last_updated?: string | null
+          latitude?: number
+          longitude?: number
+          monitoring_priority?: string | null
+          predicted_at?: string | null
+          prediction_factors?: Json | null
+          prediction_window?: string
+          radius_km?: number
+          recommended_interventions?: Json | null
+          region_name?: string
+          risk_level?: string
+          seasonal_factors?: Json | null
+          similar_historical_events?: Json | null
+          socioeconomic_indicators?: Json | null
+          status?: string | null
+          valid_until?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -477,6 +990,227 @@ export type Database = {
           username?: string | null
         }
         Relationships: []
+      }
+      response_deployments: {
+        Row: {
+          actions_taken: Json | null
+          arrived_at: string | null
+          completed_at: string | null
+          coordinating_with: string[] | null
+          created_at: string | null
+          deployed_personnel: number | null
+          deployed_resources: Json | null
+          deployment_status: string
+          dispatched_at: string | null
+          estimated_arrival: string | null
+          id: string
+          incident_id: string
+          notes: string | null
+          outcomes: Json | null
+          priority_level: string | null
+          reporting_to: string | null
+          requested_at: string | null
+          team_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          actions_taken?: Json | null
+          arrived_at?: string | null
+          completed_at?: string | null
+          coordinating_with?: string[] | null
+          created_at?: string | null
+          deployed_personnel?: number | null
+          deployed_resources?: Json | null
+          deployment_status?: string
+          dispatched_at?: string | null
+          estimated_arrival?: string | null
+          id?: string
+          incident_id: string
+          notes?: string | null
+          outcomes?: Json | null
+          priority_level?: string | null
+          reporting_to?: string | null
+          requested_at?: string | null
+          team_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          actions_taken?: Json | null
+          arrived_at?: string | null
+          completed_at?: string | null
+          coordinating_with?: string[] | null
+          created_at?: string | null
+          deployed_personnel?: number | null
+          deployed_resources?: Json | null
+          deployment_status?: string
+          dispatched_at?: string | null
+          estimated_arrival?: string | null
+          id?: string
+          incident_id?: string
+          notes?: string | null
+          outcomes?: Json | null
+          priority_level?: string | null
+          reporting_to?: string | null
+          requested_at?: string | null
+          team_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "response_deployments_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "citizen_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "response_deployments_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "response_teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      response_teams: {
+        Row: {
+          availability_schedule: Json | null
+          available_resources: Json | null
+          base_location: string | null
+          capabilities: string[] | null
+          contact_info: Json
+          coverage_radius_km: number | null
+          created_at: string | null
+          current_status: string | null
+          emergency_contact: string | null
+          id: string
+          operating_regions: string[] | null
+          organization: string
+          team_name: string
+          team_size: number | null
+          team_type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          availability_schedule?: Json | null
+          available_resources?: Json | null
+          base_location?: string | null
+          capabilities?: string[] | null
+          contact_info: Json
+          coverage_radius_km?: number | null
+          created_at?: string | null
+          current_status?: string | null
+          emergency_contact?: string | null
+          id?: string
+          operating_regions?: string[] | null
+          organization: string
+          team_name: string
+          team_size?: number | null
+          team_type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          availability_schedule?: Json | null
+          available_resources?: Json | null
+          base_location?: string | null
+          capabilities?: string[] | null
+          contact_info?: Json
+          coverage_radius_km?: number | null
+          created_at?: string | null
+          current_status?: string | null
+          emergency_contact?: string | null
+          id?: string
+          operating_regions?: string[] | null
+          organization?: string
+          team_name?: string
+          team_size?: number | null
+          team_type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      scenario_models: {
+        Row: {
+          ai_model_used: string | null
+          assumptions: Json
+          base_incident_id: string | null
+          confidence_intervals: Json | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          economic_impact_usd: number | null
+          estimated_affected_population: number | null
+          geographic_impact_areas: string[] | null
+          humanitarian_impact_score: number | null
+          id: string
+          model_version: string | null
+          name: string
+          predicted_outcomes: Json
+          probability_distribution: Json | null
+          recommended_interventions: Json | null
+          scenario_type: string
+          status: string | null
+          tested_interventions: Json | null
+          time_horizon_days: number
+          variables: Json
+        }
+        Insert: {
+          ai_model_used?: string | null
+          assumptions: Json
+          base_incident_id?: string | null
+          confidence_intervals?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          economic_impact_usd?: number | null
+          estimated_affected_population?: number | null
+          geographic_impact_areas?: string[] | null
+          humanitarian_impact_score?: number | null
+          id?: string
+          model_version?: string | null
+          name: string
+          predicted_outcomes: Json
+          probability_distribution?: Json | null
+          recommended_interventions?: Json | null
+          scenario_type: string
+          status?: string | null
+          tested_interventions?: Json | null
+          time_horizon_days: number
+          variables: Json
+        }
+        Update: {
+          ai_model_used?: string | null
+          assumptions?: Json
+          base_incident_id?: string | null
+          confidence_intervals?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          economic_impact_usd?: number | null
+          estimated_affected_population?: number | null
+          geographic_impact_areas?: string[] | null
+          humanitarian_impact_score?: number | null
+          id?: string
+          model_version?: string | null
+          name?: string
+          predicted_outcomes?: Json
+          probability_distribution?: Json | null
+          recommended_interventions?: Json | null
+          scenario_type?: string
+          status?: string | null
+          tested_interventions?: Json | null
+          time_horizon_days?: number
+          variables?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scenario_models_base_incident_id_fkey"
+            columns: ["base_incident_id"]
+            isOneToOne: false
+            referencedRelation: "citizen_reports"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       spatial_ref_sys: {
         Row: {
