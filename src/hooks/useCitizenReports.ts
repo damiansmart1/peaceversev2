@@ -6,12 +6,66 @@ export interface ReportSubmission {
   title: string;
   description: string;
   category: string;
+  sub_category?: string;
+  
+  // Incident details
+  incident_date?: string;
+  incident_time?: string;
+  duration_minutes?: number;
+  severity_level?: string;
+  urgency_level?: string;
+  
+  // People involved
+  estimated_people_affected?: number;
+  casualties_reported?: number;
+  injuries_reported?: number;
+  children_involved?: boolean;
+  vulnerable_groups_affected?: string[];
+  
+  // Witnesses
+  has_witnesses?: boolean;
+  witness_count?: number;
+  
+  // Contact
+  reporter_contact_phone?: string;
+  reporter_contact_email?: string;
+  preferred_contact_method?: string;
+  
+  // Location
   location?: {
     latitude: number;
     longitude: number;
     address?: string;
+    city?: string;
+    region?: string;
+    accuracy?: string;
+    type?: string;
   };
+  
+  // Evidence
   media_urls?: string[];
+  evidence_description?: string;
+  has_physical_evidence?: boolean;
+  
+  // Impact
+  immediate_needs?: string[];
+  community_impact_level?: string;
+  services_disrupted?: string[];
+  
+  // Context
+  historical_context?: string;
+  recurring_issue?: boolean;
+  first_occurrence?: boolean;
+  
+  // Authorities
+  authorities_notified?: boolean;
+  authorities_responded?: boolean;
+  authority_response_details?: string;
+  
+  // Follow-up
+  follow_up_contact_consent?: boolean;
+  
+  // Metadata
   is_anonymous?: boolean;
   tags?: string[];
 }
