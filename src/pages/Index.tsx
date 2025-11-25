@@ -27,35 +27,35 @@ const Index = () => {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 max-w-7xl mx-auto">
             <FeatureCard icon={<div className="w-12 h-12 bg-voice-active rounded-full flex items-center justify-center">
                 <Mic className="w-6 h-6 text-white" />
-              </div>} title={t('features.voice.title')} description="Share stories through voice recording (Community Hub)" onClick={() => navigate('/community')} />
+              </div>} title="Voice Stories" description="Share your peace stories through voice recording and connect with communities across Africa" onClick={() => navigate('/community')} />
             
             <FeatureCard icon={<div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center">
                 <Users className="w-6 h-6 text-white" />
-              </div>} title={t('features.community.title')} description={t('features.community.description')} onClick={() => navigate('/community')} />
+              </div>} title="Community Hub" description="Engage with peace events, join discussions, and build connections with peacebuilders" onClick={() => navigate('/community')} />
             
             <FeatureCard icon={<div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
                 <Radio className="w-6 h-6 text-white" />
-              </div>} title="Peace Radio" description="Listen to community peace radio (Community Hub)" onClick={() => navigate('/community')} />
+              </div>} title="Peace Radio" description="Listen to live peace radio broadcasts and educational content promoting dialogue" onClick={() => navigate('/community')} />
             
             <FeatureCard icon={<div className="w-12 h-12 bg-success rounded-full flex items-center justify-center">
                 <Award className="w-6 h-6 text-white" />
-              </div>} title="Challenges" description="Complete peace challenges and earn rewards (Community Hub)" onClick={() => navigate('/community')} />
+              </div>} title="Challenges" description="Participate in peacebuilding challenges, earn badges, and unlock rewards" onClick={() => navigate('/community')} />
             
             <FeatureCard icon={<div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center">
                 <Vote className="w-6 h-6 text-white" />
-              </div>} title="Polls & Proposals" description="Participate in democratic decision-making and community polls" onClick={() => navigate('/proposals')} />
+              </div>} title="Polls & Proposals" description="Vote on community proposals, create polls, and shape policy through democratic participation" onClick={() => navigate('/proposals')} />
             
             <FeatureCard icon={<div className="w-12 h-12 bg-destructive rounded-full flex items-center justify-center">
                 <Shield className="w-6 h-6 text-white" />
-              </div>} title={t('features.safety.title')} description={t('features.safety.description')} onClick={() => navigate('/safety')} />
+              </div>} title="Safety Portal" description="Access safety resources, protection guidelines, and crisis response information" onClick={() => navigate('/safety')} />
             
             <FeatureCard icon={<div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
                 <Activity className="w-6 h-6 text-white" />
-              </div>} title="Peace Pulse" description="Real-time peace intelligence and analytics dashboard tracking sentiment, tension, and regional stability." onClick={() => navigate('/peace-pulse')} />
+              </div>} title="Peace Pulse" description="Real-time analytics dashboard tracking peace metrics, sentiment analysis, and regional stability" onClick={() => navigate('/peace-pulse')} />
             
             <FeatureCard icon={<div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center">
                 <AlertCircle className="w-6 h-6 text-white" />
-              </div>} title="Incident Reporting" description="Report and track incidents anonymously with geo-location, AI analysis, and institutional response tracking." onClick={() => navigate('/incidents')} />
+              </div>} title="Incident Reporting" description="Submit verified incident reports with geo-location, media evidence, and AI-powered analysis" onClick={() => navigate('/incidents')} />
           </div>
         </div>
       </section>
@@ -63,7 +63,7 @@ const Index = () => {
       {/* Interactive Africa Map Section */}
       <section className="py-12 sm:py-16 md:py-20 bg-gradient-to-b from-muted/30 to-background">
         <div className="container mx-auto px-4 sm:px-6">
-          <SectionHeader badge="Multi-Jurisdiction" title="Africa-Wide Early Warning System" subtitle="Select your country to view localized incident reports and contribute to continental peace intelligence" icon={<Globe className="w-4 h-4" />} />
+          <SectionHeader badge="Multi-Jurisdiction" title="Continental Early Warning Network" subtitle="Interactive map enabling real-time incident tracking, cross-border analysis, and coordinated peace intelligence across African nations" icon={<Globe className="w-4 h-4" />} />
           
           <div className="max-w-7xl mx-auto mt-8 sm:mt-12">
             <AfricaMap />
@@ -121,7 +121,7 @@ const Index = () => {
       {/* Accountability & Transparency Section */}
       <section className="py-12 sm:py-16 md:py-20 bg-background">
         <div className="container mx-auto px-4 sm:px-6">
-          <SectionHeader badge="Transparency" title="Real-Time Peace Intelligence" subtitle="Track incidents, monitor peace metrics, and hold institutions accountable" icon={<TrendingUp className="w-4 h-4" />} />
+          <SectionHeader badge="Transparency" title="Data-Driven Accountability" subtitle="Monitor incidents, track institutional responses, and access verified peace intelligence across African regions" icon={<TrendingUp className="w-4 h-4" />} />
           
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-6xl mx-auto mt-8 sm:mt-12">
             <Card className="border-2 hover:border-primary transition-all cursor-pointer" onClick={() => navigate('/peace-pulse')}>
@@ -134,7 +134,7 @@ const Index = () => {
                 </div>
                 <h3 className="text-xl font-bold mb-2">Peace Pulse Dashboard</h3>
                 <p className="text-muted-foreground mb-4">
-                  Monitor real-time sentiment analysis, tension levels, risk scores, and trending topics across regions.
+                  Real-time analytics tracking sentiment, tension levels, peace scores, and emerging trends across African regions with AI-powered insights.
                 </p>
                 <div className="flex gap-2 flex-wrap">
                   <Badge variant="outline" className="text-xs">Sentiment Analysis</Badge>
@@ -154,7 +154,7 @@ const Index = () => {
                 </div>
                 <h3 className="text-xl font-bold mb-2">Incident Reporting</h3>
                 <p className="text-muted-foreground mb-4">
-                  Report incidents anonymously with geo-location, media evidence, and AI-powered verification.
+                  Submit comprehensive incident reports with 50+ data fields, geo-tagging, media uploads, and AI-assisted categorization for rigorous verification.
                 </p>
                 <div className="flex gap-2 flex-wrap">
                   <Badge variant="outline" className="text-xs">Anonymous Reporting</Badge>
@@ -174,7 +174,7 @@ const Index = () => {
                 </div>
                 <h3 className="text-xl font-bold mb-2">Response Tracking</h3>
                 <p className="text-muted-foreground mb-4">
-                  Track institutional responses, measure accountability indices, and monitor resolution progress.
+                  Monitor institutional response times, track resolution status, and measure accountability through transparent progress indicators and performance metrics.
                 </p>
                 <div className="flex gap-2 flex-wrap">
                   <Badge variant="outline" className="text-xs">Response Time</Badge>
@@ -203,36 +203,36 @@ const Index = () => {
           <div className="grid md:grid-cols-3 gap-8">
             <div className="space-y-4">
               <h3 className="text-2xl font-bold bg-peace-gradient bg-clip-text text-slate-50">
-                {t('hero.title')}
+                PeaceVerse
               </h3>
               <p className="text-primary-foreground/80">
-                {t('footer.tagline')}
+                Continental early warning system empowering African communities through verified incident intelligence and data-driven peace analytics.
               </p>
             </div>
             
             <div className="space-y-4">
-              <h4 className="font-semibold">{t('footer.features')}</h4>
+              <h4 className="font-semibold">Platform Features</h4>
               <ul className="space-y-2 text-primary-foreground/80">
-                <li>{t('footer.features.voice')}</li>
-                <li>{t('footer.features.mapping')}</li>
-                <li>{t('footer.features.challenges')}</li>
-                <li>{t('footer.features.dialogue')}</li>
+                <li>Voice Stories & Community Engagement</li>
+                <li>Interactive Peace Mapping</li>
+                <li>Peacebuilding Challenges & Rewards</li>
+                <li>Democratic Proposals & Polling</li>
               </ul>
             </div>
             
             <div className="space-y-4">
-              <h4 className="font-semibold">{t('footer.support')}</h4>
+              <h4 className="font-semibold">Support & Safety</h4>
               <ul className="space-y-2 text-primary-foreground/80">
-                <li>{t('footer.support.accessibility')}</li>
-                <li>{t('footer.support.multilang')}</li>
-                <li>{t('footer.support.safety')}</li>
-                <li>{t('footer.support.crisis')}</li>
+                <li>Accessibility Features</li>
+                <li>Multi-Language Support</li>
+                <li>Safety Resources & Protection</li>
+                <li>24/7 Crisis Response</li>
               </ul>
             </div>
           </div>
           
           <div className="border-t border-primary-foreground/20 mt-8 pt-8 text-center text-primary-foreground/60">
-            <p>&copy; 2024 {t('hero.title')}. {t('footer.tagline')}</p>
+            <p>&copy; 2025 PeaceVerse. Empowering communities through data-driven peace intelligence.</p>
           </div>
         </div>
       </footer>
