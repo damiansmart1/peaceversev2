@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { IncidentStatsCards } from '@/components/IncidentStatsCards';
 import InteractiveHeatmap from '@/components/InteractiveHeatmap';
 import { ReportSubmissionForm } from '@/components/ReportSubmissionForm';
+import { ReportTracker } from '@/components/ReportTracker';
 import { useIncidentNotifications } from '@/hooks/useIncidentNotifications';
 import SectionImageBanner from '@/components/SectionImageBanner';
 import Navigation from '@/components/Navigation';
@@ -48,14 +49,18 @@ export default function Incidents() {
         <IncidentStatsCards />
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6 md:mt-8">
-          <TabsList className="grid w-full max-w-2xl grid-cols-3 h-auto">
+          <TabsList className="grid w-full max-w-3xl grid-cols-4 h-auto">
             <TabsTrigger value="tracking" className="text-xs sm:text-sm py-2 px-2">
               <span className="hidden sm:inline">Tracking & Map</span>
               <span className="sm:hidden">Map</span>
             </TabsTrigger>
+            <TabsTrigger value="myreports" className="text-xs sm:text-sm py-2 px-2">
+              <span className="hidden sm:inline">My Reports</span>
+              <span className="sm:hidden">Reports</span>
+            </TabsTrigger>
             <TabsTrigger value="report" className="text-xs sm:text-sm py-2 px-2">
               <span className="hidden sm:inline">Submit Report</span>
-              <span className="sm:hidden">Report</span>
+              <span className="sm:hidden">Submit</span>
             </TabsTrigger>
             <TabsTrigger value="timeline" className="text-xs sm:text-sm py-2 px-2">Timeline</TabsTrigger>
           </TabsList>
@@ -64,6 +69,10 @@ export default function Incidents() {
             <Card className="p-6">
               <InteractiveHeatmap />
             </Card>
+          </TabsContent>
+
+          <TabsContent value="myreports" className="mt-6">
+            <ReportTracker />
           </TabsContent>
 
           <TabsContent value="report" className="mt-6">
