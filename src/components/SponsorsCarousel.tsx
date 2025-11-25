@@ -3,20 +3,47 @@ import { Card } from '@/components/ui/card';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSponsors } from '@/hooks/useAdminSponsors';
+import { useLocation } from 'react-router-dom';
 
 interface Sponsor {
   id: string;
   name: string;
   logo_url: string;
   website_url?: string;
+  pages?: string[];
+  rotation_duration?: number;
+  display_frequency?: 'always' | 'high' | 'medium' | 'low';
 }
 
 const SponsorsCarousel = () => {
   const { data: dbSponsors, isLoading } = useSponsors();
+  const location = useLocation();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
-  const sponsors = dbSponsors || [];
+  // Get current page from route
+  const currentPage = location.pathname.split('/')[1] || 'home';
+
+  // Filter sponsors based on current page and frequency
+  const filteredSponsors = (dbSponsors || []).filter((sponsor: Sponsor) => {
+    // Check if sponsor should appear on this page
+    if (!sponsor.pages?.includes(currentPage)) return false;
+    
+    // Apply frequency filter
+    const frequency = sponsor.display_frequency || 'always';
+    if (frequency === 'always') return true;
+    
+    const random = Math.random();
+    switch (frequency) {
+      case 'high': return random < 0.75;
+      case 'medium': return random < 0.5;
+      case 'low': return random < 0.25;
+      default: return true;
+    }
+  });
+
+  const sponsors = filteredSponsors;
+  const rotationDuration = sponsors[currentIndex]?.rotation_duration || 3000;
 
   const itemsPerView = 4;
   const maxIndex = Math.max(0, sponsors.length - itemsPerView);
@@ -26,10 +53,10 @@ const SponsorsCarousel = () => {
 
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
-    }, 3000);
+    }, rotationDuration);
 
     return () => clearInterval(interval);
-  }, [isPaused, maxIndex, sponsors.length, itemsPerView]);
+  }, [isPaused, maxIndex, sponsors.length, itemsPerView, rotationDuration]);
 
   const next = () => {
     setCurrentIndex((prev) => Math.min(prev + 1, maxIndex));
