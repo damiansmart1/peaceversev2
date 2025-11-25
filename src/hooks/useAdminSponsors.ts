@@ -26,6 +26,10 @@ export const useCreateSponsor = () => {
       logo_url: string;
       website_url?: string;
       display_order: number;
+      pages?: string[];
+      rotation_duration?: number;
+      display_frequency?: string;
+      is_active?: boolean;
     }) => {
       const { data, error } = await supabase
         .from('sponsors')

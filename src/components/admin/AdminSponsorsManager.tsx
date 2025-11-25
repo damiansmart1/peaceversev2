@@ -9,8 +9,21 @@ import { Plus, Edit, Trash, Loader2, Upload, ExternalLink } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+
+const PAGE_OPTIONS = [
+  { value: 'home', label: 'Home' },
+  { value: 'about', label: 'About' },
+  { value: 'community', label: 'Community' },
+  { value: 'incidents', label: 'Incidents' },
+  { value: 'proposals', label: 'Proposals' },
+  { value: 'challenges', label: 'Challenges' },
+  { value: 'radio', label: 'Radio' },
+  { value: 'safety', label: 'Safety' },
+];
 
 export const AdminSponsorsManager = () => {
   const { data: sponsors, isLoading } = useAdminSponsors();
@@ -29,6 +42,9 @@ export const AdminSponsorsManager = () => {
     website_url: '',
     display_order: 0,
     is_active: true,
+    pages: ['home'] as string[],
+    rotation_duration: 3000,
+    display_frequency: 'always' as 'always' | 'high' | 'medium' | 'low',
   });
 
   const resetForm = () => {
@@ -38,6 +54,9 @@ export const AdminSponsorsManager = () => {
       website_url: '',
       display_order: sponsors?.length || 0,
       is_active: true,
+      pages: ['home'],
+      rotation_duration: 3000,
+      display_frequency: 'always',
     });
     setEditingItem(null);
   };
@@ -103,6 +122,9 @@ export const AdminSponsorsManager = () => {
       website_url: item.website_url || '',
       display_order: item.display_order,
       is_active: item.is_active,
+      pages: item.pages || ['home'],
+      rotation_duration: item.rotation_duration || 3000,
+      display_frequency: item.display_frequency || 'always',
     });
     setDialogOpen(true);
   };
@@ -215,6 +237,67 @@ export const AdminSponsorsManager = () => {
                 />
               </div>
 
+              <div>
+                <Label>Display on Pages</Label>
+                <div className="grid grid-cols-2 gap-2 mt-2 p-3 border rounded-md">
+                  {PAGE_OPTIONS.map((page) => (
+                    <div key={page.value} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={page.value}
+                        checked={formData.pages.includes(page.value)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setFormData({ ...formData, pages: [...formData.pages, page.value] });
+                          } else {
+                            setFormData({ ...formData, pages: formData.pages.filter(p => p !== page.value) });
+                          }
+                        }}
+                      />
+                      <Label htmlFor={page.value} className="font-normal cursor-pointer">
+                        {page.label}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="rotation_duration">Rotation Duration (ms)</Label>
+                <Input
+                  id="rotation_duration"
+                  type="number"
+                  value={formData.rotation_duration}
+                  onChange={(e) => setFormData({ ...formData, rotation_duration: parseInt(e.target.value) || 3000 })}
+                  placeholder="3000"
+                  min="1000"
+                  step="500"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  How long each sponsor appears in the carousel (milliseconds)
+                </p>
+              </div>
+
+              <div>
+                <Label htmlFor="display_frequency">Display Frequency</Label>
+                <Select
+                  value={formData.display_frequency}
+                  onValueChange={(value: any) => setFormData({ ...formData, display_frequency: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="always">Always (100%)</SelectItem>
+                    <SelectItem value="high">High (75%)</SelectItem>
+                    <SelectItem value="medium">Medium (50%)</SelectItem>
+                    <SelectItem value="low">Low (25%)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground mt-1">
+                  How often this sponsor appears in rotation
+                </p>
+              </div>
+
               <div className="flex items-center gap-2">
                 <Switch
                   id="is_active"
@@ -238,6 +321,8 @@ export const AdminSponsorsManager = () => {
             <TableRow>
               <TableHead>Logo</TableHead>
               <TableHead>Name</TableHead>
+              <TableHead>Pages</TableHead>
+              <TableHead>Frequency</TableHead>
               <TableHead>Order</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Actions</TableHead>
@@ -267,6 +352,20 @@ export const AdminSponsorsManager = () => {
                       </a>
                     )}
                   </div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex flex-wrap gap-1">
+                    {sponsor.pages?.map((page: string) => (
+                      <Badge key={page} variant="outline" className="text-xs">
+                        {page}
+                      </Badge>
+                    ))}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Badge variant="secondary">
+                    {sponsor.display_frequency || 'always'}
+                  </Badge>
                 </TableCell>
                 <TableCell>{sponsor.display_order}</TableCell>
                 <TableCell>
