@@ -59,13 +59,13 @@ export default function NotificationCenter() {
     } else if (type === 'verification') {
       navigate('/verification');
     } else if (type === 'report_status') {
-      navigate('/reports');
+      navigate('/incidents');
     } else if (type === 'achievement') {
       navigate('/profile');
     } else if (type.includes('proposal')) {
       navigate('/proposals');
     } else if (type.includes('content')) {
-      navigate('/voice');
+      navigate('/community');
     }
   };
 

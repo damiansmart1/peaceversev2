@@ -6,10 +6,10 @@ import { useNavigate } from 'react-router-dom';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 const quickActions = [
-  { icon: Mic, label: 'Record Story', path: '/voice', color: 'bg-voice-active' },
+  { icon: Mic, label: 'Share Story', path: '/community', color: 'bg-voice-active' },
   { icon: FileText, label: 'Create Proposal', path: '/proposals', color: 'bg-primary' },
-  { icon: Users, label: 'Find Safe Space', path: '/community', color: 'bg-accent' },
-  { icon: HelpCircle, label: 'Get Help', path: '/safety', color: 'bg-success' },
+  { icon: Users, label: 'Community Hub', path: '/community', color: 'bg-accent' },
+  { icon: HelpCircle, label: 'Safety Portal', path: '/safety', color: 'bg-success' },
 ];
 
 export default function QuickActionFAB() {

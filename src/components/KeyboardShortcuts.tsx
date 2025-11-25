@@ -25,7 +25,7 @@ export default function KeyboardShortcuts({ onSearchOpen }: KeyboardShortcutsPro
       // Alt + 1-9 for quick navigation
       if (e.altKey && !isNaN(Number(e.key))) {
         e.preventDefault();
-        const routes = ['/', '/voice', '/community', '/radio', '/challenges', '/proposals', '/profile'];
+        const routes = ['/', '/community', '/proposals', '/incidents', '/verification', '/safety', '/profile'];
         const index = Number(e.key) - 1;
         if (routes[index]) {
           navigate(routes[index]);
