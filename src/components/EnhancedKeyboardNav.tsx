@@ -22,10 +22,10 @@ export default function EnhancedKeyboardNav() {
     const shortcuts: KeyboardShortcut[] = [
       // Navigation shortcuts
       { key: 'h', alt: true, action: () => navigate('/'), description: 'Go to Home' },
-      { key: 'v', alt: true, action: () => navigate('/voice'), description: 'Go to Voice' },
-      { key: 'c', alt: true, action: () => navigate('/community'), description: 'Go to Community' },
-      { key: 'p', alt: true, action: () => navigate('/proposals'), description: 'Go to Proposals' },
-      { key: 'r', alt: true, action: () => navigate('/radio'), description: 'Go to Radio' },
+      { key: 'c', alt: true, action: () => navigate('/community'), description: 'Go to Community Hub' },
+      { key: 'p', alt: true, action: () => navigate('/proposals'), description: 'Go to Polls & Proposals' },
+      { key: 'i', alt: true, action: () => navigate('/incidents'), description: 'Go to Incident Reporting' },
+      { key: 'v', alt: true, action: () => navigate('/verification'), description: 'Go to Verification' },
       
       // Accessibility shortcuts
       { key: '=', ctrl: true, action: () => {
@@ -82,14 +82,15 @@ export default function EnhancedKeyboardNav() {
       title: t('keyboard.shortcuts_title'),
       description: (
         <div className="space-y-2 text-sm">
-          <p><kbd>Alt + H</kbd> - {t('keyboard.home')}</p>
-          <p><kbd>Alt + V</kbd> - {t('keyboard.voice')}</p>
-          <p><kbd>Alt + C</kbd> - {t('keyboard.community')}</p>
-          <p><kbd>Alt + P</kbd> - {t('keyboard.proposals')}</p>
-          <p><kbd>Alt + M</kbd> - {t('keyboard.skip_to_main')}</p>
-          <p><kbd>Ctrl + =</kbd> - {t('keyboard.increase_text')}</p>
-          <p><kbd>Ctrl + -</kbd> - {t('keyboard.decrease_text')}</p>
-          <p><kbd>Shift + ?</kbd> - {t('keyboard.show_shortcuts')}</p>
+          <p><kbd>Alt + H</kbd> - Go to Home</p>
+          <p><kbd>Alt + C</kbd> - Go to Community Hub</p>
+          <p><kbd>Alt + P</kbd> - Go to Polls & Proposals</p>
+          <p><kbd>Alt + I</kbd> - Go to Incident Reporting</p>
+          <p><kbd>Alt + V</kbd> - Go to Verification</p>
+          <p><kbd>Alt + M</kbd> - Skip to main content</p>
+          <p><kbd>Ctrl + =</kbd> - Increase text size</p>
+          <p><kbd>Ctrl + -</kbd> - Decrease text size</p>
+          <p><kbd>Shift + ?</kbd> - Show shortcuts</p>
         </div>
       ),
     });

@@ -76,28 +76,28 @@ export default function VoiceCommands() {
     // Navigation commands
     if (command.includes('go home') || command.includes('home page')) {
       navigate('/');
-      speak(t('voice.navigating_home'));
-    } else if (command.includes('voice') || command.includes('stories')) {
-      navigate('/voice');
-      speak(t('voice.navigating_stories'));
-    } else if (command.includes('community')) {
+      speak('Navigating to home');
+    } else if (command.includes('community') || command.includes('voice') || command.includes('stories') || command.includes('radio') || command.includes('challenges')) {
       navigate('/community');
-      speak(t('voice.navigating_community'));
-    } else if (command.includes('proposals')) {
+      speak('Navigating to Community Hub');
+    } else if (command.includes('proposals') || command.includes('polls')) {
       navigate('/proposals');
-      speak(t('voice.navigating_proposals'));
-    } else if (command.includes('challenges')) {
-      navigate('/challenges');
-      speak(t('voice.navigating_challenges'));
-    } else if (command.includes('radio')) {
-      navigate('/radio');
-      speak(t('voice.navigating_radio'));
+      speak('Navigating to Polls and Proposals');
+    } else if (command.includes('incident') || command.includes('report')) {
+      navigate('/incidents');
+      speak('Navigating to Incident Reporting');
+    } else if (command.includes('verification') || command.includes('verify')) {
+      navigate('/verification');
+      speak('Navigating to Verification');
+    } else if (command.includes('safety')) {
+      navigate('/safety');
+      speak('Navigating to Safety Portal');
     } else if (command.includes('profile')) {
       navigate('/profile');
-      speak(t('voice.navigating_profile'));
+      speak('Navigating to profile');
     } else if (command.includes('help')) {
       navigate('/help');
-      speak(t('voice.navigating_help'));
+      speak('Navigating to help');
     }
     // Action commands
     else if (command.includes('scroll down')) {

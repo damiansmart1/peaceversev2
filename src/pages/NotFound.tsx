@@ -38,14 +38,14 @@ const NotFound = () => {
           <div className="pt-6 border-t space-y-3">
             <p className="text-sm text-muted-foreground">Quick links:</p>
             <div className="flex flex-wrap gap-2 justify-center">
-              <Button size="sm" variant="ghost" onClick={() => navigate('/voice')}>
-                Voice Stories
-              </Button>
               <Button size="sm" variant="ghost" onClick={() => navigate('/community')}>
-                Community
+                Community Hub
               </Button>
               <Button size="sm" variant="ghost" onClick={() => navigate('/proposals')}>
-                Proposals
+                Polls & Proposals
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => navigate('/incidents')}>
+                Incident Reporting
               </Button>
               <Button size="sm" variant="ghost" onClick={() => navigate('/help')}>
                 <MessageCircle className="w-3 h-3 mr-1" />

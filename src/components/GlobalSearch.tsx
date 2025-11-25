@@ -15,11 +15,11 @@ interface SearchResult {
 }
 
 const mockResults: SearchResult[] = [
-  { id: '1', title: 'Voice Stories', description: 'Share your story through voice', type: 'page', path: '/voice', icon: FileText },
-  { id: '2', title: 'Community Spaces', description: 'Find safe spaces near you', type: 'page', path: '/community', icon: Users },
-  { id: '3', title: 'Peace Radio', description: 'Listen to community radio', type: 'page', path: '/radio', icon: RadioIcon },
-  { id: '4', title: 'Challenges', description: 'Complete challenges and earn rewards', type: 'page', path: '/challenges', icon: Award },
-  { id: '5', title: 'Safety & Trust', description: 'Learn about our safety features', type: 'page', path: '/safety', icon: Shield },
+  { id: '1', title: 'Community Hub', description: 'Safe spaces, events, stories, challenges, radio', type: 'page', path: '/community', icon: Users },
+  { id: '2', title: 'Polls & Proposals', description: 'Participate in democratic decision-making', type: 'page', path: '/proposals', icon: FileText },
+  { id: '3', title: 'Incident Reporting', description: 'Report and track incidents', type: 'page', path: '/incidents', icon: Shield },
+  { id: '4', title: 'Verification', description: 'Verify community content', type: 'page', path: '/verification', icon: Award },
+  { id: '5', title: 'Safety Portal', description: 'Moderation, protection, and trust', type: 'page', path: '/safety', icon: Shield },
 ];
 
 interface GlobalSearchProps {

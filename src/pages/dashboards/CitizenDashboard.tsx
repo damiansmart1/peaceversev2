@@ -30,13 +30,13 @@ const CitizenDashboard = () => {
 
           {/* Quick Actions */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/voice')}>
+            <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/community')}>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Mic className="w-5 h-5 text-primary" />
                   Share Your Voice
                 </CardTitle>
-                <CardDescription>Submit stories and experiences</CardDescription>
+                <CardDescription>Submit stories through Community Hub</CardDescription>
               </CardHeader>
             </Card>
             <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/incidents')}>
@@ -48,7 +48,7 @@ const CitizenDashboard = () => {
                 <CardDescription>Help keep the community safe</CardDescription>
               </CardHeader>
             </Card>
-            <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/challenges')}>
+            <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/community')}>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Heart className="w-5 h-5 text-primary" />

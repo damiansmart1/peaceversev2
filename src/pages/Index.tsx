@@ -35,8 +35,8 @@ const Index = () => {
                 <Mic className="w-6 h-6 text-white" />
               </div>}
               title={t('features.voice.title')}
-              description={t('features.voice.description')}
-              onClick={() => navigate('/voice')}
+              description="Share stories through voice recording (Community Hub)"
+              onClick={() => navigate('/community')}
             />
             
             <FeatureCard
@@ -52,26 +52,26 @@ const Index = () => {
               icon={<div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
                 <Radio className="w-6 h-6 text-white" />
               </div>}
-              title={t('features.radio.title')}
-              description={t('features.radio.description')}
-              onClick={() => navigate('/radio')}
+              title="Peace Radio"
+              description="Listen to community peace radio (Community Hub)"
+              onClick={() => navigate('/community')}
             />
             
             <FeatureCard
               icon={<div className="w-12 h-12 bg-success rounded-full flex items-center justify-center">
                 <Award className="w-6 h-6 text-white" />
               </div>}
-              title={t('features.challenges.title')}
-              description={t('features.challenges.description')}
-              onClick={() => navigate('/challenges')}
+              title="Challenges"
+              description="Complete peace challenges and earn rewards (Community Hub)"
+              onClick={() => navigate('/community')}
             />
             
             <FeatureCard
               icon={<div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center">
                 <Vote className="w-6 h-6 text-white" />
               </div>}
-              title={t('proposals.publicParticipation')}
-              description={t('proposals.publicParticipationDesc')}
+              title="Polls & Proposals"
+              description="Participate in democratic decision-making and community polls"
               onClick={() => navigate('/proposals')}
             />
             
