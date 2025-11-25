@@ -10,12 +10,66 @@ interface ReportSubmission {
   title: string;
   description: string;
   category: string;
+  sub_category?: string;
+  
+  // Incident details
+  incident_date?: string;
+  incident_time?: string;
+  duration_minutes?: number;
+  severity_level?: string;
+  urgency_level?: string;
+  
+  // People involved
+  estimated_people_affected?: number;
+  casualties_reported?: number;
+  injuries_reported?: number;
+  children_involved?: boolean;
+  vulnerable_groups_affected?: string[];
+  
+  // Witnesses
+  has_witnesses?: boolean;
+  witness_count?: number;
+  
+  // Contact
+  reporter_contact_phone?: string;
+  reporter_contact_email?: string;
+  preferred_contact_method?: string;
+  
+  // Location
   location?: {
     latitude: number;
     longitude: number;
     address?: string;
+    city?: string;
+    region?: string;
+    accuracy?: string;
+    type?: string;
   };
+  
+  // Evidence
   media_urls?: string[];
+  evidence_description?: string;
+  has_physical_evidence?: boolean;
+  
+  // Impact
+  immediate_needs?: string[];
+  community_impact_level?: string;
+  services_disrupted?: string[];
+  
+  // Context
+  historical_context?: string;
+  recurring_issue?: boolean;
+  first_occurrence?: boolean;
+  
+  // Authorities
+  authorities_notified?: boolean;
+  authorities_responded?: boolean;
+  authority_response_details?: string;
+  
+  // Follow-up
+  follow_up_contact_consent?: boolean;
+  
+  // Metadata
   is_anonymous?: boolean;
   tags?: string[];
 }
@@ -30,23 +84,17 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Get authenticated user
+    // Get authenticated user (optional for anonymous reports)
     const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      return new Response(
-        JSON.stringify({ error: 'Authorization required' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
+    let userId: string | null = null;
 
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-
-    if (authError || !user) {
-      return new Response(
-        JSON.stringify({ error: 'Invalid authorization' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    if (authHeader) {
+      const token = authHeader.replace('Bearer ', '');
+      const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+      
+      if (!authError && user) {
+        userId = user.id;
+      }
     }
 
     const submission = await req.json() as ReportSubmission;
@@ -67,30 +115,99 @@ serve(async (req) => {
       );
     }
 
-    if (submission.description.length > 5000) {
+    if (submission.description.length > 10000) {
       return new Response(
-        JSON.stringify({ error: 'Description must be less than 5000 characters' }),
+        JSON.stringify({ error: 'Description must be less than 10000 characters' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log(`Creating report from user ${user.id}: ${submission.title}`);
+    console.log(`Creating comprehensive report: ${submission.title}`);
 
-    // Create report
+    // Parse incident date and time
+    let incidentDateTime: string | null = null;
+    if (submission.incident_date) {
+      if (submission.incident_time) {
+        incidentDateTime = `${submission.incident_date}T${submission.incident_time}:00Z`;
+      } else {
+        incidentDateTime = `${submission.incident_date}T00:00:00Z`;
+      }
+    }
+
+    // Create comprehensive report
     const { data: report, error: reportError } = await supabase
       .from('citizen_reports')
       .insert({
-        reporter_id: submission.is_anonymous ? null : user.id,
+        reporter_id: submission.is_anonymous ? null : userId,
+        
+        // Basic information
         title: submission.title.trim(),
         description: submission.description.trim(),
         category: submission.category,
-        location: submission.location ? `POINT(${submission.location.longitude} ${submission.location.latitude})` : null,
-        location_name: submission.location?.address,
-        media_urls: submission.media_urls || [],
-        tags: submission.tags || [],
+        sub_category: submission.sub_category?.trim(),
+        
+        // Incident details
+        incident_date: incidentDateTime,
+        incident_time: submission.incident_time,
+        duration_minutes: submission.duration_minutes,
+        severity_level: submission.severity_level || 'medium',
+        urgency_level: submission.urgency_level || 'routine',
         status: 'pending',
+        
+        // People involved
+        estimated_people_affected: submission.estimated_people_affected,
+        casualties_reported: submission.casualties_reported,
+        injuries_reported: submission.injuries_reported,
+        children_involved: submission.children_involved || false,
+        vulnerable_groups_affected: submission.vulnerable_groups_affected || [],
+        
+        // Witness information
+        has_witnesses: submission.has_witnesses || false,
+        witness_count: submission.witness_count,
+        
+        // Contact information
+        reporter_contact_phone: submission.reporter_contact_phone?.trim(),
+        reporter_contact_email: submission.reporter_contact_email?.trim(),
+        preferred_contact_method: submission.preferred_contact_method || 'none',
+        
+        // Location
+        location_latitude: submission.location?.latitude,
+        location_longitude: submission.location?.longitude,
+        location_address: submission.location?.address?.trim(),
+        location_city: submission.location?.city?.trim(),
+        location_region: submission.location?.region?.trim(),
+        location_accuracy: submission.location?.accuracy || 'approximate',
+        location_type: submission.location?.type,
+        
+        // Evidence
+        media_urls: submission.media_urls || [],
+        evidence_description: submission.evidence_description?.trim(),
+        has_physical_evidence: submission.has_physical_evidence || false,
+        
+        // Impact assessment
+        immediate_needs: submission.immediate_needs || [],
+        community_impact_level: submission.community_impact_level,
+        services_disrupted: submission.services_disrupted || [],
+        
+        // Context
+        historical_context: submission.historical_context?.trim(),
+        recurring_issue: submission.recurring_issue || false,
+        first_occurrence: submission.first_occurrence !== undefined ? submission.first_occurrence : true,
+        
+        // Authorities
+        authorities_notified: submission.authorities_notified || false,
+        authorities_responded: submission.authorities_responded || false,
+        authority_response_details: submission.authority_response_details?.trim(),
+        
+        // Follow-up
+        follow_up_required: true,
+        follow_up_contact_consent: submission.follow_up_contact_consent || false,
+        
+        // Metadata
+        tags: submission.tags || [],
+        is_anonymous: submission.is_anonymous || false,
         visibility: 'public',
-        is_anonymous: submission.is_anonymous || false
+        source: 'citizen_report'
       })
       .select()
       .single();
@@ -100,7 +217,7 @@ serve(async (req) => {
       throw reportError;
     }
 
-    console.log(`Report created successfully: ${report.id}`);
+    console.log(`Comprehensive report created successfully: ${report.id}`);
 
     // Trigger AI analysis asynchronously
     const analysisUrl = `${supabaseUrl}/functions/v1/analyze-citizen-report`;
@@ -120,31 +237,6 @@ serve(async (req) => {
       console.error('Failed to trigger analysis:', error);
     });
 
-    // Create audit log
-    await supabase
-      .from('audit_logs')
-      .insert({
-        user_id: submission.is_anonymous ? null : user.id,
-        action: 'report_submitted',
-        entity_type: 'citizen_report',
-        entity_id: report.id,
-        changes: { submission },
-        ip_address: req.headers.get('x-forwarded-for') || 'unknown',
-        user_agent: req.headers.get('user-agent') || 'unknown'
-      });
-
-    // Update user reputation (if not anonymous)
-    if (!submission.is_anonymous) {
-      const { error: repError } = await supabase.rpc('increment_user_reputation', {
-        user_id: user.id,
-        points: 10
-      });
-      
-      if (repError) {
-        console.error('Failed to update reputation:', repError);
-      }
-    }
-
     return new Response(
       JSON.stringify({ 
         success: true, 
@@ -153,7 +245,8 @@ serve(async (req) => {
           title: report.title,
           status: report.status,
           created_at: report.created_at
-        }
+        },
+        message: 'Comprehensive report submitted successfully'
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
