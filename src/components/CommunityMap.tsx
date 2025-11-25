@@ -1,198 +1,429 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Users, Shield, Clock } from "lucide-react";
-import communityIcon from "@/assets/community-icon.jpg";
-
-interface SafeHub {
-  id: string;
-  name: string;
-  location: string;
-  type: 'community_center' | 'school' | 'library' | 'youth_center';
-  activeUsers: number;
-  verified: boolean;
-  distance: string;
-  nextSession: string;
-}
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { MapPin, Users, Shield, Clock, Navigation, Search, Filter, Plus } from "lucide-react";
+import { useAdminSafeSpaces, AdminSafeSpace } from "@/hooks/useAdminSafeSpaces";
+import { useAdminCheck } from "@/hooks/useAdminCheck";
+import { useJurisdiction } from "@/contexts/JurisdictionContext";
+import { toast } from "sonner";
+import { Loader } from '@googlemaps/js-api-loader';
 
 const CommunityMap = () => {
   const [selectedHub, setSelectedHub] = useState<string | null>(null);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedType, setSelectedType] = useState<string>('all');
+  const [showVerifiedOnly, setShowVerifiedOnly] = useState(false);
+  const mapRef = useRef<HTMLDivElement>(null);
+  const googleMapRef = useRef<google.maps.Map | null>(null);
+  const markersRef = useRef<google.maps.Marker[]>([]);
+  
+  const { data: safeSpaces, isLoading } = useAdminSafeSpaces();
+  const { data: isAdmin } = useAdminCheck();
+  const { selectedCountry, setSelectedCountry } = useJurisdiction();
 
-  const safeHubs: SafeHub[] = [
-    {
-      id: '1',
-      name: 'Peace Community Center',
-      location: 'Kibera',
-      type: 'community_center',
-      activeUsers: 23,
-      verified: true,
-      distance: '0.8 km',
-      nextSession: 'Today 3:00 PM'
-    },
-    {
-      id: '2',
-      name: 'Tumaini Youth Hub',
-      location: 'Mathare',
-      type: 'youth_center',
-      activeUsers: 15,
-      verified: true,
-      distance: '1.2 km',
-      nextSession: 'Tomorrow 10:00 AM'
-    },
-    {
-      id: '3',
-      name: 'Uhuru Library',
-      location: 'Eastlands',
-      type: 'library',
-      activeUsers: 8,
-      verified: true,
-      distance: '2.1 km',
-      nextSession: 'Friday 2:00 PM'
-    },
-    {
-      id: '4',
-      name: 'Harambee Secondary School',
-      location: 'Kasarani',
-      type: 'school',
-      activeUsers: 31,
-      verified: true,
-      distance: '2.8 km',
-      nextSession: 'Monday 4:00 PM'
+  // Get user's current location
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+          toast.success('Location detected');
+        },
+        (error) => {
+          console.error('Error getting location:', error);
+          // Default to Nairobi, Kenya
+          setUserLocation({ lat: -1.286389, lng: 36.817223 });
+        }
+      );
+    } else {
+      // Default to Nairobi, Kenya
+      setUserLocation({ lat: -1.286389, lng: 36.817223 });
     }
-  ];
+  }, []);
 
-  const getHubTypeColor = (type: string) => {
+  // Initialize Google Maps
+  useEffect(() => {
+    if (!mapRef.current || !userLocation) return;
+
+    const initMap = async () => {
+      const loader = new Loader({
+        apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
+        version: 'weekly',
+      });
+
+      try {
+        await loader.load();
+        
+        const map = new google.maps.Map(mapRef.current!, {
+          center: userLocation,
+          zoom: 12,
+          styles: [
+            {
+              featureType: 'poi',
+              elementType: 'labels',
+              stylers: [{ visibility: 'off' }],
+            },
+          ],
+        });
+
+        googleMapRef.current = map;
+
+        // Add user location marker
+        new google.maps.Marker({
+          position: userLocation,
+          map,
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 8,
+            fillColor: '#074F98',
+            fillOpacity: 1,
+            strokeColor: '#fff',
+            strokeWeight: 2,
+          },
+          title: 'Your Location',
+        });
+      } catch (error) {
+        console.error('Error loading Google Maps:', error);
+        toast.error('Failed to load map. Please check your API key.');
+      }
+    };
+
+    initMap();
+  }, [userLocation]);
+
+  // Update markers when safe spaces or filters change
+  useEffect(() => {
+    if (!googleMapRef.current || !safeSpaces) return;
+
+    // Clear existing markers
+    markersRef.current.forEach(marker => marker.setMap(null));
+    markersRef.current = [];
+
+    // Filter safe spaces
+    const filtered = safeSpaces.filter(space => {
+      if (space.is_archived) return false;
+      if (showVerifiedOnly && !space.verified) return false;
+      if (selectedType !== 'all' && space.space_type !== selectedType) return false;
+      if (searchQuery && !space.name.toLowerCase().includes(searchQuery.toLowerCase()) && 
+          !space.location_name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+      return true;
+    });
+
+    // Add markers for filtered spaces
+    filtered.forEach(space => {
+      if (!space.latitude || !space.longitude) return;
+
+      const marker = new google.maps.Marker({
+        position: { lat: space.latitude, lng: space.longitude },
+        map: googleMapRef.current!,
+        title: space.name,
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 10,
+          fillColor: space.verified ? '#275432' : '#E1AD40',
+          fillOpacity: 1,
+          strokeColor: '#fff',
+          strokeWeight: 2,
+        },
+      });
+
+      marker.addListener('click', () => {
+        setSelectedHub(space.id);
+        googleMapRef.current?.panTo({ lat: space.latitude!, lng: space.longitude! });
+      });
+
+      markersRef.current.push(marker);
+    });
+  }, [safeSpaces, selectedType, showVerifiedOnly, searchQuery]);
+
+  // Calculate distance between two coordinates
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): string => {
+    const R = 6371; // Earth's radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const distance = R * c;
+    return distance < 1 ? `${Math.round(distance * 1000)}m` : `${distance.toFixed(1)}km`;
+  };
+
+  // Get filtered and sorted safe spaces
+  const getFilteredSpaces = (): AdminSafeSpace[] => {
+    if (!safeSpaces) return [];
+    
+    return safeSpaces
+      .filter(space => {
+        if (space.is_archived) return false;
+        if (showVerifiedOnly && !space.verified) return false;
+        if (selectedType !== 'all' && space.space_type !== selectedType) return false;
+        if (searchQuery && !space.name.toLowerCase().includes(searchQuery.toLowerCase()) && 
+            !space.location_name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+        return true;
+      })
+      .sort((a, b) => {
+        if (!userLocation || !a.latitude || !a.longitude || !b.latitude || !b.longitude) return 0;
+        const distA = parseFloat(calculateDistance(userLocation.lat, userLocation.lng, a.latitude, a.longitude));
+        const distB = parseFloat(calculateDistance(userLocation.lat, userLocation.lng, b.latitude, b.longitude));
+        return distA - distB;
+      });
+  };
+
+  const filteredSpaces = getFilteredSpaces();
+
+  const getSpaceTypeColor = (type: string) => {
     switch (type) {
       case 'community_center': return 'bg-primary text-primary-foreground';
       case 'youth_center': return 'bg-accent text-accent-foreground';
       case 'library': return 'bg-secondary text-secondary-foreground';
-      case 'school': return 'bg-warning text-warning-foreground';
+      case 'school': return 'bg-[hsl(var(--warning))] text-[hsl(var(--warning-foreground))]';
       default: return 'bg-muted text-muted-foreground';
     }
   };
 
-  const getHubTypeName = (type: string) => {
-    switch (type) {
-      case 'community_center': return 'Community Center';
-      case 'youth_center': return 'Youth Center';
-      case 'library': return 'Library';
-      case 'school': return 'School';
-      default: return 'Unknown';
+  const getSpaceTypeName = (type: string) => {
+    const types: Record<string, string> = {
+      community_center: 'Community Center',
+      youth_center: 'Youth Center',
+      library: 'Library',
+      school: 'School',
+      health_center: 'Health Center',
+      recreation_center: 'Recreation Center',
+    };
+    return types[type] || type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+  };
+
+  const handleGoToLocation = () => {
+    if (userLocation && googleMapRef.current) {
+      googleMapRef.current.panTo(userLocation);
+      googleMapRef.current.setZoom(14);
+      toast.success('Centered on your location');
     }
   };
+
+  if (isLoading) {
+    return (
+      <section className="py-16 bg-muted/30">
+        <div className="container mx-auto px-6">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-4 text-muted-foreground">Loading safe spaces...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-16 bg-muted/30">
       <div className="container mx-auto px-6">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold mb-4 text-foreground">Find Safe Spaces</h2>
+        <div className="text-center mb-8">
+          <h2 className="text-4xl font-bold mb-4 text-foreground">Find Safe Spaces Near You</h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Connect with verified community dialogue spaces near you where youth gather to build peace
+            Discover verified community dialogue spaces where youth gather to build peace
           </p>
         </div>
 
-        {/* Map Visualization */}
-        <div className="max-w-6xl mx-auto mb-8">
-          <Card className="p-8 bg-card/80 backdrop-blur-sm border-accent/20 shadow-story">
-            <div className="relative">
-              {/* Mock Map Background */}
-              <div className="aspect-[16/10] bg-story-gradient rounded-lg relative overflow-hidden">
-                <img
-                  src={communityIcon}
-                  alt="Community mapping interface"
-                  className="absolute inset-0 w-full h-full object-cover opacity-20"
+        {/* Filters and Controls */}
+        <div className="max-w-6xl mx-auto mb-6">
+          <Card className="p-6 bg-card border-accent/20">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Search */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search safe spaces..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
                 />
-                
-                {/* Map Pins */}
-                <div className="absolute inset-0 p-6">
-                  {safeHubs.map((hub, index) => (
-                    <div
-                      key={hub.id}
-                      className={`absolute cursor-pointer transition-all duration-300 ${
-                        selectedHub === hub.id ? 'scale-125 z-10' : 'hover:scale-110'
-                      }`}
-                      style={{
-                        left: `${20 + index * 20}%`,
-                        top: `${30 + (index % 2) * 25}%`,
-                      }}
-                      onClick={() => setSelectedHub(selectedHub === hub.id ? null : hub.id)}
-                    >
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center shadow-warm ${
-                        selectedHub === hub.id ? 'bg-primary' : 'bg-accent'
-                      }`}>
-                        <MapPin className="w-4 h-4 text-primary-foreground" />
-                      </div>
-                      {hub.verified && (
-                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-success rounded-full border-2 border-card">
-                          <Shield className="w-2 h-2 text-success-foreground ml-0.5 mt-0.5" />
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
               </div>
+
+              {/* Type Filter */}
+              <Select value={selectedType} onValueChange={setSelectedType}>
+                <SelectTrigger>
+                  <Filter className="w-4 h-4 mr-2" />
+                  <SelectValue placeholder="All Types" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="community_center">Community Center</SelectItem>
+                  <SelectItem value="youth_center">Youth Center</SelectItem>
+                  <SelectItem value="library">Library</SelectItem>
+                  <SelectItem value="school">School</SelectItem>
+                  <SelectItem value="health_center">Health Center</SelectItem>
+                  <SelectItem value="recreation_center">Recreation Center</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {/* Location Button */}
+              <Button 
+                variant="outline" 
+                onClick={handleGoToLocation}
+                className="w-full"
+              >
+                <Navigation className="w-4 h-4 mr-2" />
+                My Location
+              </Button>
+
+              {/* Verified Filter */}
+              <Button
+                variant={showVerifiedOnly ? "default" : "outline"}
+                onClick={() => setShowVerifiedOnly(!showVerifiedOnly)}
+                className="w-full"
+              >
+                <Shield className="w-4 h-4 mr-2" />
+                {showVerifiedOnly ? 'All' : 'Verified Only'}
+              </Button>
             </div>
           </Card>
         </div>
 
-        {/* Hub List */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {safeHubs.map((hub) => (
-            <Card
-              key={hub.id}
-              className={`p-6 cursor-pointer transition-all duration-300 hover:shadow-warm ${
-                selectedHub === hub.id
-                  ? 'bg-card border-primary shadow-peace scale-105'
-                  : 'bg-card/80 backdrop-blur-sm border-accent/20 shadow-story'
-              }`}
-              onClick={() => setSelectedHub(selectedHub === hub.id ? null : hub.id)}
-            >
-              <div className="space-y-4">
-                <div className="flex items-start justify-between">
-                  <h3 className="font-semibold text-card-foreground leading-tight">{hub.name}</h3>
-                  {hub.verified && (
-                    <Shield className="w-4 h-4 text-success flex-shrink-0 mt-1" />
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <MapPin className="w-4 h-4 mr-2" />
-                    {hub.location} • {hub.distance}
-                  </div>
-                  
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <Users className="w-4 h-4 mr-2" />
-                    {hub.activeUsers} active members
-                  </div>
-                  
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <Clock className="w-4 h-4 mr-2" />
-                    {hub.nextSession}
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <Badge className={getHubTypeColor(hub.type)}>
-                    {getHubTypeName(hub.type)}
-                  </Badge>
-                  
-                  <Button variant="outline" size="sm">
-                    Join
-                  </Button>
+        {/* Interactive Map */}
+        <div className="max-w-6xl mx-auto mb-8">
+          <Card className="overflow-hidden bg-card border-accent/20 shadow-story">
+            <div 
+              ref={mapRef} 
+              className="w-full h-[500px]"
+            />
+            {!import.meta.env.VITE_GOOGLE_MAPS_API_KEY && (
+              <div className="absolute inset-0 flex items-center justify-center bg-muted/90 backdrop-blur-sm">
+                <div className="text-center p-6">
+                  <MapPin className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                  <p className="text-foreground font-semibold mb-2">Map Unavailable</p>
+                  <p className="text-sm text-muted-foreground">
+                    Please configure Google Maps API key to view the interactive map
+                  </p>
                 </div>
               </div>
-            </Card>
-          ))}
+            )}
+          </Card>
         </div>
 
-        <div className="text-center mt-12">
-          <Button variant="peace" size="lg">
-            <MapPin className="w-5 h-5" />
-            Add New Safe Space
-          </Button>
+        {/* Safe Spaces List */}
+        <div className="max-w-6xl mx-auto mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-2xl font-bold text-foreground">
+              {filteredSpaces.length} Safe Space{filteredSpaces.length !== 1 ? 's' : ''} Found
+            </h3>
+          </div>
+
+          {filteredSpaces.length === 0 ? (
+            <Card className="p-12 text-center bg-card border-accent/20">
+              <MapPin className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+              <h3 className="text-xl font-semibold text-foreground mb-2">No Safe Spaces Found</h3>
+              <p className="text-muted-foreground">
+                Try adjusting your filters or search in a different area
+              </p>
+            </Card>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredSpaces.map((space) => (
+                <Card
+                  key={space.id}
+                  className={`p-6 cursor-pointer transition-all duration-300 hover:shadow-warm hover:scale-[1.02] ${
+                    selectedHub === space.id
+                      ? 'bg-card border-primary shadow-peace ring-2 ring-primary/20'
+                      : 'bg-card border-accent/20 shadow-story'
+                  }`}
+                  onClick={() => {
+                    setSelectedHub(selectedHub === space.id ? null : space.id);
+                    if (space.latitude && space.longitude && googleMapRef.current) {
+                      googleMapRef.current.panTo({ lat: space.latitude, lng: space.longitude });
+                      googleMapRef.current.setZoom(15);
+                    }
+                  }}
+                >
+                  <div className="space-y-4">
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className="font-semibold text-foreground leading-tight flex-1">
+                        {space.name}
+                      </h3>
+                      {space.verified && (
+                        <Badge variant="outline" className="bg-[hsl(var(--success))]/10 text-[hsl(var(--success))] border-[hsl(var(--success))]/20 flex-shrink-0">
+                          <Shield className="w-3 h-3 mr-1" />
+                          Verified
+                        </Badge>
+                      )}
+                    </div>
+
+                    {space.description && (
+                      <p className="text-sm text-muted-foreground line-clamp-2">
+                        {space.description}
+                      </p>
+                    )}
+
+                    <div className="space-y-2">
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <MapPin className="w-4 h-4 mr-2 flex-shrink-0" />
+                        <span className="truncate">{space.location_name}</span>
+                      </div>
+                      
+                      {userLocation && space.latitude && space.longitude && (
+                        <div className="flex items-center text-sm text-muted-foreground">
+                          <Navigation className="w-4 h-4 mr-2 flex-shrink-0" />
+                          {calculateDistance(
+                            userLocation.lat,
+                            userLocation.lng,
+                            space.latitude,
+                            space.longitude
+                          )} away
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex items-center justify-between pt-2">
+                      <Badge className={getSpaceTypeColor(space.space_type)}>
+                        {getSpaceTypeName(space.space_type)}
+                      </Badge>
+                      
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (space.latitude && space.longitude) {
+                            window.open(
+                              `https://www.google.com/maps/dir/?api=1&destination=${space.latitude},${space.longitude}`,
+                              '_blank'
+                            );
+                          }
+                        }}
+                      >
+                        Get Directions
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
+
+        {/* Admin Add Button */}
+        {isAdmin && (
+          <div className="text-center">
+            <Button 
+              size="lg"
+              className="bg-primary hover:bg-primary/90"
+              onClick={() => {
+                toast.info('Safe space creation dialog coming soon!');
+              }}
+            >
+              <Plus className="w-5 h-5 mr-2" />
+              Add New Safe Space
+            </Button>
+          </div>
+        )}
       </div>
     </section>
   );
