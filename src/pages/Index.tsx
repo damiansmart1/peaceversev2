@@ -21,8 +21,8 @@ const Index = () => {
       <HeroSection />
       
       {/* Feature Overview Section */}
-      <section id="features" className="py-20 bg-muted/30">
-        <div className="container mx-auto px-6">
+      <section id="features" className="py-12 sm:py-16 md:py-20 bg-muted/30">
+        <div className="container mx-auto px-4 sm:px-6">
           <SectionHeader
             badge={t('features.badge')}
             title={t('features.title')}
@@ -30,7 +30,7 @@ const Index = () => {
             icon={<Heart className="w-4 h-4" />}
           />
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 max-w-7xl mx-auto">
             <FeatureCard
               icon={<div className="w-12 h-12 bg-voice-active rounded-full flex items-center justify-center">
                 <Mic className="w-6 h-6 text-white" />
@@ -107,8 +107,8 @@ const Index = () => {
       </section>
 
       {/* Interactive Africa Map Section */}
-      <section className="py-20 bg-gradient-to-b from-muted/30 to-background">
-        <div className="container mx-auto px-6">
+      <section className="py-12 sm:py-16 md:py-20 bg-gradient-to-b from-muted/30 to-background">
+        <div className="container mx-auto px-4 sm:px-6">
           <SectionHeader
             badge="Multi-Jurisdiction"
             title="Africa-Wide Early Warning System"
@@ -116,11 +116,11 @@ const Index = () => {
             icon={<Globe className="w-4 h-4" />}
           />
           
-          <div className="max-w-7xl mx-auto mt-12">
+          <div className="max-w-7xl mx-auto mt-8 sm:mt-12">
             <AfricaMap />
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto mt-12">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-6xl mx-auto mt-8 sm:mt-12">
             <Card className="border-2">
               <CardContent className="p-6">
                 <div className="flex items-center gap-3 mb-4">
@@ -170,8 +170,8 @@ const Index = () => {
       </section>
 
       {/* Accountability & Transparency Section */}
-      <section className="py-20 bg-background">
-        <div className="container mx-auto px-6">
+      <section className="py-12 sm:py-16 md:py-20 bg-background">
+        <div className="container mx-auto px-4 sm:px-6">
           <SectionHeader
             badge="Transparency"
             title="Real-Time Peace Intelligence"
@@ -179,7 +179,7 @@ const Index = () => {
             icon={<TrendingUp className="w-4 h-4" />}
           />
           
-          <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto mt-12">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-6xl mx-auto mt-8 sm:mt-12">
             <Card className="border-2 hover:border-primary transition-all cursor-pointer" onClick={() => navigate('/peace-pulse')}>
               <CardContent className="p-6">
                 <div className="flex items-center gap-3 mb-4">
@@ -241,14 +241,14 @@ const Index = () => {
             </Card>
           </div>
 
-          <div className="text-center mt-12">
+          <div className="text-center mt-8 sm:mt-12 px-4">
             <Button 
               size="lg" 
               onClick={() => navigate('/peace-pulse')}
-              className="gap-2"
+              className="gap-2 w-full sm:w-auto"
             >
               <Activity className="w-5 h-5" />
-              Explore Peace Intelligence
+              <span className="whitespace-nowrap">Explore Peace Intelligence</span>
             </Button>
           </div>
         </div>
