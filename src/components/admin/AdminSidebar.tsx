@@ -12,6 +12,7 @@ import {
   Settings,
   AlertTriangle,
   ChevronDown,
+  Brain,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -85,6 +86,7 @@ const menuItems = [
     label: 'Configuration',
     icon: Settings,
     children: [
+      { id: 'ai-analytics', label: 'AI Analytics' },
       { id: 'sponsors', label: 'Sponsors' },
       { id: 'settings', label: 'System Settings' },
     ],

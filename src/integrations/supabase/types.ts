@@ -14,6 +14,167 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_analysis_logs: {
+        Row: {
+          analysis_type: Database["public"]["Enums"]["ai_analysis_type"]
+          confidence_score: number | null
+          created_at: string | null
+          detected_entities: Json | null
+          id: string
+          input_data: Json | null
+          ip_address: string | null
+          model_used: string
+          model_version: string | null
+          output_data: Json
+          processing_time_ms: number | null
+          report_id: string | null
+          risk_indicators: Json | null
+          security_flags: Json | null
+          sentiment_breakdown: Json | null
+          user_id: string | null
+          validation_status: string | null
+        }
+        Insert: {
+          analysis_type: Database["public"]["Enums"]["ai_analysis_type"]
+          confidence_score?: number | null
+          created_at?: string | null
+          detected_entities?: Json | null
+          id?: string
+          input_data?: Json | null
+          ip_address?: string | null
+          model_used: string
+          model_version?: string | null
+          output_data: Json
+          processing_time_ms?: number | null
+          report_id?: string | null
+          risk_indicators?: Json | null
+          security_flags?: Json | null
+          sentiment_breakdown?: Json | null
+          user_id?: string | null
+          validation_status?: string | null
+        }
+        Update: {
+          analysis_type?: Database["public"]["Enums"]["ai_analysis_type"]
+          confidence_score?: number | null
+          created_at?: string | null
+          detected_entities?: Json | null
+          id?: string
+          input_data?: Json | null
+          ip_address?: string | null
+          model_used?: string
+          model_version?: string | null
+          output_data?: Json
+          processing_time_ms?: number | null
+          report_id?: string | null
+          risk_indicators?: Json | null
+          security_flags?: Json | null
+          sentiment_breakdown?: Json | null
+          user_id?: string | null
+          validation_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_analysis_logs_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "citizen_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_analytics_summary: {
+        Row: {
+          analysis_type_breakdown: Json | null
+          average_confidence: number | null
+          average_processing_time_ms: number | null
+          created_at: string | null
+          critical_detections: number | null
+          date: string
+          flagged_count: number | null
+          high_confidence_count: number | null
+          id: string
+          low_confidence_count: number | null
+          model_usage_stats: Json | null
+          total_analyses: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          analysis_type_breakdown?: Json | null
+          average_confidence?: number | null
+          average_processing_time_ms?: number | null
+          created_at?: string | null
+          critical_detections?: number | null
+          date?: string
+          flagged_count?: number | null
+          high_confidence_count?: number | null
+          id?: string
+          low_confidence_count?: number | null
+          model_usage_stats?: Json | null
+          total_analyses?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          analysis_type_breakdown?: Json | null
+          average_confidence?: number | null
+          average_processing_time_ms?: number | null
+          created_at?: string | null
+          critical_detections?: number | null
+          date?: string
+          flagged_count?: number | null
+          high_confidence_count?: number | null
+          id?: string
+          low_confidence_count?: number | null
+          model_usage_stats?: Json | null
+          total_analyses?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      ai_report_exports: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          date_range: Json
+          error_message: string | null
+          expires_at: string | null
+          file_url: string | null
+          filters: Json | null
+          generated_by: string
+          id: string
+          record_count: number | null
+          report_type: string
+          status: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          date_range: Json
+          error_message?: string | null
+          expires_at?: string | null
+          file_url?: string | null
+          filters?: Json | null
+          generated_by: string
+          id?: string
+          record_count?: number | null
+          report_type: string
+          status?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          date_range?: Json
+          error_message?: string | null
+          expires_at?: string | null
+          file_url?: string | null
+          filters?: Json | null
+          generated_by?: string
+          id?: string
+          record_count?: number | null
+          report_type?: string
+          status?: string | null
+        }
+        Relationships: []
+      }
       citizen_reports: {
         Row: {
           ai_key_entities: Json | null
@@ -1352,6 +1513,7 @@ export type Database = {
         Returns: unknown
       }
       unlockrows: { Args: { "": string }; Returns: number }
+      update_ai_analytics_summary: { Args: never; Returns: undefined }
       updategeometrysrid: {
         Args: {
           catalogn_name: string
@@ -1364,6 +1526,14 @@ export type Database = {
       }
     }
     Enums: {
+      ai_analysis_type:
+        | "sentiment"
+        | "threat_detection"
+        | "credibility"
+        | "entity_extraction"
+        | "tone_classification"
+        | "anomaly_detection"
+        | "sentiment_and_threat"
       app_role: "citizen" | "verifier" | "partner" | "government" | "admin"
     }
     CompositeTypes: {
@@ -1500,6 +1670,15 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      ai_analysis_type: [
+        "sentiment",
+        "threat_detection",
+        "credibility",
+        "entity_extraction",
+        "tone_classification",
+        "anomaly_detection",
+        "sentiment_and_threat",
+      ],
       app_role: ["citizen", "verifier", "partner", "government", "admin"],
     },
   },
