@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
-import { Menu, X, Mic, Users, Radio, Map, Award, Shield, Globe, User, LogOut, Settings, Search, HelpCircle } from "lucide-react";
+import { Menu, X, Mic, Users, Radio, Map, Award, Shield, Globe, Heart, User, LogOut, Settings, Search, HelpCircle } from "lucide-react";
 import peaceverselogo from "@/assets/peaceverse-logo.png";
 import GlobalSearch from '@/components/GlobalSearch';
 import KeyboardShortcuts from '@/components/KeyboardShortcuts';
