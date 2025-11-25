@@ -10,13 +10,13 @@ All colors MUST be HSL.
   :root {
     /* Official Peaceverse Color Palette - Light Mode */
     --background: 0 0% 100%;
-    --foreground: 209 91% 20%;
+    --foreground: 209 91% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 209 91% 20%;
+    --card-foreground: 209 91% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 209 91% 20%;
+    --popover-foreground: 209 91% 15%;
 
     /* Primary - Peaceverse Blue (#074F98) */
     --primary: 209 91% 31%;
@@ -28,9 +28,9 @@ All colors MUST be HSL.
     --secondary-foreground: 0 0% 100%;
     
     /* Accent - Golden Hope (#E1AD40) */
-    --accent: 41 73% 57%;
-    --accent-foreground: 209 91% 20%;
-    --accent-light: 41 73% 70%;
+    --accent: 41 73% 50%;
+    --accent-foreground: 0 0% 100%;
+    --accent-light: 41 73% 60%;
 
     /* Earth & Stability - Brown (#986135) */
     --earth: 27 48% 40%;
@@ -38,20 +38,20 @@ All colors MUST be HSL.
 
     /* Soft backgrounds - Cream (#E9D8B8) */
     --muted: 39 55% 92%;
-    --muted-foreground: 209 50% 30%;
+    --muted-foreground: 209 91% 25%;
 
     /* Success - Peace Green */
-    --success: 135 37% 35%;
+    --success: 135 37% 30%;
     --success-foreground: 0 0% 100%;
     
     /* Warning - Golden Alert */
-    --warning: 41 73% 50%;
-    --warning-foreground: 209 91% 20%;
+    --warning: 41 73% 45%;
+    --warning-foreground: 0 0% 100%;
 
-    --destructive: 0 84% 55%;
+    --destructive: 0 84% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 39 40% 85%;
+    --border: 39 40% 80%;
     --input: 39 55% 92%;
     --ring: 209 91% 31%;
 
@@ -75,62 +75,62 @@ All colors MUST be HSL.
     --radius: 0.25rem;
 
     --sidebar-background: 39 55% 97%;
-    --sidebar-foreground: 209 91% 20%;
+    --sidebar-foreground: 209 91% 15%;
     --sidebar-primary: 209 91% 31%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 39 55% 92%;
-    --sidebar-accent-foreground: 209 91% 20%;
-    --sidebar-border: 39 40% 85%;
+    --sidebar-accent-foreground: 209 91% 15%;
+    --sidebar-border: 39 40% 80%;
     --sidebar-ring: 209 91% 31%;
   }
 
   .dark {
     /* Official Peaceverse Color Palette - Dark Mode */
     --background: 209 60% 10%;
-    --foreground: 39 55% 92%;
+    --foreground: 39 55% 95%;
 
     --card: 209 50% 12%;
-    --card-foreground: 39 55% 92%;
+    --card-foreground: 39 55% 95%;
 
     --popover: 209 50% 12%;
-    --popover-foreground: 39 55% 92%;
+    --popover-foreground: 39 55% 95%;
 
     /* Primary - Peaceverse Blue (enhanced for dark) */
-    --primary: 209 91% 45%;
+    --primary: 209 91% 50%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 209 91% 60%;
+    --primary-glow: 209 91% 65%;
 
     /* Secondary - Peace Green (dark) */
-    --secondary: 135 37% 30%;
+    --secondary: 135 37% 35%;
     --secondary-foreground: 0 0% 100%;
     
     /* Accent - Golden Hope (enhanced for dark) */
-    --accent: 41 73% 65%;
-    --accent-foreground: 209 91% 15%;
-    --accent-light: 41 73% 75%;
+    --accent: 41 73% 60%;
+    --accent-foreground: 0 0% 100%;
+    --accent-light: 41 73% 70%;
 
     /* Earth & Stability */
-    --earth: 27 48% 45%;
+    --earth: 27 48% 50%;
     --earth-foreground: 0 0% 100%;
 
     /* Dark backgrounds */
     --muted: 209 40% 18%;
-    --muted-foreground: 39 40% 70%;
+    --muted-foreground: 39 55% 85%;
 
     /* Success - Peace Green */
-    --success: 135 37% 40%;
+    --success: 135 37% 45%;
     --success-foreground: 0 0% 100%;
     
     /* Warning - Golden Alert */
-    --warning: 41 73% 60%;
-    --warning-foreground: 209 91% 15%;
+    --warning: 41 73% 55%;
+    --warning-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 209 40% 22%;
-    --input: 209 40% 18%;
-    --ring: 209 91% 45%;
+    --border: 209 40% 25%;
+    --input: 209 40% 20%;
+    --ring: 209 91% 50%;
 
     /* Peaceverse Brand Gradients (dark) */
     --peace-gradient: linear-gradient(135deg, hsl(209 91% 35%) 0%, hsl(135 37% 30%) 100%);
@@ -150,13 +150,13 @@ All colors MUST be HSL.
     --voice-success: 135 37% 40%;
     
     --sidebar-background: 209 50% 12%;
-    --sidebar-foreground: 39 55% 92%;
-    --sidebar-primary: 209 91% 45%;
+    --sidebar-foreground: 39 55% 95%;
+    --sidebar-primary: 209 91% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 209 40% 18%;
-    --sidebar-accent-foreground: 39 55% 92%;
-    --sidebar-border: 209 40% 22%;
-    --sidebar-ring: 41 73% 65%;
+    --sidebar-accent-foreground: 39 55% 95%;
+    --sidebar-border: 209 40% 25%;
+    --sidebar-ring: 41 73% 60%;
   }
 }
 
