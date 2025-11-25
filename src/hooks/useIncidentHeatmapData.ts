@@ -31,23 +31,49 @@ export const useIncidentHeatmapData = (country?: string, severity?: string) => {
     queryKey: ['incident-heatmap', country, severity],
     queryFn: async () => {
       let query = supabase
-        .from('incidents' as any)
+        .from('citizen_reports')
         .select('*')
-        .not('geo_location', 'is', null)
+        .not('location_latitude', 'is', null)
+        .not('location_longitude', 'is', null)
         .order('created_at', { ascending: false });
 
       if (country && country !== 'all') {
-        query = query.eq('country_code', country);
+        query = query.eq('location_country', country);
       }
 
       if (severity && severity !== 'all') {
-        query = query.eq('severity', severity);
+        query = query.eq('severity_level', severity);
       }
 
       const { data, error } = await query;
       
       if (error) throw error;
-      return (data as unknown as HeatmapIncident[]) || [];
+      
+      // Map citizen_reports to HeatmapIncident format
+      return (data || []).map(report => ({
+        id: report.id,
+        title: report.title,
+        description: report.description,
+        incident_type: report.category,
+        severity: report.severity_level as 'low' | 'medium' | 'high' | 'critical',
+        status: report.status || 'pending',
+        geo_location: {
+          latitude: report.location_latitude!,
+          longitude: report.location_longitude!,
+          location_name: report.location_name || report.location_city || report.location_region,
+        },
+        country_code: report.location_country,
+        region: report.location_region,
+        reported_by: report.reporter_id,
+        verified_by: report.verified_by,
+        resolved_by: null,
+        created_at: report.created_at!,
+        updated_at: report.updated_at!,
+        verification_status: report.verification_status,
+        impact_assessment: null,
+        affected_population: report.estimated_people_affected,
+        response_actions: null,
+      })) as HeatmapIncident[];
     },
     refetchInterval: 30000, // Refresh every 30 seconds for live data
   });

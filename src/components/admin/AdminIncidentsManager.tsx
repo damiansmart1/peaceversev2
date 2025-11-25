@@ -12,7 +12,7 @@ import { CheckCircle2, XCircle, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 
 export const AdminIncidentsManager = () => {
-  const { data: incidents, isLoading } = useIncidents();
+  const { data: incidents = [], isLoading } = useIncidents();
   const updateIncident = useUpdateIncident();
   const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
   const [newStatus, setNewStatus] = useState('');
