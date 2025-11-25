@@ -7,7 +7,7 @@ import GamificationDashboard from '@/components/GamificationDashboard';
 import { ProfileActivityTimeline } from '@/components/ProfileActivityTimeline';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { User, Trophy, ShoppingBag, Target, Activity, Settings, Heart, Mic, Flag } from 'lucide-react';
+import { Trophy, ShoppingBag, Target, Activity, Heart, Mic, Flag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 
@@ -39,7 +39,7 @@ const CitizenDashboard = () => {
                 <CardDescription>Submit stories and experiences</CardDescription>
               </CardHeader>
             </Card>
-            <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/reports')}>
+            <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/incidents')}>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Flag className="w-5 h-5 text-primary" />
@@ -61,11 +61,11 @@ const CitizenDashboard = () => {
 
           <UserProgressCard />
 
-          <Tabs defaultValue="achievements" className="w-full">
-            <TabsList className="grid w-full grid-cols-6 mb-8">
-              <TabsTrigger value="achievements">
+          <Tabs defaultValue="progress" className="w-full">
+            <TabsList className="grid w-full grid-cols-4 mb-8">
+              <TabsTrigger value="progress">
                 <Trophy className="w-4 h-4 mr-2" />
-                Achievements
+                Progress & Rankings
               </TabsTrigger>
               <TabsTrigger value="challenges">
                 <Target className="w-4 h-4 mr-2" />
@@ -75,22 +75,15 @@ const CitizenDashboard = () => {
                 <Activity className="w-4 h-4 mr-2" />
                 Activity
               </TabsTrigger>
-              <TabsTrigger value="leaderboard">
-                <User className="w-4 h-4 mr-2" />
-                Rankings
-              </TabsTrigger>
               <TabsTrigger value="store">
                 <ShoppingBag className="w-4 h-4 mr-2" />
                 Store
               </TabsTrigger>
-              <TabsTrigger value="settings">
-                <Settings className="w-4 h-4 mr-2" />
-                Settings
-              </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="achievements">
+            <TabsContent value="progress" className="space-y-8">
               <GamificationDashboard />
+              <LeaderboardSection />
             </TabsContent>
 
             <TabsContent value="challenges">
@@ -101,16 +94,8 @@ const CitizenDashboard = () => {
               <ProfileActivityTimeline />
             </TabsContent>
 
-            <TabsContent value="leaderboard">
-              <LeaderboardSection />
-            </TabsContent>
-
             <TabsContent value="store">
               <RewardStoreSection />
-            </TabsContent>
-
-            <TabsContent value="settings" className="text-center py-12">
-              <p className="text-muted-foreground">Profile settings coming soon</p>
             </TabsContent>
           </Tabs>
         </div>
