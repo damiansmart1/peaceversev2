@@ -444,7 +444,7 @@ const InteractiveHeatmap = () => {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Select value={selectedCountry} onValueChange={setSelectedCountry}>
               <SelectTrigger>
                 <SelectValue placeholder="Select Country" />
@@ -480,21 +480,21 @@ const InteractiveHeatmap = () => {
                 <SelectItem value="heatmap">Heatmap</SelectItem>
               </SelectContent>
             </Select>
+          </div>
 
-            <div className="flex gap-2">
-              <Button onClick={() => handleExport('json')} variant="outline" size="sm" className="flex-1">
-                <Download className="w-4 h-4 mr-1" /> JSON
-              </Button>
-              <Button onClick={() => handleExport('csv')} variant="outline" size="sm" className="flex-1">
-                <Download className="w-4 h-4 mr-1" /> CSV
-              </Button>
-              <Button onClick={() => handleExport('pdf')} variant="outline" size="sm" className="flex-1">
-                <Download className="w-4 h-4 mr-1" /> PDF
-              </Button>
-              <Button onClick={() => handleExport('word')} variant="outline" size="sm" className="flex-1">
-                <Download className="w-4 h-4 mr-1" /> Word
-              </Button>
-            </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            <Button onClick={() => handleExport('json')} variant="outline" size="sm">
+              <Download className="w-4 h-4 mr-1" /> JSON
+            </Button>
+            <Button onClick={() => handleExport('csv')} variant="outline" size="sm">
+              <Download className="w-4 h-4 mr-1" /> CSV
+            </Button>
+            <Button onClick={() => handleExport('pdf')} variant="outline" size="sm">
+              <Download className="w-4 h-4 mr-1" /> PDF
+            </Button>
+            <Button onClick={() => handleExport('word')} variant="outline" size="sm">
+              <Download className="w-4 h-4 mr-1" /> Word
+            </Button>
           </div>
         </CardContent>
       </Card>
