@@ -49,13 +49,11 @@ const Navigation = () => {
     { path: '/about', label: 'About', icon: Heart },
     { path: '/challenges', label: t('nav.challenges'), icon: Award },
     { path: '/community', label: t('nav.community'), icon: Users },
-    { path: '/incidents', label: 'Incidents', icon: Shield },
+    { path: '/incidents', label: 'Incident Hub', icon: Shield },
     { path: '/peace-pulse', label: 'PeacePulse', icon: Globe },
     { path: '/proposals', label: 'Proposals', icon: Map },
     { path: '/radio', label: t('nav.radio'), icon: Radio },
-    { path: '/reports', label: 'Reports', icon: Shield },
-    { path: '/safety', label: t('nav.safety'), icon: Shield },
-    { path: '/verification', label: 'Verification', icon: Shield },
+    { path: '/safety', label: 'Safety Portal', icon: Shield },
     { path: '/voice', label: t('nav.voice'), icon: Mic },
   ];
 
