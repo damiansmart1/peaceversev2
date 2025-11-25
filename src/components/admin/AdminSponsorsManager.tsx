@@ -69,12 +69,14 @@ export const AdminSponsorsManager = () => {
     const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
     if (!allowedTypes.includes(file.type)) {
       toast.error('Please upload a PNG, JPG, or JPEG image file');
+      e.target.value = ''; // Reset input
       return;
     }
 
     // Validate file size (5MB max)
     if (file.size > 5 * 1024 * 1024) {
       toast.error('Image must be less than 5MB');
+      e.target.value = ''; // Reset input
       return;
     }
 
@@ -104,9 +106,13 @@ export const AdminSponsorsManager = () => {
 
       setFormData({ ...formData, logo_url: publicUrl });
       toast.success('Logo uploaded successfully');
+      
+      // Reset file input to allow re-uploading
+      e.target.value = '';
     } catch (error: any) {
       console.error('Upload failed:', error);
       toast.error('Failed to upload logo: ' + (error.message || 'Unknown error'));
+      e.target.value = ''; // Reset input on error
     } finally {
       setUploading(false);
     }
