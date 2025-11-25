@@ -3,12 +3,23 @@ import SectionHeader from '@/components/SectionHeader';
 import CommunityMap from '@/components/CommunityMap';
 import ContentFeed from '@/components/ContentFeed';
 import { CommunityEvents } from '@/components/CommunityEvents';
+import PeacebuildingChallenges from '@/components/PeacebuildingChallenges';
+import GamificationDashboard from '@/components/GamificationDashboard';
+import FunctionalRadio from '@/components/FunctionalRadio';
+import RadioAccessibilityFeatures from '@/components/RadioAccessibilityFeatures';
+import { RadioSchedule } from '@/components/RadioSchedule';
+import VoiceRecorder from '@/components/VoiceRecorder';
+import ContentUpload from '@/components/ContentUpload';
+import { StoryFilters } from '@/components/StoryFilters';
+import { FeaturedStories } from '@/components/FeaturedStories';
+import { useContentFilters } from '@/hooks/useContentFilters';
 import { useTranslationContext } from '@/components/TranslationProvider';
-import { Map, MessageSquare, Users, Calendar, BookOpen } from 'lucide-react';
+import { Map, MessageSquare, Users, Calendar, BookOpen, Award, Radio as RadioIcon, Mic } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const Community = () => {
   const { t } = useTranslationContext();
+  const { filters, updateFilter, resetFilters } = useContentFilters();
 
   return (
     <div className="min-h-screen bg-background">
@@ -17,12 +28,12 @@ const Community = () => {
         <SectionHeader
           badge={t('community.badge')}
           title="Community Hub"
-          subtitle="Connect with safe spaces, join events, and share stories"
+          subtitle="Connect with safe spaces, join events, share stories, and engage in challenges"
           icon={<Users className="w-4 h-4" />}
         />
         
         <Tabs defaultValue="map" className="max-w-6xl mx-auto">
-          <TabsList className="grid w-full grid-cols-4 mb-8">
+          <TabsList className="grid w-full grid-cols-7 mb-8">
             <TabsTrigger value="map" className="flex items-center gap-2">
               <Map className="w-4 h-4" />
               Safe Spaces
@@ -34,6 +45,18 @@ const Community = () => {
             <TabsTrigger value="stories" className="flex items-center gap-2">
               <MessageSquare className="w-4 h-4" />
               Stories
+            </TabsTrigger>
+            <TabsTrigger value="challenges" className="flex items-center gap-2">
+              <Award className="w-4 h-4" />
+              Challenges
+            </TabsTrigger>
+            <TabsTrigger value="radio" className="flex items-center gap-2">
+              <RadioIcon className="w-4 h-4" />
+              Peace Radio
+            </TabsTrigger>
+            <TabsTrigger value="voice" className="flex items-center gap-2">
+              <Mic className="w-4 h-4" />
+              Voice Stories
             </TabsTrigger>
             <TabsTrigger value="resources" className="flex items-center gap-2">
               <BookOpen className="w-4 h-4" />
@@ -51,6 +74,58 @@ const Community = () => {
           
           <TabsContent value="stories" className="space-y-4">
             <ContentFeed />
+          </TabsContent>
+
+          <TabsContent value="challenges" className="space-y-8">
+            <PeacebuildingChallenges />
+            <GamificationDashboard />
+          </TabsContent>
+
+          <TabsContent value="radio" className="space-y-8">
+            <Tabs defaultValue="live" className="w-full">
+              <TabsList className="grid w-full grid-cols-3 mb-8">
+                <TabsTrigger value="live">Live Radio</TabsTrigger>
+                <TabsTrigger value="schedule">Schedule</TabsTrigger>
+                <TabsTrigger value="accessibility">Accessibility</TabsTrigger>
+              </TabsList>
+              <TabsContent value="live" className="space-y-8">
+                <FunctionalRadio />
+              </TabsContent>
+              <TabsContent value="schedule" className="space-y-8">
+                <RadioSchedule />
+              </TabsContent>
+              <TabsContent value="accessibility" className="space-y-8">
+                <RadioAccessibilityFeatures />
+              </TabsContent>
+            </Tabs>
+          </TabsContent>
+
+          <TabsContent value="voice" className="space-y-8">
+            <Tabs defaultValue="share" className="w-full">
+              <TabsList className="grid w-full grid-cols-3 mb-8">
+                <TabsTrigger value="share">Share Story</TabsTrigger>
+                <TabsTrigger value="browse">Browse Stories</TabsTrigger>
+                <TabsTrigger value="featured">Featured</TabsTrigger>
+              </TabsList>
+              <TabsContent value="share" className="space-y-12">
+                <VoiceRecorder />
+                <div className="border-t border-border pt-12">
+                  <ContentUpload />
+                </div>
+              </TabsContent>
+              <TabsContent value="browse" className="space-y-6">
+                <StoryFilters
+                  filters={filters}
+                  onFilterChange={updateFilter}
+                  onReset={resetFilters}
+                />
+                <ContentFeed />
+              </TabsContent>
+              <TabsContent value="featured" className="space-y-8">
+                <FeaturedStories />
+                <ContentFeed />
+              </TabsContent>
+            </Tabs>
           </TabsContent>
 
           <TabsContent value="resources" className="space-y-4 text-center py-12">

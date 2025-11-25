@@ -47,14 +47,12 @@ const Navigation = () => {
   // Base navigation items (alphabetically ordered)
   const baseNavItems = [
     { path: '/about', label: 'About', icon: Heart },
-    { path: '/challenges', label: t('nav.challenges'), icon: Award },
     { path: '/community', label: t('nav.community'), icon: Users },
-    { path: '/incidents', label: 'Incident Hub', icon: Shield },
+    { path: '/incidents', label: 'Incident Reporting', icon: Shield },
     { path: '/peace-pulse', label: 'PeacePulse', icon: Globe },
-    { path: '/proposals', label: 'Proposals', icon: Map },
-    { path: '/radio', label: t('nav.radio'), icon: Radio },
+    { path: '/proposals', label: 'Polls & Proposals', icon: Map },
     { path: '/safety', label: 'Safety Portal', icon: Shield },
-    { path: '/voice', label: t('nav.voice'), icon: Mic },
+    { path: '/verification', label: 'Verification', icon: Award },
   ];
 
   // Add profile only if user is logged in
