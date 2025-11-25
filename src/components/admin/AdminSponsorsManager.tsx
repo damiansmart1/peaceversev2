@@ -124,16 +124,21 @@ export const AdminSponsorsManager = () => {
       return;
     }
 
-    if (editingItem) {
-      await updateMutation.mutateAsync({
-        id: editingItem.id,
-        updates: formData,
-      });
-    } else {
-      await createMutation.mutateAsync(formData);
+    try {
+      if (editingItem) {
+        await updateMutation.mutateAsync({
+          id: editingItem.id,
+          updates: formData,
+        });
+      } else {
+        await createMutation.mutateAsync(formData);
+      }
+      setDialogOpen(false);
+      resetForm();
+    } catch (error) {
+      // Error handling is done in the mutation hooks
+      console.error('Submit error:', error);
     }
-    setDialogOpen(false);
-    resetForm();
   };
 
   const handleEdit = (item: any) => {
@@ -333,8 +338,19 @@ export const AdminSponsorsManager = () => {
                 <Label htmlFor="is_active">Active (visible on website)</Label>
               </div>
 
-              <Button onClick={handleSubmit} className="w-full">
-                {editingItem ? 'Update' : 'Add'} Sponsor
+              <Button 
+                onClick={handleSubmit} 
+                className="w-full"
+                disabled={createMutation.isPending || updateMutation.isPending || !formData.name || !formData.logo_url}
+              >
+                {(createMutation.isPending || updateMutation.isPending) ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    {editingItem ? 'Updating...' : 'Adding...'}
+                  </>
+                ) : (
+                  <>{editingItem ? 'Update' : 'Add'} Sponsor</>
+                )}
               </Button>
             </div>
           </DialogContent>
