@@ -32,8 +32,8 @@ export default function Auth() {
 
   useEffect(() => {
     if (user && !user.is_anonymous) {
-      // Redirect to profile page after successful login
-      navigate('/profile');
+      // Redirect to dashboard router to determine appropriate dashboard
+      navigate('/dashboard');
     }
   }, [user, navigate]);
 
@@ -184,7 +184,7 @@ export default function Auth() {
         title: 'Welcome Back!',
         description: 'You have successfully signed in.',
       });
-      navigate('/profile');
+      navigate('/dashboard');
     }
   };
 
