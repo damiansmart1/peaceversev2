@@ -16,26 +16,26 @@ export default function Incidents() {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      <div className="container mx-auto px-4 py-24">
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-4xl font-bold text-foreground">
+      <div className="container mx-auto px-4 py-20 md:py-24">
+        <div className="mb-6 md:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground">
               Incident Hub
             </h1>
             <Button 
               onClick={() => setActiveTab('report')}
               size="lg"
-              className="gap-2"
+              className="gap-2 w-full sm:w-auto"
             >
               <AlertTriangle className="h-5 w-5" />
-              Submit Report
+              <span className="whitespace-nowrap">Submit Report</span>
             </Button>
           </div>
-          <p className="text-muted-foreground">
+          <p className="text-sm md:text-base text-muted-foreground">
             Report incidents, track real-time monitoring, and view early warning visualizations
           </p>
           {locationPermission === 'denied' && (
-            <p className="text-sm text-amber-600 dark:text-amber-400 mt-2">
+            <p className="text-xs md:text-sm text-amber-600 dark:text-amber-400 mt-2">
               Enable location permissions to receive alerts for nearby critical incidents
             </p>
           )}
@@ -43,11 +43,17 @@ export default function Incidents() {
 
         <IncidentStatsCards />
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
-          <TabsList className="grid w-full max-w-2xl grid-cols-3">
-            <TabsTrigger value="tracking">Tracking & Map</TabsTrigger>
-            <TabsTrigger value="report">Submit Report</TabsTrigger>
-            <TabsTrigger value="timeline">Timeline</TabsTrigger>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6 md:mt-8">
+          <TabsList className="grid w-full max-w-2xl grid-cols-3 h-auto">
+            <TabsTrigger value="tracking" className="text-xs sm:text-sm py-2 px-2">
+              <span className="hidden sm:inline">Tracking & Map</span>
+              <span className="sm:hidden">Map</span>
+            </TabsTrigger>
+            <TabsTrigger value="report" className="text-xs sm:text-sm py-2 px-2">
+              <span className="hidden sm:inline">Submit Report</span>
+              <span className="sm:hidden">Report</span>
+            </TabsTrigger>
+            <TabsTrigger value="timeline" className="text-xs sm:text-sm py-2 px-2">Timeline</TabsTrigger>
           </TabsList>
 
           <TabsContent value="tracking" className="mt-6">
