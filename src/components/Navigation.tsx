@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
-import { Menu, X, Mic, Users, Radio, Map, Award, Shield, Globe, Heart, User, LogOut, Settings, Search, HelpCircle } from "lucide-react";
+import { Menu, X, Mic, Users, Radio, Map, Award, Shield, Globe, Heart, User, LogOut, Settings, Search, HelpCircle, AlertTriangle } from "lucide-react";
 import peaceverselogo from "@/assets/peaceverse-logo.png";
 import GlobalSearch from '@/components/GlobalSearch';
 import KeyboardShortcuts from '@/components/KeyboardShortcuts';
@@ -71,6 +71,11 @@ const Navigation = () => {
   // Add Verification only for verifiers, admins, and government officials
   if (roleStrings.includes('verifier') || roleStrings.includes('admin') || roleStrings.includes('government')) {
     roleBasedItems.push({ path: '/verification', label: 'Verification', icon: Award });
+  }
+  
+  // Add Early Warning Dashboard for admins, government, and partners
+  if (roleStrings.includes('admin') || roleStrings.includes('government') || roleStrings.includes('partner')) {
+    roleBasedItems.push({ path: '/early-warning', label: 'Early Warning', icon: AlertTriangle });
   }
 
   // Combine and sort navigation items alphabetically
