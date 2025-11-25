@@ -22,6 +22,10 @@ export interface ReportSubmission {
   children_involved?: boolean;
   vulnerable_groups_affected?: string[];
   
+  // Perpetrator
+  perpetrator_type?: string;
+  perpetrator_description?: string;
+  
   // Witnesses
   has_witnesses?: boolean;
   witness_count?: number;
@@ -38,6 +42,8 @@ export interface ReportSubmission {
     address?: string;
     city?: string;
     region?: string;
+    country?: string;
+    postal_code?: string;
     accuracy?: string;
     type?: string;
   };
@@ -51,11 +57,22 @@ export interface ReportSubmission {
   immediate_needs?: string[];
   community_impact_level?: string;
   services_disrupted?: string[];
+  infrastructure_damage?: string[];
+  economic_impact_estimate?: number;
+  community_response?: string;
+  immediate_actions_taken?: string[];
+  
+  // Assistance
+  assistance_received?: boolean;
+  assistance_type?: string[];
+  assistance_provider?: string;
   
   // Context
   historical_context?: string;
   recurring_issue?: boolean;
   first_occurrence?: boolean;
+  previous_reports_filed?: boolean;
+  related_incidents?: string;
   
   // Authorities
   authorities_notified?: boolean;
