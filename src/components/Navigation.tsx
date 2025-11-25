@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
-import { Menu, X, Mic, Users, Radio, Map, Award, Shield, Globe, Heart, User, LogOut, Settings, Search, HelpCircle } from "lucide-react";
+import { Menu, X, Mic, Users, Radio, Map, Award, Shield, Globe, User, LogOut, Settings, Search, HelpCircle } from "lucide-react";
+import peaceverselogo from "@/assets/peaceverse-logo.png";
 import GlobalSearch from '@/components/GlobalSearch';
 import KeyboardShortcuts from '@/components/KeyboardShortcuts';
 import NotificationCenter from '@/components/NotificationCenter';
@@ -72,13 +73,12 @@ const Navigation = () => {
       <div className="container mx-auto px-3 sm:px-4">
         <div className="flex items-center justify-between h-14 sm:h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-1.5 sm:gap-2 hover:opacity-80 transition-opacity flex-shrink-0">
-            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-peace-gradient rounded-full flex items-center justify-center">
-              <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
-            </div>
-            <span className="font-bold text-base sm:text-xl bg-peace-gradient bg-clip-text text-transparent whitespace-nowrap">
-              {t('hero.title')}
-            </span>
+          <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity flex-shrink-0">
+            <img 
+              src={peaceverselogo} 
+              alt="PeaceVerse Logo" 
+              className="h-10 sm:h-12 w-auto"
+            />
             <Badge variant="secondary" className="text-xs hidden lg:inline-flex">
               v2.0
             </Badge>
@@ -189,12 +189,11 @@ const Navigation = () => {
               <SheetContent side="right" className="w-[85vw] max-w-sm bg-background z-[60]">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 bg-peace-gradient rounded-full flex items-center justify-center">
-                      <Heart className="w-3 h-3 text-white" />
-                    </div>
-                    <span className="font-bold bg-peace-gradient bg-clip-text text-transparent text-base">
-                      {t('hero.title')}
-                    </span>
+                    <img 
+                      src={peaceverselogo} 
+                      alt="PeaceVerse Logo" 
+                      className="h-8 w-auto"
+                    />
                   </div>
                   <SheetClose asChild>
                     <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
