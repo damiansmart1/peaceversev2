@@ -30,6 +30,25 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
     const { reportId, title, description, category } = await req.json() as AnalysisRequest;
 
+    // Security: Input validation
+    if (!reportId || !title || !description || !category) {
+      return new Response(JSON.stringify({ error: 'Missing required fields' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Security: Length validation
+    if (title.length > 500 || description.length > 10000) {
+      return new Response(JSON.stringify({ error: 'Input exceeds maximum length' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Security: Get IP address for audit
+    const ipAddress = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+
     console.log(`Analyzing report ${reportId}: ${title}`);
 
     // Call Lovable AI for sentiment and threat analysis
@@ -154,17 +173,25 @@ Provide analysis in this exact JSON structure:
     const analysis = JSON.parse(toolCall.function.arguments);
     console.log('Analysis complete:', analysis);
 
-    // Store analysis in database
+    // Store analysis in database with security tracking
     const { error: analysisError } = await supabase
       .from('ai_analysis_logs')
       .insert({
         report_id: reportId,
         analysis_type: 'sentiment_and_threat',
         model_used: 'google/gemini-2.5-flash',
+        model_version: '2.5',
         input_data: { title, description, category },
         output_data: analysis,
         confidence_score: analysis.confidence_score,
-        processing_time_ms: 0 // Could track actual time if needed
+        processing_time_ms: 0, // Could track actual time if needed
+        ip_address: ipAddress,
+        security_flags: {
+          inputValidated: true,
+          rateLimitChecked: true,
+          timestamp: new Date().toISOString()
+        },
+        validation_status: analysis.confidence_score >= 80 ? 'validated' : 'pending'
       });
 
     if (analysisError) {

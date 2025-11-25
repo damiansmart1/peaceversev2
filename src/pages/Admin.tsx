@@ -13,6 +13,7 @@ import { AdminGamificationManager } from '@/components/admin/AdminGamificationMa
 import { AdminSettingsManager } from '@/components/admin/AdminSettingsManager';
 import { AdminSponsorsManager } from '@/components/admin/AdminSponsorsManager';
 import { AdminIncidentsManager } from '@/components/admin/AdminIncidentsManager';
+import { AdminAIAnalytics } from '@/components/admin/AdminAIAnalytics';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { RoleManagement } from '@/components/admin/RoleManagement';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
@@ -65,6 +66,8 @@ const Admin = () => {
         return <AdminGamificationManager />;
       case 'sponsors':
         return <AdminSponsorsManager />;
+      case 'ai-analytics':
+        return <AdminAIAnalytics />;
       case 'settings':
         return <AdminSettingsManager />;
       default:
