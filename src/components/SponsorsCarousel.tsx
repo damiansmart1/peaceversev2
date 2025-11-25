@@ -126,8 +126,8 @@ const SponsorsCarousel = () => {
                   <img
                     src={sponsor.logo_url}
                     alt={sponsor.name}
-                    className="max-w-full max-h-20 w-auto object-contain grayscale hover:grayscale-0 transition-all"
-                    style={{ imageRendering: 'crisp-edges' }}
+                    className="max-w-full max-h-20 w-auto object-contain transition-all hover:scale-105"
+                    style={{ imageRendering: '-webkit-optimize-contrast' }}
                     loading="lazy"
                   />
                 </Card>
