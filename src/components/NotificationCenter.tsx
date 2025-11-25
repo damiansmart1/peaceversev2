@@ -7,7 +7,11 @@ import { useNotifications, useMarkNotificationRead, useMarkAllNotificationsRead 
 import { formatDistanceToNow } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 
-const iconMap = {
+const iconMap: Record<string, any> = {
+  report_status: Info,
+  verification: FileCheck,
+  incident: Bell,
+  achievement: CheckCircle2,
   content_approved: FileCheck,
   content_rejected: FileX,
   proposal_approved: CheckCircle2,
@@ -15,7 +19,11 @@ const iconMap = {
   system: Info,
 };
 
-const colorMap = {
+const colorMap: Record<string, string> = {
+  report_status: 'text-blue-500',
+  verification: 'text-purple-500',
+  incident: 'text-red-500',
+  achievement: 'text-green-500',
   content_approved: 'text-green-500',
   content_rejected: 'text-red-500',
   proposal_approved: 'text-green-500',
@@ -44,12 +52,20 @@ export default function NotificationCenter() {
       markAsRead(notification.id);
     }
     
-    if (notification.related_id) {
-      if (notification.type.includes('proposal')) {
-        navigate(`/proposals`);
-      } else if (notification.type.includes('content')) {
-        navigate(`/voice`);
-      }
+    // Navigate based on notification type
+    const type = notification.type as string;
+    if (type === 'incident') {
+      navigate('/incidents');
+    } else if (type === 'verification') {
+      navigate('/verification');
+    } else if (type === 'report_status') {
+      navigate('/reports');
+    } else if (type === 'achievement') {
+      navigate('/profile');
+    } else if (type.includes('proposal')) {
+      navigate('/proposals');
+    } else if (type.includes('content')) {
+      navigate('/voice');
     }
   };
 
