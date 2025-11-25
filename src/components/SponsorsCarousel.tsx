@@ -92,9 +92,9 @@ const SponsorsCarousel = () => {
               {sponsors.map(sponsor => <Card key={sponsor.id} style={{
               width: `calc(${100 / itemsPerView}% - ${24 * (itemsPerView - 1) / itemsPerView}px)`
             }} onClick={() => sponsor.website_url && window.open(sponsor.website_url, '_blank')} className="flex-shrink-0 p-6 flex items-center justify-center hover:shadow-lg transition-shadow cursor-pointer rounded-md opacity-100 border-2 text-slate-50 bg-white gap-0">
-                  <img src={sponsor.logo_url} alt={sponsor.name} className="max-w-full max-h-20 w-auto object-contain transition-all hover:scale-105" style={{
+                  <img src={sponsor.logo_url} alt={sponsor.name} style={{
                 imageRendering: '-webkit-optimize-contrast'
-              }} loading="lazy" />
+              }} loading="lazy" className="max-w-full max-h-20 w-auto transition-all hover:scale-105 object-fill" />
                 </Card>)}
             </div>
           </div>
