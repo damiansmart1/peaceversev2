@@ -29,9 +29,18 @@ const AFRICAN_COUNTRIES = [
 const AfricaMap = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
-  const [mapboxToken, setMapboxToken] = useState<string>('');
+  const [mapboxToken, setMapboxToken] = useState<string>(() => {
+    // Load token from localStorage on mount
+    return localStorage.getItem('mapbox_token') || '';
+  });
   const [tokenInput, setTokenInput] = useState<string>('');
   const { selectedCountry, setSelectedCountry } = useJurisdiction();
+
+  // Save token to localStorage whenever it changes
+  const handleSaveToken = (token: string) => {
+    localStorage.setItem('mapbox_token', token);
+    setMapboxToken(token);
+  };
 
   // Fetch incident counts per country
   const { data: incidentCounts } = useQuery({
@@ -153,7 +162,7 @@ const AfricaMap = () => {
           className="w-full px-4 py-2 border border-border rounded-lg mb-4"
         />
         <button
-          onClick={() => setMapboxToken(tokenInput)}
+          onClick={() => handleSaveToken(tokenInput)}
           className="w-full bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
         >
           Load Map
