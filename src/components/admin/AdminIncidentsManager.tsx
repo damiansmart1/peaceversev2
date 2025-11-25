@@ -8,7 +8,7 @@ import { useIncidents, useUpdateIncident, Incident } from '@/hooks/useIncidents'
 import DataTable from '@/components/DataTable';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { CheckCircle2, XCircle, AlertTriangle } from 'lucide-react';
+import { CheckCircle2, XCircle, AlertTriangle, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 export const AdminIncidentsManager = () => {
@@ -155,13 +155,20 @@ export const AdminIncidentsManager = () => {
     return <LoadingSpinner />;
   }
 
-  // Stats
+  // Enhanced Stats
   const stats = {
     total: incidents?.length || 0,
     pending: incidents?.filter(i => i.status === 'reported').length || 0,
     verified: incidents?.filter(i => i.status === 'verified').length || 0,
+    inProgress: incidents?.filter(i => i.status === 'in_progress').length || 0,
     resolved: incidents?.filter(i => i.status === 'resolved').length || 0,
     critical: incidents?.filter(i => i.severity === 'critical').length || 0,
+    high: incidents?.filter(i => i.severity === 'high').length || 0,
+    avgResolutionTime: incidents?.filter(i => i.status === 'resolved' && i.resolved_at).length > 0 
+      ? (incidents.filter(i => i.status === 'resolved' && i.resolved_at)
+          .reduce((sum, i) => sum + (new Date(i.resolved_at!).getTime() - new Date(i.created_at).getTime()), 0) / 
+         incidents.filter(i => i.status === 'resolved' && i.resolved_at).length / (1000 * 60 * 60 * 24)).toFixed(1)
+      : '0',
   };
 
   return (
@@ -171,19 +178,63 @@ export const AdminIncidentsManager = () => {
         <p className="text-muted-foreground">Monitor and respond to reported incidents</p>
       </div>
 
-      {/* Stats Overview */}
-      <div className="grid gap-4 md:grid-cols-5">
+      {/* Enhanced Stats Overview */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Total</CardTitle>
+            <CardTitle className="text-sm">Total Incidents</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
+            <div className="text-3xl font-bold">{stats.total}</div>
+            <p className="text-xs text-muted-foreground mt-1">All time</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Pending</CardTitle>
+            <CardTitle className="text-sm">Active Cases</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-blue-500">{stats.pending + stats.inProgress}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {stats.pending} pending, {stats.inProgress} in progress
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-1">
+              <CheckCircle className="w-4 h-4 text-green-500" />
+              Resolved
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-green-500">{stats.resolved}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Avg resolution: {stats.avgResolutionTime} days
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-1">
+              <AlertTriangle className="w-4 h-4 text-red-500" />
+              High Priority
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-red-500">{stats.critical + stats.high}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {stats.critical} critical, {stats.high} high severity
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Additional Metrics */}
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">Pending Review</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-orange-500">{stats.pending}</div>
@@ -199,21 +250,20 @@ export const AdminIncidentsManager = () => {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Resolved</CardTitle>
+            <CardTitle className="text-sm">In Progress</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-500">{stats.resolved}</div>
+            <div className="text-2xl font-bold text-purple-500">{stats.inProgress}</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm flex items-center gap-1">
-              <AlertTriangle className="w-4 h-4 text-red-500" />
-              Critical
-            </CardTitle>
+            <CardTitle className="text-sm">Resolution Rate</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-500">{stats.critical}</div>
+            <div className="text-2xl font-bold">
+              {stats.total > 0 ? Math.round((stats.resolved / stats.total) * 100) : 0}%
+            </div>
           </CardContent>
         </Card>
       </div>

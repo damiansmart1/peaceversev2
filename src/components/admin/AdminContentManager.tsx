@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Label } from '@/components/ui/label';
 import { Plus, Edit, Trash, Archive, ArchiveRestore, Loader2, Upload, X, Link as LinkIcon, CheckCircle2, XCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import RichTextEditor from '@/components/RichTextEditor';
@@ -232,6 +233,29 @@ export const AdminContentManager = () => {
     }
   };
 
+  // Enhanced analytics
+  const contentStats = useMemo(() => {
+    if (!content) return null;
+    
+    const totalViews = content.reduce((sum, c) => sum + (c.view_count || 0), 0);
+    const totalLikes = content.reduce((sum, c) => sum + (c.like_count || 0), 0);
+    const avgEngagement = content.length > 0 ? Math.round((totalViews + totalLikes) / content.length) : 0;
+    const engagementRate = totalViews > 0 ? ((totalLikes / totalViews) * 100).toFixed(2) : '0';
+    
+    const typeDistribution = content.reduce((acc: Record<string, number>, item) => {
+      acc[item.file_type] = (acc[item.file_type] || 0) + 1;
+      return acc;
+    }, {});
+
+    return {
+      totalViews,
+      totalLikes,
+      avgEngagement,
+      engagementRate,
+      typeDistribution
+    };
+  }, [content]);
+
   // Filter content by status
   const filteredContent = useMemo(() => {
     if (!content) return { all: [], pending: [], approved: [], rejected: [] };
@@ -351,6 +375,77 @@ export const AdminContentManager = () => {
 
   return (
     <div className="space-y-4">
+      {/* Analytics Overview */}
+      {contentStats && (
+        <div className="grid gap-4 md:grid-cols-5 mb-6">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm">Total Views</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{contentStats.totalViews.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Across all content
+              </p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm">Total Likes</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-red-500">{contentStats.totalLikes.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                User reactions
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm">Engagement Rate</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-500">{contentStats.engagementRate}%</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Likes per view
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm">Avg Engagement</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-purple-500">{contentStats.avgEngagement}</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Per content item
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Content Type Distribution */}
+      {contentStats?.typeDistribution && (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-sm">Content Type Distribution</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {Object.entries(contentStats.typeDistribution).map(([type, count]) => (
+                <Badge key={type} variant="outline" className="text-sm">
+                  {type}: {count}
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold">Content Stories</h2>

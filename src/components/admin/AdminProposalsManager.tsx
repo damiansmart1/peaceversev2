@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Label } from '@/components/ui/label';
 import { Plus, Edit, Trash, Archive, ArchiveRestore, Loader2, CheckCircle2, XCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
@@ -88,6 +89,24 @@ export const AdminProposalsManager = () => {
       setDeleteId(null);
     }
   };
+
+  // Enhanced analytics
+  const proposalStats = useMemo(() => {
+    if (!proposals) return null;
+    
+    const totalViews = proposals.reduce((sum, p) => sum + (p.view_count || 0), 0);
+    const totalSignatures = proposals.reduce((sum, p) => sum + (p.signature_count || 0), 0);
+    const avgViewsPerProposal = proposals.length > 0 ? Math.round(totalViews / proposals.length) : 0;
+    const avgSignaturesPerProposal = proposals.length > 0 ? Math.round(totalSignatures / proposals.length) : 0;
+    
+    return {
+      totalViews,
+      totalSignatures,
+      avgViewsPerProposal,
+      avgSignaturesPerProposal,
+      conversionRate: totalViews > 0 ? ((totalSignatures / totalViews) * 100).toFixed(2) : '0'
+    };
+  }, [proposals]);
 
   // Filter proposals by status
   const filteredProposals = useMemo(() => {
@@ -205,6 +224,75 @@ export const AdminProposalsManager = () => {
 
   return (
     <div className="space-y-4">
+      {/* Analytics Overview */}
+      {proposalStats && (
+        <div className="grid gap-4 md:grid-cols-5 mb-6">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm">Total Views</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{proposalStats.totalViews.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Avg: {proposalStats.avgViewsPerProposal} per proposal
+              </p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm">Total Signatures</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-primary">{proposalStats.totalSignatures.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Avg: {proposalStats.avgSignaturesPerProposal} per proposal
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm">Conversion Rate</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-500">{proposalStats.conversionRate}%</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Views to signatures
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm">Published</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{filteredProposals.published.length}</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Live proposals
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm">Engagement</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-blue-500">
+                {filteredProposals.all.length > 0 
+                  ? Math.round((proposalStats.totalSignatures / filteredProposals.all.length)) 
+                  : 0}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Signatures per item
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold">Proposals</h2>
