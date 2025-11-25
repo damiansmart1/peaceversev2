@@ -19,27 +19,42 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           created_at: string | null
+          current_level: number | null
           display_name: string | null
+          email: string | null
           id: string
+          is_verified: boolean | null
+          peace_points: number | null
           updated_at: string | null
+          user_type: string | null
           username: string | null
         }
         Insert: {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string | null
+          current_level?: number | null
           display_name?: string | null
+          email?: string | null
           id: string
+          is_verified?: boolean | null
+          peace_points?: number | null
           updated_at?: string | null
+          user_type?: string | null
           username?: string | null
         }
         Update: {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string | null
+          current_level?: number | null
           display_name?: string | null
+          email?: string | null
           id?: string
+          is_verified?: boolean | null
+          peace_points?: number | null
           updated_at?: string | null
+          user_type?: string | null
           username?: string | null
         }
         Relationships: []
@@ -47,21 +62,27 @@ export type Database = {
       user_roles: {
         Row: {
           created_at: string | null
+          expires_at: string | null
           id: string
+          is_active: boolean | null
           role: Database["public"]["Enums"]["app_role"]
           updated_at: string | null
           user_id: string
         }
         Insert: {
           created_at?: string | null
+          expires_at?: string | null
           id?: string
+          is_active?: boolean | null
           role: Database["public"]["Enums"]["app_role"]
           updated_at?: string | null
           user_id: string
         }
         Update: {
           created_at?: string | null
+          expires_at?: string | null
           id?: string
+          is_active?: boolean | null
           role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string | null
           user_id?: string

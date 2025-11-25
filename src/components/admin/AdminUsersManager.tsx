@@ -31,7 +31,7 @@ export const AdminUsersManager = () => {
         .from('profiles')
         .select(`
           *,
-          user_roles(role)
+          user_roles!user_roles_user_id_fkey(role, is_active, expires_at)
         `)
         .order('created_at', { ascending: false });
 
@@ -41,15 +41,15 @@ export const AdminUsersManager = () => {
   });
 
   const updateRoleMutation = useMutation({
-    mutationFn: async ({ userId, role }: { userId: string; role: 'user' | 'moderator' | 'admin' }) => {
+    mutationFn: async ({ userId, role }: { userId: string; role: 'citizen' | 'verifier' | 'partner' | 'government' | 'admin' }) => {
+      // Delete existing roles
       await (supabase as any).from('user_roles').delete().eq('user_id', userId);
       
-      if (role !== 'user') {
-        const { error } = await (supabase as any)
-          .from('user_roles')
-          .insert({ user_id: userId, role: role as any });
-        if (error) throw error;
-      }
+      // Insert new role
+      const { error } = await (supabase as any)
+        .from('user_roles')
+        .insert({ user_id: userId, role: role as any, is_active: true });
+      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
@@ -65,7 +65,7 @@ export const AdminUsersManager = () => {
       const { error } = await (supabase as any)
         .from('profiles')
         .update({ display_name: displayName, bio })
-        .eq('user_id', userId);
+        .eq('id', userId);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -83,7 +83,7 @@ export const AdminUsersManager = () => {
       const { error } = await (supabase as any)
         .from('profiles')
         .update({ is_verified: !isVerified })
-        .eq('user_id', userId);
+        .eq('id', userId);
       if (error) throw error;
     },
     onSuccess: (_, variables) => {
@@ -97,11 +97,17 @@ export const AdminUsersManager = () => {
 
   const deleteUserMutation = useMutation({
     mutationFn: async (userId: string) => {
-      // Delete user profile and related data
+      // Delete user roles first (cascade will handle this, but being explicit)
+      await (supabase as any)
+        .from('user_roles')
+        .delete()
+        .eq('user_id', userId);
+      
+      // Delete user profile
       const { error } = await (supabase as any)
         .from('profiles')
         .delete()
-        .eq('user_id', userId);
+        .eq('id', userId);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -130,7 +136,8 @@ export const AdminUsersManager = () => {
   const filteredUsers = users?.filter((user: any) =>
     user.display_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     user.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.user_id?.toLowerCase().includes(searchQuery.toLowerCase())
+    user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    user.id?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   if (isLoading) {
@@ -185,7 +192,8 @@ export const AdminUsersManager = () => {
                         <div>
                           <div className="font-medium">{user.display_name || 'Anonymous User'}</div>
                           <div className="text-sm text-muted-foreground">@{user.username || 'no-username'}</div>
-                          <div className="text-xs text-muted-foreground mt-0.5">{user.user_id?.slice(0, 8)}...</div>
+                          {user.email && <div className="text-xs text-muted-foreground">{user.email}</div>}
+                          <div className="text-xs text-muted-foreground mt-0.5">{user.id?.slice(0, 8)}...</div>
                         </div>
                       </div>
                     </TableCell>
@@ -195,22 +203,31 @@ export const AdminUsersManager = () => {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge 
-                        variant={(user.user_roles as any)?.[0]?.role === 'admin' ? 'default' : 
-                                (user.user_roles as any)?.[0]?.role === 'moderator' ? 'secondary' : 'outline'}
-                      >
-                        {(user.user_roles as any)?.[0]?.role || 'user'}
-                      </Badge>
+                      {user.user_roles && user.user_roles.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {user.user_roles.filter((r: any) => r.is_active !== false).map((roleObj: any, idx: number) => (
+                            <Badge 
+                              key={idx}
+                              variant={roleObj.role === 'admin' ? 'default' : 
+                                      roleObj.role === 'moderator' ? 'secondary' : 'outline'}
+                            >
+                              {roleObj.role}
+                            </Badge>
+                          ))}
+                        </div>
+                      ) : (
+                        <Badge variant="outline">citizen</Badge>
+                      )}
                     </TableCell>
                     <TableCell>
                       <div className="text-sm space-y-0.5">
                         <div className="flex items-center gap-1">
                           <span className="text-muted-foreground">Points:</span>
-                          <span className="font-medium">{user.peace_points}</span>
+                          <span className="font-medium">{user.peace_points || 0}</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <span className="text-muted-foreground">Level:</span>
-                          <span className="font-medium">{user.current_level}</span>
+                          <span className="font-medium">{user.current_level || 1}</span>
                         </div>
                       </div>
                     </TableCell>
@@ -263,23 +280,35 @@ export const AdminUsersManager = () => {
                                 <div className="space-y-2">
                                   <Label className="text-base font-semibold">User Role</Label>
                                   <Select
-                                    defaultValue={(user.user_roles as any)?.[0]?.role || 'user'}
-                                    onValueChange={(role: any) => updateRoleMutation.mutate({ userId: user.user_id, role })}
+                                    defaultValue={(user.user_roles as any)?.[0]?.role || 'citizen'}
+                                    onValueChange={(role: any) => updateRoleMutation.mutate({ userId: user.id, role })}
                                   >
                                     <SelectTrigger>
                                       <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                      <SelectItem value="user">
+                                      <SelectItem value="citizen">
                                         <div className="flex flex-col items-start">
-                                          <span className="font-medium">User</span>
+                                          <span className="font-medium">Citizen</span>
                                           <span className="text-xs text-muted-foreground">Standard platform access</span>
                                         </div>
                                       </SelectItem>
-                                      <SelectItem value="moderator">
+                                      <SelectItem value="verifier">
                                         <div className="flex flex-col items-start">
-                                          <span className="font-medium">Moderator</span>
-                                          <span className="text-xs text-muted-foreground">Content moderation & user support</span>
+                                          <span className="font-medium">Verifier</span>
+                                          <span className="text-xs text-muted-foreground">Verify content submissions</span>
+                                        </div>
+                                      </SelectItem>
+                                      <SelectItem value="partner">
+                                        <div className="flex flex-col items-start">
+                                          <span className="font-medium">Partner</span>
+                                          <span className="text-xs text-muted-foreground">Partner organization access</span>
+                                        </div>
+                                      </SelectItem>
+                                      <SelectItem value="government">
+                                        <div className="flex flex-col items-start">
+                                          <span className="font-medium">Government</span>
+                                          <span className="text-xs text-muted-foreground">Government official access</span>
                                         </div>
                                       </SelectItem>
                                       <SelectItem value="admin">
@@ -302,19 +331,25 @@ export const AdminUsersManager = () => {
                                       <CheckCircle className="h-3 w-3 text-primary" />
                                       Create and share content
                                     </li>
-                                    {((user.user_roles as any)?.[0]?.role === 'moderator' || (user.user_roles as any)?.[0]?.role === 'admin') && (
-                                      <>
-                                        <li className="flex items-center gap-2">
-                                          <CheckCircle className="h-3 w-3 text-primary" />
-                                          Moderate user content
-                                        </li>
-                                        <li className="flex items-center gap-2">
-                                          <CheckCircle className="h-3 w-3 text-primary" />
-                                          Manage reports
-                                        </li>
-                                      </>
+                                    {user.user_roles?.some((r: any) => r.role === 'verifier' || r.role === 'admin') && (
+                                      <li className="flex items-center gap-2">
+                                        <CheckCircle className="h-3 w-3 text-primary" />
+                                        Verify content submissions
+                                      </li>
                                     )}
-                                    {(user.user_roles as any)?.[0]?.role === 'admin' && (
+                                    {user.user_roles?.some((r: any) => r.role === 'partner' || r.role === 'admin') && (
+                                      <li className="flex items-center gap-2">
+                                        <CheckCircle className="h-3 w-3 text-primary" />
+                                        Partner dashboard access
+                                      </li>
+                                    )}
+                                    {user.user_roles?.some((r: any) => r.role === 'government' || r.role === 'admin') && (
+                                      <li className="flex items-center gap-2">
+                                        <CheckCircle className="h-3 w-3 text-primary" />
+                                        Government insights access
+                                      </li>
+                                    )}
+                                    {user.user_roles?.some((r: any) => r.role === 'admin') && (
                                       <>
                                         <li className="flex items-center gap-2">
                                           <CheckCircle className="h-3 w-3 text-primary" />
@@ -343,7 +378,7 @@ export const AdminUsersManager = () => {
                                       variant={user.is_verified ? "outline" : "default"}
                                       size="sm"
                                       onClick={() => toggleVerificationMutation.mutate({ 
-                                        userId: user.user_id, 
+                                        userId: user.id, 
                                         isVerified: user.is_verified 
                                       })}
                                       disabled={toggleVerificationMutation.isPending}
@@ -381,8 +416,8 @@ export const AdminUsersManager = () => {
                                         </span>
                                       </div>
                                       <div className="flex justify-between">
-                                        <span className="text-muted-foreground">Login Streak:</span>
-                                        <span className="font-medium">{user.login_streak} days</span>
+                                        <span className="text-muted-foreground">User ID:</span>
+                                        <span className="font-medium text-xs">{user.id.slice(0, 12)}...</span>
                                       </div>
                                     </div>
                                   </div>
@@ -403,15 +438,9 @@ export const AdminUsersManager = () => {
                                     <Label>Bio</Label>
                                     <Textarea value={user.bio || 'No bio provided'} disabled rows={3} />
                                   </div>
-                                  <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                      <Label>Region</Label>
-                                      <Input value={user.region || 'Not set'} disabled />
-                                    </div>
-                                    <div className="space-y-2">
-                                      <Label>Language</Label>
-                                      <Input value={user.preferred_language || 'en'} disabled />
-                                    </div>
+                                  <div className="space-y-2">
+                                    <Label>User Type</Label>
+                                    <Input value={user.user_type || 'youth'} disabled />
                                   </div>
                                   <div className="flex gap-2 pt-2">
                                     <Button
@@ -481,7 +510,7 @@ export const AdminUsersManager = () => {
             </Button>
             <Button
               onClick={() => updateProfileMutation.mutate({
-                userId: selectedUser?.user_id,
+                userId: selectedUser?.id,
                 displayName,
                 bio,
               })}
@@ -519,7 +548,7 @@ export const AdminUsersManager = () => {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => deleteUserMutation.mutate(selectedUser?.user_id)}
+              onClick={() => deleteUserMutation.mutate(selectedUser?.id)}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {deleteUserMutation.isPending ? 'Deleting...' : 'Delete Account'}

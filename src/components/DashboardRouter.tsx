@@ -33,14 +33,17 @@ export const DashboardRouter = () => {
       return;
     }
 
+    // Extract role strings from role objects
+    const roleStrings = userRoles.map((r: any) => r.role);
+
     // Route based on highest priority role
-    if (userRoles.includes('admin')) {
+    if (roleStrings.includes('admin')) {
       navigate('/admin');
-    } else if (userRoles.includes('government')) {
+    } else if (roleStrings.includes('government')) {
       navigate('/dashboard/government');
-    } else if (userRoles.includes('partner')) {
+    } else if (roleStrings.includes('partner')) {
       navigate('/dashboard/partner');
-    } else if (userRoles.includes('verifier')) {
+    } else if (roleStrings.includes('verifier')) {
       navigate('/dashboard/verifier');
     } else {
       // Default to citizen dashboard
