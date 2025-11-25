@@ -1,5 +1,6 @@
 import { Card } from '@/components/ui/card';
 import { Users, MessageSquare, Globe, Award, TrendingUp, Heart } from 'lucide-react';
+import impactMetrics from "@/assets/impact-metrics.jpg";
 
 const metrics = [
   {
@@ -49,11 +50,21 @@ const metrics = [
 export const AboutImpactMetrics = () => {
   return (
     <div className="space-y-6">
-      <div className="text-center">
-        <h2 className="text-3xl font-bold text-foreground mb-3">Our Impact</h2>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Together, we're building a global community dedicated to peace and positive change
-        </p>
+      <div className="relative w-full rounded-lg overflow-hidden h-80 mb-8">
+        <img
+          src={impactMetrics}
+          alt="Team analyzing peace impact metrics and data for positive change"
+          className="w-full h-full object-cover"
+          style={{ imageRendering: '-webkit-optimize-contrast' }}
+          loading="lazy"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/30 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 p-6 text-foreground">
+          <h2 className="text-3xl font-bold mb-2">Our Impact</h2>
+          <p className="text-lg text-muted-foreground">
+            Together, we're building a global community dedicated to peace and positive change
+          </p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

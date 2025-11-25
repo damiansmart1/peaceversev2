@@ -6,8 +6,10 @@ import { IncidentStatsCards } from '@/components/IncidentStatsCards';
 import InteractiveHeatmap from '@/components/InteractiveHeatmap';
 import { ReportSubmissionForm } from '@/components/ReportSubmissionForm';
 import { useIncidentNotifications } from '@/hooks/useIncidentNotifications';
+import SectionImageBanner from '@/components/SectionImageBanner';
 import Navigation from '@/components/Navigation';
 import { AlertTriangle } from 'lucide-react';
+import incidentReporting from "@/assets/incident-reporting.jpg";
 
 export default function Incidents() {
   const { locationPermission } = useIncidentNotifications(50);
@@ -17,11 +19,16 @@ export default function Incidents() {
     <div className="min-h-screen bg-background">
       <Navigation />
       <div className="container mx-auto px-4 py-20 md:py-24">
+        <SectionImageBanner
+          image={incidentReporting}
+          alt="Map of Africa with incident reporting and early warning system visualization"
+          title="Incident Hub"
+          subtitle="Report incidents, track real-time monitoring, and view early warning visualizations"
+          className="h-96 mb-8"
+        />
+        
         <div className="mb-6 md:mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground">
-              Incident Hub
-            </h1>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <Button 
               onClick={() => setActiveTab('report')}
               size="lg"
@@ -31,9 +38,6 @@ export default function Incidents() {
               <span className="whitespace-nowrap">Submit Report</span>
             </Button>
           </div>
-          <p className="text-sm md:text-base text-muted-foreground">
-            Report incidents, track real-time monitoring, and view early warning visualizations
-          </p>
           {locationPermission === 'denied' && (
             <p className="text-xs md:text-sm text-amber-600 dark:text-amber-400 mt-2">
               Enable location permissions to receive alerts for nearby critical incidents

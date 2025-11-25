@@ -6,8 +6,10 @@ import CommunityTrustSection from '@/components/CommunityTrustSection';
 import OfflineAccessSection from '@/components/OfflineAccessSection';
 import { SafetyResourceLibrary } from '@/components/SafetyResourceLibrary';
 import { useTranslationContext } from '@/components/TranslationProvider';
+import SectionImageBanner from '@/components/SectionImageBanner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Shield, AlertTriangle, Users, Wifi, BookOpen } from 'lucide-react';
+import safetyProtection from "@/assets/safety-protection.jpg";
 
 const Safety = () => {
   const { t } = useTranslationContext();
@@ -16,12 +18,15 @@ const Safety = () => {
     <div className="min-h-screen bg-background">
       <Navigation />
       <div className="container mx-auto px-4 py-24">
-        <SectionHeader
-          badge={t('safety.badge')}
-          title="Safety Portal"
-          subtitle="Protection, moderation, trust building, and offline access"
-          icon={<Shield className="w-4 h-4" />}
-        />
+        <div className="mb-12">
+          <SectionImageBanner
+            image={safetyProtection}
+            alt="African community members in a safe space showing protection and security"
+            title="Safety Portal"
+            subtitle="Protection, moderation, trust building, and offline access"
+            className="h-96 mb-8"
+          />
+        </div>
         
         <Tabs defaultValue="moderation" className="max-w-6xl mx-auto">
           <TabsList className="grid w-full grid-cols-5 mb-8">

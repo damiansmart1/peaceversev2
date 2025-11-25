@@ -14,6 +14,7 @@ import {
   Contrast,
   MousePointer
 } from "lucide-react";
+import accessibilityInclusion from "@/assets/accessibility-inclusion.jpg";
 
 const AccessibilityFeatures = () => {
   const [voiceNavigation, setVoiceNavigation] = useState(false);
@@ -34,11 +35,21 @@ const AccessibilityFeatures = () => {
   return (
     <section className="py-16 bg-muted/20">
       <div className="container mx-auto px-6">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold mb-4 text-foreground">Inclusive by Design</h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Peace Verse is designed to welcome everyone, regardless of literacy level, physical ability, or language
-          </p>
+        <div className="relative w-full rounded-lg overflow-hidden h-80 mb-12">
+          <img
+            src={accessibilityInclusion}
+            alt="Diverse people including those with disabilities participating equally in community activities"
+            className="w-full h-full object-cover"
+            style={{ imageRendering: '-webkit-optimize-contrast' }}
+            loading="lazy"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/30 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 p-6 text-center text-foreground">
+            <h2 className="text-4xl font-bold mb-2">Inclusive by Design</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Peace Verse is designed to welcome everyone, regardless of literacy level, physical ability, or language
+            </p>
+          </div>
         </div>
 
         <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-8">
