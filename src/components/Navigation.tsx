@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAdminCheck } from "@/hooks/useAdminCheck";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { useUserRoles } from "@/hooks/useRoleCheck";
 
 const Navigation = () => {
   const { t } = useTranslationContext();
@@ -26,7 +27,11 @@ const Navigation = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const { data: isAdmin } = useAdminCheck();
   const { data: userProfile } = useUserProfile();
+  const { data: userRoles } = useUserRoles();
   const safeProfile: any = userProfile as any;
+  
+  // Extract role strings for easier checking
+  const roleStrings = userRoles?.map((r: any) => r.role) || [];
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -45,21 +50,31 @@ const Navigation = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Base navigation items (alphabetically ordered)
-  const baseNavItems = [
+  // Base navigation items - all users can see these
+  const publicNavItems = [
     { path: '/about', label: 'About', icon: Heart },
     { path: '/community', label: t('nav.community'), icon: Users },
     { path: '/incidents', label: 'Incident Reporting', icon: Shield },
     { path: '/peace-pulse', label: 'PeacePulse', icon: Globe },
     { path: '/proposals', label: 'Polls & Proposals', icon: Map },
     { path: '/safety', label: 'Safety Portal', icon: Shield },
-    { path: '/verification', label: 'Verification', icon: Award },
   ];
 
-  // Add profile only if user is logged in
-  const navItems = user && !isAnonymous
-    ? [...baseNavItems, { path: '/dashboard', label: 'Dashboard', icon: User }].sort((a, b) => a.label.localeCompare(b.label))
-    : baseNavItems;
+  // Role-specific navigation items
+  const roleBasedItems = [];
+  
+  // Add Dashboard for all authenticated users
+  if (user && !isAnonymous) {
+    roleBasedItems.push({ path: '/dashboard', label: 'Dashboard', icon: User });
+  }
+  
+  // Add Verification only for verifiers, admins, and government officials
+  if (roleStrings.includes('verifier') || roleStrings.includes('admin') || roleStrings.includes('government')) {
+    roleBasedItems.push({ path: '/verification', label: 'Verification', icon: Award });
+  }
+
+  // Combine and sort navigation items alphabetically
+  const navItems = [...publicNavItems, ...roleBasedItems].sort((a, b) => a.label.localeCompare(b.label));
 
   return (
     <>
