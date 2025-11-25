@@ -66,23 +66,38 @@ export const AdminSponsorsManager = () => {
     if (!file) return;
 
     // Validate file type
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please upload an image file (PNG, JPG, etc.)');
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Please upload a PNG, JPG, or JPEG image file');
+      return;
+    }
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image must be less than 5MB');
       return;
     }
 
     setUploading(true);
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+      const fileExt = file.name.split('.').pop()?.toLowerCase();
+      const fileName = `sponsor-${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
       const filePath = `sponsors/${fileName}`;
 
+      // Upload file
       const { error: uploadError } = await supabase.storage
         .from('content')
-        .upload(filePath, file);
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        throw new Error(uploadError.message);
+      }
 
+      // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from('content')
         .getPublicUrl(filePath);
@@ -90,7 +105,8 @@ export const AdminSponsorsManager = () => {
       setFormData({ ...formData, logo_url: publicUrl });
       toast.success('Logo uploaded successfully');
     } catch (error: any) {
-      toast.error('Failed to upload logo: ' + error.message);
+      console.error('Upload failed:', error);
+      toast.error('Failed to upload logo: ' + (error.message || 'Unknown error'));
     } finally {
       setUploading(false);
     }
@@ -182,7 +198,7 @@ export const AdminSponsorsManager = () => {
                       id="logo_url"
                       value={formData.logo_url}
                       onChange={(e) => setFormData({ ...formData, logo_url: e.target.value })}
-                      placeholder="https://example.com/logo.png"
+                      placeholder="https://example.com/logo.png or upload below"
                     />
                     <Button
                       type="button"
@@ -199,17 +215,21 @@ export const AdminSponsorsManager = () => {
                     <input
                       id="file-upload"
                       type="file"
-                      accept="image/*"
+                      accept="image/png,image/jpeg,image/jpg,image/webp"
                       className="hidden"
                       onChange={handleFileUpload}
                     />
                   </div>
+                  <p className="text-xs text-muted-foreground">
+                    Accepts PNG, JPG, JPEG (max 5MB). Images maintain quality without distortion.
+                  </p>
                   {formData.logo_url && (
-                    <div className="border rounded p-2">
+                    <div className="border rounded p-4 bg-muted/20">
                       <img 
                         src={formData.logo_url} 
-                        alt="Preview" 
-                        className="max-h-20 object-contain"
+                        alt="Logo preview" 
+                        className="max-h-24 w-auto mx-auto object-contain"
+                        style={{ imageRendering: 'crisp-edges' }}
                       />
                     </div>
                   )}
@@ -332,11 +352,14 @@ export const AdminSponsorsManager = () => {
             {sponsors?.map((sponsor: any) => (
               <TableRow key={sponsor.id}>
                 <TableCell>
-                  <img 
-                    src={sponsor.logo_url} 
-                    alt={sponsor.name}
-                    className="h-10 w-20 object-contain"
-                  />
+                  <div className="flex items-center justify-center h-12 w-24 bg-muted/20 rounded">
+                    <img 
+                      src={sponsor.logo_url} 
+                      alt={sponsor.name}
+                      className="max-h-10 max-w-full object-contain"
+                      style={{ imageRendering: 'crisp-edges' }}
+                    />
+                  </div>
                 </TableCell>
                 <TableCell className="font-medium">
                   <div className="flex items-center gap-2">
