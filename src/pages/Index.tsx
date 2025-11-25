@@ -3,9 +3,10 @@ import Navigation from "@/components/Navigation";
 import SectionHeader from "@/components/SectionHeader";
 import FeatureCard from "@/components/FeatureCard";
 import SponsorsCarousel from "@/components/SponsorsCarousel";
+import AfricaMap from "@/components/AfricaMap";
 import { useTranslationContext } from "@/components/TranslationProvider";
 import { useNavigate } from "react-router-dom";
-import { Mic, Users, Radio, Award, Shield, Heart, Vote, Activity, AlertCircle, TrendingUp, MapPin } from "lucide-react";
+import { Mic, Users, Radio, Award, Shield, Heart, Vote, Activity, AlertCircle, TrendingUp, MapPin, Globe } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -101,6 +102,69 @@ const Index = () => {
               description="Report and track incidents anonymously with geo-location, AI analysis, and institutional response tracking."
               onClick={() => navigate('/incidents')}
             />
+          </div>
+        </div>
+      </section>
+
+      {/* Interactive Africa Map Section */}
+      <section className="py-20 bg-gradient-to-b from-muted/30 to-background">
+        <div className="container mx-auto px-6">
+          <SectionHeader
+            badge="Multi-Jurisdiction"
+            title="Africa-Wide Early Warning System"
+            subtitle="Select your country to view localized incident reports and contribute to continental peace intelligence"
+            icon={<Globe className="w-4 h-4" />}
+          />
+          
+          <div className="max-w-7xl mx-auto mt-12">
+            <AfricaMap />
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto mt-12">
+            <Card className="border-2">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                    <Globe className="w-6 h-6 text-primary" />
+                  </div>
+                  <Badge variant="secondary">Scalable</Badge>
+                </div>
+                <h3 className="text-xl font-bold mb-2">Multi-Country Coverage</h3>
+                <p className="text-muted-foreground">
+                  Platform designed to scale across all African nations with localized incident reporting and jurisdiction-specific analytics.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-2">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 bg-orange-500/10 rounded-lg flex items-center justify-center">
+                    <AlertCircle className="w-6 h-6 text-orange-500" />
+                  </div>
+                  <Badge variant="secondary">Real-Time</Badge>
+                </div>
+                <h3 className="text-xl font-bold mb-2">Early Warning System</h3>
+                <p className="text-muted-foreground">
+                  Advanced AI-powered detection and prediction to identify potential conflicts before they escalate across borders.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-2">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 bg-blue-500/10 rounded-lg flex items-center justify-center">
+                    <TrendingUp className="w-6 h-6 text-blue-500" />
+                  </div>
+                  <Badge variant="secondary">Intelligence</Badge>
+                </div>
+                <h3 className="text-xl font-bold mb-2">Cross-Border Insights</h3>
+                <p className="text-muted-foreground">
+                  Track trends, patterns, and correlations across different jurisdictions to inform continental peace strategies.
+                </p>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>

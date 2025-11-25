@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { TranslationProvider } from "@/components/TranslationProvider";
 import { AccessibilityProvider } from "@/contexts/AccessibilityContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { JurisdictionProvider } from "@/contexts/JurisdictionContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ErrorBoundary from "@/components/ErrorBoundary";
@@ -57,12 +58,13 @@ const App = () => (
         <TranslationProvider>
           <AccessibilityProvider>
             <AuthProvider>
-              <TooltipProvider>
-                <Toaster />
-                <Sonner position="top-right" />
-                <SkipNavigation />
-                <OfflineIndicator />
-                <BrowserRouter>
+              <JurisdictionProvider>
+                <TooltipProvider>
+                  <Toaster />
+                  <Sonner position="top-right" />
+                  <SkipNavigation />
+                  <OfflineIndicator />
+                  <BrowserRouter>
                   <FocusManager />
                   <EnhancedKeyboardNav />
                   <AccessibilityMenu />
@@ -125,6 +127,7 @@ const App = () => (
                   <QuickActionFAB />
                 </BrowserRouter>
               </TooltipProvider>
+              </JurisdictionProvider>
             </AuthProvider>
           </AccessibilityProvider>
         </TranslationProvider>
