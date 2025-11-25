@@ -14,8 +14,12 @@ import { StoryFilters } from '@/components/StoryFilters';
 import { FeaturedStories } from '@/components/FeaturedStories';
 import { useContentFilters } from '@/hooks/useContentFilters';
 import { useTranslationContext } from '@/components/TranslationProvider';
+import SectionImageBanner from '@/components/SectionImageBanner';
 import { Map, MessageSquare, Users, Calendar, BookOpen, Award, Radio as RadioIcon, Mic } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import communityUnity from "@/assets/community-unity.jpg";
+import radioBroadcasting from "@/assets/radio-broadcasting.jpg";
+import challengesCollaboration from "@/assets/challenges-collaboration.jpg";
 
 const Community = () => {
   const { t } = useTranslationContext();
@@ -25,12 +29,15 @@ const Community = () => {
     <div className="min-h-screen bg-background">
       <Navigation />
       <div className="container mx-auto px-4 py-24">
-        <SectionHeader
-          badge={t('community.badge')}
-          title="Community Hub"
-          subtitle="Connect with safe spaces, join events, share stories, and engage in challenges"
-          icon={<Users className="w-4 h-4" />}
-        />
+        <div className="mb-12">
+          <SectionImageBanner
+            image={communityUnity}
+            alt="Diverse African community members coming together in unity for peacebuilding"
+            title="Community Hub"
+            subtitle="Connect with safe spaces, join events, share stories, and engage in challenges"
+            className="h-96 mb-8"
+          />
+        </div>
         
         <Tabs defaultValue="map" className="max-w-6xl mx-auto">
           <TabsList className="grid w-full grid-cols-7 mb-8">
@@ -77,11 +84,21 @@ const Community = () => {
           </TabsContent>
 
           <TabsContent value="challenges" className="space-y-8">
+            <SectionImageBanner
+              image={challengesCollaboration}
+              alt="African community members working together on peacebuilding challenges"
+              className="h-72 mb-6"
+            />
             <PeacebuildingChallenges />
             <GamificationDashboard />
           </TabsContent>
 
           <TabsContent value="radio" className="space-y-8">
+            <SectionImageBanner
+              image={radioBroadcasting}
+              alt="African youth participating in community radio broadcasting"
+              className="h-72 mb-6"
+            />
             <Tabs defaultValue="live" className="w-full">
               <TabsList className="grid w-full grid-cols-3 mb-8">
                 <TabsTrigger value="live">Live Radio</TabsTrigger>
