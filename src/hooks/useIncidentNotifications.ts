@@ -62,25 +62,25 @@ export const useIncidentNotifications = (radiusKm: number = 50) => {
         {
           event: 'INSERT',
           schema: 'public',
-          table: 'incidents',
+          table: 'citizen_reports',
         },
         (payload) => {
-          const incident = payload.new as unknown as HeatmapIncident;
+          const report = payload.new as any;
           
           // Only notify for critical incidents with location
-          if (incident.severity === 'critical' && incident.geo_location) {
+          if (report.severity_level === 'critical' && report.location_latitude && report.location_longitude) {
             const distance = calculateDistance(
               userLocation.latitude,
               userLocation.longitude,
-              incident.geo_location.latitude,
-              incident.geo_location.longitude
+              report.location_latitude,
+              report.location_longitude
             );
 
             if (distance <= radiusKm) {
               toast.error(
-                `Critical Incident Alert: ${incident.title}`,
+                `Critical Incident Alert: ${report.title}`,
                 {
-                  description: `${incident.geo_location.location_name || 'Nearby location'} - ${Math.round(distance)}km away. ${incident.description.substring(0, 100)}...`,
+                  description: `${report.location_name || report.location_city || 'Nearby location'} - ${Math.round(distance)}km away. ${report.description.substring(0, 100)}...`,
                   duration: 10000,
                   action: {
                     label: 'View Map',
