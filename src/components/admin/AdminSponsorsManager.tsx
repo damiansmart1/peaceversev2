@@ -240,7 +240,7 @@ export const AdminSponsorsManager = () => {
                         src={formData.logo_url} 
                         alt="Logo preview" 
                         className="max-h-24 w-auto mx-auto object-contain"
-                        style={{ imageRendering: 'crisp-edges' }}
+                        style={{ imageRendering: '-webkit-optimize-contrast' }}
                       />
                     </div>
                   )}
@@ -379,7 +379,7 @@ export const AdminSponsorsManager = () => {
                       src={sponsor.logo_url} 
                       alt={sponsor.name}
                       className="max-h-10 max-w-full object-contain"
-                      style={{ imageRendering: 'crisp-edges' }}
+                      style={{ imageRendering: '-webkit-optimize-contrast' }}
                     />
                   </div>
                 </TableCell>
