@@ -10,98 +10,52 @@ import { Mic, Users, Radio, Award, Shield, Heart, Vote, Activity, AlertCircle, T
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-
 const Index = () => {
-  const { t } = useTranslationContext();
+  const {
+    t
+  } = useTranslationContext();
   const navigate = useNavigate();
-  
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       <Navigation />
       <HeroSection />
       
       {/* Feature Overview Section */}
       <section id="features" className="py-12 sm:py-16 md:py-20 bg-muted/30">
         <div className="container mx-auto px-4 sm:px-6">
-          <SectionHeader
-            badge={t('features.badge')}
-            title={t('features.title')}
-            subtitle={t('features.subtitle')}
-            icon={<Heart className="w-4 h-4" />}
-          />
+          <SectionHeader badge={t('features.badge')} title={t('features.title')} subtitle={t('features.subtitle')} icon={<Heart className="w-4 h-4" />} />
           
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 max-w-7xl mx-auto">
-            <FeatureCard
-              icon={<div className="w-12 h-12 bg-voice-active rounded-full flex items-center justify-center">
+            <FeatureCard icon={<div className="w-12 h-12 bg-voice-active rounded-full flex items-center justify-center">
                 <Mic className="w-6 h-6 text-white" />
-              </div>}
-              title={t('features.voice.title')}
-              description="Share stories through voice recording (Community Hub)"
-              onClick={() => navigate('/community')}
-            />
+              </div>} title={t('features.voice.title')} description="Share stories through voice recording (Community Hub)" onClick={() => navigate('/community')} />
             
-            <FeatureCard
-              icon={<div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center">
+            <FeatureCard icon={<div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center">
                 <Users className="w-6 h-6 text-white" />
-              </div>}
-              title={t('features.community.title')}
-              description={t('features.community.description')}
-              onClick={() => navigate('/community')}
-            />
+              </div>} title={t('features.community.title')} description={t('features.community.description')} onClick={() => navigate('/community')} />
             
-            <FeatureCard
-              icon={<div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
+            <FeatureCard icon={<div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
                 <Radio className="w-6 h-6 text-white" />
-              </div>}
-              title="Peace Radio"
-              description="Listen to community peace radio (Community Hub)"
-              onClick={() => navigate('/community')}
-            />
+              </div>} title="Peace Radio" description="Listen to community peace radio (Community Hub)" onClick={() => navigate('/community')} />
             
-            <FeatureCard
-              icon={<div className="w-12 h-12 bg-success rounded-full flex items-center justify-center">
+            <FeatureCard icon={<div className="w-12 h-12 bg-success rounded-full flex items-center justify-center">
                 <Award className="w-6 h-6 text-white" />
-              </div>}
-              title="Challenges"
-              description="Complete peace challenges and earn rewards (Community Hub)"
-              onClick={() => navigate('/community')}
-            />
+              </div>} title="Challenges" description="Complete peace challenges and earn rewards (Community Hub)" onClick={() => navigate('/community')} />
             
-            <FeatureCard
-              icon={<div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center">
+            <FeatureCard icon={<div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center">
                 <Vote className="w-6 h-6 text-white" />
-              </div>}
-              title="Polls & Proposals"
-              description="Participate in democratic decision-making and community polls"
-              onClick={() => navigate('/proposals')}
-            />
+              </div>} title="Polls & Proposals" description="Participate in democratic decision-making and community polls" onClick={() => navigate('/proposals')} />
             
-            <FeatureCard
-              icon={<div className="w-12 h-12 bg-destructive rounded-full flex items-center justify-center">
+            <FeatureCard icon={<div className="w-12 h-12 bg-destructive rounded-full flex items-center justify-center">
                 <Shield className="w-6 h-6 text-white" />
-              </div>}
-              title={t('features.safety.title')}
-              description={t('features.safety.description')}
-              onClick={() => navigate('/safety')}
-            />
+              </div>} title={t('features.safety.title')} description={t('features.safety.description')} onClick={() => navigate('/safety')} />
             
-            <FeatureCard
-              icon={<div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
+            <FeatureCard icon={<div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
                 <Activity className="w-6 h-6 text-white" />
-              </div>}
-              title="Peace Pulse"
-              description="Real-time peace intelligence and analytics dashboard tracking sentiment, tension, and regional stability."
-              onClick={() => navigate('/peace-pulse')}
-            />
+              </div>} title="Peace Pulse" description="Real-time peace intelligence and analytics dashboard tracking sentiment, tension, and regional stability." onClick={() => navigate('/peace-pulse')} />
             
-            <FeatureCard
-              icon={<div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center">
+            <FeatureCard icon={<div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center">
                 <AlertCircle className="w-6 h-6 text-white" />
-              </div>}
-              title="Incident Reporting"
-              description="Report and track incidents anonymously with geo-location, AI analysis, and institutional response tracking."
-              onClick={() => navigate('/incidents')}
-            />
+              </div>} title="Incident Reporting" description="Report and track incidents anonymously with geo-location, AI analysis, and institutional response tracking." onClick={() => navigate('/incidents')} />
           </div>
         </div>
       </section>
@@ -109,12 +63,7 @@ const Index = () => {
       {/* Interactive Africa Map Section */}
       <section className="py-12 sm:py-16 md:py-20 bg-gradient-to-b from-muted/30 to-background">
         <div className="container mx-auto px-4 sm:px-6">
-          <SectionHeader
-            badge="Multi-Jurisdiction"
-            title="Africa-Wide Early Warning System"
-            subtitle="Select your country to view localized incident reports and contribute to continental peace intelligence"
-            icon={<Globe className="w-4 h-4" />}
-          />
+          <SectionHeader badge="Multi-Jurisdiction" title="Africa-Wide Early Warning System" subtitle="Select your country to view localized incident reports and contribute to continental peace intelligence" icon={<Globe className="w-4 h-4" />} />
           
           <div className="max-w-7xl mx-auto mt-8 sm:mt-12">
             <AfricaMap />
@@ -172,12 +121,7 @@ const Index = () => {
       {/* Accountability & Transparency Section */}
       <section className="py-12 sm:py-16 md:py-20 bg-background">
         <div className="container mx-auto px-4 sm:px-6">
-          <SectionHeader
-            badge="Transparency"
-            title="Real-Time Peace Intelligence"
-            subtitle="Track incidents, monitor peace metrics, and hold institutions accountable"
-            icon={<TrendingUp className="w-4 h-4" />}
-          />
+          <SectionHeader badge="Transparency" title="Real-Time Peace Intelligence" subtitle="Track incidents, monitor peace metrics, and hold institutions accountable" icon={<TrendingUp className="w-4 h-4" />} />
           
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-6xl mx-auto mt-8 sm:mt-12">
             <Card className="border-2 hover:border-primary transition-all cursor-pointer" onClick={() => navigate('/peace-pulse')}>
@@ -242,11 +186,7 @@ const Index = () => {
           </div>
 
           <div className="text-center mt-8 sm:mt-12 px-4">
-            <Button 
-              size="lg" 
-              onClick={() => navigate('/peace-pulse')}
-              className="gap-2 w-full sm:w-auto"
-            >
+            <Button size="lg" onClick={() => navigate('/peace-pulse')} className="gap-2 w-full sm:w-auto">
               <Activity className="w-5 h-5" />
               <span className="whitespace-nowrap">Explore Peace Intelligence</span>
             </Button>
@@ -262,7 +202,7 @@ const Index = () => {
         <div className="container mx-auto px-6">
           <div className="grid md:grid-cols-3 gap-8">
             <div className="space-y-4">
-              <h3 className="text-2xl font-bold bg-peace-gradient bg-clip-text text-transparent">
+              <h3 className="text-2xl font-bold bg-peace-gradient bg-clip-text text-slate-50">
                 {t('hero.title')}
               </h3>
               <p className="text-primary-foreground/80">
@@ -296,8 +236,6 @@ const Index = () => {
           </div>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
