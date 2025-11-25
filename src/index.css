@@ -8,146 +8,146 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* African-Inspired Design System - Light Mode */
-    --background: 35 45% 96%;
-    --foreground: 25 35% 18%;
+    /* UN-Inspired Professional Design System - Light Mode */
+    --background: 0 0% 100%;
+    --foreground: 216 20% 15%;
 
-    --card: 35 30% 98%;
-    --card-foreground: 25 35% 18%;
+    --card: 0 0% 100%;
+    --card-foreground: 216 20% 15%;
 
-    --popover: 35 30% 98%;
-    --popover-foreground: 25 35% 18%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 216 20% 15%;
 
-    /* Terracotta & Burnt Sienna - African earth */
-    --primary: 18 75% 52%;
+    /* Primary - UN Blue */
+    --primary: 199 100% 46%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 25 85% 62%;
+    --primary-glow: 199 100% 60%;
 
-    /* Warm Ochre & Gold - African sunsets */
-    --secondary: 42 78% 65%;
-    --secondary-foreground: 25 45% 20%;
+    /* Secondary - Professional Gray */
+    --secondary: 210 15% 92%;
+    --secondary-foreground: 216 20% 25%;
     
-    /* Savanna Green - African landscape */
-    --accent: 95 45% 48%;
+    /* Accent - Alert Orange (for warnings) */
+    --accent: 25 95% 53%;
     --accent-foreground: 0 0% 100%;
-    --accent-light: 95 35% 85%;
+    --accent-light: 25 95% 65%;
 
-    /* Peaceful backgrounds - warm sand tones */
-    --muted: 35 35% 92%;
-    --muted-foreground: 25 25% 45%;
+    /* Professional backgrounds */
+    --muted: 210 15% 96%;
+    --muted-foreground: 216 12% 45%;
 
-    /* Trust and safety - deep forest green */
-    --success: 145 55% 42%;
+    /* Trust and safety - professional green */
+    --success: 142 71% 42%;
     --success-foreground: 0 0% 100%;
     
-    /* Warning - bright African gold */
-    --warning: 45 92% 58%;
-    --warning-foreground: 30 40% 18%;
+    /* Warning - professional amber */
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
 
-    --destructive: 8 72% 52%;
+    --destructive: 0 84% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 35 30% 88%;
-    --input: 35 30% 94%;
-    --ring: 18 75% 52%;
+    --border: 214 20% 88%;
+    --input: 214 20% 92%;
+    --ring: 199 100% 46%;
 
-    /* African-inspired gradients */
-    --peace-gradient: linear-gradient(135deg, hsl(18 75% 52%), hsl(95 45% 48%));
-    --community-gradient: linear-gradient(135deg, hsl(25 85% 62%), hsl(42 78% 65%));
-    --story-gradient: linear-gradient(135deg, hsl(95 35% 85%), hsl(35 45% 90%));
-    --hero-gradient: linear-gradient(180deg, hsl(35 45% 96%) 0%, hsl(42 50% 92%) 100%);
+    /* Professional gradients */
+    --peace-gradient: linear-gradient(135deg, hsl(199 100% 46%) 0%, hsl(199 100% 36%) 100%);
+    --community-gradient: linear-gradient(135deg, hsl(199 100% 46%) 0%, hsl(142 71% 42%) 100%);
+    --story-gradient: linear-gradient(135deg, hsl(142 71% 42%) 0%, hsl(199 100% 46%) 100%);
+    --hero-gradient: linear-gradient(135deg, hsl(199 100% 46% / 0.95) 0%, hsl(199 100% 36% / 0.95) 100%);
     
-    /* Warm African shadows */
-    --shadow-peace: 0 8px 24px -6px hsl(18 75% 52% / 0.3);
-    --shadow-warm: 0 6px 20px -4px hsl(42 78% 65% / 0.4);
-    --shadow-story: 0 4px 16px -2px hsl(95 45% 48% / 0.25);
-    --shadow-elevated: 0 12px 32px -8px hsl(25 40% 35% / 0.2);
+    /* Subtle professional shadows */
+    --shadow-peace: 0 4px 20px -4px hsl(199 100% 46% / 0.15);
+    --shadow-warm: 0 4px 20px -4px hsl(216 20% 15% / 0.08);
+    --shadow-story: 0 4px 20px -4px hsl(142 71% 42% / 0.12);
+    --shadow-elevated: 0 8px 30px -8px hsl(216 20% 15% / 0.12);
 
     /* Voice interaction highlights */
-    --voice-active: 18 80% 58%;
-    --voice-recording: 8 85% 60%;
-    --voice-success: 145 65% 48%;
+    --voice-active: 199 100% 46%;
+    --voice-recording: 0 84% 55%;
+    --voice-success: 142 71% 42%;
 
-    --radius: 0.75rem;
+    --radius: 0.25rem;
 
-    --sidebar-background: 35 40% 97%;
-    --sidebar-foreground: 25 35% 22%;
-    --sidebar-primary: 18 75% 52%;
+    --sidebar-background: 216 20% 98%;
+    --sidebar-foreground: 216 20% 15%;
+    --sidebar-primary: 199 100% 46%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 35 35% 92%;
-    --sidebar-accent-foreground: 25 40% 20%;
-    --sidebar-border: 35 30% 88%;
-    --sidebar-ring: 18 75% 52%;
+    --sidebar-accent: 210 15% 92%;
+    --sidebar-accent-foreground: 216 20% 15%;
+    --sidebar-border: 214 20% 88%;
+    --sidebar-ring: 199 100% 46%;
   }
 
   .dark {
-    /* African-Inspired Design System - Dark Mode */
-    --background: 25 35% 12%;
-    --foreground: 35 30% 92%;
+    /* UN-Inspired Professional Design System - Dark Mode */
+    --background: 216 25% 8%;
+    --foreground: 210 15% 96%;
 
-    --card: 25 28% 16%;
-    --card-foreground: 35 30% 92%;
+    --card: 216 25% 10%;
+    --card-foreground: 210 15% 96%;
 
-    --popover: 25 28% 16%;
-    --popover-foreground: 35 30% 92%;
+    --popover: 216 25% 10%;
+    --popover-foreground: 210 15% 96%;
 
-    /* Glowing terracotta & burnt orange - dark mode */
-    --primary: 18 78% 60%;
-    --primary-foreground: 25 35% 12%;
-    --primary-glow: 25 85% 68%;
+    /* Primary - UN Blue (dark mode) */
+    --primary: 199 100% 46%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 199 100% 60%;
 
-    /* Rich ochre & gold - dark mode warmth */
-    --secondary: 42 55% 35%;
-    --secondary-foreground: 42 85% 88%;
+    /* Secondary - Professional Gray (dark) */
+    --secondary: 216 20% 18%;
+    --secondary-foreground: 210 15% 92%;
     
-    /* Deep savanna green - night landscape */
-    --accent: 95 50% 55%;
-    --accent-foreground: 25 35% 12%;
-    --accent-light: 95 35% 28%;
+    /* Accent - Alert Orange (dark mode) */
+    --accent: 25 95% 53%;
+    --accent-foreground: 0 0% 100%;
+    --accent-light: 25 95% 65%;
 
-    /* Dark earth backgrounds */
-    --muted: 25 25% 20%;
-    --muted-foreground: 35 20% 68%;
+    /* Dark backgrounds */
+    --muted: 216 20% 15%;
+    --muted-foreground: 216 12% 65%;
 
-    /* Forest green - trust in darkness */
-    --success: 145 58% 52%;
-    --success-foreground: 25 35% 12%;
+    /* Success - professional green */
+    --success: 142 71% 42%;
+    --success-foreground: 0 0% 100%;
     
-    /* Bright gold warning */
-    --warning: 45 88% 62%;
-    --warning-foreground: 30 35% 15%;
+    /* Warning - professional amber */
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
 
-    --destructive: 8 75% 58%;
-    --destructive-foreground: 25 35% 12%;
+    --destructive: 0 84% 55%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 25 25% 24%;
-    --input: 25 25% 20%;
-    --ring: 18 78% 60%;
+    --border: 216 20% 18%;
+    --input: 216 20% 15%;
+    --ring: 199 100% 46%;
 
-    /* African night gradients */
-    --peace-gradient: linear-gradient(135deg, hsl(18 78% 60%), hsl(95 50% 55%));
-    --community-gradient: linear-gradient(135deg, hsl(25 65% 45%), hsl(42 70% 52%));
-    --story-gradient: linear-gradient(135deg, hsl(95 35% 28%), hsl(25 25% 20%));
-    --hero-gradient: linear-gradient(180deg, hsl(25 35% 12%) 0%, hsl(42 40% 18%) 100%);
+    /* Professional dark gradients */
+    --peace-gradient: linear-gradient(135deg, hsl(199 100% 46%) 0%, hsl(199 100% 36%) 100%);
+    --community-gradient: linear-gradient(135deg, hsl(199 100% 46%) 0%, hsl(142 71% 42%) 100%);
+    --story-gradient: linear-gradient(135deg, hsl(142 71% 42%) 0%, hsl(199 100% 46%) 100%);
+    --hero-gradient: linear-gradient(135deg, hsl(199 100% 46% / 0.95) 0%, hsl(199 100% 36% / 0.95) 100%);
     
-    /* Deep warm shadows */
-    --shadow-peace: 0 8px 24px -6px hsl(18 78% 60% / 0.45);
-    --shadow-warm: 0 6px 20px -4px hsl(42 55% 35% / 0.55);
-    --shadow-story: 0 4px 16px -2px hsl(95 50% 55% / 0.35);
-    --shadow-elevated: 0 12px 32px -8px hsl(0 0% 0% / 0.7);
+    /* Dark mode shadows */
+    --shadow-peace: 0 4px 20px -4px hsl(199 100% 46% / 0.25);
+    --shadow-warm: 0 4px 20px -4px hsl(210 15% 96% / 0.06);
+    --shadow-story: 0 4px 20px -4px hsl(142 71% 42% / 0.18);
+    --shadow-elevated: 0 8px 30px -8px hsl(210 15% 96% / 0.08);
 
-    /* Voice interaction - warm night glow */
-    --voice-active: 18 80% 65%;
-    --voice-recording: 8 82% 62%;
-    --voice-success: 145 65% 58%;
+    /* Voice interaction */
+    --voice-active: 199 100% 46%;
+    --voice-recording: 0 84% 55%;
+    --voice-success: 142 71% 42%;
     
-    --sidebar-background: 25 30% 14%;
-    --sidebar-foreground: 35 25% 90%;
-    --sidebar-primary: 18 78% 60%;
+    --sidebar-background: 216 25% 10%;
+    --sidebar-foreground: 210 15% 96%;
+    --sidebar-primary: 199 100% 46%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 25 25% 20%;
-    --sidebar-accent-foreground: 35 25% 90%;
-    --sidebar-border: 25 25% 24%;
+    --sidebar-accent: 216 20% 15%;
+    --sidebar-accent-foreground: 210 15% 96%;
+    --sidebar-border: 216 20% 18%;
     --sidebar-ring: 18 78% 60%;
   }
 }
