@@ -24,6 +24,7 @@ import Voice from "./pages/Voice";
 import Community from "./pages/Community";
 import Radio from "./pages/Radio";
 import Challenges from "./pages/Challenges";
+import Verification from "./pages/Verification";
 import Safety from "./pages/Safety";
 import About from "./pages/About";
 import Auth from "./pages/Auth";
@@ -73,6 +74,7 @@ const App = () => (
                     <Route path="/community" element={<Community />} />
                     <Route path="/radio" element={<Radio />} />
                     <Route path="/challenges" element={<Challenges />} />
+                    <Route path="/verification" element={<Verification />} />
                     <Route path="/safety" element={<Safety />} />
                     <Route path="/about" element={<About />} />
                     <Route path="/proposals" element={<Proposals />} />
