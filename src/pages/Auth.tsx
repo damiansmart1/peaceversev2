@@ -25,7 +25,7 @@ export default function Auth() {
 
   useEffect(() => {
     if (user && !user.is_anonymous) {
-      navigate('/dashboard');
+      navigate('/');
     }
   }, [user, navigate]);
 
@@ -107,7 +107,7 @@ export default function Auth() {
         title: 'Welcome Back!',
         description: 'You have successfully signed in.',
       });
-      navigate('/dashboard');
+      navigate('/');
     }
   };
 
