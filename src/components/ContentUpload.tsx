@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,6 +18,23 @@ const ContentUpload = () => {
   const [attachments, setAttachments] = useState<File[]>([]);
   const [webLinks, setWebLinks] = useState<string[]>(['']);
   const { toast } = useToast();
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
+  // Check authentication status on mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setCurrentUser(user);
+    };
+    checkAuth();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setCurrentUser(session?.user || null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -92,6 +109,8 @@ const ContentUpload = () => {
   };
 
   const handleUpload = async () => {
+    console.log('Upload initiated', { hasFile: !!file, title });
+    
     if (!file || !title.trim()) {
       toast({
         title: "Missing information",
@@ -101,7 +120,18 @@ const ContentUpload = () => {
       return;
     }
 
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    console.log('Auth check', { hasUser: !!user, authError });
+    
+    if (authError) {
+      console.error('Auth error:', authError);
+      toast({
+        title: "Authentication error",
+        description: authError.message,
+        variant: "destructive",
+      });
+      return;
+    }
     
     if (!user) {
       toast({
@@ -119,11 +149,18 @@ const ContentUpload = () => {
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
       
+      console.log('Uploading file to storage', { fileName, fileSize: file.size, fileType: file.type });
+      
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('content')
         .upload(fileName, file);
 
-      if (uploadError) throw uploadError;
+      console.log('Storage upload result', { uploadData, uploadError });
+
+      if (uploadError) {
+        console.error('Storage upload error:', uploadError);
+        throw uploadError;
+      }
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
@@ -166,6 +203,14 @@ const ContentUpload = () => {
       });
 
       // Save content metadata to database
+      console.log('Inserting content metadata to database', {
+        user_id: user.id,
+        title: title.trim(),
+        file_url: publicUrl,
+        file_type: getFileType(file),
+        category: category
+      });
+      
       const { error: dbError } = await supabase
         .from('content')
         .insert({
@@ -178,7 +223,12 @@ const ContentUpload = () => {
           attachments: uploadedAttachments
         });
 
-      if (dbError) throw dbError;
+      console.log('Database insert result', { dbError });
+
+      if (dbError) {
+        console.error('Database insert error:', dbError);
+        throw dbError;
+      }
 
       toast({
         title: "Upload successful!",
@@ -198,11 +248,12 @@ const ContentUpload = () => {
       const attInput = document.getElementById('attachments-upload') as HTMLInputElement;
       if (attInput) attInput.value = '';
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Upload error:', error);
+      const errorMessage = error?.message || error?.error_description || 'There was an error uploading your content';
       toast({
         title: "Upload failed",
-        description: "There was an error uploading your content",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -217,6 +268,13 @@ const ContentUpload = () => {
           <Upload className="w-5 h-5" />
           Share Your Content
         </CardTitle>
+        {!currentUser && (
+          <div className="mt-2 p-3 bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+            <p className="text-sm text-yellow-800 dark:text-yellow-200">
+              ⚠️ You must be <a href="/auth" className="underline font-medium">logged in</a> to upload content
+            </p>
+          </div>
+        )}
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="edit" className="w-full">
@@ -393,10 +451,10 @@ const ContentUpload = () => {
 
             <Button
               onClick={handleUpload} 
-              disabled={uploading || !file || !title.trim()}
+              disabled={uploading || !file || !title.trim() || !currentUser}
               className="w-full"
             >
-              {uploading ? "Uploading..." : "Share Content"}
+              {!currentUser ? "Please login to upload" : uploading ? "Uploading..." : "Share Content"}
             </Button>
           </TabsContent>
 
