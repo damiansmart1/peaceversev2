@@ -615,6 +615,41 @@ export type Database = {
         }
         Relationships: []
       }
+      comments: {
+        Row: {
+          content_id: string
+          created_at: string
+          id: string
+          text: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content_id: string
+          created_at?: string
+          id?: string
+          text: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content_id?: string
+          created_at?: string
+          id?: string
+          text?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "content"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       content: {
         Row: {
           approval_status: string
@@ -916,6 +951,35 @@ export type Database = {
           },
         ]
       }
+      likes: {
+        Row: {
+          content_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          content_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          content_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "likes_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "content"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       predictive_hotspots: {
         Row: {
           ai_model_used: string | null
@@ -1042,6 +1106,86 @@ export type Database = {
           updated_at?: string | null
           user_type?: string | null
           username?: string | null
+        }
+        Relationships: []
+      }
+      proposal_votes: {
+        Row: {
+          created_at: string
+          id: string
+          proposal_id: string
+          user_id: string
+          vote: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          proposal_id: string
+          user_id: string
+          vote: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          proposal_id?: string
+          user_id?: string
+          vote?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_votes_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proposals: {
+        Row: {
+          category: string
+          created_at: string
+          creator_id: string
+          description: string
+          ends_at: string | null
+          id: string
+          status: string
+          title: string
+          updated_at: string
+          visibility: string
+          votes_abstain: number
+          votes_against: number
+          votes_for: number
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          creator_id: string
+          description: string
+          ends_at?: string | null
+          id?: string
+          status?: string
+          title: string
+          updated_at?: string
+          visibility?: string
+          votes_abstain?: number
+          votes_against?: number
+          votes_for?: number
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          creator_id?: string
+          description?: string
+          ends_at?: string | null
+          id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          visibility?: string
+          votes_abstain?: number
+          votes_against?: number
+          votes_for?: number
         }
         Relationships: []
       }
