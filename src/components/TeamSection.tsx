@@ -26,15 +26,6 @@ const teamMembers: TeamMember[] = [
     }
   },
   {
-    name: "Morris Mwangi",
-    role: "Tech Lead",
-    bio: "Building scalable, accessible technology solutions for youth in low-bandwidth environments.",
-    social: {
-      linkedin: "#",
-      twitter: "#"
-    }
-  },
-  {
     name: "Brian Kinuthia",
     role: "Visuals & Design Lead",
     bio: "Creating engaging, youth-centered experiences that make peacebuilding fun and accessible.",
