@@ -5,6 +5,9 @@ import TextAlign from '@tiptap/extension-text-align';
 import Highlight from '@tiptap/extension-highlight';
 import { TextStyle } from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
+import BulletList from '@tiptap/extension-bullet-list';
+import OrderedList from '@tiptap/extension-ordered-list';
+import ListItem from '@tiptap/extension-list-item';
 import { Button } from '@/components/ui/button';
 import { 
   Bold, 
@@ -23,7 +26,9 @@ import {
   Heading1,
   Heading2,
   Heading3,
-  Code
+  Code,
+  IndentIncrease,
+  IndentDecrease
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -44,10 +49,25 @@ export default function RichTextEditor({
 }: RichTextEditorProps) {
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        bulletList: false,
+        orderedList: false,
+        listItem: false,
+      }),
+      BulletList.configure({
+        HTMLAttributes: {
+          class: 'list-disc ml-4',
+        },
+      }),
+      OrderedList.configure({
+        HTMLAttributes: {
+          class: 'list-decimal ml-4',
+        },
+      }),
+      ListItem,
       Underline,
       TextAlign.configure({
-        types: ['heading', 'paragraph'],
+        types: ['heading', 'paragraph', 'listItem'],
       }),
       Highlight.configure({
         multicolor: true,
@@ -66,6 +86,26 @@ export default function RichTextEditor({
           'min-h-[' + minHeight + '] p-4 rounded-md border border-input bg-background',
           className
         ),
+      },
+      handlePaste: (view, event) => {
+        const clipboardData = event.clipboardData;
+        if (!clipboardData) return false;
+
+        // Check if pasting HTML content
+        const html = clipboardData.getData('text/html');
+        const text = clipboardData.getData('text/plain');
+
+        if (html) {
+          // Allow pasting formatted content
+          return false;
+        }
+
+        if (text) {
+          // Allow pasting plain text
+          return false;
+        }
+
+        return false;
       },
     },
   });
@@ -211,6 +251,22 @@ export default function RichTextEditor({
           title="Numbered List"
         >
           <ListOrdered className="h-4 w-4" />
+        </ToolbarButton>
+
+        <ToolbarButton
+          onClick={() => editor.chain().focus().sinkListItem('listItem').run()}
+          disabled={!editor.can().sinkListItem('listItem')}
+          title="Indent"
+        >
+          <IndentIncrease className="h-4 w-4" />
+        </ToolbarButton>
+
+        <ToolbarButton
+          onClick={() => editor.chain().focus().liftListItem('listItem').run()}
+          disabled={!editor.can().liftListItem('listItem')}
+          title="Outdent"
+        >
+          <IndentDecrease className="h-4 w-4" />
         </ToolbarButton>
 
         <ToolbarButton
