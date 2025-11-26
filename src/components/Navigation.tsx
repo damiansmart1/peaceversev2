@@ -129,7 +129,7 @@ const Navigation = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity flex-shrink-0">
             <img src={peaceverselogo} alt="PeaceVerse Logo" className="h-10 sm:h-12 w-auto" />
-            <Badge variant="secondary" className="text-xs hidden lg:inline-flex">
+            <Badge variant="secondary" className="text-xs hidden lg:inline-flex bg-black">
               v2.0
             </Badge>
           </Link>
@@ -174,7 +174,7 @@ const Navigation = () => {
                       <span>Admin</span>
                     </Button>}
                   
-                  <Button variant="ghost" size="sm" onClick={handleSignOut} className="gap-1.5 text-xs sm:text-sm h-8 px-2 sm:px-3">
+                  <Button variant="ghost" size="sm" onClick={handleSignOut} className="gap-1.5 text-xs sm:text-sm h-8 px-2 sm:px-3 rounded-xl shadow-lg">
                     <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     <span className="hidden lg:inline">Sign Out</span>
                   </Button>

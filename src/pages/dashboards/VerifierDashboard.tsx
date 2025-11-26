@@ -5,24 +5,23 @@ import { useNavigate } from 'react-router-dom';
 import { CheckCircle, Clock, AlertTriangle, FileCheck, TrendingUp } from 'lucide-react';
 import { useVerificationTasks } from '@/hooks/useVerificationTasks';
 import { Badge } from '@/components/ui/badge';
-
 const VerifierDashboard = () => {
   const navigate = useNavigate();
-  const { tasks, isLoading } = useVerificationTasks();
-
+  const {
+    tasks,
+    isLoading
+  } = useVerificationTasks();
   const pendingTasks = tasks?.filter(t => t.status === 'pending').length || 0;
   const completedTasks = tasks?.filter(t => t.status === 'completed').length || 0;
-
-  return (
-    <div className="min-h-screen bg-hero-gradient">
+  return <div className="min-h-screen bg-hero-gradient">
       <Navigation />
       <div className="container mx-auto px-4 py-20">
         <div className="max-w-6xl mx-auto space-y-8">
           <div className="text-center mb-8">
-            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-3">
+            <h1 className="text-4xl md:text-5xl font-bold mb-3 text-[#e1ad40]">
               Verifier Dashboard
             </h1>
-            <p className="text-lg text-muted-foreground">
+            <p className="text-lg text-white">
               Review and verify community submissions
             </p>
           </div>
@@ -76,11 +75,9 @@ const VerifierDashboard = () => {
               <CardContent>
                 <Button className="w-full">
                   Start Reviewing
-                  {pendingTasks > 0 && (
-                    <Badge variant="secondary" className="ml-2">
+                  {pendingTasks > 0 && <Badge variant="secondary" className="ml-2">
                       {pendingTasks} pending
-                    </Badge>
-                  )}
+                    </Badge>}
                 </Button>
               </CardContent>
             </Card>
@@ -110,12 +107,8 @@ const VerifierDashboard = () => {
               <CardDescription>Recent submissions you've reviewed</CardDescription>
             </CardHeader>
             <CardContent>
-              {isLoading ? (
-                <div className="text-center py-8 text-muted-foreground">Loading...</div>
-              ) : tasks && tasks.length > 0 ? (
-                <div className="space-y-4">
-                  {tasks.slice(0, 5).map((task) => (
-                    <div key={task.id} className="flex items-center justify-between p-4 border rounded-lg">
+              {isLoading ? <div className="text-center py-8 text-muted-foreground">Loading...</div> : tasks && tasks.length > 0 ? <div className="space-y-4">
+                  {tasks.slice(0, 5).map(task => <div key={task.id} className="flex items-center justify-between p-4 border rounded-lg">
                       <div className="flex-1">
                         <p className="font-medium">{task.content_type}</p>
                         <p className="text-sm text-muted-foreground">
@@ -125,20 +118,14 @@ const VerifierDashboard = () => {
                       <Badge variant={task.status === 'completed' ? 'default' : 'secondary'}>
                         {task.status}
                       </Badge>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
+                    </div>)}
+                </div> : <div className="text-center py-8 text-muted-foreground">
                   No verification tasks yet
-                </div>
-              )}
+                </div>}
             </CardContent>
           </Card>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default VerifierDashboard;
