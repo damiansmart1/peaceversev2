@@ -615,6 +615,60 @@ export type Database = {
         }
         Relationships: []
       }
+      content: {
+        Row: {
+          approval_status: string
+          attachments: Json | null
+          category: string
+          created_at: string
+          description: string | null
+          file_type: string
+          file_url: string
+          id: string
+          is_archived: boolean
+          like_count: number
+          share_count: number
+          title: string
+          updated_at: string
+          user_id: string
+          view_count: number
+        }
+        Insert: {
+          approval_status?: string
+          attachments?: Json | null
+          category?: string
+          created_at?: string
+          description?: string | null
+          file_type: string
+          file_url: string
+          id?: string
+          is_archived?: boolean
+          like_count?: number
+          share_count?: number
+          title: string
+          updated_at?: string
+          user_id: string
+          view_count?: number
+        }
+        Update: {
+          approval_status?: string
+          attachments?: Json | null
+          category?: string
+          created_at?: string
+          description?: string | null
+          file_type?: string
+          file_url?: string
+          id?: string
+          is_archived?: boolean
+          like_count?: number
+          share_count?: number
+          title?: string
+          updated_at?: string
+          user_id?: string
+          view_count?: number
+        }
+        Relationships: []
+      }
       external_data_records: {
         Row: {
           ai_extracted_entities: Json | null
