@@ -9,6 +9,8 @@ export interface AdminContent {
   file_url: string;
   file_type: string;
   thumbnail_url: string | null;
+  category: string;
+  attachments: any[];
   user_id: string;
   is_archived: boolean;
   approval_status: 'pending_approval' | 'approved' | 'rejected' | 'draft';
@@ -51,7 +53,9 @@ export const useCreateContent = () => {
           description: content.description,
           file_url: content.file_url!,
           file_type: content.file_type!,
-          thumbnail_url: content.thumbnail_url,
+          thumbnail_url: content.thumbnail_url || null,
+          category: content.category || 'general',
+          attachments: content.attachments || [],
           user_id: user.id,
         } as any)
         .select()
