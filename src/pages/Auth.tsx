@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { z } from 'zod';
 import { Globe } from 'lucide-react';
+import peaceLogo from '@/assets/peaceverse-logo.png';
 
 const emailSchema = z.string().trim().email('Invalid email address').max(255);
 const passwordSchema = z.string().min(8, 'Password must be at least 8 characters').max(100).regex(
@@ -124,7 +125,7 @@ export default function Auth() {
       {/* Navigation */}
       <nav className="relative z-10 flex items-center justify-between px-8 py-6">
         <div className="flex items-center gap-3">
-          <img src="/src/assets/peaceverse-logo.png" alt="Peaceverse Logo" className="h-12 w-12" />
+          <img src={peaceLogo} alt="Peaceverse Logo" className="h-12 w-12" />
           <span className="text-2xl font-bold text-primary-foreground">Peaceverse</span>
         </div>
       </nav>
