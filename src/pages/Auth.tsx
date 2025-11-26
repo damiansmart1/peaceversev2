@@ -137,7 +137,7 @@ export default function Auth() {
             Peaceverse
           </h1>
           <p className="text-xl md:text-2xl text-primary-foreground/80 tracking-wide font-light">
-            Observation. Prediction. Prevention.
+            Detect. Verify. Prevent.
           </p>
         </div>
 
