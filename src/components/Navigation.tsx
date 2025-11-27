@@ -45,11 +45,11 @@ const Navigation = () => {
 
   // Extract role strings for easier checking
   const roleStrings = userRoles?.map((r: any) => r.role) || [];
-  const handleSignOut = async () => {
+const handleSignOut = async () => {
     await supabase.auth.signOut();
     toast({
-      title: 'Signed out',
-      description: 'You have been successfully signed out.'
+      title: t('auth.signedOut'),
+      description: t('auth.signedOutDesc')
     });
     navigate('/');
   };
@@ -64,7 +64,7 @@ const Navigation = () => {
   // Base navigation items - all users can see these
   const publicNavItems = [{
     path: '/about',
-    label: 'About',
+    label: t('nav.about'),
     icon: Heart
   }, {
     path: '/community',
@@ -72,19 +72,19 @@ const Navigation = () => {
     icon: Users
   }, {
     path: '/incidents',
-    label: 'Incident Reporting',
+    label: t('nav.incidents'),
     icon: Shield
   }, {
     path: '/peace-pulse',
-    label: 'PeacePulse',
+    label: t('nav.peacePulse'),
     icon: Globe
   }, {
     path: '/proposals',
-    label: 'Polls & Proposals',
+    label: t('nav.pollsProposals'),
     icon: Map
   }, {
     path: '/safety',
-    label: 'Safety Portal',
+    label: t('nav.safetyPortal'),
     icon: Shield
   }];
 
@@ -95,7 +95,7 @@ const Navigation = () => {
   if (user && !isAnonymous) {
     roleBasedItems.push({
       path: '/dashboard',
-      label: 'Dashboard',
+      label: t('nav.dashboard'),
       icon: User
     });
   }
@@ -104,7 +104,7 @@ const Navigation = () => {
   if (roleStrings.includes('verifier') || roleStrings.includes('admin') || roleStrings.includes('government')) {
     roleBasedItems.push({
       path: '/verification',
-      label: 'Verification',
+      label: t('nav.verification'),
       icon: Award
     });
   }
@@ -113,7 +113,7 @@ const Navigation = () => {
   if (roleStrings.includes('admin') || roleStrings.includes('government') || roleStrings.includes('partner')) {
     roleBasedItems.push({
       path: '/early-warning',
-      label: 'Early Warning',
+      label: t('nav.earlyWarning'),
       icon: AlertTriangle
     });
   }
