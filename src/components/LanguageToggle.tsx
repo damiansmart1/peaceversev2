@@ -10,9 +10,11 @@ import { Badge } from '@/components/ui/badge';
 import { Languages, Check } from 'lucide-react';
 import { useTranslationContext } from './TranslationProvider';
 import { Language } from '@/hooks/useTranslation';
+import { useToast } from '@/hooks/use-toast';
 
 const LanguageToggle = () => {
   const { language, setLanguage, t } = useTranslationContext();
+  const { toast } = useToast();
 
   const languages: { code: Language; name: string; nativeName: string }[] = [
     { code: 'en', name: 'English', nativeName: 'English' },
@@ -27,6 +29,15 @@ const LanguageToggle = () => {
     { code: 'hi', name: 'Hindi', nativeName: 'हिन्दी' },
     { code: 'de', name: 'German', nativeName: 'Deutsch' },
   ];
+
+  const handleLanguageChange = (langCode: Language) => {
+    setLanguage(langCode);
+    const selectedLang = languages.find(l => l.code === langCode);
+    toast({
+      title: t('language.changed') || 'Language Changed',
+      description: `${t('language.switched_to') || 'Switched to'} ${selectedLang?.nativeName || langCode}`,
+    });
+  };
 
   const currentLanguageName = languages.find(lang => lang.code === language)?.nativeName || 'English';
 
@@ -45,14 +56,14 @@ const LanguageToggle = () => {
           </Badge>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
+      <DropdownMenuContent align="end" className="w-56 max-h-80 overflow-y-auto">
         <div className="px-2 py-1.5 text-sm font-medium text-muted-foreground border-b">
           {t('language.select')}
         </div>
         {languages.map((lang) => (
           <DropdownMenuItem
             key={lang.code}
-            onClick={() => setLanguage(lang.code)}
+            onClick={() => handleLanguageChange(lang.code)}
             className="flex items-center justify-between cursor-pointer"
           >
             <div className="flex flex-col">

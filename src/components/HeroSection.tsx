@@ -1,17 +1,18 @@
 import { Button } from "@/components/ui/button";
 import { Mic, Users, Award, Map } from "lucide-react";
 import heroImage from "@/assets/hero-image.jpg";
-import { useTranslation } from "@/hooks/useTranslation";
+import { useTranslationContext } from "@/components/TranslationProvider";
 
 const HeroSection = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslationContext();
+  
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background pt-16">
       {/* Background Image with Overlay */}
       <div className="absolute inset-0 z-0">
         <img
           src={heroImage}
-          alt="Diverse youth coming together for peace building through storytelling and community dialogue"
+          alt={t('hero.alt') || "Diverse youth coming together for peace building through storytelling and community dialogue"}
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-br from-background/90 via-background/70 to-background/90" />
@@ -22,26 +23,26 @@ const HeroSection = () => {
         <div className="max-w-4xl mx-auto text-center animate-fade-in-up">
           {/* Main Heading */}
           <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-peace-gradient bg-clip-text text-transparent leading-tight">
-            PeaceVerse: Continental Early Warning Network
+            {t('hero.title')}: {t('hero.network') || 'Continental Early Warning Network'}
           </h1>
           
           <p className="text-xl md:text-2xl text-foreground/80 mb-4 font-medium">
-            Empowering African Communities Through Data-Driven Peace Intelligence
+            {t('hero.subtitle')}
           </p>
           
           <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
-            Advanced multi-jurisdiction platform enabling real-time incident reporting, AI-powered analysis, and cross-border peace coordination across Africa.
+            {t('hero.description')}
           </p>
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
             <Button variant="peace" size="lg" className="text-lg px-8 py-6" onClick={() => window.location.href='/community'}>
               <Mic className="w-5 h-5" />
-              Share Your Story
+              {t('hero.cta.primary')}
             </Button>
             <Button variant="community" size="lg" className="text-lg px-8 py-6" onClick={() => window.location.href='/incidents'}>
               <Users className="w-5 h-5" />
-              Report Incident
+              {t('hero.cta.report') || 'Report Incident'}
             </Button>
           </div>
 
@@ -51,9 +52,9 @@ const HeroSection = () => {
               <div className="w-12 h-12 bg-voice-active rounded-full flex items-center justify-center mb-4 mx-auto">
                 <Mic className="w-6 h-6 text-primary-foreground" />
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-card-foreground">Voice Stories</h3>
+              <h3 className="text-xl font-semibold mb-3 text-card-foreground">{t('features.voice.title')}</h3>
               <p className="text-muted-foreground">
-                Share your peace journey through voice recordings and connect with communities building a safer Africa.
+                {t('features.voice.description')}
               </p>
             </div>
 
@@ -61,9 +62,9 @@ const HeroSection = () => {
               <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center mb-4 mx-auto">
                 <Map className="w-6 h-6 text-accent-foreground" />
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-card-foreground">Interactive Mapping</h3>
+              <h3 className="text-xl font-semibold mb-3 text-card-foreground">{t('features.mapping.title') || 'Interactive Mapping'}</h3>
               <p className="text-muted-foreground">
-                Visualize peace and conflict data across African regions with real-time geo-tagged incident intelligence.
+                {t('features.mapping.description') || 'Visualize peace and conflict data across African regions with real-time geo-tagged incident intelligence.'}
               </p>
             </div>
 
@@ -71,9 +72,9 @@ const HeroSection = () => {
               <div className="w-12 h-12 bg-warning rounded-full flex items-center justify-center mb-4 mx-auto">
                 <Award className="w-6 h-6 text-warning-foreground" />
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-card-foreground">Earn Rewards</h3>
+              <h3 className="text-xl font-semibold mb-3 text-card-foreground">{t('features.rewards.title') || 'Earn Rewards'}</h3>
               <p className="text-muted-foreground">
-                Complete peacebuilding challenges, earn badges, and unlock exclusive rewards for community contributions.
+                {t('features.rewards.description') || 'Complete peacebuilding challenges, earn badges, and unlock exclusive rewards for community contributions.'}
               </p>
             </div>
           </div>
