@@ -10,20 +10,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Trophy, ShoppingBag, Target, Activity, Heart, Mic, Flag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-
 const CitizenDashboard = () => {
   const navigate = useNavigate();
-
-  return (
-    <div className="min-h-screen bg-hero-gradient">
+  return <div className="min-h-screen bg-hero-gradient">
       <Navigation />
       <div className="container mx-auto px-4 py-20">
         <div className="max-w-6xl mx-auto space-y-8">
           <div className="text-center mb-8">
-            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-3">
+            <h1 className="text-4xl md:text-5xl font-bold mb-3 text-[#e1ad40]">
               Citizen Dashboard
             </h1>
-            <p className="text-lg text-muted-foreground">
+            <p className="text-lg text-white">
               Track your impact and continue building peace
             </p>
           </div>
@@ -31,7 +28,7 @@ const CitizenDashboard = () => {
           {/* Quick Actions */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
             <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/community')}>
-              <CardHeader>
+              <CardHeader className="border-none">
                 <CardTitle className="flex items-center gap-2">
                   <Mic className="w-5 h-5 text-primary" />
                   Share Your Voice
@@ -100,8 +97,6 @@ const CitizenDashboard = () => {
           </Tabs>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default CitizenDashboard;

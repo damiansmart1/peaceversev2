@@ -45,7 +45,7 @@ const Navigation = () => {
 
   // Extract role strings for easier checking
   const roleStrings = userRoles?.map((r: any) => r.role) || [];
-const handleSignOut = async () => {
+  const handleSignOut = async () => {
     await supabase.auth.signOut();
     toast({
       title: t('auth.signedOut'),
@@ -142,8 +142,8 @@ const handleSignOut = async () => {
                 const isActive = location.pathname === item.path;
                 return <Button key={item.path} variant="ghost" size="sm" asChild className={`flex items-center space-x-1.5 transition-all duration-200 whitespace-nowrap flex-shrink-0 text-xs xl:text-sm px-2 xl:px-3 ${isActive ? 'text-primary bg-primary/10 font-medium' : 'text-foreground hover:text-primary hover:bg-primary/10'}`}>
                     <Link to={item.path} className="text-[#e1ad40] rounded-full">
-                      <Icon className="w-3.5 h-3.5 xl:w-4 xl:h-4" />
-                      <span className="bg-[#f7f9fa]/0 text-xs font-sans">{item.label}</span>
+                      <Icon className="w-3.5 h-3.5 xl:w-4 xl:h-4 text-white" />
+                      <span className="bg-[#f7f9fa]/0 text-xs font-sans text-[#e1ad40]">{item.label}</span>
                     </Link>
                   </Button>;
               })}
@@ -176,7 +176,7 @@ const handleSignOut = async () => {
                   
                   <Button variant="ghost" size="sm" onClick={handleSignOut} className="gap-1.5 text-xs sm:text-sm h-8 px-2 sm:px-3 rounded-xl shadow-lg">
                     <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                    <span className="hidden lg:inline">Sign Out</span>
+                    <span className="hidden lg:inline text-white">Sign Out</span>
                   </Button>
                 </> : <Button variant="default" size="sm" onClick={() => navigate('/auth')} className="gap-1.5 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 font-semibold text-xs sm:text-sm h-8 px-2 sm:px-3">
                   <User className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
