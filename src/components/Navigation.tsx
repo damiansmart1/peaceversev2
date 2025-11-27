@@ -141,7 +141,7 @@ const Navigation = () => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.path;
                 return <Button key={item.path} variant="ghost" size="sm" asChild className={`flex items-center space-x-1.5 transition-all duration-200 whitespace-nowrap flex-shrink-0 text-xs xl:text-sm px-2 xl:px-3 ${isActive ? 'text-primary bg-primary/10 font-medium' : 'text-foreground hover:text-primary hover:bg-primary/10'}`}>
-                    <Link to={item.path} className="text-[#e1ad40] rounded-full">
+                    <Link to={item.path} className="rounded-full text-primary bg-[#1b5f9f]/[0.36]">
                       <Icon className="w-3.5 h-3.5 xl:w-4 xl:h-4 text-white" />
                       <span className="text-xs font-sans bg-[#e1ad40]">{item.label}</span>
                     </Link>
