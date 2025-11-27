@@ -1,1 +1,34 @@
 project_id = "grdfsvyexnlofddpntrq"
+
+[functions.analyze-citizen-report]
+verify_jwt = false
+
+[functions.analyze-incident-risk]
+verify_jwt = false
+
+[functions.analyze-sentiment]
+verify_jwt = false
+
+[functions.assign-verification-task]
+verify_jwt = false
+
+[functions.complete-verification]
+verify_jwt = false
+
+[functions.detect-correlations]
+verify_jwt = false
+
+[functions.generate-ai-report]
+verify_jwt = false
+
+[functions.generate-section-image]
+verify_jwt = false
+
+[functions.predict-hotspots]
+verify_jwt = false
+
+[functions.submit-report]
+verify_jwt = false
+
+[functions.translate-content]
+verify_jwt = false

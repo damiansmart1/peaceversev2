@@ -41,10 +41,13 @@ export const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     'hero.title': 'Peace Verse',
-    'hero.subtitle': 'Empowering Youth Voices for Peace Across Kenya',
+    'hero.subtitle': 'Empowering Youth Voices for Peace Across Africa',
     'hero.description': 'Join a transformative community where young peacebuilders share stories, build bridges, and create lasting change through voice-first storytelling and inclusive dialogue.',
     'hero.cta.primary': 'Share Your Story',
     'hero.cta.secondary': 'Explore Community',
+    'hero.cta.report': 'Report Incident',
+    'hero.network': 'Continental Early Warning Network',
+    'hero.alt': 'Diverse youth coming together for peace building through storytelling and community dialogue',
     
     // Features
     'features.badge': 'Platform Features',
@@ -60,6 +63,18 @@ export const translations: Record<Language, Record<string, string>> = {
     'features.challenges.description': 'Participate in monthly challenges promoting dialogue and positive action.',
     'features.safety.title': 'Safety First',
     'features.safety.description': 'Advanced moderation ensures a secure environment for all.',
+    'features.mapping.title': 'Interactive Mapping',
+    'features.mapping.description': 'Visualize peace and conflict data across African regions with real-time geo-tagged incident intelligence.',
+    'features.rewards.title': 'Earn Rewards',
+    'features.rewards.description': 'Complete peacebuilding challenges, earn badges, and unlock exclusive rewards for community contributions.',
+    'features.polls.title': 'Polls & Proposals',
+    'features.polls.description': 'Vote on community proposals, create polls, and shape policy through democratic participation.',
+    'features.incidents.title': 'Incident Reporting',
+    'features.incidents.description': 'Submit verified incident reports with geo-location, media evidence, and AI-powered analysis.',
+    'features.peacepulse.title': 'Peace Pulse',
+    'features.peacepulse.description': 'Real-time analytics dashboard tracking peace metrics, sentiment analysis, and regional stability.',
+    'features.safetyportal.title': 'Safety Portal',
+    'features.safetyportal.description': 'Access safety resources, protection guidelines, and crisis response information.',
     
     // Voice/Recording
     'voice.badge': 'Voice Stories',
@@ -233,6 +248,8 @@ export const translations: Record<Language, Record<string, string>> = {
     // Language
     'language.select': 'Select Language',
     'language.current': 'Current Language',
+    'language.changed': 'Language Changed',
+    'language.switched_to': 'Switched to',
     
     // Auth
     'auth.login': 'Login',
@@ -301,10 +318,13 @@ export const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     'hero.title': 'Peace Verse',
-    'hero.subtitle': 'Kuimarisha Sauti za Vijana kwa Amani Kote Kenya',
+    'hero.subtitle': 'Kuimarisha Sauti za Vijana kwa Amani Kote Afrika',
     'hero.description': 'Jiunge na jamii ya mabadiliko ambapo wajenzi wa amani vijana hushiriki hadithi, kujenga madaraja, na kuunda mabadiliko ya kudumu.',
     'hero.cta.primary': 'Shiriki Hadithi Yako',
     'hero.cta.secondary': 'Chunguza Jamii',
+    'hero.cta.report': 'Ripoti Tukio',
+    'hero.network': 'Mtandao wa Onyo la Mapema wa Bara',
+    'hero.alt': 'Vijana wa makabila mbalimbali wakikutana kwa kujenga amani kupitia masimulizi na mazungumzo ya jamii',
     
     // Features
     'features.badge': 'Vipengele vya Jukwaa',
@@ -320,6 +340,18 @@ export const translations: Record<Language, Record<string, string>> = {
     'features.challenges.description': 'Shiriki katika changamoto za kila mwezi zinazokuza mazungumzo.',
     'features.safety.title': 'Usalama wa Kwanza',
     'features.safety.description': 'Usimamizi wa juu unahakikisha mazingira salama kwa wote.',
+    'features.mapping.title': 'Ramani Shirikishi',
+    'features.mapping.description': 'Onyesha data ya amani na migogoro katika mikoa ya Afrika kwa ujasusi wa matukio uliowekwa alama ya kijiografia.',
+    'features.rewards.title': 'Pata Tuzo',
+    'features.rewards.description': 'Maliza changamoto za kujenga amani, pata beji, na fungua tuzo za kipekee.',
+    'features.polls.title': 'Kura na Mapendekezo',
+    'features.polls.description': 'Piga kura kwenye mapendekezo ya jamii na uunde sera kupitia ushiriki wa kidemokrasia.',
+    'features.incidents.title': 'Kuripoti Matukio',
+    'features.incidents.description': 'Wasilisha ripoti za matukio zilizothibitishwa na eneo, ushahidi wa media, na uchambuzi wa AI.',
+    'features.peacepulse.title': 'Mapigo ya Amani',
+    'features.peacepulse.description': 'Dashibodi ya uchanganuzi wa wakati halisi inayofuatilia vipimo vya amani na uchanganuzi wa hisia.',
+    'features.safetyportal.title': 'Lango la Usalama',
+    'features.safetyportal.description': 'Fikia rasilimali za usalama, miongozo ya ulinzi, na habari za majibu ya dharura.',
     
     // Voice/Recording
     'voice.badge': 'Hadithi za Sauti',
@@ -481,10 +513,13 @@ export const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     'hero.title': 'Peace Verse',
-    'hero.subtitle': 'Amplifier les Voix des Jeunes pour la Paix à Travers le Kenya',
+    'hero.subtitle': 'Amplifier les Voix des Jeunes pour la Paix à Travers l\'Afrique',
     'hero.description': 'Rejoignez une communauté transformatrice où les jeunes artisans de paix partagent des histoires et créent un changement durable.',
     'hero.cta.primary': 'Partagez Votre Histoire',
     'hero.cta.secondary': 'Explorer la Communauté',
+    'hero.cta.report': 'Signaler un Incident',
+    'hero.network': 'Réseau d\'Alerte Précoce Continental',
+    'hero.alt': 'Des jeunes de diverses origines se réunissent pour la construction de la paix',
     
     // Features
     'features.badge': 'Fonctionnalités',
@@ -500,6 +535,18 @@ export const translations: Record<Language, Record<string, string>> = {
     'features.challenges.description': 'Participez à des défis mensuels favorisant le dialogue et l\'action positive.',
     'features.safety.title': 'Sécurité Avant Tout',
     'features.safety.description': 'Une modération avancée garantit un environnement sécurisé pour tous.',
+    'features.mapping.title': 'Cartographie Interactive',
+    'features.mapping.description': 'Visualisez les données de paix et de conflit avec des incidents géolocalisés en temps réel.',
+    'features.rewards.title': 'Gagnez des Récompenses',
+    'features.rewards.description': 'Complétez des défis de paix, gagnez des badges et débloquez des récompenses exclusives.',
+    'features.polls.title': 'Sondages et Propositions',
+    'features.polls.description': 'Votez sur les propositions communautaires et façonnez les politiques par la participation démocratique.',
+    'features.incidents.title': 'Signalement d\'Incidents',
+    'features.incidents.description': 'Soumettez des rapports d\'incidents vérifiés avec géolocalisation et analyse IA.',
+    'features.peacepulse.title': 'Pouls de la Paix',
+    'features.peacepulse.description': 'Tableau de bord analytique en temps réel suivant les métriques de paix et les sentiments.',
+    'features.safetyportal.title': 'Portail de Sécurité',
+    'features.safetyportal.description': 'Accédez aux ressources de sécurité et aux informations de réponse aux crises.',
     
     // Voice/Recording
     'voice.badge': 'Histoires Vocales',
@@ -645,10 +692,13 @@ export const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     'hero.title': 'بيس فيرس',
-    'hero.subtitle': 'تمكين أصوات الشباب من أجل السلام عبر كينيا',
+    'hero.subtitle': 'تمكين أصوات الشباب من أجل السلام عبر أفريقيا',
     'hero.description': 'انضم إلى مجتمع تحويلي حيث يشارك بناة السلام الشباب القصص ويخلقون تغييراً دائماً.',
     'hero.cta.primary': 'شارك قصتك',
     'hero.cta.secondary': 'استكشف المجتمع',
+    'hero.cta.report': 'الإبلاغ عن حادث',
+    'hero.network': 'شبكة الإنذار المبكر القارية',
+    'hero.alt': 'شباب متنوعون يجتمعون لبناء السلام من خلال سرد القصص والحوار المجتمعي',
     
     // Features
     'features.badge': 'ميزات المنصة',
@@ -664,6 +714,18 @@ export const translations: Record<Language, Record<string, string>> = {
     'features.challenges.description': 'شارك في تحديات شهرية تعزز الحوار والعمل الإيجابي.',
     'features.safety.title': 'السلامة أولاً',
     'features.safety.description': 'تضمن الرقابة المتقدمة بيئة آمنة للجميع.',
+    'features.mapping.title': 'الخرائط التفاعلية',
+    'features.mapping.description': 'تصور بيانات السلام والصراع مع استخبارات الحوادث المحددة جغرافياً في الوقت الفعلي.',
+    'features.rewards.title': 'اكسب المكافآت',
+    'features.rewards.description': 'أكمل تحديات بناء السلام، احصل على شارات، وافتح مكافآت حصرية.',
+    'features.polls.title': 'الاستطلاعات والمقترحات',
+    'features.polls.description': 'صوت على مقترحات المجتمع وشكل السياسات من خلال المشاركة الديمقراطية.',
+    'features.incidents.title': 'الإبلاغ عن الحوادث',
+    'features.incidents.description': 'قدم تقارير الحوادث المتحققة مع الموقع الجغرافي والأدلة وتحليل الذكاء الاصطناعي.',
+    'features.peacepulse.title': 'نبض السلام',
+    'features.peacepulse.description': 'لوحة تحليلات في الوقت الفعلي تتبع مقاييس السلام وتحليل المشاعر.',
+    'features.safetyportal.title': 'بوابة السلامة',
+    'features.safetyportal.description': 'الوصول إلى موارد السلامة وإرشادات الحماية ومعلومات الاستجابة للأزمات.',
     
     // Voice/Recording
     'voice.badge': 'قصص صوتية',

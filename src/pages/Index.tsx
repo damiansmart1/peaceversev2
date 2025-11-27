@@ -206,33 +206,33 @@ const Index = () => {
                 PeaceVerse
               </h3>
               <p className="text-primary-foreground/80">
-                Continental early warning system empowering African communities through verified incident intelligence and data-driven peace analytics.
+                {t('footer.tagline')}
               </p>
             </div>
             
             <div className="space-y-4">
-              <h4 className="font-semibold">Platform Features</h4>
+              <h4 className="font-semibold">{t('footer.features')}</h4>
               <ul className="space-y-2 text-primary-foreground/80">
-                <li>Voice Stories & Community Engagement</li>
-                <li>Interactive Peace Mapping</li>
-                <li>Peacebuilding Challenges & Rewards</li>
-                <li>Democratic Proposals & Polling</li>
+                <li>{t('footer.features.voice')}</li>
+                <li>{t('footer.features.mapping')}</li>
+                <li>{t('footer.features.challenges')}</li>
+                <li>{t('footer.features.dialogue')}</li>
               </ul>
             </div>
             
             <div className="space-y-4">
-              <h4 className="font-semibold">Support & Safety</h4>
+              <h4 className="font-semibold">{t('footer.support')}</h4>
               <ul className="space-y-2 text-primary-foreground/80">
-                <li>Accessibility Features</li>
-                <li>Multi-Language Support</li>
-                <li>Safety Resources & Protection</li>
-                <li>24/7 Crisis Response</li>
+                <li>{t('footer.support.accessibility')}</li>
+                <li>{t('footer.support.multilang')}</li>
+                <li>{t('footer.support.safety')}</li>
+                <li>{t('footer.support.crisis')}</li>
               </ul>
             </div>
           </div>
           
           <div className="border-t border-primary-foreground/20 mt-8 pt-8 text-center text-primary-foreground/60">
-            <p>&copy; 2025 PeaceVerse. Empowering communities through data-driven peace intelligence.</p>
+            <p>&copy; 2025 PeaceVerse. {t('footer.tagline')}</p>
           </div>
         </div>
       </footer>
