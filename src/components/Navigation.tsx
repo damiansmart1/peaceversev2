@@ -127,11 +127,9 @@ const Navigation = () => {
       <div className="container mx-auto px-3 sm:px-4">
         <div className="flex items-center justify-between h-14 sm:h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity flex-shrink-0">
+          <Link to="/" className="flex items-center gap-2 transition-opacity flex-shrink-0 opacity-100">
             <img src={peaceverselogo} alt="PeaceVerse Logo" className="h-10 sm:h-12 w-auto" />
-            <Badge variant="secondary" className="text-xs hidden lg:inline-flex bg-black">
-              v2.0
-            </Badge>
+            
           </Link>
 
           {/* Desktop Navigation - Scrollable horizontal layout */}
@@ -141,7 +139,7 @@ const Navigation = () => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.path;
                 return <Button key={item.path} variant="ghost" size="sm" asChild className={`flex items-center space-x-1.5 transition-all duration-200 whitespace-nowrap flex-shrink-0 text-xs xl:text-sm px-2 xl:px-3 ${isActive ? 'text-primary bg-primary/10 font-medium' : 'text-foreground hover:text-primary hover:bg-primary/10'}`}>
-                    <Link to={item.path} className="rounded-full text-primary bg-[#1b5f9f]/[0.36]">
+                    <Link to={item.path} className="rounded-full bg-primary text-white/0">
                       <Icon className="w-3.5 h-3.5 xl:w-4 xl:h-4 text-white" />
                       <span className="text-xs font-sans bg-[#e0ad3f]/[0.09] text-[#e1ad40]">{item.label}</span>
                     </Link>
