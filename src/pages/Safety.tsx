@@ -21,9 +21,9 @@ const Safety = () => {
         <div className="mb-12">
           <SectionImageBanner
             image={safetyProtection}
-            alt="African community members in a safe space showing protection and security"
-            title="Safety Portal"
-            subtitle="Protection, moderation, trust building, and offline access"
+            alt={t('safety.portal')}
+            title={t('safety.portal')}
+            subtitle={t('safety.portalSubtitle')}
             className="h-96 mb-8"
           />
         </div>
@@ -32,23 +32,23 @@ const Safety = () => {
           <TabsList className="grid w-full grid-cols-5 mb-8">
             <TabsTrigger value="moderation" className="gap-2">
               <Shield className="w-4 h-4" />
-              Moderation
+              {t('safety.moderation')}
             </TabsTrigger>
             <TabsTrigger value="protection" className="gap-2">
               <AlertTriangle className="w-4 h-4" />
-              Protection
+              {t('safety.protection')}
             </TabsTrigger>
             <TabsTrigger value="trust" className="gap-2">
               <Users className="w-4 h-4" />
-              Trust
+              {t('safety.trust')}
             </TabsTrigger>
             <TabsTrigger value="offline" className="gap-2">
               <Wifi className="w-4 h-4" />
-              Offline
+              {t('safety.offline')}
             </TabsTrigger>
             <TabsTrigger value="resources" className="gap-2">
               <BookOpen className="w-4 h-4" />
-              Resources
+              {t('safety.resources')}
             </TabsTrigger>
           </TabsList>
 
