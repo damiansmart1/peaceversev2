@@ -7,13 +7,17 @@ import { Badge } from '@/components/ui/badge';
 import { 
   Key, Webhook, Plug, Code, Shield, Activity, 
   Copy, ExternalLink, Plus, Settings, CheckCircle,
-  Globe, Database, Zap, ArrowRight, BookOpen
+  Globe, Database, Zap, ArrowRight, BookOpen, Gauge,
+  HeartPulse, TestTube, Server
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import APIKeysManager from '@/components/integrations/APIKeysManager';
 import WebhooksManager from '@/components/integrations/WebhooksManager';
 import IntegrationsGallery from '@/components/integrations/IntegrationsGallery';
 import APIDocumentation from '@/components/integrations/APIDocumentation';
+import APIHealthMonitor from '@/components/integrations/APIHealthMonitor';
+import APIRateLimits from '@/components/integrations/APIRateLimits';
+import APITestingTool from '@/components/integrations/APITestingTool';
 
 const Integrations = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -24,28 +28,32 @@ const Integrations = () => {
       title: 'API Access',
       description: 'Secure REST API with API key authentication',
       color: 'text-blue-500',
-      bgColor: 'bg-blue-500/10'
+      bgColor: 'bg-blue-500/10',
+      tab: 'api-keys'
     },
     {
       icon: Webhook,
       title: 'Webhooks',
       description: 'Real-time event notifications to your systems',
       color: 'text-purple-500',
-      bgColor: 'bg-purple-500/10'
+      bgColor: 'bg-purple-500/10',
+      tab: 'webhooks'
     },
     {
-      icon: Plug,
-      title: 'Pre-built Integrations',
-      description: 'Connect to UN OCHA, ACLED, GDELT and more',
+      icon: HeartPulse,
+      title: 'Health Monitoring',
+      description: 'Real-time API health and performance metrics',
       color: 'text-green-500',
-      bgColor: 'bg-green-500/10'
+      bgColor: 'bg-green-500/10',
+      tab: 'health'
     },
     {
-      icon: Shield,
-      title: 'CAP Protocol',
-      description: 'Common Alerting Protocol compliance',
+      icon: Gauge,
+      title: 'Rate Limiting',
+      description: 'Configure and monitor API rate limits',
       color: 'text-orange-500',
-      bgColor: 'bg-orange-500/10'
+      bgColor: 'bg-orange-500/10',
+      tab: 'rate-limits'
     }
   ];
 
@@ -106,7 +114,11 @@ const Integrations = () => {
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
         >
           {features.map((feature, index) => (
-            <Card key={index} className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer">
+            <Card 
+              key={index} 
+              className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer"
+              onClick={() => setActiveTab(feature.tab)}
+            >
               <CardContent className="pt-6">
                 <div className={`w-12 h-12 rounded-lg ${feature.bgColor} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
                   <feature.icon className={`w-6 h-6 ${feature.color}`} />
@@ -120,7 +132,7 @@ const Integrations = () => {
 
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid grid-cols-5 w-full max-w-2xl mx-auto">
+          <TabsList className="flex flex-wrap justify-center gap-1 h-auto p-1">
             <TabsTrigger value="overview" className="gap-2">
               <Activity className="w-4 h-4" />
               <span className="hidden sm:inline">Overview</span>
@@ -132,6 +144,18 @@ const Integrations = () => {
             <TabsTrigger value="webhooks" className="gap-2">
               <Webhook className="w-4 h-4" />
               <span className="hidden sm:inline">Webhooks</span>
+            </TabsTrigger>
+            <TabsTrigger value="health" className="gap-2">
+              <HeartPulse className="w-4 h-4" />
+              <span className="hidden sm:inline">Health</span>
+            </TabsTrigger>
+            <TabsTrigger value="rate-limits" className="gap-2">
+              <Gauge className="w-4 h-4" />
+              <span className="hidden sm:inline">Rate Limits</span>
+            </TabsTrigger>
+            <TabsTrigger value="testing" className="gap-2">
+              <TestTube className="w-4 h-4" />
+              <span className="hidden sm:inline">API Tester</span>
             </TabsTrigger>
             <TabsTrigger value="integrations" className="gap-2">
               <Plug className="w-4 h-4" />
@@ -155,7 +179,7 @@ const Integrations = () => {
                   <CardDescription>Get integrated in minutes</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                     <div className="flex flex-col items-center text-center p-4 rounded-lg bg-muted/50">
                       <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-3">
                         <span className="text-primary font-bold">1</span>
@@ -170,6 +194,16 @@ const Integrations = () => {
                       <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-3">
                         <span className="text-primary font-bold">2</span>
                       </div>
+                      <h4 className="font-medium mb-2">Test Your Setup</h4>
+                      <p className="text-sm text-muted-foreground">Use our API tester to verify connectivity</p>
+                      <Button variant="link" className="mt-2" onClick={() => setActiveTab('testing')}>
+                        Test API <ArrowRight className="w-4 h-4 ml-1" />
+                      </Button>
+                    </div>
+                    <div className="flex flex-col items-center text-center p-4 rounded-lg bg-muted/50">
+                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+                        <span className="text-primary font-bold">3</span>
+                      </div>
                       <h4 className="font-medium mb-2">Configure Webhooks</h4>
                       <p className="text-sm text-muted-foreground">Set up real-time event notifications</p>
                       <Button variant="link" className="mt-2" onClick={() => setActiveTab('webhooks')}>
@@ -178,12 +212,12 @@ const Integrations = () => {
                     </div>
                     <div className="flex flex-col items-center text-center p-4 rounded-lg bg-muted/50">
                       <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-3">
-                        <span className="text-primary font-bold">3</span>
+                        <span className="text-primary font-bold">4</span>
                       </div>
-                      <h4 className="font-medium mb-2">Start Integrating</h4>
-                      <p className="text-sm text-muted-foreground">Use our API to fetch data or receive alerts</p>
-                      <Button variant="link" className="mt-2" onClick={() => setActiveTab('docs')}>
-                        View Docs <ArrowRight className="w-4 h-4 ml-1" />
+                      <h4 className="font-medium mb-2">Monitor Health</h4>
+                      <p className="text-sm text-muted-foreground">Track API performance and uptime</p>
+                      <Button variant="link" className="mt-2" onClick={() => setActiveTab('health')}>
+                        View Health <ArrowRight className="w-4 h-4 ml-1" />
                       </Button>
                     </div>
                   </div>
@@ -251,6 +285,18 @@ const Integrations = () => {
 
           <TabsContent value="webhooks">
             <WebhooksManager />
+          </TabsContent>
+
+          <TabsContent value="health">
+            <APIHealthMonitor />
+          </TabsContent>
+
+          <TabsContent value="rate-limits">
+            <APIRateLimits />
+          </TabsContent>
+
+          <TabsContent value="testing">
+            <APITestingTool />
           </TabsContent>
 
           <TabsContent value="integrations">

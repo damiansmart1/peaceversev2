@@ -17,9 +17,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Key, Plus, Copy, Trash2, Eye, EyeOff, Calendar, Shield, AlertTriangle } from 'lucide-react';
+import { Key, Plus, Copy, Trash2, Eye, EyeOff, Calendar, Shield, AlertTriangle, RefreshCw, Activity, BarChart3 } from 'lucide-react';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
+import { format, differenceInDays } from 'date-fns';
 
 // Generate secure API key
 const generateApiKey = (): string => {
@@ -58,6 +58,8 @@ const APIKeysManager = () => {
   const [expiresIn, setExpiresIn] = useState('never');
   const [generatedKey, setGeneratedKey] = useState<string | null>(null);
   const [showKeys, setShowKeys] = useState<Record<string, boolean>>({});
+  const [rotatingKeyId, setRotatingKeyId] = useState<string | null>(null);
+  const [selectedKeyForStats, setSelectedKeyForStats] = useState<string | null>(null);
 
   const { data: apiKeys, isLoading } = useQuery({
     queryKey: ['api-keys'],
@@ -68,6 +70,35 @@ const APIKeysManager = () => {
         .order('created_at', { ascending: false });
       if (error) throw error;
       return data;
+    }
+  });
+
+  // Fetch usage statistics for API keys
+  const { data: keyUsageStats } = useQuery({
+    queryKey: ['api-key-usage-stats'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('api_usage_logs')
+        .select('api_key_id, response_status, created_at');
+      
+      const stats: Record<string, { total: number; success: number; lastUsed: string | null }> = {};
+      
+      data?.forEach((log: any) => {
+        if (log.api_key_id) {
+          if (!stats[log.api_key_id]) {
+            stats[log.api_key_id] = { total: 0, success: 0, lastUsed: null };
+          }
+          stats[log.api_key_id].total += 1;
+          if (log.response_status && log.response_status < 400) {
+            stats[log.api_key_id].success += 1;
+          }
+          if (!stats[log.api_key_id].lastUsed || log.created_at > stats[log.api_key_id].lastUsed) {
+            stats[log.api_key_id].lastUsed = log.created_at;
+          }
+        }
+      });
+      
+      return stats;
     }
   });
 
@@ -141,9 +172,55 @@ const APIKeysManager = () => {
     }
   });
 
+  // Key rotation mutation
+  const rotateKeyMutation = useMutation({
+    mutationFn: async (keyId: string) => {
+      const oldKey = apiKeys?.find((k: any) => k.id === keyId);
+      if (!oldKey) throw new Error('Key not found');
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const newApiKey = generateApiKey();
+      const newKeyHash = await hashApiKey(newApiKey);
+      const newKeyPrefix = newApiKey.substring(0, 8);
+
+      // Update the existing key with new hash
+      const { error } = await supabase
+        .from('api_keys')
+        .update({ 
+          key_hash: newKeyHash,
+          key_prefix: newKeyPrefix,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', keyId);
+
+      if (error) throw error;
+      return { keyId, newKey: newApiKey };
+    },
+    onSuccess: (data) => {
+      setGeneratedKey(data.newKey);
+      setRotatingKeyId(data.keyId);
+      queryClient.invalidateQueries({ queryKey: ['api-keys'] });
+      toast.success('API key rotated successfully');
+    },
+    onError: (error) => {
+      toast.error('Failed to rotate key: ' + error.message);
+    }
+  });
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast.success('Copied to clipboard');
+  };
+
+  const getExpirationWarning = (expiresAt: string | null) => {
+    if (!expiresAt) return null;
+    const daysUntilExpiry = differenceInDays(new Date(expiresAt), new Date());
+    if (daysUntilExpiry < 0) return { type: 'expired', message: 'Expired' };
+    if (daysUntilExpiry <= 7) return { type: 'critical', message: `Expires in ${daysUntilExpiry} days` };
+    if (daysUntilExpiry <= 30) return { type: 'warning', message: `Expires in ${daysUntilExpiry} days` };
+    return null;
   };
 
   const handleCreateKey = () => {
