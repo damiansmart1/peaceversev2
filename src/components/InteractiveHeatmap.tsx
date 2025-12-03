@@ -1,5 +1,5 @@
 /// <reference types="google.maps" />
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback, memo } from 'react';
 import { Loader } from '@googlemaps/js-api-loader';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,19 +23,56 @@ const SEVERITY_LEVELS = [
   { value: 'low', label: 'Low' },
 ];
 
+// Singleton loader instance to prevent multiple loads
+let loaderInstance: Loader | null = null;
+let isGoogleMapsLoaded = false;
+let loadPromise: Promise<typeof google> | null = null;
 
-const InteractiveHeatmap = () => {
+const getLoader = () => {
+  if (!loaderInstance && GOOGLE_MAPS_API_KEY) {
+    loaderInstance = new Loader({
+      apiKey: GOOGLE_MAPS_API_KEY,
+      version: 'weekly',
+      libraries: ['visualization', 'marker'],
+    });
+  }
+  return loaderInstance;
+};
+
+const loadGoogleMaps = async (): Promise<typeof google | null> => {
+  if (isGoogleMapsLoaded && window.google) {
+    return window.google;
+  }
+  
+  if (loadPromise) {
+    return loadPromise;
+  }
+  
+  const loader = getLoader();
+  if (!loader) return null;
+  
+  loadPromise = loader.load().then((google) => {
+    isGoogleMapsLoaded = true;
+    return google;
+  });
+  
+  return loadPromise;
+};
+
+const InteractiveHeatmap = memo(() => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
   const markersRef = useRef<google.maps.Marker[]>([]);
   const heatmapLayerRef = useRef<google.maps.visualization.HeatmapLayer | null>(null);
   const infoWindowRef = useRef<google.maps.InfoWindow | null>(null);
   const userMarkerRef = useRef<google.maps.Marker | null>(null);
+  const initAttemptedRef = useRef(false);
 
   const [selectedCountry, setSelectedCountry] = useState('all');
   const [selectedSeverity, setSelectedSeverity] = useState('all');
   const [selectedIncident, setSelectedIncident] = useState<HeatmapIncident | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [mapError, setMapError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'markers' | 'heatmap'>('markers');
 
   const { data: countriesByBlock, isLoading: countriesLoading } = useCountriesByBlock();
@@ -47,28 +84,24 @@ const InteractiveHeatmap = () => {
   
   const { userLocation, locationPermission } = useIncidentNotifications(50);
 
-  // Initialize Google Maps
+  // Initialize Google Maps - only once
   useEffect(() => {
-    if (!mapRef.current || mapLoaded) return;
+    if (!mapRef.current || initAttemptedRef.current || mapInstanceRef.current) return;
+    initAttemptedRef.current = true;
 
     if (!GOOGLE_MAPS_API_KEY) {
-      console.error('Google Maps API key is missing');
-      toast.error('Google Maps API key is not configured. Please add VITE_GOOGLE_MAPS_API_KEY to your environment variables.');
+      setMapError('Google Maps API key is not configured');
       return;
     }
 
-    const loader = new Loader({
-      apiKey: GOOGLE_MAPS_API_KEY,
-      version: 'weekly',
-      libraries: ['visualization', 'marker'],
-    });
+    let isMounted = true;
 
-    loader.load().then(() => {
-      if (!mapRef.current) return;
+    loadGoogleMaps().then((google) => {
+      if (!isMounted || !mapRef.current || !google) return;
 
       const map = new google.maps.Map(mapRef.current, {
-        center: { lat: -1.2921, lng: 36.8219 }, // Center on Kenya/COMESA region
-        zoom: 5,
+        center: { lat: 0, lng: 20 }, // Center on Africa
+        zoom: 4,
         minZoom: 3,
         maxZoom: 18,
         mapTypeId: 'roadmap',
@@ -76,6 +109,7 @@ const InteractiveHeatmap = () => {
         mapTypeControl: true,
         fullscreenControl: true,
         zoomControl: true,
+        gestureHandling: 'greedy',
         styles: [
           {
             featureType: 'poi',
@@ -93,49 +127,18 @@ const InteractiveHeatmap = () => {
         maxWidth: 320,
       });
       
-      // Add user location marker if available
-      if (userLocation) {
-        userMarkerRef.current = new google.maps.Marker({
-          position: { lat: userLocation.latitude, lng: userLocation.longitude },
-          map: map,
-          title: 'Your Location',
-          icon: {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 8,
-            fillColor: '#4F46E5',
-            fillOpacity: 1,
-            strokeColor: '#ffffff',
-            strokeWeight: 2,
-          },
-          zIndex: 1000,
-        });
-
-        const userInfoWindow = new google.maps.InfoWindow({
-          content: `
-            <div style="padding: 12px;">
-              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-                <span style="font-size: 18px;">📍</span>
-                <strong style="color: #4F46E5;">Your Location</strong>
-              </div>
-              <p style="color: #666; font-size: 14px; margin: 0;">
-                Monitoring critical incidents within 50km radius
-              </p>
-            </div>
-          `,
-        });
-
-        userMarkerRef.current.addListener('click', () => {
-          userInfoWindow.open(map, userMarkerRef.current);
-        });
-      }
-      
       setMapLoaded(true);
-      toast.success('Interactive map loaded successfully');
     }).catch(error => {
+      if (!isMounted) return;
       console.error('Error loading Google Maps:', error);
+      setMapError('Failed to load map');
       toast.error('Failed to load map. Please check your API key configuration.');
     });
-  }, [mapLoaded, userLocation]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
   
   // Update user location marker when location changes
   useEffect(() => {
@@ -377,17 +380,17 @@ const InteractiveHeatmap = () => {
 
   const totalAffected = incidents?.reduce((sum, incident) => sum + (incident.affected_population || 0), 0) || 0;
 
-  if (isLoading && !mapLoaded) {
+  if (isLoading && !mapLoaded && !mapError) {
     return <LoadingSpinner />;
   }
 
-  if (!GOOGLE_MAPS_API_KEY) {
+  if (mapError || !GOOGLE_MAPS_API_KEY) {
     return (
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-destructive">
             <AlertTriangle className="w-5 h-5" />
-            Google Maps API Key Required
+            {mapError || 'Google Maps API Key Required'}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -689,6 +692,6 @@ const InteractiveHeatmap = () => {
       </Card>
     </div>
   );
-};
+});
 
 export default InteractiveHeatmap;
