@@ -5,8 +5,13 @@ import { AlertTriangle, TrendingUp, Bell, Network, Users, Shield, Activity } fro
 import RiskDashboard from '@/components/early-warning/RiskDashboard';
 import PredictiveHotspotMap from '@/components/early-warning/PredictiveHotspotMap';
 import AlertSystem from '@/components/early-warning/AlertSystem';
+import LiveActivityFeed from '@/components/LiveActivityFeed';
+import { useRealtimeAlerts } from '@/hooks/useRealtimeAlerts';
 
 const EarlyWarningDashboard = () => {
+  // Activate real-time alerts subscription
+  const { activeAlerts } = useRealtimeAlerts();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background">
       <Navigation />
@@ -79,44 +84,50 @@ const EarlyWarningDashboard = () => {
             </TabsContent>
           </Tabs>
 
-          {/* System Status Card */}
-          <Card className="p-6 bg-card/80 backdrop-blur-sm border-border shadow-lg overflow-hidden relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-secondary/5" />
-            
-            <div className="relative">
-              <div className="flex items-center gap-2 mb-6">
-                <Activity className="w-5 h-5 text-primary" />
-                <h3 className="text-lg font-semibold text-foreground">System Status</h3>
-              </div>
-              
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <StatusItem
-                  icon={Network}
-                  title="AI Analysis"
-                  status="Operational"
-                  color="success"
-                />
-                <StatusItem
-                  icon={TrendingUp}
-                  title="Prediction Engine"
-                  status="Active"
-                  color="success"
-                />
-                <StatusItem
-                  icon={Bell}
-                  title="Alert System"
-                  status="Monitoring"
-                  color="warning"
-                />
-                <StatusItem
-                  icon={Users}
-                  title="Response Teams"
-                  status="Ready"
-                  color="success"
-                />
-              </div>
+          {/* Live Activity Feed & System Status Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <LiveActivityFeed />
             </div>
-          </Card>
+            
+            {/* System Status Card */}
+            <Card className="p-6 bg-card/80 backdrop-blur-sm border-border shadow-lg overflow-hidden relative h-fit">
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-secondary/5" />
+              <div className="relative">
+                <div className="flex items-center gap-2 mb-6">
+                  <Activity className="w-5 h-5 text-primary" />
+                  <h3 className="text-lg font-semibold text-foreground">System Status</h3>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <StatusItem
+                    icon={Network}
+                    title="AI Analysis"
+                    status="Operational"
+                    color="success"
+                  />
+                  <StatusItem
+                    icon={TrendingUp}
+                    title="Prediction"
+                    status="Active"
+                    color="success"
+                  />
+                  <StatusItem
+                    icon={Bell}
+                    title="Alerts"
+                    status={`${activeAlerts.length} Active`}
+                    color={activeAlerts.length > 0 ? "warning" : "success"}
+                  />
+                  <StatusItem
+                    icon={Users}
+                    title="Response"
+                    status="Ready"
+                    color="success"
+                  />
+                </div>
+              </div>
+            </Card>
+          </div>
         </div>
       </div>
     </div>
