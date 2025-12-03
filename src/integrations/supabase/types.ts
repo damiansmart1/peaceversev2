@@ -1553,6 +1553,145 @@ export type Database = {
         }
         Relationships: []
       }
+      poll_analytics: {
+        Row: {
+          created_at: string | null
+          event_type: string
+          id: string
+          metadata: Json | null
+          poll_id: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          poll_id: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          poll_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_analytics_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      poll_responses: {
+        Row: {
+          comment: string | null
+          created_at: string | null
+          id: string
+          ip_hash: string | null
+          is_anonymous: boolean | null
+          poll_id: string
+          rating_value: number | null
+          selected_options: number[]
+          user_id: string | null
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string | null
+          id?: string
+          ip_hash?: string | null
+          is_anonymous?: boolean | null
+          poll_id: string
+          rating_value?: number | null
+          selected_options: number[]
+          user_id?: string | null
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string | null
+          id?: string
+          ip_hash?: string | null
+          is_anonymous?: boolean | null
+          poll_id?: string
+          rating_value?: number | null
+          selected_options?: number[]
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_responses_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      polls: {
+        Row: {
+          category: string
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          ends_at: string | null
+          id: string
+          is_active: boolean | null
+          is_featured: boolean | null
+          options: Json
+          poll_type: string
+          settings: Json | null
+          starts_at: string | null
+          title: string
+          total_participants: number | null
+          total_votes: number | null
+          updated_at: string | null
+          visibility: string | null
+        }
+        Insert: {
+          category?: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          options?: Json
+          poll_type?: string
+          settings?: Json | null
+          starts_at?: string | null
+          title: string
+          total_participants?: number | null
+          total_votes?: number | null
+          updated_at?: string | null
+          visibility?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          options?: Json
+          poll_type?: string
+          settings?: Json | null
+          starts_at?: string | null
+          title?: string
+          total_participants?: number | null
+          total_votes?: number | null
+          updated_at?: string | null
+          visibility?: string | null
+        }
+        Relationships: []
+      }
       predictive_hotspots: {
         Row: {
           ai_model_used: string | null
