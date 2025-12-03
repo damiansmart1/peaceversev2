@@ -6,27 +6,36 @@ import { Bell, Check, CheckCircle2, Info, FileCheck, FileX } from 'lucide-react'
 import { useNotifications, useMarkNotificationRead, useMarkAllNotificationsRead } from '@/hooks/useNotifications';
 import { formatDistanceToNow } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
+import { Trophy, Target, Gift, TrendingUp, AlertCircle } from 'lucide-react';
+
 const iconMap: Record<string, any> = {
   report_status: Info,
   verification: FileCheck,
-  incident: Bell,
-  achievement: CheckCircle2,
+  incident: AlertCircle,
+  achievement: Trophy,
+  gamification: Target,
   content_approved: FileCheck,
   content_rejected: FileX,
   proposal_approved: CheckCircle2,
   proposal_rejected: FileX,
-  system: Info
+  system: Bell,
+  reward: Gift,
+  level_up: TrendingUp
 };
+
 const colorMap: Record<string, string> = {
-  report_status: 'text-blue-500',
-  verification: 'text-purple-500',
-  incident: 'text-red-500',
-  achievement: 'text-green-500',
-  content_approved: 'text-green-500',
-  content_rejected: 'text-red-500',
-  proposal_approved: 'text-green-500',
-  proposal_rejected: 'text-red-500',
-  system: 'text-blue-500'
+  report_status: 'text-primary',
+  verification: 'text-secondary',
+  incident: 'text-destructive',
+  achievement: 'text-accent',
+  gamification: 'text-accent',
+  content_approved: 'text-secondary',
+  content_rejected: 'text-destructive',
+  proposal_approved: 'text-secondary',
+  proposal_rejected: 'text-destructive',
+  system: 'text-primary',
+  reward: 'text-accent',
+  level_up: 'text-accent'
 };
 export default function NotificationCenter() {
   const navigate = useNavigate();
@@ -56,12 +65,14 @@ export default function NotificationCenter() {
       navigate('/verification');
     } else if (type === 'report_status') {
       navigate('/incidents');
-    } else if (type === 'achievement') {
+    } else if (type === 'achievement' || type === 'gamification' || type === 'reward' || type === 'level_up') {
       navigate('/profile');
     } else if (type.includes('proposal')) {
       navigate('/proposals');
     } else if (type.includes('content')) {
       navigate('/community');
+    } else {
+      // Default: stay on current page
     }
   };
   return <Sheet>
