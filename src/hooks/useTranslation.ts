@@ -592,7 +592,6 @@ export const translations: Record<Language, Record<string, string>> = {
     'incidents.timelineComingSoon': 'Timeline view coming soon - chronological incident tracking',
     
     // Community - Extended keys
-    'community.subtitle': 'Connect with safe spaces, join events, share stories, and engage in challenges',
     'community.bannerAlt': 'Diverse African community members coming together in unity for peacebuilding',
     'community.challengesBannerAlt': 'African community members working together on peacebuilding challenges',
     'community.radioBannerAlt': 'African youth participating in community radio broadcasting',
