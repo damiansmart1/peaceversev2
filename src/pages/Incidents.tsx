@@ -10,9 +10,11 @@ import { useIncidentNotifications } from '@/hooks/useIncidentNotifications';
 import SectionImageBanner from '@/components/SectionImageBanner';
 import Navigation from '@/components/Navigation';
 import { AlertTriangle } from 'lucide-react';
+import { useTranslationContext } from '@/components/TranslationProvider';
 import incidentReporting from "@/assets/incident-reporting.jpg";
 
 export default function Incidents() {
+  const { t } = useTranslationContext();
   const { locationPermission } = useIncidentNotifications(50);
   const [activeTab, setActiveTab] = useState('tracking');
 
@@ -22,9 +24,9 @@ export default function Incidents() {
       <div className="container mx-auto px-4 py-20 md:py-24">
         <SectionImageBanner
           image={incidentReporting}
-          alt="Map of Africa with incident reporting and early warning system visualization"
-          title="Incident Hub"
-          subtitle="Report incidents, track real-time monitoring, and view early warning visualizations"
+          alt={t('incidents.bannerAlt')}
+          title={t('incidents.title')}
+          subtitle={t('incidents.subtitle')}
           className="h-96 mb-8"
         />
         
@@ -36,12 +38,12 @@ export default function Incidents() {
               className="gap-2 w-full sm:w-auto"
             >
               <AlertTriangle className="h-5 w-5" />
-              <span className="whitespace-nowrap">Submit Report</span>
+              <span className="whitespace-nowrap">{t('incidents.submitReport')}</span>
             </Button>
           </div>
           {locationPermission === 'denied' && (
             <p className="text-xs md:text-sm text-amber-600 dark:text-amber-400 mt-2">
-              Enable location permissions to receive alerts for nearby critical incidents
+              {t('incidents.locationWarning')}
             </p>
           )}
         </div>
@@ -51,18 +53,18 @@ export default function Incidents() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6 md:mt-8">
           <TabsList className="grid w-full max-w-3xl grid-cols-4 h-auto">
             <TabsTrigger value="tracking" className="text-xs sm:text-sm py-2 px-2">
-              <span className="hidden sm:inline">Tracking & Map</span>
-              <span className="sm:hidden">Map</span>
+              <span className="hidden sm:inline">{t('incidents.tabs.trackingMap')}</span>
+              <span className="sm:hidden">{t('incidents.tabs.map')}</span>
             </TabsTrigger>
             <TabsTrigger value="myreports" className="text-xs sm:text-sm py-2 px-2">
-              <span className="hidden sm:inline">My Reports</span>
-              <span className="sm:hidden">Reports</span>
+              <span className="hidden sm:inline">{t('incidents.tabs.myReports')}</span>
+              <span className="sm:hidden">{t('incidents.tabs.reports')}</span>
             </TabsTrigger>
             <TabsTrigger value="report" className="text-xs sm:text-sm py-2 px-2">
-              <span className="hidden sm:inline">Submit Report</span>
-              <span className="sm:hidden">Submit</span>
+              <span className="hidden sm:inline">{t('incidents.tabs.submitReport')}</span>
+              <span className="sm:hidden">{t('incidents.tabs.submit')}</span>
             </TabsTrigger>
-            <TabsTrigger value="timeline" className="text-xs sm:text-sm py-2 px-2">Timeline</TabsTrigger>
+            <TabsTrigger value="timeline" className="text-xs sm:text-sm py-2 px-2">{t('incidents.tabs.timeline')}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="tracking" className="mt-6">
@@ -82,7 +84,7 @@ export default function Incidents() {
           <TabsContent value="timeline" className="mt-6">
             <Card className="p-6">
               <p className="text-muted-foreground text-center py-8">
-                Timeline view coming soon - chronological incident tracking
+                {t('incidents.timelineComingSoon')}
               </p>
             </Card>
           </TabsContent>

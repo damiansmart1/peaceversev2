@@ -29,15 +29,15 @@ const Voice = () => {
           <TabsList className="grid w-full grid-cols-3 mb-8">
             <TabsTrigger value="share" className="gap-2">
               <Upload className="w-4 h-4" />
-              Share Story
+              {t('voice.tabs.share')}
             </TabsTrigger>
             <TabsTrigger value="browse" className="gap-2">
               <Library className="w-4 h-4" />
-              Browse Stories
+              {t('voice.tabs.browse')}
             </TabsTrigger>
             <TabsTrigger value="featured" className="gap-2">
               <TrendingUp className="w-4 h-4" />
-              Featured
+              {t('voice.tabs.featured')}
             </TabsTrigger>
           </TabsList>
 

@@ -16,9 +16,9 @@ const About = () => {
       <Navigation />
       <div className="container mx-auto px-4 py-24">
         <SectionHeader
-          badge="About Us"
-          title="Building a Peaceful Future Together"
-          subtitle="Learn about our mission, team, impact, and the supporters making this possible"
+          badge={t('about.badge')}
+          title={t('about.title')}
+          subtitle={t('about.subtitle')}
           icon={<Heart className="w-4 h-4" />}
         />
         
@@ -26,19 +26,19 @@ const About = () => {
           <TabsList className="grid w-full grid-cols-4 mb-8">
             <TabsTrigger value="mission" className="gap-2">
               <Heart className="w-4 h-4" />
-              Mission
+              {t('about.tabs.mission')}
             </TabsTrigger>
             <TabsTrigger value="impact" className="gap-2">
               <BarChart className="w-4 h-4" />
-              Impact
+              {t('about.tabs.impact')}
             </TabsTrigger>
             <TabsTrigger value="accessibility" className="gap-2">
               <Accessibility className="w-4 h-4" />
-              Accessibility
+              {t('common.accessibility')}
             </TabsTrigger>
             <TabsTrigger value="supporters" className="gap-2">
               <Gift className="w-4 h-4" />
-              Supporters
+              {t('about.tabs.supporters')}
             </TabsTrigger>
           </TabsList>
 

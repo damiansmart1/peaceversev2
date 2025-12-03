@@ -32,9 +32,9 @@ const Community = () => {
         <div className="mb-12">
           <SectionImageBanner
             image={communityUnity}
-            alt="Diverse African community members coming together in unity for peacebuilding"
-            title="Community Hub"
-            subtitle="Connect with safe spaces, join events, share stories, and engage in challenges"
+            alt={t('community.bannerAlt')}
+            title={t('community.title')}
+            subtitle={t('community.subtitle')}
             className="h-96 mb-8"
           />
         </div>
@@ -43,31 +43,31 @@ const Community = () => {
           <TabsList className="grid w-full grid-cols-7 mb-8">
             <TabsTrigger value="map" className="flex items-center gap-2">
               <Map className="w-4 h-4" />
-              Safe Spaces
+              {t('community.tabs.safeSpaces')}
             </TabsTrigger>
             <TabsTrigger value="events" className="flex items-center gap-2">
               <Calendar className="w-4 h-4" />
-              Events
+              {t('community.tabs.events')}
             </TabsTrigger>
             <TabsTrigger value="stories" className="flex items-center gap-2">
               <MessageSquare className="w-4 h-4" />
-              Stories
+              {t('community.tabs.stories')}
             </TabsTrigger>
             <TabsTrigger value="challenges" className="flex items-center gap-2">
               <Award className="w-4 h-4" />
-              Challenges
+              {t('community.tabs.challenges')}
             </TabsTrigger>
             <TabsTrigger value="radio" className="flex items-center gap-2">
               <RadioIcon className="w-4 h-4" />
-              Peace Radio
+              {t('community.tabs.radio')}
             </TabsTrigger>
             <TabsTrigger value="voice" className="flex items-center gap-2">
               <Mic className="w-4 h-4" />
-              Voice Stories
+              {t('community.tabs.voiceStories')}
             </TabsTrigger>
             <TabsTrigger value="resources" className="flex items-center gap-2">
               <BookOpen className="w-4 h-4" />
-              Resources
+              {t('community.tabs.resources')}
             </TabsTrigger>
           </TabsList>
           
@@ -86,7 +86,7 @@ const Community = () => {
           <TabsContent value="challenges" className="space-y-8">
             <SectionImageBanner
               image={challengesCollaboration}
-              alt="African community members working together on peacebuilding challenges"
+              alt={t('community.challengesBannerAlt')}
               className="h-72 mb-6"
             />
             <PeacebuildingChallenges />
@@ -96,14 +96,14 @@ const Community = () => {
           <TabsContent value="radio" className="space-y-8">
             <SectionImageBanner
               image={radioBroadcasting}
-              alt="African youth participating in community radio broadcasting"
+              alt={t('community.radioBannerAlt')}
               className="h-72 mb-6"
             />
             <Tabs defaultValue="live" className="w-full">
               <TabsList className="grid w-full grid-cols-3 mb-8">
-                <TabsTrigger value="live">Live Radio</TabsTrigger>
-                <TabsTrigger value="schedule">Schedule</TabsTrigger>
-                <TabsTrigger value="accessibility">Accessibility</TabsTrigger>
+                <TabsTrigger value="live">{t('community.radio.live')}</TabsTrigger>
+                <TabsTrigger value="schedule">{t('community.radio.schedule')}</TabsTrigger>
+                <TabsTrigger value="accessibility">{t('common.accessibility')}</TabsTrigger>
               </TabsList>
               <TabsContent value="live" className="space-y-8">
                 <FunctionalRadio />
@@ -120,9 +120,9 @@ const Community = () => {
           <TabsContent value="voice" className="space-y-8">
             <Tabs defaultValue="share" className="w-full">
               <TabsList className="grid w-full grid-cols-3 mb-8">
-                <TabsTrigger value="share">Share Story</TabsTrigger>
-                <TabsTrigger value="browse">Browse Stories</TabsTrigger>
-                <TabsTrigger value="featured">Featured</TabsTrigger>
+                <TabsTrigger value="share">{t('community.voice.shareStory')}</TabsTrigger>
+                <TabsTrigger value="browse">{t('community.voice.browseStories')}</TabsTrigger>
+                <TabsTrigger value="featured">{t('community.voice.featured')}</TabsTrigger>
               </TabsList>
               <TabsContent value="share" className="space-y-12">
                 <VoiceRecorder />
@@ -146,7 +146,7 @@ const Community = () => {
           </TabsContent>
 
           <TabsContent value="resources" className="space-y-4 text-center py-12">
-            <p className="text-muted-foreground">Community resources coming soon</p>
+            <p className="text-muted-foreground">{t('community.resourcesComingSoon')}</p>
           </TabsContent>
         </Tabs>
       </div>
