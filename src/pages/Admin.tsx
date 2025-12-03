@@ -15,6 +15,7 @@ import { AdminSponsorsManager } from '@/components/admin/AdminSponsorsManager';
 import { AdminIncidentsManager } from '@/components/admin/AdminIncidentsManager';
 import { AdminAIAnalytics } from '@/components/admin/AdminAIAnalytics';
 import { AdminAPIUsageAnalytics } from '@/components/admin/AdminAPIUsageAnalytics';
+import { AdminIntegrationsManager } from '@/components/admin/AdminIntegrationsManager';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { RoleManagement } from '@/components/admin/RoleManagement';
 import AdminPeaceMetricsManager from '@/components/admin/AdminPeaceMetricsManager';
@@ -72,6 +73,8 @@ const Admin = () => {
         return <AdminAIAnalytics />;
       case 'api-analytics':
         return <AdminAPIUsageAnalytics />;
+      case 'integrations':
+        return <AdminIntegrationsManager />;
       case 'peace-metrics':
         return <AdminPeaceMetricsManager />;
       case 'settings':
