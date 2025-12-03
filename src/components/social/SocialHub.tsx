@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslationContext } from '@/components/TranslationProvider';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,8 +24,25 @@ import { Link } from 'react-router-dom';
 export const SocialHub = () => {
   const { user, isAnonymous } = useAuth();
   const { t } = useTranslationContext();
+  const { data: profile } = useUserProfile();
   const [activeTab, setActiveTab] = useState('feed');
   const [showContentCreator, setShowContentCreator] = useState(false);
+
+  // Extract first name from display_name or email
+  const getFirstName = () => {
+    if (profile?.display_name) {
+      return profile.display_name.split(' ')[0];
+    }
+    if (user?.user_metadata?.first_name) {
+      return user.user_metadata.first_name;
+    }
+    if (user?.email) {
+      return user.email.split('@')[0];
+    }
+    return 'there';
+  };
+
+  const firstName = getFirstName();
 
   if (!user || isAnonymous) {
     return (
@@ -51,7 +69,9 @@ export const SocialHub = () => {
           <CardContent className="p-6">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
               <div>
-                <h2 className="text-2xl font-bold mb-1">Welcome to Peaceverse Social</h2>
+                <h2 className="text-2xl font-bold mb-1">
+                  Welcome back, <span className="text-primary">{firstName}</span>! 👋
+                </h2>
                 <p className="text-muted-foreground">Connect, share, and earn with our community</p>
               </div>
               <div className="flex gap-2">
