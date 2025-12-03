@@ -635,6 +635,11 @@ export const translations: Record<Language, Record<string, string>> = {
     'auth.accountCreated': 'Account created successfully. You can now sign in.',
     'auth.welcomeBack': 'Welcome Back!',
     'auth.signedIn': 'You have successfully signed in.',
+    'auth.or': 'or',
+    'auth.continueAsGuest': 'Continue as Guest',
+    'auth.welcomeGuest': 'Welcome, Guest!',
+    'auth.guestSignedIn': 'You are browsing anonymously. Your privacy is protected.',
+    'auth.guestPrivacyNote': 'Guest sessions are anonymous and your data is protected.',
     
     // Radio - Tabs
     'radio.tabs.live': 'Live Radio',
