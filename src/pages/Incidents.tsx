@@ -19,6 +19,13 @@ export default function Incidents() {
   const { locationPermission } = useIncidentNotifications(50);
   const [activeTab, setActiveTab] = useState('tracking');
 
+  const handleSubmitReport = () => {
+    setActiveTab('report');
+    setTimeout(() => {
+      document.getElementById('report-form-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -34,7 +41,7 @@ export default function Incidents() {
         <div className="mb-6 md:mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <Button 
-              onClick={() => setActiveTab('report')}
+              onClick={handleSubmitReport}
               size="lg"
               className="gap-2 w-full sm:w-auto"
             >
@@ -78,7 +85,7 @@ export default function Incidents() {
             <ReportTracker />
           </TabsContent>
 
-          <TabsContent value="report" className="mt-6">
+          <TabsContent value="report" className="mt-6" id="report-form-section">
             <ReportSubmissionForm />
           </TabsContent>
 
