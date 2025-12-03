@@ -1330,6 +1330,51 @@ export type Database = {
         }
         Relationships: []
       }
+      safe_spaces: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_archived: boolean | null
+          latitude: number | null
+          location_name: string
+          longitude: number | null
+          name: string
+          space_type: string
+          updated_at: string
+          verified: boolean | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_archived?: boolean | null
+          latitude?: number | null
+          location_name: string
+          longitude?: number | null
+          name: string
+          space_type?: string
+          updated_at?: string
+          verified?: boolean | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_archived?: boolean | null
+          latitude?: number | null
+          location_name?: string
+          longitude?: number | null
+          name?: string
+          space_type?: string
+          updated_at?: string
+          verified?: boolean | null
+        }
+        Relationships: []
+      }
       scenario_models: {
         Row: {
           ai_model_used: string | null
