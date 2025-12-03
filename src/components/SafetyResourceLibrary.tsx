@@ -12,58 +12,60 @@ import {
   Search 
 } from 'lucide-react';
 import { useState } from 'react';
-
-const resources = [
-  {
-    id: '1',
-    title: 'Digital Safety Guide for Youth',
-    description: 'Complete guide on staying safe online and protecting your privacy',
-    type: 'PDF',
-    icon: FileText,
-    category: 'Safety',
-    downloads: 1234,
-    language: 'English',
-  },
-  {
-    id: '2',
-    title: 'Conflict Resolution Workshop',
-    description: 'Video series on peaceful conflict resolution techniques',
-    type: 'Video',
-    icon: Video,
-    category: 'Training',
-    downloads: 856,
-    language: 'Multi',
-  },
-  {
-    id: '3',
-    title: 'Mental Health Support Podcast',
-    description: 'Weekly podcast discussing mental health and wellbeing',
-    type: 'Audio',
-    icon: Headphones,
-    category: 'Wellness',
-    downloads: 2341,
-    language: 'Swahili',
-  },
-  {
-    id: '4',
-    title: 'Community Guidelines Handbook',
-    description: 'Detailed handbook on platform rules and community standards',
-    type: 'PDF',
-    icon: FileText,
-    category: 'Guidelines',
-    downloads: 3421,
-    language: 'English',
-  },
-];
-
-const typeColors: Record<string, string> = {
-  PDF: 'bg-red-500/10 text-red-500',
-  Video: 'bg-blue-500/10 text-blue-500',
-  Audio: 'bg-purple-500/10 text-purple-500',
-};
+import { useTranslationContext } from './TranslationProvider';
 
 export const SafetyResourceLibrary = () => {
   const [search, setSearch] = useState('');
+  const { t } = useTranslationContext();
+
+  const resources = [
+    {
+      id: '1',
+      title: t('safety.library.resource1.title'),
+      description: t('safety.library.resource1.description'),
+      type: 'PDF',
+      icon: FileText,
+      category: t('safety.library.category.safety'),
+      downloads: 1234,
+      language: t('safety.library.language.english'),
+    },
+    {
+      id: '2',
+      title: t('safety.library.resource2.title'),
+      description: t('safety.library.resource2.description'),
+      type: 'Video',
+      icon: Video,
+      category: t('safety.library.category.training'),
+      downloads: 856,
+      language: t('safety.library.language.multi'),
+    },
+    {
+      id: '3',
+      title: t('safety.library.resource3.title'),
+      description: t('safety.library.resource3.description'),
+      type: 'Audio',
+      icon: Headphones,
+      category: t('safety.library.category.wellness'),
+      downloads: 2341,
+      language: t('safety.library.language.swahili'),
+    },
+    {
+      id: '4',
+      title: t('safety.library.resource4.title'),
+      description: t('safety.library.resource4.description'),
+      type: 'PDF',
+      icon: FileText,
+      category: t('safety.library.category.guidelines'),
+      downloads: 3421,
+      language: t('safety.library.language.english'),
+    },
+  ];
+
+  const typeColors: Record<string, string> = {
+    PDF: 'bg-red-500/10 text-red-500',
+    Video: 'bg-blue-500/10 text-blue-500',
+    Audio: 'bg-purple-500/10 text-purple-500',
+  };
 
   return (
     <Card className="p-6">
@@ -71,14 +73,14 @@ export const SafetyResourceLibrary = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <BookOpen className="w-6 h-6 text-primary" />
-            <h2 className="text-2xl font-bold text-foreground">Resource Library</h2>
+            <h2 className="text-2xl font-bold text-foreground">{t('safety.library.title')}</h2>
           </div>
         </div>
 
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Search resources..."
+            placeholder={t('safety.library.searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-10"
@@ -111,7 +113,7 @@ export const SafetyResourceLibrary = () => {
                       <div className="flex gap-2 text-xs text-muted-foreground">
                         <Badge variant="secondary">{resource.category}</Badge>
                         <span>•</span>
-                        <span>{resource.downloads} downloads</span>
+                        <span>{resource.downloads} {t('safety.library.downloads')}</span>
                         <span>•</span>
                         <span>{resource.language}</span>
                       </div>
