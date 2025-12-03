@@ -100,7 +100,7 @@ const Admin = () => {
             <div className="flex items-center gap-3">
               <Shield className="h-6 w-6 text-gold animate-pulse" />
               <h1 className="text-2xl font-bold bg-gradient-to-r from-gold to-gold-light bg-clip-text text-transparent">
-                {activeSection.charAt(0).toUpperCase() + activeSection.slice(1).replace(/-/g, ' ')}
+                {activeSection === 'dashboard' ? 'Dashboard' : activeSection.charAt(0).toUpperCase() + activeSection.slice(1).replace(/-/g, ' ')}
               </h1>
             </div>
           </header>
