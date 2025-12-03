@@ -12,9 +12,9 @@ const Verification = () => {
       <Navigation />
       <div className="container mx-auto px-4 py-24">
         <SectionHeader
-          badge="Verification"
-          title="Content Verification"
-          subtitle="Review and verify community-submitted content"
+          badge={t('verification.badge')}
+          title={t('verification.title')}
+          subtitle={t('verification.subtitle')}
           icon={<CheckCircle className="w-4 h-4" />}
         />
         

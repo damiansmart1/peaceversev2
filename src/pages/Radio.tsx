@@ -25,15 +25,15 @@ const Radio = () => {
           <TabsList className="grid w-full grid-cols-3 mb-8">
             <TabsTrigger value="live" className="gap-2">
               <Waves className="w-4 h-4" />
-              Live Radio
+              {t('radio.tabs.live')}
             </TabsTrigger>
             <TabsTrigger value="schedule" className="gap-2">
               <Calendar className="w-4 h-4" />
-              Schedule
+              {t('radio.tabs.schedule')}
             </TabsTrigger>
             <TabsTrigger value="accessibility" className="gap-2">
               <Settings className="w-4 h-4" />
-              Accessibility
+              {t('common.accessibility')}
             </TabsTrigger>
           </TabsList>
 

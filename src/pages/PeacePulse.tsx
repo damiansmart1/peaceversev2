@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Activity, TrendingUp, AlertTriangle, BarChart3, Globe, MapPin } from 'lucide-react';
 import { usePeacePulseMetrics, useAccountabilityMetrics } from '@/hooks/usePeaceMetrics';
+import { useTranslationContext } from '@/components/TranslationProvider';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { PeacePulseCharts } from '@/components/PeacePulseCharts';
 import InteractiveHeatmap from '@/components/InteractiveHeatmap';
@@ -25,6 +26,7 @@ const COMESA_COUNTRIES = [
 ];
 
 const PeacePulse = () => {
+  const { t } = useTranslationContext();
   const [selectedCountry, setSelectedCountry] = useState('all');
   
   const { data: pulseMetrics, isLoading: pulseLoading } = usePeacePulseMetrics(
@@ -52,9 +54,9 @@ const PeacePulse = () => {
       <Navigation />
       <div className="container mx-auto px-4 py-24">
         <SectionHeader
-          badge="Live Insights"
-          title="PeacePulse Dashboard"
-          subtitle="Real-time peace intelligence across COMESA region"
+          badge={t('peacePulse.badge')}
+          title={t('peacePulse.title')}
+          subtitle={t('peacePulse.subtitle')}
           icon={<Activity className="w-4 h-4" />}
         />
 
@@ -80,11 +82,11 @@ const PeacePulse = () => {
           ) : (
             <Tabs defaultValue="overview" className="space-y-6">
               <TabsList className="grid w-full grid-cols-5">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="heatmap">Heatmap</TabsTrigger>
-                <TabsTrigger value="sentiment">Sentiment</TabsTrigger>
-                <TabsTrigger value="accountability">Accountability</TabsTrigger>
-                <TabsTrigger value="trends">Trends</TabsTrigger>
+                <TabsTrigger value="overview">{t('peacePulse.tabs.overview')}</TabsTrigger>
+                <TabsTrigger value="heatmap">{t('peacePulse.tabs.heatmap')}</TabsTrigger>
+                <TabsTrigger value="sentiment">{t('peacePulse.tabs.sentiment')}</TabsTrigger>
+                <TabsTrigger value="accountability">{t('peacePulse.tabs.accountability')}</TabsTrigger>
+                <TabsTrigger value="trends">{t('peacePulse.tabs.trends')}</TabsTrigger>
               </TabsList>
 
               <TabsContent value="overview" className="space-y-6">
@@ -93,12 +95,12 @@ const PeacePulse = () => {
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm font-medium flex items-center gap-2">
                         <Activity className="w-4 h-4" />
-                        Activity Level
+                        {t('peacePulse.activityLevel')}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">{latestMetrics?.activity_count || 0}</div>
-                      <p className="text-xs text-muted-foreground mt-1">Reports today</p>
+                      <p className="text-xs text-muted-foreground mt-1">{t('peacePulse.reportsToday')}</p>
                     </CardContent>
                   </Card>
 
@@ -106,7 +108,7 @@ const PeacePulse = () => {
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm font-medium flex items-center gap-2">
                         <TrendingUp className="w-4 h-4" />
-                        Sentiment
+                        {t('peacePulse.sentiment')}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -114,7 +116,7 @@ const PeacePulse = () => {
                         {latestMetrics?.sentiment_average ? 
                           (latestMetrics.sentiment_average * 100).toFixed(0) : 'N/A'}
                       </div>
-                      <p className="text-xs text-muted-foreground mt-1">Peace index score</p>
+                      <p className="text-xs text-muted-foreground mt-1">{t('peacePulse.peaceIndex')}</p>
                     </CardContent>
                   </Card>
 
@@ -122,14 +124,14 @@ const PeacePulse = () => {
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm font-medium flex items-center gap-2">
                         <AlertTriangle className="w-4 h-4" />
-                        Tension Level
+                        {t('peacePulse.tensionLevel')}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className={`text-2xl font-bold capitalize ${getTensionColor(latestMetrics?.tension_level)}`}>
-                        {latestMetrics?.tension_level || 'Unknown'}
+                        {latestMetrics?.tension_level || t('common.unknown')}
                       </div>
-                      <p className="text-xs text-muted-foreground mt-1">Current status</p>
+                      <p className="text-xs text-muted-foreground mt-1">{t('peacePulse.currentStatus')}</p>
                     </CardContent>
                   </Card>
 
@@ -137,7 +139,7 @@ const PeacePulse = () => {
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm font-medium flex items-center gap-2">
                         <BarChart3 className="w-4 h-4" />
-                        Risk Score
+                        {t('peacePulse.riskScore')}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -145,15 +147,15 @@ const PeacePulse = () => {
                         {latestMetrics?.risk_score ? 
                           (latestMetrics.risk_score * 100).toFixed(0) : 'N/A'}
                       </div>
-                      <p className="text-xs text-muted-foreground mt-1">Conflict probability</p>
+                      <p className="text-xs text-muted-foreground mt-1">{t('peacePulse.conflictProbability')}</p>
                     </CardContent>
                   </Card>
                 </div>
 
                 <Card>
                   <CardHeader>
-                    <CardTitle>Trending Topics</CardTitle>
-                    <CardDescription>Most discussed peace themes</CardDescription>
+                    <CardTitle>{t('peacePulse.trendingTopics')}</CardTitle>
+                    <CardDescription>{t('peacePulse.trendingDescription')}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-wrap gap-2">
@@ -164,7 +166,7 @@ const PeacePulse = () => {
                           </div>
                         ))
                       ) : (
-                        <p className="text-muted-foreground">No trending topics available</p>
+                        <p className="text-muted-foreground">{t('peacePulse.noTrendingTopics')}</p>
                       )}
                     </div>
                   </CardContent>
@@ -174,9 +176,9 @@ const PeacePulse = () => {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <MapPin className="w-5 h-5" />
-                      Hotspot Locations
+                      {t('peacePulse.hotspotLocations')}
                     </CardTitle>
-                    <CardDescription>Areas requiring attention</CardDescription>
+                    <CardDescription>{t('peacePulse.hotspotDescription')}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     {latestMetrics?.hotspot_locations && Array.isArray(latestMetrics.hotspot_locations) ? (
@@ -185,13 +187,13 @@ const PeacePulse = () => {
                           <div key={i} className="flex items-center justify-between p-2 border rounded">
                             <span>{location.name || location}</span>
                             <span className="text-sm text-muted-foreground">
-                              {location.risk || 'Unknown'}
+                              {location.risk || t('common.unknown')}
                             </span>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <p className="text-muted-foreground">No hotspots identified</p>
+                      <p className="text-muted-foreground">{t('peacePulse.noHotspots')}</p>
                     )}
                   </CardContent>
                 </Card>
@@ -204,8 +206,8 @@ const PeacePulse = () => {
               <TabsContent value="accountability" className="space-y-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Peace Accountability Index</CardTitle>
-                    <CardDescription>Institutional response performance</CardDescription>
+                    <CardTitle>{t('peacePulse.accountabilityIndex')}</CardTitle>
+                    <CardDescription>{t('peacePulse.accountabilityDescription')}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -214,29 +216,29 @@ const PeacePulse = () => {
                           {latestAccountability?.accountability_index ? 
                             (latestAccountability.accountability_index * 100).toFixed(0) : 'N/A'}
                         </div>
-                        <p className="text-sm text-muted-foreground mt-1">Accountability Score</p>
+                        <p className="text-sm text-muted-foreground mt-1">{t('peacePulse.accountabilityScore')}</p>
                       </div>
                       <div>
                         <div className="text-3xl font-bold">
                           {latestAccountability?.incidents_reported || 0}
                         </div>
-                        <p className="text-sm text-muted-foreground mt-1">Incidents Reported</p>
+                        <p className="text-sm text-muted-foreground mt-1">{t('peacePulse.incidentsReported')}</p>
                       </div>
                       <div>
                         <div className="text-3xl font-bold text-green-500">
                           {latestAccountability?.incidents_resolved || 0}
                         </div>
-                        <p className="text-sm text-muted-foreground mt-1">Incidents Resolved</p>
+                        <p className="text-sm text-muted-foreground mt-1">{t('peacePulse.incidentsResolved')}</p>
                       </div>
                     </div>
 
                     <div className="mt-6 p-4 bg-muted rounded-lg">
                       <p className="text-sm">
-                        <strong>Average Response Time:</strong>{' '}
+                        <strong>{t('peacePulse.avgResponseTime')}:</strong>{' '}
                         {latestAccountability?.avg_response_time || 'N/A'}
                       </p>
                       <p className="text-sm mt-2">
-                        <strong>Average Resolution Time:</strong>{' '}
+                        <strong>{t('peacePulse.avgResolutionTime')}:</strong>{' '}
                         {latestAccountability?.avg_resolution_time || 'N/A'}
                       </p>
                     </div>

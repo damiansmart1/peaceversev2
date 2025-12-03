@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslationContext } from '@/components/TranslationProvider';
 import { z } from 'zod';
 import { Globe } from 'lucide-react';
 import peaceLogo from '@/assets/peaceverse-logo.png';
@@ -16,6 +17,7 @@ const passwordSchema = z.string().min(8, 'Password must be at least 8 characters
 );
 
 export default function Auth() {
+  const { t } = useTranslationContext();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -39,7 +41,7 @@ export default function Auth() {
     } catch (error) {
       if (error instanceof z.ZodError) {
         toast({
-          title: 'Validation Error',
+          title: t('auth.validationError'),
           description: error.errors[0].message,
           variant: 'destructive',
         });
@@ -60,14 +62,14 @@ export default function Auth() {
 
     if (error) {
       toast({
-        title: 'Sign Up Failed',
+        title: t('auth.signUpFailed'),
         description: error.message,
         variant: 'destructive',
       });
     } else {
       toast({
-        title: 'Success!',
-        description: 'Account created successfully. You can now sign in.',
+        title: t('auth.success'),
+        description: t('auth.accountCreated'),
       });
       setIsSignUp(false);
     }
@@ -81,7 +83,7 @@ export default function Auth() {
     } catch (error) {
       if (error instanceof z.ZodError) {
         toast({
-          title: 'Validation Error',
+          title: t('auth.validationError'),
           description: error.errors[0].message,
           variant: 'destructive',
         });
@@ -99,14 +101,14 @@ export default function Auth() {
 
     if (error) {
       toast({
-        title: 'Sign In Failed',
+        title: t('auth.signInFailed'),
         description: error.message,
         variant: 'destructive',
       });
     } else {
       toast({
-        title: 'Welcome Back!',
-        description: 'You have successfully signed in.',
+        title: t('auth.welcomeBack'),
+        description: t('auth.signedIn'),
       });
       navigate('/');
     }
@@ -137,7 +139,7 @@ export default function Auth() {
             Peaceverse
           </h1>
           <p className="text-xl md:text-2xl text-primary-foreground/80 tracking-wide font-light">
-            Detect. Verify. Prevent.
+            {t('auth.tagline')}
           </p>
         </div>
 
@@ -147,7 +149,7 @@ export default function Auth() {
             <div className="space-y-2">
               <Input
                 type="email"
-                placeholder="Email"
+                placeholder={t('auth.email')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -158,7 +160,7 @@ export default function Auth() {
             <div className="space-y-2">
               <Input
                 type="password"
-                placeholder="Password"
+                placeholder={t('auth.password')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -171,7 +173,7 @@ export default function Auth() {
               disabled={isLoading}
               className="w-full h-12 bg-gradient-to-r from-gold to-gold-light hover:from-gold-light hover:to-gold text-primary font-semibold text-lg transition-all duration-300"
             >
-              {isLoading ? 'Please wait...' : isSignUp ? 'Sign Up' : 'Enter'}
+              {isLoading ? t('auth.pleaseWait') : isSignUp ? t('auth.signUp') : t('auth.enter')}
             </Button>
 
             <div className="text-center pt-4">
@@ -180,7 +182,7 @@ export default function Auth() {
                 onClick={() => setIsSignUp(!isSignUp)}
                 className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors"
               >
-                {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
+                {isSignUp ? t('auth.haveAccount') : t('auth.noAccount')}
               </button>
             </div>
           </form>
