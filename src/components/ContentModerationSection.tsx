@@ -96,33 +96,33 @@ const ContentModerationSection = () => {
   ];
 
   return (
-    <section className="py-16 bg-muted/30">
-      <div className="container mx-auto px-6">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold mb-4 text-foreground">
+    <section className="py-8 sm:py-12 lg:py-16 bg-muted/30">
+      <div className="container mx-auto px-4 sm:px-6">
+        <div className="text-center mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4 text-foreground">
             {t('safety.moderation.title')}
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
             {t('safety.moderation.subtitle')}
           </p>
         </div>
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-8 sm:mb-12">
           {isLoading ? (
-            <div className="col-span-4 flex justify-center py-8">
+            <div className="col-span-2 lg:col-span-4 flex justify-center py-8">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
           ) : (
             moderationStats.map((stat) => {
               const IconComponent = stat.icon;
               return (
-                <Card key={stat.label} className="p-6 text-center bg-card/80 backdrop-blur-sm shadow-story">
-                  <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <IconComponent className="w-6 h-6 text-primary" />
+                <Card key={stat.label} className="p-4 sm:p-6 text-center bg-card/80 backdrop-blur-sm shadow-story">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3">
+                    <IconComponent className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                   </div>
-                  <div className="text-2xl font-bold text-card-foreground mb-1">{stat.value}</div>
-                  <div className="text-sm text-muted-foreground">{stat.label}</div>
+                  <div className="text-xl sm:text-2xl font-bold text-card-foreground mb-1">{stat.value}</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground line-clamp-2">{stat.label}</div>
                 </Card>
               );
             })
@@ -131,11 +131,11 @@ const ContentModerationSection = () => {
 
         {/* Moderation Features */}
         <Tabs defaultValue="ai-detection" className="max-w-6xl mx-auto">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-3 h-auto p-1 mb-4">
             {moderationFeatures.map((feature) => (
-              <TabsTrigger key={feature.id} value={feature.id} className="text-sm">
-                <feature.icon className="w-4 h-4 mr-2" />
-                {feature.title}
+              <TabsTrigger key={feature.id} value={feature.id} className="text-xs sm:text-sm py-2 px-2 sm:px-3 flex items-center gap-1 sm:gap-2">
+                <feature.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                <span className="hidden sm:inline truncate">{feature.title}</span>
               </TabsTrigger>
             ))}
           </TabsList>

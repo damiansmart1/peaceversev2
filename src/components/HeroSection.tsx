@@ -87,11 +87,11 @@ const HeroSection = () => {
 
       {/* Content */}
       <motion.div 
-        className="relative z-10 container mx-auto px-6 pt-24 pb-16"
+        className="relative z-10 container mx-auto px-4 sm:px-6 pt-20 sm:pt-24 pb-12 sm:pb-16"
         style={{ y, opacity }}
       >
         <div className="max-w-5xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             {/* Left Content */}
             <motion.div
               initial={{ opacity: 0, x: -50 }}
@@ -113,7 +113,7 @@ const HeroSection = () => {
               </motion.div>
 
               {/* Main Heading */}
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 leading-[1.1] tracking-tight">
+              <h1 className="text-3xl xs:text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4 sm:mb-6 leading-[1.1] tracking-tight">
                 <motion.span
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -142,7 +142,7 @@ const HeroSection = () => {
               
               {/* Subtitle */}
               <motion.p 
-                className="text-lg text-white/70 mb-8 max-w-md leading-relaxed"
+                className="text-base sm:text-lg text-white/70 mb-6 sm:mb-8 max-w-md leading-relaxed"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.6 }}
@@ -152,14 +152,14 @@ const HeroSection = () => {
 
               {/* CTA Buttons */}
               <motion.div 
-                className="flex flex-wrap gap-4"
+                className="flex flex-col xs:flex-row flex-wrap gap-3 sm:gap-4"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.7 }}
               >
                 <Button 
                   size="lg" 
-                  className="bg-white text-primary hover:bg-white/90 text-base px-6 h-12 gap-2 shadow-elevated group"
+                  className="bg-white text-primary hover:bg-white/90 text-sm sm:text-base px-4 sm:px-6 h-11 sm:h-12 gap-2 shadow-elevated group w-full xs:w-auto"
                   onClick={() => navigate('/incidents')}
                 >
                   Report Incident
@@ -168,7 +168,7 @@ const HeroSection = () => {
                 <Button 
                   variant="outline" 
                   size="lg" 
-                  className="border-white/30 bg-white/5 text-white hover:bg-white/15 text-base px-6 h-12 gap-2 backdrop-blur-sm"
+                  className="border-white/30 bg-white/5 text-white hover:bg-white/15 text-sm sm:text-base px-4 sm:px-6 h-11 sm:h-12 gap-2 backdrop-blur-sm w-full xs:w-auto"
                   onClick={() => navigate('/peace-pulse')}
                 >
                   <Play className="w-4 h-4" />
@@ -179,7 +179,7 @@ const HeroSection = () => {
 
             {/* Right Content - Stats Cards */}
             <motion.div
-              className="grid grid-cols-2 gap-4"
+              className="grid grid-cols-2 gap-3 sm:gap-4 mt-6 lg:mt-0"
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
@@ -192,16 +192,16 @@ const HeroSection = () => {
               ].map((stat, i) => (
                 <motion.div
                   key={stat.label}
-                  className={`relative overflow-hidden bg-gradient-to-br ${stat.color} backdrop-blur-xl border border-white/10 rounded-2xl p-6 group hover:border-white/20 transition-all duration-300`}
+                  className={`relative overflow-hidden bg-gradient-to-br ${stat.color} backdrop-blur-xl border border-white/10 rounded-xl sm:rounded-2xl p-4 sm:p-6 group hover:border-white/20 transition-all duration-300`}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5 + i * 0.1 }}
                   whileHover={{ scale: 1.02, y: -2 }}
                 >
-                  <stat.icon className="w-8 h-8 text-white/40 mb-3 group-hover:text-white/60 transition-colors" />
-                  <div className="text-3xl font-bold text-white mb-1">{stat.value}</div>
-                  <div className="text-white/60 text-sm">{stat.label}</div>
-                  <div className="absolute -bottom-4 -right-4 w-20 h-20 bg-white/5 rounded-full blur-2xl group-hover:bg-white/10 transition-colors" />
+                  <stat.icon className="w-6 h-6 sm:w-8 sm:h-8 text-white/40 mb-2 sm:mb-3 group-hover:text-white/60 transition-colors" />
+                  <div className="text-2xl sm:text-3xl font-bold text-white mb-1">{stat.value}</div>
+                  <div className="text-white/60 text-xs sm:text-sm">{stat.label}</div>
+                  <div className="absolute -bottom-4 -right-4 w-16 sm:w-20 h-16 sm:h-20 bg-white/5 rounded-full blur-2xl group-hover:bg-white/10 transition-colors" />
                 </motion.div>
               ))}
             </motion.div>

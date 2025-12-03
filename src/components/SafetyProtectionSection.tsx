@@ -144,82 +144,85 @@ const SafetyProtectionSection = () => {
   ];
 
   return (
-    <section className="py-16 bg-muted/30">
-      <div className="container mx-auto px-6">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold mb-4 text-foreground">
+    <section className="py-8 sm:py-12 lg:py-16 bg-muted/30">
+      <div className="container mx-auto px-4 sm:px-6">
+        <div className="text-center mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4 text-foreground">
             {t('safety.protection.title')}
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
             {t('safety.protection.subtitle')}
           </p>
         </div>
 
         {/* Safety Controls Demo */}
-        <Card className="max-w-4xl mx-auto mb-12 p-8 bg-card/80 backdrop-blur-sm shadow-story">
-          <h3 className="text-xl font-semibold mb-6 text-card-foreground text-center">
+        <Card className="max-w-4xl mx-auto mb-8 sm:mb-12 p-4 sm:p-6 lg:p-8 bg-card/80 backdrop-blur-sm shadow-story">
+          <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-card-foreground text-center">
             {t('safety.protection.personalControls')}
           </h3>
           
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <div className="text-sm font-medium text-card-foreground">{t('safety.protection.controls.anonymousMode')}</div>
-                  <div className="text-xs text-muted-foreground">{t('safety.protection.controls.anonymousModeDesc')}</div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div className="space-y-3 sm:space-y-4">
+              <div className="flex items-center justify-between gap-3">
+                <div className="space-y-0.5 sm:space-y-1 min-w-0">
+                  <div className="text-xs sm:text-sm font-medium text-card-foreground truncate">{t('safety.protection.controls.anonymousMode')}</div>
+                  <div className="text-[10px] sm:text-xs text-muted-foreground line-clamp-2">{t('safety.protection.controls.anonymousModeDesc')}</div>
                 </div>
                 <Switch 
                   checked={anonymousMode} 
                   onCheckedChange={setAnonymousMode}
+                  className="shrink-0"
                 />
               </div>
               {anonymousMode && (
-                <div className="bg-success/10 rounded-lg p-3">
-                  <div className="flex items-center space-x-2">
-                    <EyeOff className="w-4 h-4 text-success" />
-                    <span className="text-xs text-success-foreground">{t('safety.protection.controls.identityProtected')}</span>
+                <div className="bg-success/10 rounded-lg p-2 sm:p-3">
+                  <div className="flex items-center gap-2">
+                    <EyeOff className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-success shrink-0" />
+                    <span className="text-[10px] sm:text-xs text-success-foreground">{t('safety.protection.controls.identityProtected')}</span>
                   </div>
                 </div>
               )}
             </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <div className="text-sm font-medium text-card-foreground">{t('safety.protection.controls.locationSharing')}</div>
-                  <div className="text-xs text-muted-foreground">{t('safety.protection.controls.locationSharingDesc')}</div>
+            <div className="space-y-3 sm:space-y-4">
+              <div className="flex items-center justify-between gap-3">
+                <div className="space-y-0.5 sm:space-y-1 min-w-0">
+                  <div className="text-xs sm:text-sm font-medium text-card-foreground truncate">{t('safety.protection.controls.locationSharing')}</div>
+                  <div className="text-[10px] sm:text-xs text-muted-foreground line-clamp-2">{t('safety.protection.controls.locationSharingDesc')}</div>
                 </div>
                 <Switch 
                   checked={locationSharing} 
                   onCheckedChange={setLocationSharing}
+                  className="shrink-0"
                 />
               </div>
               {!locationSharing && (
-                <div className="bg-primary/10 rounded-lg p-3">
-                  <div className="flex items-center space-x-2">
-                    <Lock className="w-4 h-4 text-primary" />
-                    <span className="text-xs text-primary-foreground">{t('safety.protection.controls.locationHidden')}</span>
+                <div className="bg-primary/10 rounded-lg p-2 sm:p-3">
+                  <div className="flex items-center gap-2">
+                    <Lock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary shrink-0" />
+                    <span className="text-[10px] sm:text-xs text-primary-foreground">{t('safety.protection.controls.locationHidden')}</span>
                   </div>
                 </div>
               )}
             </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <div className="text-sm font-medium text-card-foreground">{t('safety.protection.controls.secureMode')}</div>
-                  <div className="text-xs text-muted-foreground">{t('safety.protection.controls.secureModeDesc')}</div>
+            <div className="space-y-3 sm:space-y-4 sm:col-span-2 lg:col-span-1">
+              <div className="flex items-center justify-between gap-3">
+                <div className="space-y-0.5 sm:space-y-1 min-w-0">
+                  <div className="text-xs sm:text-sm font-medium text-card-foreground truncate">{t('safety.protection.controls.secureMode')}</div>
+                  <div className="text-[10px] sm:text-xs text-muted-foreground line-clamp-2">{t('safety.protection.controls.secureModeDesc')}</div>
                 </div>
                 <Switch 
                   checked={secureMode} 
                   onCheckedChange={setSecureMode}
+                  className="shrink-0"
                 />
               </div>
               {secureMode && (
-                <div className="bg-warning/10 rounded-lg p-3">
-                  <div className="flex items-center space-x-2">
-                    <Shield className="w-4 h-4 text-warning" />
-                    <span className="text-xs text-warning-foreground">{t('safety.protection.controls.fullProtection')}</span>
+                <div className="bg-warning/10 rounded-lg p-2 sm:p-3">
+                  <div className="flex items-center gap-2">
+                    <Shield className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-warning shrink-0" />
+                    <span className="text-[10px] sm:text-xs text-warning-foreground">{t('safety.protection.controls.fullProtection')}</span>
                   </div>
                 </div>
               )}
