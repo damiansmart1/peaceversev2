@@ -1337,6 +1337,63 @@ export type Database = {
         }
         Relationships: []
       }
+      proposal_comments: {
+        Row: {
+          body: string
+          created_at: string
+          display_anonymous: boolean
+          id: string
+          is_edited: boolean
+          is_pinned: boolean
+          like_count: number
+          parent_comment_id: string | null
+          proposal_id: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          display_anonymous?: boolean
+          id?: string
+          is_edited?: boolean
+          is_pinned?: boolean
+          like_count?: number
+          parent_comment_id?: string | null
+          proposal_id: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          display_anonymous?: boolean
+          id?: string
+          is_edited?: boolean
+          is_pinned?: boolean
+          like_count?: number
+          parent_comment_id?: string | null
+          proposal_id?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_comments_parent_comment_id_fkey"
+            columns: ["parent_comment_id"]
+            isOneToOne: false
+            referencedRelation: "proposal_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proposal_comments_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       proposal_votes: {
         Row: {
           created_at: string
