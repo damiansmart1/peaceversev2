@@ -1,10 +1,64 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+// Africa's Talking SMS Integration
+const AT_API_KEY = Deno.env.get('AFRICASTALKING_API_KEY');
+const AT_USERNAME = Deno.env.get('AFRICASTALKING_USERNAME') || 'sandbox';
+const AT_SHORTCODE = Deno.env.get('AFRICASTALKING_SHORTCODE') || 'PEACEVERSE';
+const AT_API_URL = AT_USERNAME === 'sandbox' 
+  ? 'https://api.sandbox.africastalking.com/version1/messaging'
+  : 'https://api.africastalking.com/version1/messaging';
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Send SMS via Africa's Talking
+async function sendSMS(to: string, message: string): Promise<{ success: boolean; messageId?: string; error?: string }> {
+  if (!AT_API_KEY) {
+    console.log('Africa\'s Talking API key not configured, skipping SMS send');
+    return { success: false, error: 'SMS provider not configured' };
+  }
+
+  try {
+    const formData = new URLSearchParams();
+    formData.append('username', AT_USERNAME);
+    formData.append('to', to);
+    formData.append('message', message);
+    if (AT_SHORTCODE) {
+      formData.append('from', AT_SHORTCODE);
+    }
+
+    const response = await fetch(AT_API_URL, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'apiKey': AT_API_KEY,
+      },
+      body: formData.toString(),
+    });
+
+    const result = await response.json();
+    console.log('Africa\'s Talking response:', result);
+
+    if (result.SMSMessageData?.Recipients?.[0]?.status === 'Success') {
+      return { 
+        success: true, 
+        messageId: result.SMSMessageData.Recipients[0].messageId 
+      };
+    }
+
+    return { 
+      success: false, 
+      error: result.SMSMessageData?.Recipients?.[0]?.status || 'Unknown error' 
+    };
+  } catch (error) {
+    console.error('SMS send error:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
 
 serve(async (req) => {
   // Handle CORS preflight
@@ -60,7 +114,18 @@ serve(async (req) => {
       } else if (command === '3' || command === 'STATUS') {
         response = `To check status, send:\nSTATUS [report ID]\nExample: STATUS RPT-123456`;
       } else if (command === '4' || command === 'SAFE') {
-        response = `Safe spaces near you:\n1. Red Cross Center - 2km\n2. Community Hall - 3km\n3. School Shelter - 4km\nCall 0800-PEACE for help`;
+        // Fetch safe spaces from database
+        const { data: safeSpaces } = await supabase
+          .from('safe_spaces')
+          .select('name, contact_phone')
+          .eq('is_archived', false)
+          .limit(3);
+
+        if (safeSpaces && safeSpaces.length > 0) {
+          response = `Safe spaces:\n${safeSpaces.map((s, i) => `${i + 1}. ${s.name}${s.contact_phone ? ` - ${s.contact_phone}` : ''}`).join('\n')}\nCall for assistance`;
+        } else {
+          response = `Safe spaces:\n1. Red Cross - 0800-723-253\n2. UNHCR - 0800-727-253\n3. Emergency - 112`;
+        }
       } else if (command.startsWith('REPORT ')) {
         // Process incident report
         const reportText = text.substring(7).trim();
@@ -117,41 +182,110 @@ serve(async (req) => {
         response = `Peaceverse: Invalid command. Reply HELP for options.`;
       }
 
+      // Send SMS response via Africa's Talking
+      const smsResult = await sendSMS(from, response);
+      
       // Log outbound SMS
       await supabase.from('sms_logs').insert({
         phone_number: from,
         direction: 'outbound',
-        message: response
+        message: response,
+        status: smsResult.success ? 'delivered' : 'failed'
       });
 
       return new Response(
         JSON.stringify({ 
           success: true, 
           response,
-          // Format for Africa's Talking API
+          smsDelivery: smsResult,
+          // Format for Africa's Talking callback
           sms: [{ to: from, message: response }]
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Send SMS alert to subscribers
+    // Send single SMS
+    if (req.method === 'POST' && action === 'send') {
+      const { to, message } = await req.json();
+      
+      if (!to || !message) {
+        return new Response(
+          JSON.stringify({ error: 'Missing required fields: to, message' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const result = await sendSMS(to, message);
+      
+      // Log the SMS
+      await supabase.from('sms_logs').insert({
+        phone_number: to,
+        direction: 'outbound',
+        message: message,
+        status: result.success ? 'delivered' : 'failed'
+      });
+
+      return new Response(
+        JSON.stringify(result),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Send SMS alert to subscribers (broadcast)
     if (req.method === 'POST' && action === 'broadcast') {
       const { alertId, message, recipients } = await req.json();
       
       console.log(`Broadcasting alert ${alertId} to ${recipients?.length || 0} recipients`);
 
-      // In production, integrate with Africa's Talking, Twilio, or local SMS provider
-      // For now, log the broadcast
-      await supabase.from('sms_broadcasts').insert({
+      // Create broadcast record
+      const { data: broadcast } = await supabase.from('sms_broadcasts').insert({
         alert_id: alertId,
         message,
         recipient_count: recipients?.length || 0,
-        status: 'queued'
-      });
+        status: 'processing'
+      }).select('id').single();
+
+      let deliveredCount = 0;
+      let failedCount = 0;
+
+      // Send to all recipients
+      if (recipients && recipients.length > 0) {
+        for (const recipient of recipients) {
+          const result = await sendSMS(recipient, message);
+          if (result.success) {
+            deliveredCount++;
+          } else {
+            failedCount++;
+          }
+          
+          // Log each SMS
+          await supabase.from('sms_logs').insert({
+            phone_number: recipient,
+            direction: 'outbound',
+            message: message,
+            status: result.success ? 'delivered' : 'failed'
+          });
+        }
+      }
+
+      // Update broadcast status
+      if (broadcast?.id) {
+        await supabase.from('sms_broadcasts').update({
+          delivered_count: deliveredCount,
+          failed_count: failedCount,
+          status: 'completed',
+          completed_at: new Date().toISOString()
+        }).eq('id', broadcast.id);
+      }
 
       return new Response(
-        JSON.stringify({ success: true, queued: recipients?.length || 0 }),
+        JSON.stringify({ 
+          success: true, 
+          queued: recipients?.length || 0,
+          delivered: deliveredCount,
+          failed: failedCount
+        }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -160,11 +294,22 @@ serve(async (req) => {
     if (req.method === 'GET' && action === 'stats') {
       const { data: stats } = await supabase
         .from('sms_logs')
-        .select('direction')
+        .select('direction, status')
         .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
 
       const inbound = stats?.filter(s => s.direction === 'inbound').length || 0;
       const outbound = stats?.filter(s => s.direction === 'outbound').length || 0;
+      const delivered = stats?.filter(s => s.status === 'delivered').length || 0;
+      const failed = stats?.filter(s => s.status === 'failed').length || 0;
+
+      // Get broadcast stats
+      const { data: broadcasts } = await supabase
+        .from('sms_broadcasts')
+        .select('recipient_count, delivered_count, failed_count')
+        .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
+
+      const totalBroadcasts = broadcasts?.length || 0;
+      const totalBroadcastRecipients = broadcasts?.reduce((sum, b) => sum + (b.recipient_count || 0), 0) || 0;
 
       return new Response(
         JSON.stringify({ 
@@ -173,7 +318,35 @@ serve(async (req) => {
             inbound, 
             outbound, 
             total: inbound + outbound,
+            delivered,
+            failed,
+            deliveryRate: outbound > 0 ? ((delivered / outbound) * 100).toFixed(1) : '0',
+            broadcasts: {
+              total: totalBroadcasts,
+              recipients: totalBroadcastRecipients
+            },
             period: '30 days'
+          },
+          provider: {
+            name: 'Africa\'s Talking',
+            configured: !!AT_API_KEY,
+            mode: AT_USERNAME === 'sandbox' ? 'sandbox' : 'production'
+          }
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Check provider status
+    if (req.method === 'GET' && action === 'status') {
+      return new Response(
+        JSON.stringify({ 
+          success: true,
+          provider: {
+            name: 'Africa\'s Talking',
+            configured: !!AT_API_KEY,
+            mode: AT_USERNAME === 'sandbox' ? 'sandbox' : 'production',
+            shortcode: AT_SHORTCODE
           }
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -183,7 +356,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         error: 'Invalid action',
-        available_actions: ['incoming', 'broadcast', 'stats']
+        available_actions: ['incoming', 'send', 'broadcast', 'stats', 'status']
       }),
       { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
