@@ -2614,6 +2614,10 @@ export type Database = {
         Args: { report_id: string }
         Returns: undefined
       }
+      increment_share_count: {
+        Args: { content_id: string }
+        Returns: undefined
+      }
       longtransactionsenabled: { Args: never; Returns: boolean }
       populate_geometry_columns:
         | { Args: { use_typmod?: boolean }; Returns: string }

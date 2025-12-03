@@ -119,6 +119,30 @@ export const SocialFeed = ({ userId, showAll = true }: SocialFeedProps) => {
     onError: () => toast.error('Failed to repost'),
   });
 
+  const shareMutation = useMutation({
+    mutationFn: async (postId: string) => {
+      // Use RPC function to atomically increment share count
+      const { error } = await supabase.rpc('increment_share_count', { content_id: postId });
+      if (error) {
+        // Fallback: fetch and update manually
+        const { data } = await supabase
+          .from('content')
+          .select('share_count')
+          .eq('id', postId)
+          .single();
+        if (data) {
+          await supabase
+            .from('content')
+            .update({ share_count: (data.share_count || 0) + 1 })
+            .eq('id', postId);
+        }
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['social-feed'] });
+    },
+  });
+
   const handleLike = (post: any) => {
     if (!user) {
       toast.error('Please login to like posts');
@@ -130,6 +154,7 @@ export const SocialFeed = ({ userId, showAll = true }: SocialFeedProps) => {
   const handleShare = (post: any) => {
     const url = `${window.location.origin}/content/${post.id}`;
     navigator.clipboard.writeText(url);
+    shareMutation.mutate(post.id);
     toast.success('Link copied to clipboard!');
   };
 
@@ -281,94 +306,112 @@ export const SocialFeed = ({ userId, showAll = true }: SocialFeedProps) => {
 
                 <CardContent className="p-0">
                   {post.file_type?.startsWith('image') && (
-                    <div className="relative aspect-square bg-muted">
+                    <div className="relative w-full max-h-[300px] sm:max-h-[350px] md:max-h-[400px] overflow-hidden bg-muted">
                       <img
                         src={post.file_url}
                         alt={post.title}
                         className="w-full h-full object-cover"
+                        loading="lazy"
+                        decoding="async"
+                        style={{ maxHeight: '400px', objectFit: 'cover' }}
                       />
                     </div>
                   )}
                   {post.file_type?.startsWith('video') && (
-                    <div className="relative aspect-video bg-black">
+                    <div className="relative w-full max-h-[300px] sm:max-h-[350px] md:max-h-[400px] bg-black">
                       <video
                         src={post.file_url}
                         className="w-full h-full object-contain"
                         controls
+                        preload="metadata"
+                        playsInline
+                        controlsList="nodownload"
+                        style={{ maxHeight: '400px' }}
                       />
                     </div>
                   )}
                   {post.file_type?.startsWith('audio') && (
-                    <div className="p-6 bg-gradient-to-br from-primary/10 to-secondary/10">
-                      <audio src={post.file_url} controls className="w-full" />
+                    <div className="p-4 sm:p-6 bg-gradient-to-br from-primary/10 to-secondary/10">
+                      <audio 
+                        src={post.file_url} 
+                        controls 
+                        className="w-full" 
+                        preload="metadata"
+                      />
                     </div>
                   )}
-                  <div className="p-4">
-                    <h3 className="font-semibold text-lg mb-2">{post.title}</h3>
+                  <div className="p-3 sm:p-4">
+                    <h3 className="font-semibold text-base sm:text-lg mb-1 sm:mb-2 line-clamp-2">{post.title}</h3>
                     {post.description && (
-                      <p className="text-muted-foreground line-clamp-3">{post.description}</p>
+                      <p className="text-muted-foreground text-sm line-clamp-2">{post.description}</p>
                     )}
-                    <Badge variant="secondary" className="mt-3">
+                    <Badge variant="secondary" className="mt-2 sm:mt-3 text-xs">
                       {post.category}
                     </Badge>
                   </div>
                 </CardContent>
 
-                <CardFooter className="border-t p-3 flex-col">
-                  <div className="flex items-center justify-between w-full">
-                    <div className="flex items-center gap-1">
+                <CardFooter className="border-t p-2 sm:p-3 flex-col gap-2">
+                  <div className="flex items-center justify-between w-full flex-wrap gap-1">
+                    <div className="flex items-center gap-0.5 sm:gap-1 flex-wrap">
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => handleLike(post)}
-                        className={cn(post.isLiked && "text-red-500")}
+                        className={cn("h-8 px-2 sm:px-3", post.isLiked && "text-red-500")}
                         disabled={likeMutation.isPending}
                       >
-                        <Heart className={cn("h-5 w-5 mr-1", post.isLiked && "fill-current")} />
-                        {post.likesCount}
+                        <Heart className={cn("h-4 w-4 sm:h-5 sm:w-5", post.isLiked && "fill-current")} />
+                        <span className="ml-1 text-xs sm:text-sm">{post.likesCount}</span>
                       </Button>
                       <Button 
                         variant="ghost" 
                         size="sm"
                         onClick={() => toggleComments(post.id)}
-                        className={cn(expandedComments.has(post.id) && "text-primary")}
+                        className={cn("h-8 px-2 sm:px-3", expandedComments.has(post.id) && "text-primary")}
                       >
-                        <MessageCircle className={cn("h-5 w-5 mr-1", expandedComments.has(post.id) && "fill-current")} />
-                        {post.commentsCount}
+                        <MessageCircle className={cn("h-4 w-4 sm:h-5 sm:w-5", expandedComments.has(post.id) && "fill-current")} />
+                        <span className="ml-1 text-xs sm:text-sm">{post.commentsCount}</span>
                       </Button>
                       <Button 
                         variant="ghost" 
                         size="sm" 
                         onClick={() => handleRepost(post)}
                         disabled={repostMutation.isPending}
+                        className="h-8 px-2 sm:px-3"
                       >
-                        <Repeat2 className="h-5 w-5 mr-1" />
-                        Repost
+                        <Repeat2 className="h-4 w-4 sm:h-5 sm:w-5" />
+                        <span className="ml-1 text-xs sm:text-sm hidden sm:inline">Repost</span>
                       </Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleShare(post)}>
-                        <Share2 className="h-5 w-5 mr-1" />
-                        Share
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => handleShare(post)}
+                        className="h-8 px-2 sm:px-3"
+                      >
+                        <Share2 className="h-4 w-4 sm:h-5 sm:w-5" />
+                        <span className="ml-1 text-xs sm:text-sm hidden sm:inline">{post.share_count || 0}</span>
                       </Button>
                     </div>
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-0.5 sm:gap-1">
                       {post.profile?.is_creator && user?.id !== post.user_id && (
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => handleTip(post)}
-                          className="text-green-600 border-green-600 hover:bg-green-50"
+                          className="h-8 px-2 sm:px-3 text-green-600 border-green-600 hover:bg-green-50 dark:hover:bg-green-950"
                         >
-                          <DollarSign className="h-4 w-4 mr-1" />
-                          Tip
+                          <DollarSign className="h-4 w-4" />
+                          <span className="ml-1 text-xs sm:text-sm hidden sm:inline">Tip</span>
                         </Button>
                       )}
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => handleSave(post.id)}
-                        className={cn(savedPosts.has(post.id) && "text-primary")}
+                        className={cn("h-8 w-8", savedPosts.has(post.id) && "text-primary")}
                       >
-                        <Bookmark className={cn("h-5 w-5", savedPosts.has(post.id) && "fill-current")} />
+                        <Bookmark className={cn("h-4 w-4 sm:h-5 sm:w-5", savedPosts.has(post.id) && "fill-current")} />
                       </Button>
                     </div>
                   </div>
