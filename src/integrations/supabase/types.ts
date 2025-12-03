@@ -407,6 +407,101 @@ export type Database = {
         }
         Relationships: []
       }
+      api_keys: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+          key_hash: string
+          key_prefix: string
+          last_used_at: string | null
+          name: string
+          organization_name: string | null
+          permissions: Json | null
+          rate_limit_per_minute: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          key_hash: string
+          key_prefix: string
+          last_used_at?: string | null
+          name: string
+          organization_name?: string | null
+          permissions?: Json | null
+          rate_limit_per_minute?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          key_hash?: string
+          key_prefix?: string
+          last_used_at?: string | null
+          name?: string
+          organization_name?: string | null
+          permissions?: Json | null
+          rate_limit_per_minute?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      api_usage_logs: {
+        Row: {
+          api_key_id: string | null
+          created_at: string | null
+          endpoint: string
+          id: string
+          ip_address: string | null
+          method: string
+          response_status: number | null
+          response_time_ms: number | null
+          user_agent: string | null
+        }
+        Insert: {
+          api_key_id?: string | null
+          created_at?: string | null
+          endpoint: string
+          id?: string
+          ip_address?: string | null
+          method: string
+          response_status?: number | null
+          response_time_ms?: number | null
+          user_agent?: string | null
+        }
+        Update: {
+          api_key_id?: string | null
+          created_at?: string | null
+          endpoint?: string
+          id?: string
+          ip_address?: string | null
+          method?: string
+          response_status?: number | null
+          response_time_ms?: number | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_usage_logs_api_key_id_fkey"
+            columns: ["api_key_id"]
+            isOneToOne: false
+            referencedRelation: "api_keys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chatroom_members: {
         Row: {
           chatroom_id: string
@@ -1397,6 +1492,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      integration_connections: {
+        Row: {
+          config: Json
+          created_at: string | null
+          created_by: string | null
+          credentials_encrypted: string | null
+          direction: string | null
+          id: string
+          integration_type: string
+          is_active: boolean | null
+          last_sync_at: string | null
+          last_sync_status: string | null
+          name: string
+          sync_frequency_minutes: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          config?: Json
+          created_at?: string | null
+          created_by?: string | null
+          credentials_encrypted?: string | null
+          direction?: string | null
+          id?: string
+          integration_type: string
+          is_active?: boolean | null
+          last_sync_at?: string | null
+          last_sync_status?: string | null
+          name: string
+          sync_frequency_minutes?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          config?: Json
+          created_at?: string | null
+          created_by?: string | null
+          credentials_encrypted?: string | null
+          direction?: string | null
+          id?: string
+          integration_type?: string
+          is_active?: boolean | null
+          last_sync_at?: string | null
+          last_sync_status?: string | null
+          name?: string
+          sync_frequency_minutes?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       likes: {
         Row: {
@@ -2437,6 +2580,113 @@ export type Database = {
           total_withdrawn?: number | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      webhook_deliveries: {
+        Row: {
+          attempt_number: number | null
+          created_at: string | null
+          duration_ms: number | null
+          error_message: string | null
+          event_type: string
+          id: string
+          payload: Json
+          response_body: string | null
+          response_status: number | null
+          success: boolean | null
+          webhook_id: string | null
+        }
+        Insert: {
+          attempt_number?: number | null
+          created_at?: string | null
+          duration_ms?: number | null
+          error_message?: string | null
+          event_type: string
+          id?: string
+          payload: Json
+          response_body?: string | null
+          response_status?: number | null
+          success?: boolean | null
+          webhook_id?: string | null
+        }
+        Update: {
+          attempt_number?: number | null
+          created_at?: string | null
+          duration_ms?: number | null
+          error_message?: string | null
+          event_type?: string
+          id?: string
+          payload?: Json
+          response_body?: string | null
+          response_status?: number | null
+          success?: boolean | null
+          webhook_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webhook_deliveries_webhook_id_fkey"
+            columns: ["webhook_id"]
+            isOneToOne: false
+            referencedRelation: "webhook_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      webhook_subscriptions: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          events: string[]
+          failure_count: number | null
+          filters: Json | null
+          id: string
+          is_active: boolean | null
+          last_status: string | null
+          last_triggered_at: string | null
+          name: string
+          organization_name: string | null
+          retry_count: number | null
+          secret: string
+          timeout_seconds: number | null
+          updated_at: string | null
+          url: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          events?: string[]
+          failure_count?: number | null
+          filters?: Json | null
+          id?: string
+          is_active?: boolean | null
+          last_status?: string | null
+          last_triggered_at?: string | null
+          name: string
+          organization_name?: string | null
+          retry_count?: number | null
+          secret: string
+          timeout_seconds?: number | null
+          updated_at?: string | null
+          url: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          events?: string[]
+          failure_count?: number | null
+          filters?: Json | null
+          id?: string
+          is_active?: boolean | null
+          last_status?: string | null
+          last_triggered_at?: string | null
+          name?: string
+          organization_name?: string | null
+          retry_count?: number | null
+          secret?: string
+          timeout_seconds?: number | null
+          updated_at?: string | null
+          url?: string
         }
         Relationships: []
       }
