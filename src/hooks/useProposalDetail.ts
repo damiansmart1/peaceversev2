@@ -20,20 +20,20 @@ export interface ProposalComment {
   };
 }
 
-export const useProposalDetail = (slug: string) => {
+export const useProposalDetail = (id: string) => {
   return useQuery({
-    queryKey: ['proposal', slug],
+    queryKey: ['proposal', id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('proposals')
         .select('*')
-        .eq('slug', slug)
-        .single();
+        .eq('id', id)
+        .maybeSingle();
 
       if (error) throw error;
       return data as Proposal;
     },
-    enabled: !!slug,
+    enabled: !!id,
   });
 };
 
