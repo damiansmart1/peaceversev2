@@ -17,6 +17,7 @@ import AccessibilityMenu from "@/components/AccessibilityMenu";
 import VoiceCommands from "@/components/VoiceCommands";
 import EnhancedKeyboardNav from "@/components/EnhancedKeyboardNav";
 import FocusManager from "@/components/FocusManager";
+import GlobalAlertBanner from "@/components/GlobalAlertBanner";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Proposals from "./pages/Proposals";
@@ -65,6 +66,7 @@ const App = () => (
                   <Sonner position="top-right" />
                   <SkipNavigation />
                   <OfflineIndicator />
+                  <GlobalAlertBanner />
                   <BrowserRouter>
                   <FocusManager />
                   <EnhancedKeyboardNav />
