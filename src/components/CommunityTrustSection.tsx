@@ -17,125 +17,127 @@ import {
   Globe,
   TrendingUp
 } from "lucide-react";
+import { useTranslationContext } from './TranslationProvider';
 
 const CommunityTrustSection = () => {
   const [selectedStory, setSelectedStory] = useState<string | null>(null);
+  const { t } = useTranslationContext();
 
   const trustBuilders = [
     {
       id: "elder-partnership",
       icon: Crown,
-      title: "Elder Partnership",
-      description: "Collaborative leadership with community elders and religious leaders",
+      title: t('safety.trust.elderPartnership.title'),
+      description: t('safety.trust.elderPartnership.description'),
       features: [
-        "Elder council advisory board",
-        "Traditional wisdom integration", 
-        "Cultural protocol guidance",
-        "Intergenerational dialogue facilitation"
+        t('safety.trust.elderPartnership.feature1'),
+        t('safety.trust.elderPartnership.feature2'), 
+        t('safety.trust.elderPartnership.feature3'),
+        t('safety.trust.elderPartnership.feature4')
       ],
-      impact: "87% community approval",
-      participants: "200+ community elders"
+      impact: t('safety.trust.elderPartnership.impact'),
+      participants: t('safety.trust.elderPartnership.participants')
     },
     {
       id: "transparency-system", 
       icon: Eye,
-      title: "Uwazi wa Shughuli",
-      description: "Ufichuzi kamili wa shughuli, fedha, na maamuzi",
+      title: t('safety.trust.transparency.title'),
+      description: t('safety.trust.transparency.description'),
       features: [
-        "Public impact dashboards",
-        "Financial transparency reports",
-        "Decision-making process visibility", 
-        "Regular community updates"
+        t('safety.trust.transparency.feature1'),
+        t('safety.trust.transparency.feature2'),
+        t('safety.trust.transparency.feature3'), 
+        t('safety.trust.transparency.feature4')
       ],
-      impact: "95% trust rating",
-      participants: "Open to all"
+      impact: t('safety.trust.transparency.impact'),
+      participants: t('safety.trust.transparency.participants')
     },
     {
       id: "diverse-voices",
       icon: Users,
-      title: "Sauti Mbalimbali",
-      description: "Kuhakikisha uwakilishi wa makundi yote ya jamii",
+      title: t('safety.trust.diverseVoices.title'),
+      description: t('safety.trust.diverseVoices.description'),
       features: [
-        "Gender-balanced leadership",
-        "Disability inclusion programs",
-        "Multi-ethnic representation",
-        "Youth-adult collaboration"
+        t('safety.trust.diverseVoices.feature1'),
+        t('safety.trust.diverseVoices.feature2'),
+        t('safety.trust.diverseVoices.feature3'),
+        t('safety.trust.diverseVoices.feature4')
       ],
-      impact: "78% participation across groups",
-      participants: "50+ community groups"
+      impact: t('safety.trust.diverseVoices.impact'),
+      participants: t('safety.trust.diverseVoices.participants')
     },
     {
       id: "proven-results",
       icon: TrendingUp,
-      title: "Proven Results",
-      description: "Evidence of success in peace building",
+      title: t('safety.trust.provenResults.title'),
+      description: t('safety.trust.provenResults.description'),
       features: [
-        "Documented conflict reduction",
-        "Successful mediation cases", 
-        "Community healing stories",
-        "Long-term impact tracking"
+        t('safety.trust.provenResults.feature1'),
+        t('safety.trust.provenResults.feature2'), 
+        t('safety.trust.provenResults.feature3'),
+        t('safety.trust.provenResults.feature4')
       ],
-      impact: "23% reduction in local conflicts",
-      participants: "5000+ community members"
+      impact: t('safety.trust.provenResults.impact'),
+      participants: t('safety.trust.provenResults.participants')
     }
   ];
 
   const trustMetrics = [
-    { label: "Community Leaders Endorsing", value: "340+", icon: UserCheck },
-    { label: "Trust Score", value: "94/100", icon: Star },
-    { label: "Cross-Community Partnerships", value: "67", icon: Handshake },
-    { label: "Success Stories Verified", value: "1,200+", icon: CheckCircle2 }
+    { label: t('safety.trust.metrics.leadersEndorsing'), value: "340+", icon: UserCheck },
+    { label: t('safety.trust.metrics.trustScore'), value: "94/100", icon: Star },
+    { label: t('safety.trust.metrics.partnerships'), value: "67", icon: Handshake },
+    { label: t('safety.trust.metrics.successStories'), value: "1,200+", icon: CheckCircle2 }
   ];
 
   const verificationProcess = [
     {
       step: 1,
-      title: "Community Nomination",
-      description: "Wanajamii wanapendekeza mashindano ya amani",
+      title: t('safety.trust.verification.step1.title'),
+      description: t('safety.trust.verification.step1.description'),
       icon: Users,
-      duration: "Ongoing"
+      duration: t('safety.trust.verification.step1.duration')
     },
     {
       step: 2, 
-      title: "Elder Council Review",
-      description: "Wazee wanahakiki na kuthibitisha hadithi",
+      title: t('safety.trust.verification.step2.title'),
+      description: t('safety.trust.verification.step2.description'),
       icon: Crown,
-      duration: "2-3 days"
+      duration: t('safety.trust.verification.step2.duration')
     },
     {
       step: 3,
-      title: "Cross-Community Validation", 
-      description: "Jamii mbalimbali zinahakiki ukweli wa hadithi",
+      title: t('safety.trust.verification.step3.title'), 
+      description: t('safety.trust.verification.step3.description'),
       icon: Globe,
-      duration: "1 week"
+      duration: t('safety.trust.verification.step3.duration')
     },
     {
       step: 4,
-      title: "Platform Recognition",
-      description: "Hadithi zilizothibitishwa zinapewa umaarufu",
+      title: t('safety.trust.verification.step4.title'),
+      description: t('safety.trust.verification.step4.description'),
       icon: Award,
-      duration: "Immediate"
+      duration: t('safety.trust.verification.step4.duration')
     }
   ];
 
   const successStories = [
     {
       id: "kibera-peace",
-      title: "Kibera Youth Peace Initiative",
-      description: "Kibera youth united to resolve community conflicts",
-      impact: "40% reduction in youth conflicts",
+      title: t('safety.trust.stories.kibera.title'),
+      description: t('safety.trust.stories.kibera.description'),
+      impact: t('safety.trust.stories.kibera.impact'),
       verified: true,
-      endorsers: ["Area Chief", "Religious Leaders", "Women's Groups"],
-      quote: "Peace Verse helped us speak and share without fear"
+      endorsers: [t('safety.trust.stories.kibera.endorser1'), t('safety.trust.stories.kibera.endorser2'), t('safety.trust.stories.kibera.endorser3')],
+      quote: t('safety.trust.stories.kibera.quote')
     },
     {
       id: "nakuru-harmony",
-      title: "Nakuru Ethnic Harmony Project", 
-      description: "Different tribes came together after conflicts",
-      impact: "35 families reconciled",
+      title: t('safety.trust.stories.nakuru.title'), 
+      description: t('safety.trust.stories.nakuru.description'),
+      impact: t('safety.trust.stories.nakuru.impact'),
       verified: true,
-      endorsers: ["County Commissioner", "Traditional Elders", "Youth Leaders"],
-      quote: "We got the opportunity to understand and forgive each other"
+      endorsers: [t('safety.trust.stories.nakuru.endorser1'), t('safety.trust.stories.nakuru.endorser2'), t('safety.trust.stories.nakuru.endorser3')],
+      quote: t('safety.trust.stories.nakuru.quote')
     }
   ];
 
@@ -144,10 +146,10 @@ const CommunityTrustSection = () => {
       <div className="container mx-auto px-6">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold mb-4 text-foreground">
-            Building Community Trust  
+            {t('safety.trust.title')}  
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Bridging youth voices with cultural leadership for respected peace guidance
+            {t('safety.trust.subtitle')}
           </p>
         </div>
 
@@ -196,11 +198,11 @@ const CommunityTrustSection = () => {
                   <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border">
                     <div className="text-center">
                       <div className="text-lg font-bold text-primary">{builder.impact}</div>
-                      <div className="text-xs text-muted-foreground">Impact Achieved</div>
+                      <div className="text-xs text-muted-foreground">{t('safety.trust.impactAchieved')}</div>
                     </div>
                     <div className="text-center">
                       <div className="text-lg font-bold text-accent">{builder.participants}</div>
-                      <div className="text-xs text-muted-foreground">Active Participants</div>
+                      <div className="text-xs text-muted-foreground">{t('safety.trust.activeParticipants')}</div>
                     </div>
                   </div>
                 </div>
@@ -212,7 +214,7 @@ const CommunityTrustSection = () => {
         {/* Verification Process */}
         <Card className="max-w-5xl mx-auto mb-12 p-8 bg-card/80 backdrop-blur-sm shadow-story">
           <h3 className="text-2xl font-bold text-center mb-8 text-card-foreground">
-            Mchakato wa Uthibitisho | Verification Process
+            {t('safety.trust.verificationProcess')}
           </h3>
           
           <div className="grid md:grid-cols-4 gap-6">
@@ -243,7 +245,7 @@ const CommunityTrustSection = () => {
         {/* Success Stories */}
         <div className="max-w-6xl mx-auto">
           <h3 className="text-2xl font-bold text-center mb-8 text-foreground">
-            Hadithi za Mafanikio Zilizothibitishwa | Verified Success Stories
+            {t('safety.trust.verifiedSuccessStories')}
           </h3>
           
           <div className="grid md:grid-cols-2 gap-8">
@@ -264,7 +266,7 @@ const CommunityTrustSection = () => {
                     {story.verified && (
                       <Badge className="bg-success text-success-foreground ml-3">
                         <CheckCircle2 className="w-3 h-3 mr-1" />
-                        Verified
+                        {t('safety.trust.verified')}
                       </Badge>
                     )}
                   </div>
@@ -279,7 +281,7 @@ const CommunityTrustSection = () => {
                   {selectedStory === story.id && (
                     <div className="space-y-3 pt-3 border-t border-border">
                       <div>
-                        <p className="text-sm font-medium text-card-foreground mb-2">Community Endorsers:</p>
+                        <p className="text-sm font-medium text-card-foreground mb-2">{t('safety.trust.communityEndorsers')}:</p>
                         <div className="flex flex-wrap gap-1">
                           {story.endorsers.map((endorser, index) => (
                             <Badge key={index} variant="outline" className="text-xs">
@@ -305,10 +307,9 @@ const CommunityTrustSection = () => {
         <Card className="max-w-4xl mx-auto mt-12 p-8 bg-gradient-to-r from-success/10 to-primary/10 border-success/20">
           <div className="text-center">
             <Handshake className="w-16 h-16 text-success mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-card-foreground mb-4">Trust Commitment</h3>
+            <h3 className="text-2xl font-bold text-card-foreground mb-4">{t('safety.trust.trustCommitment')}</h3>
             <p className="text-muted-foreground leading-relaxed">
-              Peace Verse is not just a youth project - it's a partnership between youth and cultural leadership. 
-              We respect culture, lead with transparency, and deliver on our commitments to the community.
+              {t('safety.trust.trustCommitmentText')}
             </p>
           </div>
         </Card>

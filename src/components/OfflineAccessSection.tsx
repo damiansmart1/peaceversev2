@@ -17,94 +17,96 @@ import {
   Volume2,
   Download
 } from "lucide-react";
+import { useTranslationContext } from './TranslationProvider';
 
 const OfflineAccessSection = () => {
   const [connectionDemo, setConnectionDemo] = useState<'online' | 'offline'>('online');
+  const { t } = useTranslationContext();
 
   const accessMethods = [
     {
       id: "sms-ussd",
       icon: MessageSquare,
-      title: "SMS & USSD",
-      description: "Accessible via basic phones without internet connectivity",
+      title: t('safety.offline.smsUssd.title'),
+      description: t('safety.offline.smsUssd.description'),
       features: [
-        "Story sharing via SMS (160 chars)",
-        "*555# USSD menu navigation", 
-        "Voice note requests via SMS",
-        "Safe space reporting",
-        "Peace point balance checks"
+        t('safety.offline.smsUssd.feature1'),
+        t('safety.offline.smsUssd.feature2'), 
+        t('safety.offline.smsUssd.feature3'),
+        t('safety.offline.smsUssd.feature4'),
+        t('safety.offline.smsUssd.feature5')
       ],
-      cost: "Ksh 5 per SMS",
-      coverage: "99.8% Kenya",
-      requirement: "Any mobile phone"
+      cost: t('safety.offline.smsUssd.cost'),
+      coverage: t('safety.offline.smsUssd.coverage'),
+      requirement: t('safety.offline.smsUssd.requirement')
     },
     {
       id: "voice-calls",
       icon: Phone,
-      title: "Voice Hotline",
-      description: "Direct phone line for sharing stories and getting support",
+      title: t('safety.offline.voiceHotline.title'),
+      description: t('safety.offline.voiceHotline.description'),
       features: [
-        "24/7 peace storytelling hotline",
-        "Multi-language support",
-        "Crisis intervention routing",
-        "Story recording & transcription",
-        "Community leader connections"
+        t('safety.offline.voiceHotline.feature1'),
+        t('safety.offline.voiceHotline.feature2'),
+        t('safety.offline.voiceHotline.feature3'),
+        t('safety.offline.voiceHotline.feature4'),
+        t('safety.offline.voiceHotline.feature5')
       ],
-      cost: "Free (toll-free)",
-      coverage: "National",
-      requirement: "Voice calling capability"
+      cost: t('safety.offline.voiceHotline.cost'),
+      coverage: t('safety.offline.voiceHotline.coverage'),
+      requirement: t('safety.offline.voiceHotline.requirement')
     },
     {
       id: "radio-integration",
       icon: Radio,
-      title: "Community Radio",
-      description: "Integration with community radio stations for broad communication",
+      title: t('safety.offline.communityRadio.title'),
+      description: t('safety.offline.communityRadio.description'),
       features: [
-        "Weekly peace dialogue broadcasts",
-        "Story sharing sessions",
-        "Live community Q&A",
-        "Educational content",
-        "Event announcements"
+        t('safety.offline.communityRadio.feature1'),
+        t('safety.offline.communityRadio.feature2'),
+        t('safety.offline.communityRadio.feature3'),
+        t('safety.offline.communityRadio.feature4'),
+        t('safety.offline.communityRadio.feature5')
       ],
-      cost: "Free",
-      coverage: "90+ radio stations",
-      requirement: "FM radio access"
+      cost: t('safety.offline.communityRadio.cost'),
+      coverage: t('safety.offline.communityRadio.coverage'),
+      requirement: t('safety.offline.communityRadio.requirement')
     },
     {
       id: "offline-app",
       icon: WifiOff,
-      title: "Offline-First App",
-      description: "Programu inayofanya kazi bila mtandao na kusawazisha baadaye",
+      title: t('safety.offline.offlineApp.title'),
+      description: t('safety.offline.offlineApp.description'),
       features: [
-        "Offline content creation",
-        "Local story storage",
-        "Background sync when online",
-        "Offline gamification",
-        "Community map caching"
+        t('safety.offline.offlineApp.feature1'),
+        t('safety.offline.offlineApp.feature2'),
+        t('safety.offline.offlineApp.feature3'),
+        t('safety.offline.offlineApp.feature4'),
+        t('safety.offline.offlineApp.feature5')
       ],
-      cost: "Free download",
-      coverage: "Android 5.0+",
-      requirement: "Smartphone with 50MB space"
+      cost: t('safety.offline.offlineApp.cost'),
+      coverage: t('safety.offline.offlineApp.coverage'),
+      requirement: t('safety.offline.offlineApp.requirement')
     }
   ];
 
   const bridgingFeatures = [
     {
-      title: "Community Hubs",
-      description: "Vituo vya kijamii vilivyo na WiFi bure na kompyuta",
-      locations: "50+ locations across Kenya",
+      title: t('safety.offline.bridges.communityHubs.title'),
+      description: t('safety.offline.bridges.communityHubs.description'),
+      locations: t('safety.offline.bridges.communityHubs.locations'),
       icon: MapPin
     },
     {
-      title: "Mobile Sync Points", 
-      description: "Madereva wa matatu na makazi ya jamii yanayotoa huduma za kusawazisha",
-      frequency: "Daily sync opportunities",
+      title: t('safety.offline.bridges.mobileSyncPoints.title'), 
+      description: t('safety.offline.bridges.mobileSyncPoints.description'),
+      frequency: t('safety.offline.bridges.mobileSyncPoints.frequency'),
       icon: RefreshCw
     },
     {
-      title: "Offline Content Packages",
-      description: "Content packages distributed via Bluetooth and WiFi hotspots",
-      size: "Weekly 5MB packages",
+      title: t('safety.offline.bridges.offlinePackages.title'),
+      description: t('safety.offline.bridges.offlinePackages.description'),
+      size: t('safety.offline.bridges.offlinePackages.size'),
       icon: Download
     }
   ];
@@ -114,17 +116,17 @@ const OfflineAccessSection = () => {
       <div className="container mx-auto px-6">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold mb-4 text-foreground">
-            Universal Access
+            {t('safety.offline.title')}
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Peace Verse works for youth in marginalized and rural areas with limited internet access
+            {t('safety.offline.subtitle')}
           </p>
         </div>
 
         {/* Connection Demo */}
         <Card className="max-w-4xl mx-auto mb-12 p-8 bg-card/80 backdrop-blur-sm shadow-story">
           <div className="text-center mb-6">
-            <h3 className="text-xl font-semibold mb-4 text-card-foreground">Demo: Platform Access Modes</h3>
+            <h3 className="text-xl font-semibold mb-4 text-card-foreground">{t('safety.offline.demo.title')}</h3>
             <div className="flex justify-center space-x-4">
               <Button 
                 variant={connectionDemo === 'online' ? 'default' : 'outline'}
@@ -132,7 +134,7 @@ const OfflineAccessSection = () => {
                 className="space-x-2"
               >
                 <Wifi className="w-4 h-4" />
-                <span>Online Mode</span>
+                <span>{t('safety.offline.demo.onlineMode')}</span>
               </Button>
               <Button 
                 variant={connectionDemo === 'offline' ? 'default' : 'outline'}
@@ -140,7 +142,7 @@ const OfflineAccessSection = () => {
                 className="space-x-2"
               >
                 <WifiOff className="w-4 h-4" />
-                <span>Offline Mode</span>
+                <span>{t('safety.offline.demo.offlineMode')}</span>
               </Button>
             </div>
           </div>
@@ -152,14 +154,14 @@ const OfflineAccessSection = () => {
                   <Wifi className="w-6 h-6" />
                   <Signal className="w-6 h-6" />
                 </div>
-                <h4 className="font-semibold text-card-foreground">Full Platform Access</h4>
+                <h4 className="font-semibold text-card-foreground">{t('safety.offline.demo.fullAccess')}</h4>
                 <p className="text-sm text-muted-foreground">
-                  Complete app functionality: story sharing, community map, gamification, real-time interactions
+                  {t('safety.offline.demo.fullAccessDesc')}
                 </p>
                 <div className="flex justify-center space-x-2">
-                  <Badge className="bg-success text-success-foreground">HD Media</Badge>
-                  <Badge className="bg-success text-success-foreground">Real-time Chat</Badge>
-                  <Badge className="bg-success text-success-foreground">Live Updates</Badge>
+                  <Badge className="bg-success text-success-foreground">{t('safety.offline.demo.hdMedia')}</Badge>
+                  <Badge className="bg-success text-success-foreground">{t('safety.offline.demo.realtimeChat')}</Badge>
+                  <Badge className="bg-success text-success-foreground">{t('safety.offline.demo.liveUpdates')}</Badge>
                 </div>
               </div>
             ) : (
@@ -168,14 +170,14 @@ const OfflineAccessSection = () => {
                   <WifiOff className="w-6 h-6" />
                   <MessageSquare className="w-6 h-6" />
                 </div>
-                <h4 className="font-semibold text-card-foreground">Alternative Access Methods</h4>
+                <h4 className="font-semibold text-card-foreground">{t('safety.offline.demo.alternativeAccess')}</h4>
                 <p className="text-sm text-muted-foreground">
-                  SMS stories, voice calls, radio integration, offline app with sync capabilities
+                  {t('safety.offline.demo.alternativeAccessDesc')}
                 </p>
                 <div className="flex justify-center space-x-2">
-                  <Badge className="bg-warning text-warning-foreground">SMS Stories</Badge>
-                  <Badge className="bg-warning text-warning-foreground">Voice Calls</Badge>
-                  <Badge className="bg-warning text-warning-foreground">Radio Shows</Badge>
+                  <Badge className="bg-warning text-warning-foreground">{t('safety.offline.demo.smsStories')}</Badge>
+                  <Badge className="bg-warning text-warning-foreground">{t('safety.offline.demo.voiceCalls')}</Badge>
+                  <Badge className="bg-warning text-warning-foreground">{t('safety.offline.demo.radioShows')}</Badge>
                 </div>
               </div>
             )}
@@ -223,7 +225,7 @@ const OfflineAccessSection = () => {
                       <div className="bg-primary/10 rounded-lg p-4">
                         <div className="flex items-center space-x-2 mb-2">
                           <div className="w-3 h-3 bg-primary rounded-full" />
-                          <span className="text-sm font-medium text-card-foreground">Cost</span>
+                          <span className="text-sm font-medium text-card-foreground">{t('safety.offline.cost')}</span>
                         </div>
                         <p className="text-lg font-bold text-primary">{method.cost}</p>
                       </div>
@@ -231,7 +233,7 @@ const OfflineAccessSection = () => {
                       <div className="bg-success/10 rounded-lg p-4">
                         <div className="flex items-center space-x-2 mb-2">
                           <div className="w-3 h-3 bg-success rounded-full" />
-                          <span className="text-sm font-medium text-card-foreground">Coverage</span>
+                          <span className="text-sm font-medium text-card-foreground">{t('safety.offline.coverage')}</span>
                         </div>
                         <p className="text-lg font-bold text-success">{method.coverage}</p>
                       </div>
@@ -239,7 +241,7 @@ const OfflineAccessSection = () => {
                       <div className="bg-accent/10 rounded-lg p-4">
                         <div className="flex items-center space-x-2 mb-2">
                           <div className="w-3 h-3 bg-accent rounded-full" />
-                          <span className="text-sm font-medium text-card-foreground">Requirements</span>
+                          <span className="text-sm font-medium text-card-foreground">{t('safety.offline.requirements')}</span>
                         </div>
                         <p className="text-sm text-accent-foreground">{method.requirement}</p>
                       </div>
@@ -254,7 +256,7 @@ const OfflineAccessSection = () => {
         {/* Offline-to-Online Bridges */}
         <div className="max-w-6xl mx-auto">
           <h3 className="text-2xl font-bold text-center mb-8 text-foreground">
-            Madaraja ya Offline-Online | Connectivity Bridges
+            {t('safety.offline.connectivityBridges')}
           </h3>
           
           <div className="grid md:grid-cols-3 gap-6">
@@ -282,10 +284,9 @@ const OfflineAccessSection = () => {
         <Card className="max-w-4xl mx-auto mt-12 p-8 bg-gradient-to-r from-accent/10 to-primary/10 border-accent/20">
           <div className="text-center">
             <Users className="w-16 h-16 text-accent mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-card-foreground mb-4">Access Promise</h3>
+            <h3 className="text-2xl font-bold text-card-foreground mb-4">{t('safety.offline.accessPromise')}</h3>
             <p className="text-muted-foreground leading-relaxed">
-              No Kenyan youth should be excluded from peace conversations because of technology barriers. 
-              Peace Verse works on basic phones, smartphones, and even without any phone at all.
+              {t('safety.offline.accessPromiseText')}
             </p>
           </div>
         </Card>
