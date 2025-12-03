@@ -1902,6 +1902,7 @@ export type Database = {
       proposal_votes: {
         Row: {
           created_at: string
+          display_anonymous: boolean
           id: string
           proposal_id: string
           user_id: string
@@ -1909,6 +1910,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          display_anonymous?: boolean
           id?: string
           proposal_id: string
           user_id: string
@@ -1916,6 +1918,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          display_anonymous?: boolean
           id?: string
           proposal_id?: string
           user_id?: string
