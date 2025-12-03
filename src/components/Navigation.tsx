@@ -123,23 +123,23 @@ const Navigation = () => {
   return <>
       <KeyboardShortcuts onSearchOpen={() => setSearchOpen(true)} />
       <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled ? 'bg-gradient-to-r from-primary/95 via-forest/90 to-earth/95 backdrop-blur-xl border-b border-gold/30 shadow-xl' : 'bg-gradient-to-r from-primary/80 via-forest/70 to-earth/80 backdrop-blur-md'}`}>
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled ? 'bg-gradient-to-r from-primary via-secondary to-earth backdrop-blur-xl border-b border-accent/40 shadow-[0_4px_30px_-4px_hsl(var(--primary)/0.3)]' : 'bg-gradient-to-r from-primary/90 via-secondary/85 to-earth/90 backdrop-blur-md'}`}>
       <div className="container mx-auto px-3 sm:px-4">
         <div className="flex items-center justify-between h-14 sm:h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 hover:scale-105 transition-all duration-300 flex-shrink-0 group">
-            <img src={peaceverselogo} alt="PeaceVerse Logo" className="h-10 sm:h-12 w-auto drop-shadow-lg group-hover:drop-shadow-xl transition-all" />
+            <img src={peaceverselogo} alt="PeaceVerse Logo" className="h-10 sm:h-12 w-auto drop-shadow-[0_2px_8px_hsl(var(--accent)/0.4)] group-hover:drop-shadow-[0_4px_12px_hsl(var(--accent)/0.6)] transition-all" />
           </Link>
 
           {/* Desktop Navigation - Scrollable horizontal layout */}
           <div className="hidden lg:flex items-center overflow-x-auto max-w-xl xl:max-w-3xl scrollbar-hide">
-            <div className="flex items-center space-x-1 px-2">
+            <div className="flex items-center space-x-1.5 px-2">
               {navItems.map(item => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.path;
-                return <Button key={item.path} variant="ghost" size="sm" asChild className={`flex items-center space-x-2 transition-all duration-300 whitespace-nowrap flex-shrink-0 text-xs xl:text-sm px-3 xl:px-4 py-2 rounded-full ${isActive ? 'bg-gold/90 text-primary-foreground font-semibold shadow-lg shadow-gold/30' : 'text-cream hover:bg-cream/20 hover:text-gold hover:shadow-md'}`}>
+                return <Button key={item.path} variant="ghost" size="sm" asChild className={`flex items-center space-x-2 transition-all duration-300 whitespace-nowrap flex-shrink-0 text-xs xl:text-sm px-3 xl:px-4 py-2 rounded-full border ${isActive ? 'bg-accent text-primary font-semibold shadow-lg shadow-accent/40 border-accent' : 'text-primary-foreground/90 hover:bg-accent/20 hover:text-accent border-transparent hover:border-accent/30 hover:shadow-md'}`}>
                     <Link to={item.path}>
-                      <Icon className={`w-4 h-4 xl:w-5 xl:h-5 ${isActive ? 'text-primary' : 'text-gold'}`} />
+                      <Icon className={`w-4 h-4 xl:w-5 xl:h-5 ${isActive ? 'text-primary' : 'text-accent'}`} />
                       <span className="font-medium">{item.label}</span>
                     </Link>
                   </Button>;
@@ -149,33 +149,33 @@ const Navigation = () => {
 
           {/* Right Side Actions */}
           <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-            <Button variant="ghost" size="sm" onClick={() => setSearchOpen(true)} className="gap-2 hidden xl:flex text-cream hover:bg-cream/20 hover:text-gold rounded-full transition-all duration-300">
-              <Search className="w-4 h-4 text-gold" />
-              <span className="text-xs text-cream/70">⌘K</span>
+            <Button variant="ghost" size="sm" onClick={() => setSearchOpen(true)} className="gap-2 hidden xl:flex text-primary-foreground/90 hover:bg-accent/20 hover:text-accent rounded-full transition-all duration-300">
+              <Search className="w-4 h-4 text-accent" />
+              <span className="text-xs text-primary-foreground/60">⌘K</span>
             </Button>
             <NotificationCenter />
-            <Button variant="ghost" size="sm" onClick={() => navigate('/help')} className="gap-2 hidden xl:flex text-cream hover:bg-cream/20 hover:text-gold rounded-full transition-all duration-300">
-              <HelpCircle className="w-4 h-4 text-gold" />
+            <Button variant="ghost" size="sm" onClick={() => navigate('/help')} className="gap-2 hidden xl:flex text-primary-foreground/90 hover:bg-accent/20 hover:text-accent rounded-full transition-all duration-300">
+              <HelpCircle className="w-4 h-4 text-accent" />
             </Button>
             <div className="hidden sm:block">
               <LanguageToggle />
             </div>
             
             {/* Authentication Section */}
-            <div className="flex items-center gap-1 sm:gap-2 ml-1 sm:ml-2 pl-1 sm:pl-2 border-l border-cream/30">
-              {isLoading ? <div className="flex items-center gap-2 text-cream">
-                  <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 border-2 border-gold border-t-transparent rounded-full animate-spin" />
+            <div className="flex items-center gap-1 sm:gap-2 ml-1 sm:ml-2 pl-1 sm:pl-2 border-l border-primary-foreground/20">
+              {isLoading ? <div className="flex items-center gap-2 text-primary-foreground">
+                  <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 border-2 border-accent border-t-transparent rounded-full animate-spin" />
                 </div> : user ? <>
-                  {isAdmin && <Button variant="outline" size="sm" onClick={() => navigate('/admin')} className="gap-1.5 bg-gold/20 hover:bg-gold/30 border-gold/50 hidden xl:flex text-xs text-cream hover:text-gold rounded-full transition-all duration-300">
-                      <Settings className="w-3.5 h-3.5 text-gold" />
+                  {isAdmin && <Button variant="outline" size="sm" onClick={() => navigate('/admin')} className="gap-1.5 bg-accent/20 hover:bg-accent/30 border-accent/50 hidden xl:flex text-xs text-primary-foreground hover:text-accent rounded-full transition-all duration-300">
+                      <Settings className="w-3.5 h-3.5 text-accent" />
                       <span className="font-semibold">Admin</span>
                     </Button>}
                   
-                  <Button variant="ghost" size="sm" onClick={handleSignOut} className="gap-1.5 text-xs sm:text-sm h-8 px-3 sm:px-4 rounded-full bg-cream/10 hover:bg-destructive/80 text-cream hover:text-destructive-foreground transition-all duration-300 shadow-md">
+                  <Button variant="ghost" size="sm" onClick={handleSignOut} className="gap-1.5 text-xs sm:text-sm h-8 px-3 sm:px-4 rounded-full bg-primary-foreground/10 hover:bg-destructive text-primary-foreground hover:text-destructive-foreground transition-all duration-300 shadow-md border border-transparent hover:border-destructive">
                     <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     <span className="hidden lg:inline font-medium">Sign Out</span>
                   </Button>
-                </> : <Button variant="default" size="sm" onClick={() => navigate('/auth')} className="gap-1.5 bg-gradient-to-r from-gold to-gold/80 hover:from-gold/90 hover:to-earth text-primary font-bold text-xs sm:text-sm h-8 px-3 sm:px-4 rounded-full shadow-lg shadow-gold/40 hover:shadow-xl transition-all duration-300">
+                </> : <Button variant="default" size="sm" onClick={() => navigate('/auth')} className="gap-1.5 bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-earth text-primary font-bold text-xs sm:text-sm h-8 px-3 sm:px-4 rounded-full shadow-lg shadow-accent/40 hover:shadow-xl transition-all duration-300 border border-accent/30">
                   <User className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   <span className="whitespace-nowrap">Sign In</span>
                 </Button>}
