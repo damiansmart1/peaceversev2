@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase-typed';
 import { toast } from '@/hooks/use-toast';
+import { createNotification } from './useNotifications';
 
 export interface Level {
   id: string;
@@ -146,6 +147,16 @@ export const useSubmitChallenge = () => {
         .single();
 
       if (error) throw error;
+
+      // Create notification for challenge submission
+      await createNotification(
+        user.id,
+        'gamification',
+        '🎯 Challenge Submitted!',
+        'Your submission is under review. Points will be awarded once approved.',
+        { challenge_id: submission.challenge_id }
+      );
+
       return data;
     },
     onSuccess: () => {
@@ -234,6 +245,15 @@ export const useAwardPoints = () => {
       });
 
       if (error) throw error;
+
+      // Create notification for points awarded
+      await createNotification(
+        user.id,
+        'gamification',
+        `🎉 +${params.points} Peace Points!`,
+        params.description || `You earned ${params.points} points for ${params.action_type}!`,
+        { action_type: params.action_type, points: params.points }
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['userGamificationProfile'] });
@@ -261,4 +281,37 @@ export const useUpdateStreak = () => {
       queryClient.invalidateQueries({ queryKey: ['userGamificationProfile'] });
     }
   });
+};
+
+// Helper to send notification for level up
+export const notifyLevelUp = async (userId: string, newLevel: number, levelTitle: string) => {
+  await createNotification(
+    userId,
+    'achievement',
+    `⭐ Level Up! You reached Level ${newLevel}!`,
+    `Congratulations! You are now a ${levelTitle}!`,
+    { level: newLevel, title: levelTitle }
+  );
+};
+
+// Helper to send notification for badge earned
+export const notifyBadgeEarned = async (userId: string, badgeName: string, points: number) => {
+  await createNotification(
+    userId,
+    'achievement',
+    `🏆 Badge Earned: ${badgeName}!`,
+    `You earned ${points} Peace Points with this achievement!`,
+    { badge: badgeName, points }
+  );
+};
+
+// Helper to send notification for streak bonus
+export const notifyStreakBonus = async (userId: string, streakDays: number, bonusPoints: number) => {
+  await createNotification(
+    userId,
+    'gamification',
+    `🔥 ${streakDays}-Day Streak Bonus!`,
+    `Amazing! You earned +${bonusPoints} bonus Peace Points for your dedication!`,
+    { streak_days: streakDays, bonus_points: bonusPoints }
+  );
 };

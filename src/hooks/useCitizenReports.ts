@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase-typed';
 import { useToast } from '@/hooks/use-toast';
+import { createNotification } from './useNotifications';
 
 export interface ReportSubmission {
   title: string;
@@ -113,8 +114,21 @@ export const useCitizenReports = () => {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: async (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['citizen-reports'] });
+      
+      // Create notification for report submission
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await createNotification(
+          user.id,
+          'report_status',
+          '📋 Report Submitted Successfully',
+          `Your incident report "${variables.title}" has been submitted and is being reviewed.`,
+          { report_title: variables.title, status: 'pending' }
+        ).catch(console.error);
+      }
+      
       toast({
         title: 'Report Submitted',
         description: 'Your report has been submitted for verification.',
