@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useUserWallet, useCreatorEarnings, useSocialProfile } from '@/hooks/useSocialNetwork';
 import { useAuth } from '@/contexts/AuthContext';
+import { WithdrawDialog } from './WithdrawDialog';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -30,6 +31,7 @@ export const CreatorDashboard = () => {
   const { data: wallet, isLoading: loadingWallet } = useUserWallet();
   const { data: earnings, isLoading: loadingEarnings } = useCreatorEarnings();
   const { data: profile } = useSocialProfile();
+  const [withdrawDialogOpen, setWithdrawDialogOpen] = useState(false);
 
   // Mock chart data - in real app this would come from aggregated earnings
   const chartData = [
@@ -323,7 +325,7 @@ export const CreatorDashboard = () => {
       <Card>
         <CardHeader>
           <CardTitle>Withdraw Funds</CardTitle>
-          <CardDescription>Transfer your earnings to your bank or mobile money</CardDescription>
+          <CardDescription>Transfer your earnings to your bank via Paystack or mobile money</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
@@ -333,16 +335,23 @@ export const CreatorDashboard = () => {
             </div>
             <Button 
               disabled={(wallet?.balance || 0) < 10}
+              onClick={() => setWithdrawDialogOpen(true)}
               className="bg-gradient-to-r from-green-500 to-emerald-500"
             >
-              Withdraw
+              Withdraw via Paystack
             </Button>
           </div>
           <p className="text-xs text-muted-foreground mt-3">
-            Minimum withdrawal: $10.00. Processing time: 1-3 business days.
+            Minimum withdrawal: $10.00 USD. Processing via Paystack takes 24-48 hours.
           </p>
         </CardContent>
       </Card>
+
+      <WithdrawDialog
+        open={withdrawDialogOpen}
+        onOpenChange={setWithdrawDialogOpen}
+        walletBalance={wallet?.balance || 0}
+      />
     </div>
   );
 };
