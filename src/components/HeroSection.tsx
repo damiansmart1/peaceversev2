@@ -1,89 +1,136 @@
 import { Button } from "@/components/ui/button";
-import { Mic, Users, Award, Map } from "lucide-react";
+import { ArrowRight, Shield, Globe, Activity } from "lucide-react";
 import heroImage from "@/assets/hero-image.jpg";
-import { useTranslationContext } from "@/components/TranslationProvider";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 
 const HeroSection = () => {
-  const { t } = useTranslationContext();
+  const navigate = useNavigate();
   
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background pt-16">
-      {/* Background Image with Overlay */}
+    <section className="relative min-h-[100svh] flex items-center justify-center overflow-hidden bg-background">
+      {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <img
           src={heroImage}
-          alt={t('hero.alt') || "Diverse youth coming together for peace building through storytelling and community dialogue"}
+          alt="African communities united for peace"
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-background/90 via-background/70 to-background/90" />
+        <div className="absolute inset-0 bg-gradient-to-b from-primary-dark/90 via-primary-dark/80 to-background" />
       </div>
+
+      {/* Animated Grid Pattern */}
+      <div className="absolute inset-0 bg-grid-pattern opacity-20 z-[1]" />
+
+      {/* Floating Elements */}
+      <div className="absolute top-1/4 left-[10%] w-2 h-2 bg-gold rounded-full animate-pulse-voice z-[1]" />
+      <div className="absolute top-1/3 right-[15%] w-3 h-3 bg-accent rounded-full animate-pulse-voice z-[1]" style={{ animationDelay: '0.5s' }} />
+      <div className="absolute bottom-1/3 left-[20%] w-2 h-2 bg-success rounded-full animate-pulse-voice z-[1]" style={{ animationDelay: '1s' }} />
 
       {/* Content */}
-      <div className="relative z-10 container mx-auto px-6 py-20">
-        <div className="max-w-4xl mx-auto text-center animate-fade-in-up">
+      <div className="relative z-10 container mx-auto px-6 pt-20 pb-12">
+        <motion.div 
+          className="max-w-4xl mx-auto text-center"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          {/* Badge */}
+          <motion.div 
+            className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-2 mb-6"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2 }}
+          >
+            <span className="w-2 h-2 bg-success rounded-full animate-pulse" />
+            <span className="text-white/90 text-sm font-medium">Continental Early Warning System</span>
+          </motion.div>
+
           {/* Main Heading */}
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-peace-gradient bg-clip-text text-transparent leading-tight">
-            {t('hero.title')}: {t('hero.network') || 'Continental Early Warning Network'}
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold text-white mb-6 leading-[1.1] tracking-tight">
+            Detect. Verify.
+            <span className="block bg-gradient-to-r from-gold via-accent to-gold-light bg-clip-text text-transparent">
+              Prevent.
+            </span>
           </h1>
           
-          <p className="text-xl md:text-2xl text-foreground/80 mb-4 font-medium">
-            {t('hero.subtitle')}
-          </p>
-          
-          <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
-            {t('hero.description')}
+          {/* Subtitle */}
+          <p className="text-lg sm:text-xl text-white/80 mb-10 max-w-2xl mx-auto leading-relaxed">
+            Real-time peace intelligence across Africa
           </p>
 
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Button variant="peace" size="lg" className="text-lg px-8 py-6" onClick={() => window.location.href='/community'}>
-              <Mic className="w-5 h-5" />
-              {t('hero.cta.primary')}
+          {/* CTA Buttons */}
+          <motion.div 
+            className="flex flex-col sm:flex-row gap-4 justify-center mb-16"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <Button 
+              size="lg" 
+              className="bg-white text-primary hover:bg-white/90 text-lg px-8 h-14 gap-2 shadow-elevated"
+              onClick={() => navigate('/incidents')}
+            >
+              Report Incident
+              <ArrowRight className="w-5 h-5" />
             </Button>
-            <Button variant="community" size="lg" className="text-lg px-8 py-6" onClick={() => window.location.href='/incidents'}>
-              <Users className="w-5 h-5" />
-              {t('hero.cta.report') || 'Report Incident'}
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="border-white/40 bg-white/10 text-white hover:bg-white/20 text-lg px-8 h-14"
+              onClick={() => navigate('/peace-pulse')}
+            >
+              View Dashboard
             </Button>
-          </div>
+          </motion.div>
 
-          {/* Feature Cards */}
-          <div className="grid md:grid-cols-3 gap-6 mt-16">
-            <div className="bg-card/80 backdrop-blur-sm rounded-lg p-6 shadow-story border border-accent/20 hover:shadow-warm transition-all duration-300">
-              <div className="w-12 h-12 bg-voice-active rounded-full flex items-center justify-center mb-4 mx-auto">
-                <Mic className="w-6 h-6 text-primary-foreground" />
+          {/* Stats Row */}
+          <motion.div 
+            className="grid grid-cols-3 gap-4 sm:gap-8 max-w-2xl mx-auto"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+          >
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Globe className="w-5 h-5 text-gold" />
+                <span className="text-3xl sm:text-4xl font-bold text-white">54</span>
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-card-foreground">{t('features.voice.title')}</h3>
-              <p className="text-muted-foreground">
-                {t('features.voice.description')}
-              </p>
+              <span className="text-white/60 text-sm">Countries</span>
             </div>
-
-            <div className="bg-card/80 backdrop-blur-sm rounded-lg p-6 shadow-story border border-accent/20 hover:shadow-warm transition-all duration-300">
-              <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center mb-4 mx-auto">
-                <Map className="w-6 h-6 text-accent-foreground" />
+            <div className="text-center border-x border-white/20">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Shield className="w-5 h-5 text-success" />
+                <span className="text-3xl sm:text-4xl font-bold text-white">24/7</span>
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-card-foreground">{t('features.mapping.title') || 'Interactive Mapping'}</h3>
-              <p className="text-muted-foreground">
-                {t('features.mapping.description') || 'Visualize peace and conflict data across African regions with real-time geo-tagged incident intelligence.'}
-              </p>
+              <span className="text-white/60 text-sm">Monitoring</span>
             </div>
-
-            <div className="bg-card/80 backdrop-blur-sm rounded-lg p-6 shadow-story border border-accent/20 hover:shadow-warm transition-all duration-300">
-              <div className="w-12 h-12 bg-warning rounded-full flex items-center justify-center mb-4 mx-auto">
-                <Award className="w-6 h-6 text-warning-foreground" />
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Activity className="w-5 h-5 text-accent" />
+                <span className="text-3xl sm:text-4xl font-bold text-white">Live</span>
               </div>
-              <h3 className="text-xl font-semibold mb-3 text-card-foreground">{t('features.rewards.title') || 'Earn Rewards'}</h3>
-              <p className="text-muted-foreground">
-                {t('features.rewards.description') || 'Complete peacebuilding challenges, earn badges, and unlock exclusive rewards for community contributions.'}
-              </p>
+              <span className="text-white/60 text-sm">Intelligence</span>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </div>
 
-      {/* Decorative Elements */}
-      <div className="absolute top-20 left-10 w-20 h-20 bg-primary/10 rounded-full blur-xl animate-pulse-voice" />
-      <div className="absolute bottom-20 right-10 w-32 h-32 bg-accent/10 rounded-full blur-xl animate-pulse-voice" />
+      {/* Scroll Indicator */}
+      <motion.div 
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1 }}
+      >
+        <div className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center">
+          <motion.div 
+            className="w-1.5 h-3 bg-white/60 rounded-full mt-2"
+            animate={{ y: [0, 8, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          />
+        </div>
+      </motion.div>
     </section>
   );
 };
