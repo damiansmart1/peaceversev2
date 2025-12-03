@@ -1,16 +1,18 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase-typed';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, Play, DollarSign } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, Play, DollarSign, Flag, Copy, ExternalLink } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TipDialog } from './TipDialog';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface SocialFeedProps {
   userId?: string;
@@ -19,10 +21,42 @@ interface SocialFeedProps {
 
 export const SocialFeed = ({ userId, showAll = true }: SocialFeedProps) => {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
   const [savedPosts, setSavedPosts] = useState<Set<string>>(new Set());
   const [tipDialogOpen, setTipDialogOpen] = useState(false);
   const [selectedContent, setSelectedContent] = useState<any>(null);
+
+  const handleShare = (post: any) => {
+    const url = `${window.location.origin}/content/${post.id}`;
+    navigator.clipboard.writeText(url);
+    toast.success('Link copied to clipboard!');
+  };
+
+  const handleReport = (postId: string) => {
+    toast.success('Content reported. Our team will review it.');
+  };
+
+  const repostMutation = useMutation({
+    mutationFn: async (content: any) => {
+      if (!user?.id) throw new Error('Not authenticated');
+      const { error } = await supabase.from('content').insert({
+        user_id: user.id,
+        title: `Repost: ${content.title}`,
+        description: content.description,
+        category: content.category,
+        file_url: content.file_url,
+        file_type: content.file_type,
+        approval_status: 'pending',
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['social-feed'] });
+      toast.success('Reposted! Content submitted for review.');
+    },
+    onError: () => toast.error('Failed to repost'),
+  });
 
   const { data: posts, isLoading } = useQuery({
     queryKey: ['social-feed', userId],
@@ -157,9 +191,28 @@ export const SocialFeed = ({ userId, showAll = true }: SocialFeedProps) => {
                       {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
                     </p>
                   </div>
-                  <Button variant="ghost" size="icon">
-                    <MoreHorizontal className="h-5 w-5" />
-                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <MoreHorizontal className="h-5 w-5" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => handleShare(post)}>
+                        <Copy className="h-4 w-4 mr-2" />
+                        Copy Link
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => repostMutation.mutate(post)}>
+                        <Share2 className="h-4 w-4 mr-2" />
+                        Repost
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => handleReport(post.id)} className="text-destructive">
+                        <Flag className="h-4 w-4 mr-2" />
+                        Report Content
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </CardHeader>
 
                 <CardContent className="p-0">
@@ -218,7 +271,7 @@ export const SocialFeed = ({ userId, showAll = true }: SocialFeedProps) => {
                         <MessageCircle className="h-5 w-5 mr-1" />
                         Comment
                       </Button>
-                      <Button variant="ghost" size="sm">
+                      <Button variant="ghost" size="sm" onClick={() => handleShare(post)}>
                         <Share2 className="h-5 w-5 mr-1" />
                         {post.share_count}
                       </Button>

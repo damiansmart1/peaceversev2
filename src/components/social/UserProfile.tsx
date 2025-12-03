@@ -9,12 +9,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   UserPlus, UserMinus, MessageCircle, Settings, Share2, 
   Grid3X3, Bookmark, Heart, Award, CheckCircle2, MapPin,
-  Link as LinkIcon, Calendar
+  Link as LinkIcon, Calendar, ExternalLink, Globe, Twitter, Instagram
 } from 'lucide-react';
 import { formatDistanceToNow, format } from 'date-fns';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { SocialFeed } from './SocialFeed';
+import { ProfileEditor } from './ProfileEditor';
+import { toast } from 'sonner';
 
 interface UserProfileProps {
   userId?: string;
@@ -26,6 +28,7 @@ export const UserProfile = ({ userId }: UserProfileProps) => {
   const { data: isFollowing } = useIsFollowing(userId || '');
   const followUser = useFollowUser();
   const unfollowUser = useUnfollowUser();
+  const [showProfileEditor, setShowProfileEditor] = useState(false);
 
   const isOwnProfile = !userId || userId === user?.id;
 
@@ -36,6 +39,17 @@ export const UserProfile = ({ userId }: UserProfileProps) => {
     } else {
       followUser.mutate(userId);
     }
+  };
+
+  const handleShare = () => {
+    const url = `${window.location.origin}/profile/${profile?.id || user?.id}`;
+    navigator.clipboard.writeText(url);
+    toast.success('Profile link copied to clipboard!');
+  };
+
+  const handleMessage = () => {
+    toast.info('Opening direct messages...');
+    // This would navigate to messages with this user pre-selected
   };
 
   const getCreatorTierBadge = (tier: string) => {
@@ -153,15 +167,42 @@ export const UserProfile = ({ userId }: UserProfileProps) => {
                 </span>
               </div>
 
+              {/* Social Links */}
+              {profile.social_links && (
+                <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-4">
+                  {profile.social_links.website && (
+                    <Button variant="ghost" size="sm" asChild>
+                      <a href={profile.social_links.website} target="_blank" rel="noopener noreferrer">
+                        <Globe className="h-4 w-4" />
+                      </a>
+                    </Button>
+                  )}
+                  {profile.social_links.twitter && (
+                    <Button variant="ghost" size="sm" asChild>
+                      <a href={`https://twitter.com/${profile.social_links.twitter.replace('@', '')}`} target="_blank" rel="noopener noreferrer">
+                        <Twitter className="h-4 w-4" />
+                      </a>
+                    </Button>
+                  )}
+                  {profile.social_links.instagram && (
+                    <Button variant="ghost" size="sm" asChild>
+                      <a href={`https://instagram.com/${profile.social_links.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer">
+                        <Instagram className="h-4 w-4" />
+                      </a>
+                    </Button>
+                  )}
+                </div>
+              )}
+
               {/* Actions */}
               <div className="flex flex-wrap justify-center md:justify-start gap-2">
                 {isOwnProfile ? (
                   <>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => setShowProfileEditor(true)}>
                       <Settings className="h-4 w-4 mr-2" />
                       Edit Profile
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={handleShare}>
                       <Share2 className="h-4 w-4 mr-2" />
                       Share
                     </Button>
@@ -185,9 +226,13 @@ export const UserProfile = ({ userId }: UserProfileProps) => {
                         </>
                       )}
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={handleMessage}>
                       <MessageCircle className="h-4 w-4 mr-2" />
                       Message
+                    </Button>
+                    <Button variant="outline" onClick={handleShare}>
+                      <Share2 className="h-4 w-4 mr-2" />
+                      Share
                     </Button>
                   </>
                 )}
@@ -284,6 +329,15 @@ export const UserProfile = ({ userId }: UserProfileProps) => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Profile Editor Dialog */}
+      {profile && (
+        <ProfileEditor 
+          profile={profile} 
+          open={showProfileEditor} 
+          onOpenChange={setShowProfileEditor} 
+        />
+      )}
     </div>
   );
 };
