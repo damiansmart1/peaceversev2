@@ -7,16 +7,19 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslationContext } from '@/components/TranslationProvider';
 import { z } from 'zod';
-import { Globe, UserX, Eye, EyeOff } from 'lucide-react';
+import { Globe, UserX, Eye, EyeOff, User } from 'lucide-react';
 import peaceLogo from '@/assets/peaceverse-logo.png';
+
 const emailSchema = z.string().trim().email('Invalid email address').max(255);
 const passwordSchema = z.string().min(8, 'Password must be at least 8 characters').max(100).regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Password must contain at least one uppercase letter, one lowercase letter, and one number');
+const nameSchema = z.string().min(2, 'Name must be at least 2 characters').max(50, 'Name must be less than 50 characters').regex(/^[a-zA-Z\s'-]+$/, 'Name can only contain letters, spaces, hyphens, and apostrophes');
+
 export default function Auth() {
-  const {
-    t
-  } = useTranslationContext();
+  const { t } = useTranslationContext();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -38,6 +41,8 @@ export default function Auth() {
     try {
       emailSchema.parse(email);
       passwordSchema.parse(password);
+      nameSchema.parse(firstName);
+      if (lastName) nameSchema.parse(lastName);
     } catch (error) {
       if (error instanceof z.ZodError) {
         toast({
@@ -49,13 +54,16 @@ export default function Auth() {
       }
     }
     setIsLoading(true);
-    const {
-      error
-    } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/dashboard`
+        emailRedirectTo: `${window.location.origin}/dashboard`,
+        data: {
+          first_name: firstName.trim(),
+          last_name: lastName.trim(),
+          display_name: `${firstName.trim()} ${lastName.trim()}`.trim()
+        }
       }
     });
     setIsLoading(false);
@@ -216,7 +224,31 @@ export default function Auth() {
               </div>
             </form>
           ) : (
-            <form onSubmit={isSignUp ? handleSignUp : handleSignIn} className="space-y-6">
+          <form onSubmit={isSignUp ? handleSignUp : handleSignIn} className="space-y-6">
+              {isSignUp && (
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Input 
+                      type="text" 
+                      placeholder={t('auth.firstName')} 
+                      value={firstName} 
+                      onChange={e => setFirstName(e.target.value)} 
+                      required 
+                      className="h-12 bg-background/50 border-primary-foreground/30 text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary" 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Input 
+                      type="text" 
+                      placeholder={t('auth.lastName')} 
+                      value={lastName} 
+                      onChange={e => setLastName(e.target.value)} 
+                      className="h-12 bg-background/50 border-primary-foreground/30 text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary" 
+                    />
+                  </div>
+                </div>
+              )}
+              
               <div className="space-y-2">
                 <Input type="email" placeholder={t('auth.email')} value={email} onChange={e => setEmail(e.target.value)} required className="h-12 bg-background/50 border-primary-foreground/30 text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary" />
               </div>
