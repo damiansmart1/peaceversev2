@@ -7,7 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslationContext } from '@/components/TranslationProvider';
 import { z } from 'zod';
-import { Globe } from 'lucide-react';
+import { Globe, UserX } from 'lucide-react';
 import peaceLogo from '@/assets/peaceverse-logo.png';
 
 const emailSchema = z.string().trim().email('Invalid email address').max(255);
@@ -114,6 +114,27 @@ export default function Auth() {
     }
   };
 
+  const handleAnonymousSignIn = async () => {
+    setIsLoading(true);
+    const { error } = await supabase.auth.signInAnonymously();
+
+    setIsLoading(false);
+
+    if (error) {
+      toast({
+        title: t('auth.signInFailed'),
+        description: error.message,
+        variant: 'destructive',
+      });
+    } else {
+      toast({
+        title: t('auth.welcomeGuest'),
+        description: t('auth.guestSignedIn'),
+      });
+      navigate('/');
+    }
+  };
+
   return (
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-primary via-primary-dark to-background">
       {/* Animated background elements */}
@@ -175,6 +196,30 @@ export default function Auth() {
             >
               {isLoading ? t('auth.pleaseWait') : isSignUp ? t('auth.signUp') : t('auth.enter')}
             </Button>
+
+            <div className="relative my-4">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-primary-foreground/20" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-muted/40 px-2 text-primary-foreground/60">{t('auth.or')}</span>
+              </div>
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              disabled={isLoading}
+              onClick={handleAnonymousSignIn}
+              className="w-full h-12 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 font-medium transition-all duration-300"
+            >
+              <UserX className="w-5 h-5 mr-2" />
+              {t('auth.continueAsGuest')}
+            </Button>
+
+            <p className="text-xs text-primary-foreground/50 text-center mt-2">
+              {t('auth.guestPrivacyNote')}
+            </p>
 
             <div className="text-center pt-4">
               <button
