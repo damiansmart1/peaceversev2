@@ -74,6 +74,56 @@ export type Database = {
         }
         Relationships: []
       }
+      african_countries: {
+        Row: {
+          area_km2: number | null
+          capital: string | null
+          code: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          official_languages: string[] | null
+          population: number | null
+          regional_block_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          area_km2?: number | null
+          capital?: string | null
+          code: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          official_languages?: string[] | null
+          population?: number | null
+          regional_block_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          area_km2?: number | null
+          capital?: string | null
+          code?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          official_languages?: string[] | null
+          population?: number | null
+          regional_block_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "african_countries_regional_block_id_fkey"
+            columns: ["regional_block_id"]
+            isOneToOne: false
+            referencedRelation: "regional_blocks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_analysis_logs: {
         Row: {
           analysis_type: Database["public"]["Enums"]["ai_analysis_type"]
@@ -1333,6 +1383,96 @@ export type Database = {
           },
         ]
       }
+      peace_accountability_metrics: {
+        Row: {
+          accountability_index: number | null
+          avg_resolution_time: string | null
+          avg_response_time: string | null
+          calculated_at: string | null
+          country_code: string
+          created_by: string | null
+          id: string
+          incidents_reported: number | null
+          incidents_resolved: number | null
+          incidents_verified: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          accountability_index?: number | null
+          avg_resolution_time?: string | null
+          avg_response_time?: string | null
+          calculated_at?: string | null
+          country_code: string
+          created_by?: string | null
+          id?: string
+          incidents_reported?: number | null
+          incidents_resolved?: number | null
+          incidents_verified?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          accountability_index?: number | null
+          avg_resolution_time?: string | null
+          avg_response_time?: string | null
+          calculated_at?: string | null
+          country_code?: string
+          created_by?: string | null
+          id?: string
+          incidents_reported?: number | null
+          incidents_resolved?: number | null
+          incidents_verified?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      peace_pulse_metrics: {
+        Row: {
+          activity_count: number | null
+          calculated_at: string | null
+          country_code: string
+          created_by: string | null
+          hotspot_locations: Json | null
+          id: string
+          region: string | null
+          risk_score: number | null
+          sentiment_average: number | null
+          tension_level: string | null
+          time_period: string | null
+          trending_topics: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          activity_count?: number | null
+          calculated_at?: string | null
+          country_code: string
+          created_by?: string | null
+          hotspot_locations?: Json | null
+          id?: string
+          region?: string | null
+          risk_score?: number | null
+          sentiment_average?: number | null
+          tension_level?: string | null
+          time_period?: string | null
+          trending_topics?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          activity_count?: number | null
+          calculated_at?: string | null
+          country_code?: string
+          created_by?: string | null
+          hotspot_locations?: Json | null
+          id?: string
+          region?: string | null
+          risk_score?: number | null
+          sentiment_average?: number | null
+          tension_level?: string | null
+          time_period?: string | null
+          trending_topics?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       predictive_hotspots: {
         Row: {
           ai_model_used: string | null
@@ -1617,6 +1757,48 @@ export type Database = {
           votes_abstain?: number
           votes_against?: number
           votes_for?: number
+        }
+        Relationships: []
+      }
+      regional_blocks: {
+        Row: {
+          code: string
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          full_name: string | null
+          headquarters: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          updated_at: string | null
+          website_url: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          full_name?: string | null
+          headquarters?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          updated_at?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          full_name?: string | null
+          headquarters?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          updated_at?: string | null
+          website_url?: string | null
         }
         Relationships: []
       }

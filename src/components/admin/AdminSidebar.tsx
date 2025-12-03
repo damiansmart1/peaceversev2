@@ -71,6 +71,7 @@ const menuItems = [
     children: [
       { id: 'incidents', label: 'Incident Reports' },
       { id: 'safe-spaces', label: 'Safe Spaces' },
+      { id: 'peace-metrics', label: 'Peace Metrics' },
     ],
   },
   {
