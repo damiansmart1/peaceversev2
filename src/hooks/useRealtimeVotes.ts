@@ -37,7 +37,7 @@ export const useRealtimeVotes = (proposalId: string, initialCounts: VoteCounts) 
           // Fetch updated vote counts
           const { data: votes, error } = await supabase
             .from('proposal_votes')
-            .select('vote_value')
+            .select('vote')
             .eq('proposal_id', proposalId);
 
           if (error) {
@@ -46,9 +46,9 @@ export const useRealtimeVotes = (proposalId: string, initialCounts: VoteCounts) 
           }
 
           const newCounts = {
-            supportCount: votes?.filter(v => v.vote_value === 1).length || 0,
-            opposeCount: votes?.filter(v => v.vote_value === -1).length || 0,
-            abstainCount: votes?.filter(v => v.vote_value === 0).length || 0,
+            supportCount: votes?.filter(v => v.vote === 'for').length || 0,
+            opposeCount: votes?.filter(v => v.vote === 'against').length || 0,
+            abstainCount: votes?.filter(v => v.vote === 'abstain').length || 0,
           };
 
           console.log('[Realtime Votes] Updated counts:', newCounts);
