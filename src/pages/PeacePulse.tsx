@@ -3,31 +3,19 @@ import Navigation from '@/components/Navigation';
 import SectionHeader from '@/components/SectionHeader';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Activity, TrendingUp, AlertTriangle, BarChart3, Globe, MapPin } from 'lucide-react';
-import { usePeacePulseMetrics, useAccountabilityMetrics } from '@/hooks/usePeaceMetrics';
+import { usePeacePulseMetrics, useAccountabilityMetrics, useCountriesByBlock } from '@/hooks/usePeaceMetrics';
 import { useTranslationContext } from '@/components/TranslationProvider';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { PeacePulseCharts } from '@/components/PeacePulseCharts';
 import InteractiveHeatmap from '@/components/InteractiveHeatmap';
 
-const COMESA_COUNTRIES = [
-  { code: 'all', name: 'All COMESA' },
-  { code: 'KE', name: 'Kenya' },
-  { code: 'UG', name: 'Uganda' },
-  { code: 'TZ', name: 'Tanzania' },
-  { code: 'RW', name: 'Rwanda' },
-  { code: 'ET', name: 'Ethiopia' },
-  { code: 'ZM', name: 'Zambia' },
-  { code: 'ZW', name: 'Zimbabwe' },
-  { code: 'MW', name: 'Malawi' },
-  { code: 'SO', name: 'Somalia' },
-  { code: 'SD', name: 'Sudan' },
-];
-
 const PeacePulse = () => {
   const { t } = useTranslationContext();
   const [selectedCountry, setSelectedCountry] = useState('all');
+  
+  const { data: countriesByBlock, isLoading: countriesLoading } = useCountriesByBlock();
   
   const { data: pulseMetrics, isLoading: pulseLoading } = usePeacePulseMetrics(
     selectedCountry === 'all' ? undefined : selectedCountry
@@ -42,11 +30,21 @@ const PeacePulse = () => {
 
   const getTensionColor = (level: string | null) => {
     switch (level) {
+      case 'critical': return 'text-destructive';
       case 'high': return 'text-destructive';
       case 'medium': return 'text-orange-500';
-      case 'low': return 'text-yellow-500';
+      case 'low': return 'text-green-500';
       default: return 'text-muted-foreground';
     }
+  };
+
+  const getSelectedCountryName = () => {
+    if (selectedCountry === 'all') return 'All African Countries';
+    for (const group of countriesByBlock || []) {
+      const country = group.countries.find(c => c.code === selectedCountry);
+      if (country) return country.name;
+    }
+    return selectedCountry;
   };
 
   return (
@@ -63,16 +61,31 @@ const PeacePulse = () => {
         <div className="max-w-7xl mx-auto space-y-6">
           <div className="flex justify-between items-center">
             <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-              <SelectTrigger className="w-64">
-                <Globe className="w-4 h-4 mr-2" />
-                <SelectValue />
+              <SelectTrigger className="w-80 bg-card border-border">
+                <Globe className="w-4 h-4 mr-2 text-primary" />
+                <SelectValue placeholder="Select a country">{getSelectedCountryName()}</SelectValue>
               </SelectTrigger>
-              <SelectContent>
-                {COMESA_COUNTRIES.map(country => (
-                  <SelectItem key={country.code} value={country.code}>
-                    {country.name}
-                  </SelectItem>
-                ))}
+              <SelectContent className="bg-popover border-border max-h-[400px]">
+                <SelectItem value="all" className="font-semibold">
+                  All African Countries
+                </SelectItem>
+                
+                {countriesLoading ? (
+                  <SelectItem value="loading" disabled>Loading...</SelectItem>
+                ) : (
+                  countriesByBlock?.map(({ block, countries }) => (
+                    <SelectGroup key={block.id}>
+                      <SelectLabel className="text-xs font-bold text-primary uppercase tracking-wider py-2 px-2 bg-muted/50">
+                        {block.name} - {block.full_name}
+                      </SelectLabel>
+                      {countries.map(country => (
+                        <SelectItem key={country.code} value={country.code} className="pl-4">
+                          {country.name}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  ))
+                )}
               </SelectContent>
             </Select>
           </div>
@@ -114,7 +127,7 @@ const PeacePulse = () => {
                     <CardContent>
                       <div className="text-2xl font-bold">
                         {latestMetrics?.sentiment_average ? 
-                          (latestMetrics.sentiment_average * 100).toFixed(0) : 'N/A'}
+                          (Number(latestMetrics.sentiment_average) * 100).toFixed(0) : 'N/A'}
                       </div>
                       <p className="text-xs text-muted-foreground mt-1">{t('peacePulse.peaceIndex')}</p>
                     </CardContent>
@@ -145,7 +158,7 @@ const PeacePulse = () => {
                     <CardContent>
                       <div className="text-2xl font-bold">
                         {latestMetrics?.risk_score ? 
-                          (latestMetrics.risk_score * 100).toFixed(0) : 'N/A'}
+                          (Number(latestMetrics.risk_score) * 100).toFixed(0) : 'N/A'}
                       </div>
                       <p className="text-xs text-muted-foreground mt-1">{t('peacePulse.conflictProbability')}</p>
                     </CardContent>
@@ -181,12 +194,12 @@ const PeacePulse = () => {
                     <CardDescription>{t('peacePulse.hotspotDescription')}</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    {latestMetrics?.hotspot_locations && Array.isArray(latestMetrics.hotspot_locations) ? (
+                    {latestMetrics?.hotspot_locations && Array.isArray(latestMetrics.hotspot_locations) && latestMetrics.hotspot_locations.length > 0 ? (
                       <div className="space-y-2">
                         {latestMetrics.hotspot_locations.map((location: any, i: number) => (
                           <div key={i} className="flex items-center justify-between p-2 border rounded">
                             <span>{location.name || location}</span>
-                            <span className="text-sm text-muted-foreground">
+                            <span className={`text-sm font-medium ${getTensionColor(location.risk)}`}>
                               {location.risk || t('common.unknown')}
                             </span>
                           </div>
@@ -214,7 +227,7 @@ const PeacePulse = () => {
                       <div>
                         <div className="text-3xl font-bold text-primary">
                           {latestAccountability?.accountability_index ? 
-                            (latestAccountability.accountability_index * 100).toFixed(0) : 'N/A'}
+                            (Number(latestAccountability.accountability_index) * 100).toFixed(0) : 'N/A'}
                         </div>
                         <p className="text-sm text-muted-foreground mt-1">{t('peacePulse.accountabilityScore')}</p>
                       </div>

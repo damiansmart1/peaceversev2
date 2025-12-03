@@ -16,6 +16,7 @@ import { AdminIncidentsManager } from '@/components/admin/AdminIncidentsManager'
 import { AdminAIAnalytics } from '@/components/admin/AdminAIAnalytics';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { RoleManagement } from '@/components/admin/RoleManagement';
+import AdminPeaceMetricsManager from '@/components/admin/AdminPeaceMetricsManager';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { Loader2, Shield } from 'lucide-react';
 
@@ -68,6 +69,8 @@ const Admin = () => {
         return <AdminSponsorsManager />;
       case 'ai-analytics':
         return <AdminAIAnalytics />;
+      case 'peace-metrics':
+        return <AdminPeaceMetricsManager />;
       case 'settings':
         return <AdminSettingsManager />;
       default:
