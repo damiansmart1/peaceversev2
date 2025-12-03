@@ -15,13 +15,16 @@ import {
   UserCheck,
   Heart,
   Globe,
-  TrendingUp
+  TrendingUp,
+  Loader2
 } from "lucide-react";
 import { useTranslationContext } from './TranslationProvider';
+import { useSafetyStats } from '@/hooks/useSafetyStats';
 
 const CommunityTrustSection = () => {
   const [selectedStory, setSelectedStory] = useState<string | null>(null);
   const { t } = useTranslationContext();
+  const { data: stats, isLoading } = useSafetyStats();
 
   const trustBuilders = [
     {
@@ -83,10 +86,10 @@ const CommunityTrustSection = () => {
   ];
 
   const trustMetrics = [
-    { label: t('safety.trust.metrics.leadersEndorsing'), value: "340+", icon: UserCheck },
-    { label: t('safety.trust.metrics.trustScore'), value: "94/100", icon: Star },
-    { label: t('safety.trust.metrics.partnerships'), value: "67", icon: Handshake },
-    { label: t('safety.trust.metrics.successStories'), value: "1,200+", icon: CheckCircle2 }
+    { label: t('safety.trust.metrics.leadersEndorsing'), value: `${stats?.trust.leadersEndorsing || 0}+`, icon: UserCheck },
+    { label: t('safety.trust.metrics.trustScore'), value: stats?.trust.trustScore || '0/100', icon: Star },
+    { label: t('safety.trust.metrics.partnerships'), value: `${stats?.trust.partnerships || 0}`, icon: Handshake },
+    { label: t('safety.trust.metrics.successStories'), value: `${stats?.trust.successStories?.toLocaleString() || 0}+`, icon: CheckCircle2 }
   ];
 
   const verificationProcess = [
@@ -155,18 +158,24 @@ const CommunityTrustSection = () => {
 
         {/* Trust Metrics */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
-          {trustMetrics.map((metric) => {
-            const IconComponent = metric.icon;
-            return (
-              <Card key={metric.label} className="p-6 text-center bg-card/80 backdrop-blur-sm shadow-story">
-                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <IconComponent className="w-6 h-6 text-primary" />
-                </div>
-                <div className="text-2xl font-bold text-card-foreground mb-1">{metric.value}</div>
-                <div className="text-sm text-muted-foreground">{metric.label}</div>
-              </Card>
-            );
-          })}
+          {isLoading ? (
+            <div className="col-span-4 flex justify-center py-8">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          ) : (
+            trustMetrics.map((metric) => {
+              const IconComponent = metric.icon;
+              return (
+                <Card key={metric.label} className="p-6 text-center bg-card/80 backdrop-blur-sm shadow-story">
+                  <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <IconComponent className="w-6 h-6 text-primary" />
+                  </div>
+                  <div className="text-2xl font-bold text-card-foreground mb-1">{metric.value}</div>
+                  <div className="text-sm text-muted-foreground">{metric.label}</div>
+                </Card>
+              );
+            })
+          )}
         </div>
 
         {/* Trust Building Features */}
