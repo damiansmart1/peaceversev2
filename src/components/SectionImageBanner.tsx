@@ -30,9 +30,9 @@ const SectionImageBanner = ({
         <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/20 to-transparent" />
       )}
       {(title || subtitle) && (
-        <div className="absolute bottom-0 left-0 right-0 p-6 text-foreground">
-          {title && <h3 className="text-2xl font-bold mb-2">{title}</h3>}
-          {subtitle && <p className="text-muted-foreground">{subtitle}</p>}
+        <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 text-foreground">
+          {title && <h3 className="text-xl sm:text-2xl font-bold mb-1 sm:mb-2 line-clamp-2">{title}</h3>}
+          {subtitle && <p className="text-sm sm:text-base text-muted-foreground line-clamp-2">{subtitle}</p>}
         </div>
       )}
     </div>

@@ -146,40 +146,40 @@ const OfflineAccessSection = () => {
   ];
 
   return (
-    <section className="py-8 bg-background">
+    <section className="py-6 sm:py-8 bg-background">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold mb-3 text-foreground">
+        <div className="text-center mb-6 sm:mb-8">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-2 sm:mb-3 text-foreground">
             {t('safety.offline.title')}
           </h2>
-          <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-base sm:text-lg text-muted-foreground max-w-3xl mx-auto px-2">
             {t('safety.offline.subtitle')}
           </p>
         </div>
 
         {/* Live Connection Status */}
-        <Card className="max-w-4xl mx-auto mb-8 p-6 bg-card/80 backdrop-blur-sm">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div className="flex items-center gap-4">
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+        <Card className="max-w-4xl mx-auto mb-6 sm:mb-8 p-4 sm:p-6 bg-card/80 backdrop-blur-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shrink-0 ${
                 isOnline ? 'bg-green-500/20' : 'bg-yellow-500/20'
               }`}>
                 {isOnline ? (
-                  <Wifi className="w-6 h-6 text-green-500" />
+                  <Wifi className="w-5 h-5 sm:w-6 sm:h-6 text-green-500" />
                 ) : (
-                  <WifiOff className="w-6 h-6 text-yellow-500" />
+                  <WifiOff className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-500" />
                 )}
               </div>
-              <div>
-                <h3 className="font-semibold flex items-center gap-2">
+              <div className="min-w-0">
+                <h3 className="font-semibold flex items-center gap-2 text-sm sm:text-base">
                   {isOnline ? 'Connected' : 'Offline Mode'}
                   {isOnline ? (
-                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500" />
                   ) : (
-                    <AlertCircle className="w-4 h-4 text-yellow-500" />
+                    <AlertCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-yellow-500" />
                   )}
                 </h3>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs sm:text-sm text-muted-foreground truncate">
                   {lastSyncTime 
                     ? `Last synced: ${lastSyncTime.toLocaleTimeString()}`
                     : 'Not synced yet'}
@@ -187,11 +187,11 @@ const OfflineAccessSection = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 sm:gap-4">
               {pendingReports > 0 && (
-                <Badge variant="secondary" className="flex items-center gap-1">
+                <Badge variant="secondary" className="flex items-center gap-1 text-xs">
                   <HardDrive className="w-3 h-3" />
-                  {pendingReports} pending reports
+                  {pendingReports} pending
                 </Badge>
               )}
               
@@ -199,28 +199,29 @@ const OfflineAccessSection = () => {
                 variant="outline" 
                 onClick={handleSync}
                 disabled={isSyncing || !isOnline}
-                className="gap-2"
+                className="gap-2 text-xs sm:text-sm h-9"
+                size="sm"
               >
-                <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
-                {isSyncing ? 'Syncing...' : 'Sync Now'}
+                <RefreshCw className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isSyncing ? 'animate-spin' : ''}`} />
+                {isSyncing ? 'Syncing...' : 'Sync'}
               </Button>
             </div>
           </div>
 
           {/* Cached Data Stats */}
           {cachedData && (
-            <div className="mt-4 pt-4 border-t grid grid-cols-3 gap-4">
+            <div className="mt-4 pt-4 border-t grid grid-cols-3 gap-2 sm:gap-4">
               <div className="text-center">
-                <div className="text-2xl font-bold text-primary">{cachedData.alerts?.length || 0}</div>
-                <div className="text-xs text-muted-foreground">Cached Alerts</div>
+                <div className="text-xl sm:text-2xl font-bold text-primary">{cachedData.alerts?.length || 0}</div>
+                <div className="text-[10px] sm:text-xs text-muted-foreground">Cached Alerts</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-primary">{cachedData.safeSpaces?.length || 0}</div>
-                <div className="text-xs text-muted-foreground">Safe Spaces</div>
+                <div className="text-xl sm:text-2xl font-bold text-primary">{cachedData.safeSpaces?.length || 0}</div>
+                <div className="text-[10px] sm:text-xs text-muted-foreground">Safe Spaces</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-primary">{cachedData.emergencyContacts?.length || 0}</div>
-                <div className="text-xs text-muted-foreground">Emergency Contacts</div>
+                <div className="text-xl sm:text-2xl font-bold text-primary">{cachedData.emergencyContacts?.length || 0}</div>
+                <div className="text-[10px] sm:text-xs text-muted-foreground">Contacts</div>
               </div>
             </div>
           )}

@@ -145,33 +145,33 @@ const CommunityTrustSection = () => {
   ];
 
   return (
-    <section className="py-16 bg-background">
-      <div className="container mx-auto px-6">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold mb-4 text-foreground">
+    <section className="py-8 sm:py-12 lg:py-16 bg-background">
+      <div className="container mx-auto px-4 sm:px-6">
+        <div className="text-center mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4 text-foreground">
             {t('safety.trust.title')}  
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
             {t('safety.trust.subtitle')}
           </p>
         </div>
 
         {/* Trust Metrics */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-8 sm:mb-12">
           {isLoading ? (
-            <div className="col-span-4 flex justify-center py-8">
+            <div className="col-span-2 lg:col-span-4 flex justify-center py-8">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
           ) : (
             trustMetrics.map((metric) => {
               const IconComponent = metric.icon;
               return (
-                <Card key={metric.label} className="p-6 text-center bg-card/80 backdrop-blur-sm shadow-story">
-                  <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <IconComponent className="w-6 h-6 text-primary" />
+                <Card key={metric.label} className="p-4 sm:p-6 text-center bg-card/80 backdrop-blur-sm shadow-story">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3">
+                    <IconComponent className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                   </div>
-                  <div className="text-2xl font-bold text-card-foreground mb-1">{metric.value}</div>
-                  <div className="text-sm text-muted-foreground">{metric.label}</div>
+                  <div className="text-xl sm:text-2xl font-bold text-card-foreground mb-1">{metric.value}</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground line-clamp-2">{metric.label}</div>
                 </Card>
               );
             })
@@ -179,39 +179,39 @@ const CommunityTrustSection = () => {
         </div>
 
         {/* Trust Building Features */}
-        <div className="grid md:grid-cols-2 gap-8 mb-12">
+        <div className="grid md:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 mb-8 sm:mb-12">
           {trustBuilders.map((builder) => {
             const IconComponent = builder.icon;
             return (
-              <Card key={builder.id} className="p-6 bg-card/80 backdrop-blur-sm shadow-story">
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center">
-                      <IconComponent className="w-6 h-6 text-accent-foreground" />
+              <Card key={builder.id} className="p-4 sm:p-6 bg-card/80 backdrop-blur-sm shadow-story">
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="flex items-start sm:items-center gap-3 sm:space-x-3">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-accent rounded-full flex items-center justify-center shrink-0">
+                      <IconComponent className="w-5 h-5 sm:w-6 sm:h-6 text-accent-foreground" />
                     </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-card-foreground">{builder.title}</h3>
-                      <p className="text-sm text-muted-foreground">{builder.description}</p>
+                    <div className="min-w-0">
+                      <h3 className="text-base sm:text-lg font-semibold text-card-foreground line-clamp-1">{builder.title}</h3>
+                      <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">{builder.description}</p>
                     </div>
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-1.5 sm:space-y-2">
                     {builder.features.map((feature, index) => (
-                      <div key={index} className="flex items-center space-x-2">
-                        <CheckCircle2 className="w-4 h-4 text-success" />
-                        <span className="text-sm text-card-foreground">{feature}</span>
+                      <div key={index} className="flex items-start sm:items-center gap-2">
+                        <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-success shrink-0 mt-0.5 sm:mt-0" />
+                        <span className="text-xs sm:text-sm text-card-foreground line-clamp-1">{feature}</span>
                       </div>
                     ))}
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border">
+                  <div className="grid grid-cols-2 gap-3 sm:gap-4 pt-3 sm:pt-4 border-t border-border">
                     <div className="text-center">
-                      <div className="text-lg font-bold text-primary">{builder.impact}</div>
-                      <div className="text-xs text-muted-foreground">{t('safety.trust.impactAchieved')}</div>
+                      <div className="text-base sm:text-lg font-bold text-primary">{builder.impact}</div>
+                      <div className="text-[10px] sm:text-xs text-muted-foreground">{t('safety.trust.impactAchieved')}</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-lg font-bold text-accent">{builder.participants}</div>
-                      <div className="text-xs text-muted-foreground">{t('safety.trust.activeParticipants')}</div>
+                      <div className="text-base sm:text-lg font-bold text-accent">{builder.participants}</div>
+                      <div className="text-[10px] sm:text-xs text-muted-foreground">{t('safety.trust.activeParticipants')}</div>
                     </div>
                   </div>
                 </div>
