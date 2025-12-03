@@ -1,15 +1,19 @@
+import { useState } from 'react';
 import Navigation from '@/components/Navigation';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AlertTriangle, TrendingUp, Bell, Network, Users, Shield, Activity } from 'lucide-react';
+import { AlertTriangle, TrendingUp, Bell, Network, Users, Shield, Activity, Download, MapPin } from 'lucide-react';
 import RiskDashboard from '@/components/early-warning/RiskDashboard';
 import PredictiveHotspotMap from '@/components/early-warning/PredictiveHotspotMap';
 import AlertSystem from '@/components/early-warning/AlertSystem';
 import LiveActivityFeed from '@/components/LiveActivityFeed';
+import CountrySelector, { getCountryName } from '@/components/early-warning/CountrySelector';
+import ReportingCenter from '@/components/early-warning/ReportingCenter';
 import { useRealtimeAlerts } from '@/hooks/useRealtimeAlerts';
+import { Badge } from '@/components/ui/badge';
 
 const EarlyWarningDashboard = () => {
-  // Activate real-time alerts subscription
+  const [selectedCountry, setSelectedCountry] = useState('ALL');
   const { activeAlerts } = useRealtimeAlerts();
 
   return (
@@ -35,6 +39,24 @@ const EarlyWarningDashboard = () => {
             <p className="text-lg md:text-xl text-primary-foreground/90 max-w-2xl mx-auto">
               AI-Powered Conflict Prevention & Risk Analysis for proactive peacekeeping
             </p>
+
+            {/* Country Selector in Hero */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+              <div className="flex items-center gap-2 bg-primary-foreground/10 backdrop-blur-sm rounded-lg p-2 border border-primary-foreground/20">
+                <MapPin className="w-5 h-5 text-accent" />
+                <span className="text-sm font-medium text-primary-foreground">Viewing:</span>
+                <CountrySelector
+                  value={selectedCountry}
+                  onValueChange={setSelectedCountry}
+                  className="w-[200px] bg-primary-foreground/20 border-primary-foreground/30 text-primary-foreground"
+                />
+              </div>
+              {selectedCountry !== 'ALL' && (
+                <Badge variant="secondary" className="bg-accent/20 text-accent border-accent/30">
+                  Filtered: {getCountryName(selectedCountry)}
+                </Badge>
+              )}
+            </div>
           </div>
         </div>
         
@@ -47,7 +69,7 @@ const EarlyWarningDashboard = () => {
         <div className="max-w-7xl mx-auto space-y-8">
           
           <Tabs defaultValue="risk" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-8 bg-card/80 backdrop-blur-sm border border-border shadow-lg p-1.5 rounded-xl">
+            <TabsList className="grid w-full grid-cols-4 mb-8 bg-card/80 backdrop-blur-sm border border-border shadow-lg p-1.5 rounded-xl">
               <TabsTrigger 
                 value="risk" 
                 className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md rounded-lg transition-all duration-300 font-medium"
@@ -60,7 +82,7 @@ const EarlyWarningDashboard = () => {
                 className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md rounded-lg transition-all duration-300 font-medium"
               >
                 <TrendingUp className="w-4 h-4 mr-2" />
-                Predictive Hotspots
+                Hotspots
               </TabsTrigger>
               <TabsTrigger 
                 value="alerts"
@@ -68,6 +90,13 @@ const EarlyWarningDashboard = () => {
               >
                 <Bell className="w-4 h-4 mr-2" />
                 Alerts
+              </TabsTrigger>
+              <TabsTrigger 
+                value="reports"
+                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md rounded-lg transition-all duration-300 font-medium"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Reports
               </TabsTrigger>
             </TabsList>
 
@@ -82,12 +111,16 @@ const EarlyWarningDashboard = () => {
             <TabsContent value="alerts" className="animate-fade-in">
               <AlertSystem />
             </TabsContent>
+
+            <TabsContent value="reports" className="animate-fade-in">
+              <ReportingCenter />
+            </TabsContent>
           </Tabs>
 
           {/* Live Activity Feed & System Status Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
-              <LiveActivityFeed />
+              <LiveActivityFeed selectedCountry={selectedCountry} />
             </div>
             
             {/* System Status Card */}
@@ -124,6 +157,17 @@ const EarlyWarningDashboard = () => {
                     status="Ready"
                     color="success"
                   />
+                </div>
+
+                {/* Current Filter Info */}
+                <div className="mt-6 pt-4 border-t border-border">
+                  <div className="flex items-center gap-2 text-sm">
+                    <MapPin className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-muted-foreground">Current View:</span>
+                    <span className="font-medium text-foreground">
+                      {getCountryName(selectedCountry)}
+                    </span>
+                  </div>
                 </div>
               </div>
             </Card>

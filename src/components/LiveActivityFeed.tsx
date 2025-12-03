@@ -24,32 +24,50 @@ interface ActivityItem {
   description: string;
   severity?: string;
   location?: string;
+  country?: string;
   timestamp: string;
 }
 
-const LiveActivityFeed = () => {
+interface LiveActivityFeedProps {
+  selectedCountry?: string;
+}
+
+const LiveActivityFeed = ({ selectedCountry = 'ALL' }: LiveActivityFeedProps) => {
   const [activities, setActivities] = useState<ActivityItem[]>([]);
   const [isLive, setIsLive] = useState(true);
 
   useEffect(() => {
     // Fetch initial activities
     const fetchInitialActivities = async () => {
-      const [alertsResult, incidentsResult, riskResult] = await Promise.all([
-        supabase
-          .from('alert_logs')
-          .select('*')
-          .order('triggered_at', { ascending: false })
-          .limit(5),
-        supabase
-          .from('citizen_reports')
-          .select('id, title, category, severity_level, location_city, created_at')
-          .order('created_at', { ascending: false })
-          .limit(5),
-        supabase
-          .from('incident_risk_scores')
-          .select('id, threat_level, overall_risk_score, created_at')
-          .order('created_at', { ascending: false })
-          .limit(5),
+      // Build queries with country filter
+      let alertsQuery = supabase
+        .from('alert_logs')
+        .select('*')
+        .order('triggered_at', { ascending: false })
+        .limit(5);
+
+      let incidentsQuery = supabase
+        .from('citizen_reports')
+        .select('id, title, category, severity_level, location_city, location_country, created_at')
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      let hotspotsQuery = supabase
+        .from('predictive_hotspots')
+        .select('id, region_name, country, risk_level, hotspot_score, predicted_at')
+        .order('predicted_at', { ascending: false })
+        .limit(5);
+
+      // Apply country filter to incidents and hotspots
+      if (selectedCountry && selectedCountry !== 'ALL') {
+        incidentsQuery = incidentsQuery.eq('location_country', selectedCountry);
+        hotspotsQuery = hotspotsQuery.eq('country', selectedCountry);
+      }
+
+      const [alertsResult, incidentsResult, hotspotsResult] = await Promise.all([
+        alertsQuery,
+        incidentsQuery,
+        hotspotsQuery,
       ]);
 
       const combinedActivities: ActivityItem[] = [];
@@ -68,7 +86,7 @@ const LiveActivityFeed = () => {
       }
 
       if (incidentsResult.data) {
-        incidentsResult.data.forEach((incident) => {
+        incidentsResult.data.forEach((incident: any) => {
           combinedActivities.push({
             id: `incident-${incident.id}`,
             type: 'incident',
@@ -76,20 +94,23 @@ const LiveActivityFeed = () => {
             description: `Category: ${incident.category}`,
             severity: incident.severity_level,
             location: incident.location_city,
+            country: incident.location_country,
             timestamp: incident.created_at,
           });
         });
       }
 
-      if (riskResult.data) {
-        riskResult.data.forEach((risk) => {
+      if (hotspotsResult.data) {
+        hotspotsResult.data.forEach((hotspot: any) => {
           combinedActivities.push({
-            id: `risk-${risk.id}`,
-            type: 'risk',
-            title: `Risk Assessment: ${risk.threat_level}`,
-            description: `Overall Score: ${risk.overall_risk_score}%`,
-            severity: risk.threat_level,
-            timestamp: risk.created_at,
+            id: `hotspot-${hotspot.id}`,
+            type: 'hotspot',
+            title: `Hotspot: ${hotspot.region_name}`,
+            description: `Risk Score: ${hotspot.hotspot_score}`,
+            severity: hotspot.risk_level,
+            location: hotspot.region_name,
+            country: hotspot.country,
+            timestamp: hotspot.predicted_at,
           });
         });
       }
@@ -128,6 +149,10 @@ const LiveActivityFeed = () => {
         { event: 'INSERT', schema: 'public', table: 'citizen_reports' },
         (payload) => {
           const incident = payload.new as any;
+          // Filter by country if selected
+          if (selectedCountry !== 'ALL' && incident.location_country !== selectedCountry) {
+            return;
+          }
           const newActivity: ActivityItem = {
             id: `incident-${incident.id}`,
             type: 'incident',
@@ -135,6 +160,7 @@ const LiveActivityFeed = () => {
             description: `Category: ${incident.category}`,
             severity: incident.severity_level,
             location: incident.location_city,
+            country: incident.location_country,
             timestamp: incident.created_at,
           };
           setActivities((prev) => [newActivity, ...prev].slice(0, 15));
@@ -142,16 +168,22 @@ const LiveActivityFeed = () => {
       )
       .on(
         'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'incident_risk_scores' },
+        { event: 'INSERT', schema: 'public', table: 'predictive_hotspots' },
         (payload) => {
-          const risk = payload.new as any;
+          const hotspot = payload.new as any;
+          // Filter by country if selected
+          if (selectedCountry !== 'ALL' && hotspot.country !== selectedCountry) {
+            return;
+          }
           const newActivity: ActivityItem = {
-            id: `risk-${risk.id}`,
-            type: 'risk',
-            title: `Risk Assessment: ${risk.threat_level}`,
-            description: `Overall Score: ${risk.overall_risk_score}%`,
-            severity: risk.threat_level,
-            timestamp: risk.created_at,
+            id: `hotspot-${hotspot.id}`,
+            type: 'hotspot',
+            title: `Hotspot: ${hotspot.region_name}`,
+            description: `Risk Score: ${hotspot.hotspot_score}`,
+            severity: hotspot.risk_level,
+            location: hotspot.region_name,
+            country: hotspot.country,
+            timestamp: hotspot.predicted_at,
           };
           setActivities((prev) => [newActivity, ...prev].slice(0, 15));
         }
@@ -161,7 +193,7 @@ const LiveActivityFeed = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [selectedCountry]);
 
   const getActivityIcon = (type: string) => {
     switch (type) {
