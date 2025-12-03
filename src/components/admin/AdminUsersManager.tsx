@@ -109,16 +109,27 @@ export const AdminUsersManager = () => {
   const { data: users, isLoading, refetch } = useQuery({
     queryKey: ['admin-users'],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      // Fetch profiles and user_roles separately, then merge
+      const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select(`
-          *,
-          user_roles!user_roles_user_id_fkey(role, is_active, expires_at)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      return data;
+      if (profilesError) throw profilesError;
+
+      const { data: roles, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('user_id, role, is_active, expires_at');
+
+      if (rolesError) throw rolesError;
+
+      // Merge roles into profiles
+      const usersWithRoles = profiles?.map(profile => ({
+        ...profile,
+        user_roles: roles?.filter(r => r.user_id === profile.id) || []
+      })) || [];
+
+      return usersWithRoles;
     },
   });
 
@@ -126,8 +137,8 @@ export const AdminUsersManager = () => {
   const { data: stats } = useQuery({
     queryKey: ['admin-stats'],
     queryFn: async () => {
-      const { data: profiles } = await (supabase as any).from('profiles').select('*');
-      const { data: roles } = await (supabase as any).from('user_roles').select('*');
+      const { data: profiles } = await supabase.from('profiles').select('*');
+      const { data: roles } = await supabase.from('user_roles').select('*');
       
       const totalUsers = profiles?.length || 0;
       const verifiedUsers = profiles?.filter((p: any) => p.is_verified).length || 0;
