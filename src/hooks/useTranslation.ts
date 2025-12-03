@@ -659,7 +659,7 @@ export const translations: Record<Language, Record<string, string>> = {
     
     // PeacePulse - Extended keys
     'peacePulse.badge': 'Live Insights',
-    'peacePulse.subtitle': 'Real-time peace intelligence across COMESA region',
+    'peacePulse.subtitle': 'Real-time peace intelligence across Africa',
     'peacePulse.tabs.overview': 'Overview',
     'peacePulse.tabs.heatmap': 'Heatmap',
     'peacePulse.tabs.sentiment': 'Sentiment',
