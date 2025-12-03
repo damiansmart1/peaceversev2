@@ -136,16 +136,16 @@ const Navigation = () => {
             <img src={peaceverselogo} alt="PeaceVerse Logo" className="h-10 sm:h-12 w-auto drop-shadow-[0_2px_8px_hsl(var(--accent)/0.4)] group-hover:drop-shadow-[0_4px_12px_hsl(var(--accent)/0.6)] transition-all" />
           </Link>
 
-          {/* Desktop Navigation - Scrollable horizontal layout */}
-          <div className="hidden lg:flex items-center overflow-x-auto max-w-xl xl:max-w-3xl scrollbar-hide">
-            <div className="flex items-center space-x-1.5 px-2">
+          {/* Desktop Navigation - Single line layout */}
+          <div className="hidden lg:flex items-center flex-1 justify-center">
+            <div className="flex items-center gap-0.5 xl:gap-1">
               {navItems.map(item => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.path;
-                return <Button key={item.path} variant="ghost" size="sm" asChild className={`flex items-center space-x-2 transition-all duration-300 whitespace-nowrap flex-shrink-0 text-xs xl:text-sm px-3 xl:px-4 py-2 rounded-full border ${isActive ? 'bg-accent text-primary font-semibold shadow-lg shadow-accent/40 border-accent' : 'text-primary-foreground/90 hover:bg-accent/20 hover:text-accent border-transparent hover:border-accent/30 hover:shadow-md'}`}>
+                return <Button key={item.path} variant="ghost" size="sm" asChild className={`flex items-center gap-1 transition-all duration-300 whitespace-nowrap text-[10px] xl:text-xs px-2 xl:px-2.5 py-1.5 h-8 rounded-full border ${isActive ? 'bg-accent text-primary font-semibold shadow-md shadow-accent/40 border-accent' : 'text-primary-foreground/90 hover:bg-accent/20 hover:text-accent border-transparent hover:border-accent/30'}`}>
                     <Link to={item.path}>
-                      <Icon className={`w-4 h-4 xl:w-5 xl:h-5 ${isActive ? 'text-primary' : 'text-accent'}`} />
-                      <span className="font-medium">{item.label}</span>
+                      <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-primary' : 'text-accent'}`} />
+                      <span className="font-medium hidden xl:inline">{item.label}</span>
                     </Link>
                   </Button>;
               })}
