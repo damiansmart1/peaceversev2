@@ -10,6 +10,7 @@ import { Heart, MessageCircle, Share, Volume2, Eye, Sparkles, User } from "lucid
 import ShareDialog from "@/components/ShareDialog";
 import SafeHTML from "@/components/SafeHTML";
 import { formatDistanceToNow } from "date-fns";
+import ContentCommentItem from "./ContentCommentItem";
 
 interface ContentItem {
   id: string;
@@ -465,25 +466,7 @@ const ContentFeed = () => {
                           <div className="space-y-2">
                             <p className="text-sm font-medium text-foreground">Comments ({item.comments.length})</p>
                             {item.comments.map((comment) => (
-                              <div 
-                                key={comment.id} 
-                                className="bg-muted/30 p-3 rounded-lg"
-                              >
-                                <div className="flex items-start gap-2">
-                                  <Avatar className="h-7 w-7 ring-1 ring-border/30">
-                                    <AvatarFallback className="bg-muted text-xs">
-                                      <User className="w-3 h-3" />
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  <div className="flex-1 min-w-0">
-                                    <p className="text-xs font-medium text-foreground">Community Member</p>
-                                    <p className="text-sm text-foreground/90 mt-1">{comment.text}</p>
-                                    <p className="text-xs text-muted-foreground mt-1">
-                                      {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
-                                    </p>
-                                  </div>
-                                </div>
-                              </div>
+                              <ContentCommentItem key={comment.id} comment={comment} />
                             ))}
                           </div>
                         )}

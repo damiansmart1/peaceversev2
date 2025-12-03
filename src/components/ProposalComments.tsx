@@ -6,12 +6,76 @@ import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useProposalComments } from '@/hooks/useProposalDetail';
 import { useAddComment } from '@/hooks/useProposals';
+import {
+  useCommentLikes,
+  useUserCommentLike,
+  useToggleCommentLike,
+  useReportComment,
+} from '@/hooks/useCommentActions';
 import { formatDistanceToNow } from 'date-fns';
 import { MessageSquare } from 'lucide-react';
+import CommentActions from './CommentActions';
 
 interface ProposalCommentsProps {
   proposalId: string;
 }
+
+interface CommentItemProps {
+  comment: any;
+}
+
+const CommentItem = ({ comment }: CommentItemProps) => {
+  const { data: likes } = useCommentLikes(comment.id);
+  const { data: userLike } = useUserCommentLike(comment.id);
+  const toggleLike = useToggleCommentLike();
+  const reportComment = useReportComment();
+
+  const handleToggleLike = () => {
+    toggleLike.mutate({ commentId: comment.id, isLiked: !!userLike });
+  };
+
+  const handleReport = (reason: string, details?: string) => {
+    reportComment.mutate({ commentId: comment.id, reason, details });
+  };
+
+  return (
+    <div id={`comment-${comment.id}`} className="p-4 bg-card border border-border rounded-lg space-y-2">
+      <div className="flex items-start gap-3">
+        <Avatar className="w-10 h-10">
+          <AvatarFallback>
+            {comment.display_anonymous
+              ? 'A'
+              : comment.profiles?.display_name?.[0] || 'U'}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex-1 space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="font-medium">
+              {comment.display_anonymous
+                ? 'Anonymous'
+                : comment.profiles?.display_name || 'User'}
+            </span>
+            <span className="text-xs text-muted-foreground">
+              {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
+            </span>
+          </div>
+          <p className="text-sm text-foreground whitespace-pre-wrap">{comment.body}</p>
+          <CommentActions
+            commentId={comment.id}
+            commentText={comment.body}
+            likeCount={likes?.length || 0}
+            isLiked={!!userLike}
+            onToggleLike={handleToggleLike}
+            onReport={handleReport}
+            isLikeLoading={toggleLike.isPending}
+            isReportLoading={reportComment.isPending}
+            className="mt-2"
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const ProposalComments = ({ proposalId }: ProposalCommentsProps) => {
   const [comment, setComment] = useState('');
@@ -70,31 +134,8 @@ const ProposalComments = ({ proposalId }: ProposalCommentsProps) => {
           <p className="text-muted-foreground">No comments yet. Be the first to share your thoughts!</p>
         ) : (
           <div className="space-y-4">
-            {comments.map((comment) => (
-              <div key={comment.id} className="p-4 bg-card border border-border rounded-lg space-y-2">
-                <div className="flex items-start gap-3">
-                  <Avatar className="w-10 h-10">
-                    <AvatarFallback>
-                      {comment.display_anonymous
-                        ? 'A'
-                        : comment.profiles?.display_name?.[0] || 'U'}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">
-                        {comment.display_anonymous
-                          ? 'Anonymous'
-                          : comment.profiles?.display_name || 'User'}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
-                      </span>
-                    </div>
-                    <p className="text-sm text-foreground whitespace-pre-wrap">{comment.body}</p>
-                  </div>
-                </div>
-              </div>
+            {comments.map((c) => (
+              <CommentItem key={c.id} comment={c} />
             ))}
           </div>
         )}
