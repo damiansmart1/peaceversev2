@@ -357,6 +357,115 @@ export type Database = {
         }
         Relationships: []
       }
+      chatroom_members: {
+        Row: {
+          chatroom_id: string
+          id: string
+          joined_at: string
+          role: string | null
+          user_id: string
+        }
+        Insert: {
+          chatroom_id: string
+          id?: string
+          joined_at?: string
+          role?: string | null
+          user_id: string
+        }
+        Update: {
+          chatroom_id?: string
+          id?: string
+          joined_at?: string
+          role?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chatroom_members_chatroom_id_fkey"
+            columns: ["chatroom_id"]
+            isOneToOne: false
+            referencedRelation: "chatrooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chatroom_messages: {
+        Row: {
+          chatroom_id: string
+          content: string
+          created_at: string
+          id: string
+          media_url: string | null
+          user_id: string
+        }
+        Insert: {
+          chatroom_id: string
+          content: string
+          created_at?: string
+          id?: string
+          media_url?: string | null
+          user_id: string
+        }
+        Update: {
+          chatroom_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          media_url?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chatroom_messages_chatroom_id_fkey"
+            columns: ["chatroom_id"]
+            isOneToOne: false
+            referencedRelation: "chatrooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chatrooms: {
+        Row: {
+          category: string
+          cover_image_url: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_public: boolean | null
+          location_region: string | null
+          max_members: number | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          cover_image_url?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          location_region?: string | null
+          max_members?: number | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          cover_image_url?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          location_region?: string | null
+          max_members?: number | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       citizen_reports: {
         Row: {
           ai_key_entities: Json | null
@@ -704,6 +813,101 @@ export type Database = {
           updated_at?: string
           user_id?: string
           view_count?: number
+        }
+        Relationships: []
+      }
+      content_tips: {
+        Row: {
+          amount: number
+          content_id: string
+          created_at: string
+          creator_id: string
+          id: string
+          message: string | null
+          tipper_id: string
+        }
+        Insert: {
+          amount: number
+          content_id: string
+          created_at?: string
+          creator_id: string
+          id?: string
+          message?: string | null
+          tipper_id: string
+        }
+        Update: {
+          amount?: number
+          content_id?: string
+          created_at?: string
+          creator_id?: string
+          id?: string
+          message?: string | null
+          tipper_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_tips_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "content"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      creator_earnings: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string | null
+          id: string
+          source: string
+          source_id: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          source: string
+          source_id?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          source?: string
+          source_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      direct_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_read: boolean | null
+          receiver_id: string
+          sender_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          receiver_id: string
+          sender_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          receiver_id?: string
+          sender_id?: string
         }
         Relationships: []
       }
@@ -1072,12 +1276,19 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           created_at: string | null
+          creator_tier: string | null
           current_level: number | null
           display_name: string | null
           email: string | null
+          followers_count: number | null
+          following_count: number | null
           id: string
+          is_creator: boolean | null
           is_verified: boolean | null
           peace_points: number | null
+          posts_count: number | null
+          social_links: Json | null
+          total_views: number | null
           updated_at: string | null
           user_type: string | null
           username: string | null
@@ -1086,12 +1297,19 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string | null
+          creator_tier?: string | null
           current_level?: number | null
           display_name?: string | null
           email?: string | null
+          followers_count?: number | null
+          following_count?: number | null
           id: string
+          is_creator?: boolean | null
           is_verified?: boolean | null
           peace_points?: number | null
+          posts_count?: number | null
+          social_links?: Json | null
+          total_views?: number | null
           updated_at?: string | null
           user_type?: string | null
           username?: string | null
@@ -1100,12 +1318,19 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string | null
+          creator_tier?: string | null
           current_level?: number | null
           display_name?: string | null
           email?: string | null
+          followers_count?: number | null
+          following_count?: number | null
           id?: string
+          is_creator?: boolean | null
           is_verified?: boolean | null
           peace_points?: number | null
+          posts_count?: number | null
+          social_links?: Json | null
+          total_views?: number | null
           updated_at?: string | null
           user_type?: string | null
           username?: string | null
@@ -1524,6 +1749,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_follows: {
+        Row: {
+          created_at: string
+          follower_id: string
+          following_id: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          follower_id: string
+          following_id: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          follower_id?: string
+          following_id?: string
+          id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null
@@ -1550,6 +1796,39 @@ export type Database = {
           is_active?: boolean | null
           role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_wallets: {
+        Row: {
+          balance: number | null
+          created_at: string
+          currency: string | null
+          id: string
+          total_earned: number | null
+          total_withdrawn: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number | null
+          created_at?: string
+          currency?: string | null
+          id?: string
+          total_earned?: number | null
+          total_withdrawn?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number | null
+          created_at?: string
+          currency?: string | null
+          id?: string
+          total_earned?: number | null
+          total_withdrawn?: number | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
