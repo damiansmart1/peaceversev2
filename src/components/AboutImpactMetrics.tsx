@@ -1,86 +1,83 @@
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Users, 
-  AlertTriangle, 
-  Globe, 
-  Shield, 
-  TrendingUp, 
-  Clock,
-  CheckCircle2,
-  MapPin,
-  Activity,
-  Zap
-} from 'lucide-react';
-
-const metrics = [
-  {
-    icon: AlertTriangle,
-    value: '12,450+',
-    label: 'Incidents Reported',
-    description: 'Citizen reports from across Africa',
-    change: '+34% this quarter',
-    color: 'text-destructive',
-    bgColor: 'bg-destructive/10',
-  },
-  {
-    icon: CheckCircle2,
-    value: '8,920',
-    label: 'Verified Incidents',
-    description: 'Community-verified reports',
-    change: '71.6% verification rate',
-    color: 'text-success',
-    bgColor: 'bg-success/10',
-  },
-  {
-    icon: Globe,
-    value: '47',
-    label: 'Countries Active',
-    description: 'Across all African regions',
-    change: '+5 this year',
-    color: 'text-primary',
-    bgColor: 'bg-primary/10',
-  },
-  {
-    icon: Users,
-    value: '156,000+',
-    label: 'Registered Users',
-    description: 'Citizens, verifiers & partners',
-    change: '+28% growth',
-    color: 'text-accent',
-    bgColor: 'bg-accent/10',
-  },
-  {
-    icon: Clock,
-    value: '< 4 hrs',
-    label: 'Avg. Response Time',
-    description: 'From report to verification',
-    change: '67% faster than last year',
-    color: 'text-warning',
-    bgColor: 'bg-warning/10',
-  },
-  {
-    icon: Shield,
-    value: '340+',
-    label: 'Conflicts Prevented',
-    description: 'Through early intervention',
-    change: 'Est. 50,000+ lives protected',
-    color: 'text-success',
-    bgColor: 'bg-success/10',
-  },
-];
-
-const regionalStats = [
-  { region: 'East Africa', incidents: 3420, countries: 12, status: 'Active' },
-  { region: 'West Africa', incidents: 4180, countries: 15, status: 'Active' },
-  { region: 'Southern Africa', incidents: 2140, countries: 10, status: 'Active' },
-  { region: 'Central Africa', incidents: 1890, countries: 8, status: 'Expanding' },
-  { region: 'North Africa', incidents: 820, countries: 5, status: 'Pilot' },
-];
-
+import { Users, AlertTriangle, Globe, Shield, TrendingUp, Clock, CheckCircle2, MapPin, Activity, Zap } from 'lucide-react';
+const metrics = [{
+  icon: AlertTriangle,
+  value: '12,450+',
+  label: 'Incidents Reported',
+  description: 'Citizen reports from across Africa',
+  change: '+34% this quarter',
+  color: 'text-destructive',
+  bgColor: 'bg-destructive/10'
+}, {
+  icon: CheckCircle2,
+  value: '8,920',
+  label: 'Verified Incidents',
+  description: 'Community-verified reports',
+  change: '71.6% verification rate',
+  color: 'text-success',
+  bgColor: 'bg-success/10'
+}, {
+  icon: Globe,
+  value: '47',
+  label: 'Countries Active',
+  description: 'Across all African regions',
+  change: '+5 this year',
+  color: 'text-primary',
+  bgColor: 'bg-primary/10'
+}, {
+  icon: Users,
+  value: '156,000+',
+  label: 'Registered Users',
+  description: 'Citizens, verifiers & partners',
+  change: '+28% growth',
+  color: 'text-accent',
+  bgColor: 'bg-accent/10'
+}, {
+  icon: Clock,
+  value: '< 4 hrs',
+  label: 'Avg. Response Time',
+  description: 'From report to verification',
+  change: '67% faster than last year',
+  color: 'text-warning',
+  bgColor: 'bg-warning/10'
+}, {
+  icon: Shield,
+  value: '340+',
+  label: 'Conflicts Prevented',
+  description: 'Through early intervention',
+  change: 'Est. 50,000+ lives protected',
+  color: 'text-success',
+  bgColor: 'bg-success/10'
+}];
+const regionalStats = [{
+  region: 'East Africa',
+  incidents: 3420,
+  countries: 12,
+  status: 'Active'
+}, {
+  region: 'West Africa',
+  incidents: 4180,
+  countries: 15,
+  status: 'Active'
+}, {
+  region: 'Southern Africa',
+  incidents: 2140,
+  countries: 10,
+  status: 'Active'
+}, {
+  region: 'Central Africa',
+  incidents: 1890,
+  countries: 8,
+  status: 'Expanding'
+}, {
+  region: 'North Africa',
+  incidents: 820,
+  countries: 5,
+  status: 'Pilot'
+}];
 export const AboutImpactMetrics = () => {
-  return (
-    <div className="space-y-12">
+  return <div className="space-y-12">
       {/* Hero Stats */}
       <div className="text-center mb-8">
         <Badge variant="secondary" className="mb-4">Platform Impact</Badge>
@@ -97,9 +94,8 @@ export const AboutImpactMetrics = () => {
       {/* Main Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {metrics.map((metric, index) => {
-          const Icon = metric.icon;
-          return (
-            <Card key={index} className="p-6 hover:shadow-elevated transition-all duration-300 border hover:border-primary/20">
+        const Icon = metric.icon;
+        return <Card key={index} className="p-6 hover:shadow-elevated transition-all duration-300 border hover:border-primary/20">
               <div className="flex items-start gap-4">
                 <div className={`p-3 rounded-xl ${metric.bgColor}`}>
                   <Icon className={`w-6 h-6 ${metric.color}`} />
@@ -113,9 +109,8 @@ export const AboutImpactMetrics = () => {
                   </Badge>
                 </div>
               </div>
-            </Card>
-          );
-        })}
+            </Card>;
+      })}
       </div>
 
       {/* Regional Coverage */}
@@ -136,27 +131,16 @@ export const AboutImpactMetrics = () => {
               </tr>
             </thead>
             <tbody>
-              {regionalStats.map((stat, index) => (
-                <tr key={index} className="border-b border-border/50 hover:bg-muted/50 transition-colors">
+              {regionalStats.map((stat, index) => <tr key={index} className="border-b border-border/50 hover:bg-muted/50 transition-colors">
                   <td className="py-3 px-4 font-medium text-foreground">{stat.region}</td>
                   <td className="py-3 px-4 text-foreground">{stat.incidents.toLocaleString()}</td>
                   <td className="py-3 px-4 text-foreground">{stat.countries}</td>
                   <td className="py-3 px-4">
-                    <Badge 
-                      variant="outline" 
-                      className={
-                        stat.status === 'Active' 
-                          ? 'bg-success/10 text-success border-success/20' 
-                          : stat.status === 'Expanding'
-                          ? 'bg-warning/10 text-warning border-warning/20'
-                          : 'bg-primary/10 text-primary border-primary/20'
-                      }
-                    >
+                    <Badge variant="outline" className={stat.status === 'Active' ? 'bg-success/10 text-success border-success/20' : stat.status === 'Expanding' ? 'bg-warning/10 text-warning border-warning/20' : 'bg-primary/10 text-primary border-primary/20'}>
                       {stat.status}
                     </Badge>
                   </td>
-                </tr>
-              ))}
+                </tr>)}
             </tbody>
           </table>
         </div>
@@ -167,7 +151,7 @@ export const AboutImpactMetrics = () => {
         <Card className="p-6 bg-gradient-to-br from-success/10 to-success/5 border-success/20">
           <div className="flex items-center gap-3 mb-4">
             <Activity className="w-6 h-6 text-success" />
-            <h3 className="text-lg font-bold text-foreground">2024 Achievements</h3>
+            <h3 className="text-lg font-bold text-foreground">2025 Achievements</h3>
           </div>
           <ul className="space-y-3">
             <li className="flex items-start gap-3">
@@ -200,7 +184,7 @@ export const AboutImpactMetrics = () => {
         <Card className="p-6 bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
           <div className="flex items-center gap-3 mb-4">
             <Zap className="w-6 h-6 text-primary" />
-            <h3 className="text-lg font-bold text-foreground">2025 Goals</h3>
+            <h3 className="text-lg font-bold text-foreground">2026 Goals</h3>
           </div>
           <ul className="space-y-3">
             <li className="flex items-start gap-3">
@@ -230,6 +214,5 @@ export const AboutImpactMetrics = () => {
           </ul>
         </Card>
       </div>
-    </div>
-  );
+    </div>;
 };
