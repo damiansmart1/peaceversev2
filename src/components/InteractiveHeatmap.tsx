@@ -3,30 +3,17 @@ import { useEffect, useRef, useState } from 'react';
 import { Loader } from '@googlemaps/js-api-loader';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Download, MapPin, AlertTriangle, Activity, Users, Calendar, FileText, MapPinned } from 'lucide-react';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Download, MapPin, AlertTriangle, Activity, Users, Calendar, FileText, MapPinned, Globe } from 'lucide-react';
 import { useIncidentHeatmapData, HeatmapIncident } from '@/hooks/useIncidentHeatmapData';
 import { useIncidentNotifications } from '@/hooks/useIncidentNotifications';
+import { useCountriesByBlock } from '@/hooks/usePeaceMetrics';
 import { exportToJSON, exportToCSV, exportToPDF, exportToWord } from '@/lib/exportUtils';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
-
-const COMESA_COUNTRIES = [
-  { code: 'all', name: 'All COMESA' },
-  { code: 'KE', name: 'Kenya' },
-  { code: 'UG', name: 'Uganda' },
-  { code: 'TZ', name: 'Tanzania' },
-  { code: 'RW', name: 'Rwanda' },
-  { code: 'ET', name: 'Ethiopia' },
-  { code: 'ZM', name: 'Zambia' },
-  { code: 'ZW', name: 'Zimbabwe' },
-  { code: 'MW', name: 'Malawi' },
-  { code: 'SO', name: 'Somalia' },
-  { code: 'SD', name: 'Sudan' },
-];
 
 const SEVERITY_LEVELS = [
   { value: 'all', label: 'All Severities' },
@@ -35,6 +22,7 @@ const SEVERITY_LEVELS = [
   { value: 'medium', label: 'Medium' },
   { value: 'low', label: 'Low' },
 ];
+
 
 const InteractiveHeatmap = () => {
   const mapRef = useRef<HTMLDivElement>(null);
@@ -49,6 +37,8 @@ const InteractiveHeatmap = () => {
   const [selectedIncident, setSelectedIncident] = useState<HeatmapIncident | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [viewMode, setViewMode] = useState<'markers' | 'heatmap'>('markers');
+
+  const { data: countriesByBlock, isLoading: countriesLoading } = useCountriesByBlock();
 
   const { data: incidents, isLoading } = useIncidentHeatmapData(
     selectedCountry === 'all' ? undefined : selectedCountry,
@@ -446,15 +436,34 @@ const InteractiveHeatmap = () => {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select Country" />
+              <SelectTrigger className="bg-card border-border">
+                <Globe className="w-4 h-4 mr-2 text-primary" />
+                <SelectValue placeholder="Select Country">
+                  {selectedCountry === 'all' ? 'All African Countries' : 
+                    countriesByBlock?.flatMap(g => g.countries).find(c => c.code === selectedCountry)?.name || selectedCountry}
+                </SelectValue>
               </SelectTrigger>
-              <SelectContent>
-                {COMESA_COUNTRIES.map(country => (
-                  <SelectItem key={country.code} value={country.code}>
-                    {country.name}
-                  </SelectItem>
-                ))}
+              <SelectContent className="bg-popover border-border max-h-[400px]">
+                <SelectItem value="all" className="font-semibold">
+                  All African Countries
+                </SelectItem>
+                
+                {countriesLoading ? (
+                  <SelectItem value="loading" disabled>Loading...</SelectItem>
+                ) : (
+                  countriesByBlock?.map(({ block, countries }) => (
+                    <SelectGroup key={block.id}>
+                      <SelectLabel className="text-xs font-bold text-primary uppercase tracking-wider py-2 px-2 bg-muted/50">
+                        {block.name} - {block.full_name}
+                      </SelectLabel>
+                      {countries.map(country => (
+                        <SelectItem key={country.code} value={country.code} className="pl-4">
+                          {country.name}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  ))
+                )}
               </SelectContent>
             </Select>
 
