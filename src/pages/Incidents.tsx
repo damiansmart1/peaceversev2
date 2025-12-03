@@ -6,6 +6,7 @@ import { IncidentAnalyticsDashboard } from '@/components/IncidentAnalyticsDashbo
 import InteractiveHeatmap from '@/components/InteractiveHeatmap';
 import { ReportSubmissionForm } from '@/components/ReportSubmissionForm';
 import { ReportTracker } from '@/components/ReportTracker';
+import { IncidentTimeline } from '@/components/IncidentTimeline';
 import { useIncidentNotifications } from '@/hooks/useIncidentNotifications';
 import SectionImageBanner from '@/components/SectionImageBanner';
 import Navigation from '@/components/Navigation';
@@ -82,11 +83,7 @@ export default function Incidents() {
           </TabsContent>
 
           <TabsContent value="timeline" className="mt-6">
-            <Card className="p-6">
-              <p className="text-muted-foreground text-center py-8">
-                {t('incidents.timelineComingSoon')}
-              </p>
-            </Card>
+            <IncidentTimeline />
           </TabsContent>
         </Tabs>
       </div>
