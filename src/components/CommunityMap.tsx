@@ -1,32 +1,76 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MapPin, Users, Shield, Clock, Navigation, Search, Filter, Plus } from "lucide-react";
+import { MapPin, Users, Shield, Clock, Navigation, Search, Filter, Plus, AlertTriangle } from "lucide-react";
 import { useAdminSafeSpaces, AdminSafeSpace } from "@/hooks/useAdminSafeSpaces";
 import { useAdminCheck } from "@/hooks/useAdminCheck";
 import { useJurisdiction } from "@/contexts/JurisdictionContext";
 import { toast } from "sonner";
 import { Loader } from '@googlemaps/js-api-loader';
 
-const CommunityMap = () => {
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
+
+// Singleton loader to prevent multiple loads
+let loaderInstance: Loader | null = null;
+let isGoogleMapsLoaded = false;
+let loadPromise: Promise<typeof google> | null = null;
+
+const getLoader = () => {
+  if (!loaderInstance && GOOGLE_MAPS_API_KEY) {
+    loaderInstance = new Loader({
+      apiKey: GOOGLE_MAPS_API_KEY,
+      version: 'weekly',
+    });
+  }
+  return loaderInstance;
+};
+
+const loadGoogleMaps = async (): Promise<typeof google | null> => {
+  if (isGoogleMapsLoaded && window.google) {
+    return window.google;
+  }
+  
+  if (loadPromise) {
+    return loadPromise;
+  }
+  
+  const loader = getLoader();
+  if (!loader) return null;
+  
+  loadPromise = loader.load().then((google) => {
+    isGoogleMapsLoaded = true;
+    return google;
+  });
+  
+  return loadPromise;
+};
+
+const CommunityMap = memo(() => {
   const [selectedHub, setSelectedHub] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState<string>('all');
   const [showVerifiedOnly, setShowVerifiedOnly] = useState(false);
+  const [mapLoaded, setMapLoaded] = useState(false);
+  const [mapError, setMapError] = useState<string | null>(null);
+  
   const mapRef = useRef<HTMLDivElement>(null);
   const googleMapRef = useRef<google.maps.Map | null>(null);
   const markersRef = useRef<google.maps.Marker[]>([]);
+  const userMarkerRef = useRef<google.maps.Marker | null>(null);
+  const initAttemptedRef = useRef(false);
   
   const { data: safeSpaces, isLoading } = useAdminSafeSpaces();
   const { data: isAdmin } = useAdminCheck();
   const { selectedCountry, setSelectedCountry } = useJurisdiction();
 
-  // Get user's current location
+  // Get user's current location - only once
   useEffect(() => {
+    if (userLocation) return; // Already have location
+    
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -34,7 +78,6 @@ const CommunityMap = () => {
             lat: position.coords.latitude,
             lng: position.coords.longitude,
           });
-          toast.success('Location detected');
         },
         (error) => {
           console.error('Error getting location:', error);
@@ -46,63 +89,84 @@ const CommunityMap = () => {
       // Default to Nairobi, Kenya
       setUserLocation({ lat: -1.286389, lng: 36.817223 });
     }
-  }, []);
+  }, [userLocation]);
 
-  // Initialize Google Maps
+  // Initialize Google Maps - only once
   useEffect(() => {
-    if (!mapRef.current || !userLocation) return;
+    if (!mapRef.current || initAttemptedRef.current || googleMapRef.current) return;
+    initAttemptedRef.current = true;
 
-    const initMap = async () => {
-      const loader = new Loader({
-        apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
-        version: 'weekly',
+    if (!GOOGLE_MAPS_API_KEY) {
+      setMapError('Google Maps API key is not configured');
+      return;
+    }
+
+    let isMounted = true;
+
+    loadGoogleMaps().then((google) => {
+      if (!isMounted || !mapRef.current || !google) return;
+
+      // Default center (Nairobi) - will be updated when user location is available
+      const defaultCenter = { lat: -1.286389, lng: 36.817223 };
+
+      const map = new google.maps.Map(mapRef.current, {
+        center: userLocation || defaultCenter,
+        zoom: 12,
+        gestureHandling: 'greedy',
+        styles: [
+          {
+            featureType: 'poi',
+            elementType: 'labels',
+            stylers: [{ visibility: 'off' }],
+          },
+        ],
       });
 
-      try {
-        await loader.load();
-        
-        const map = new google.maps.Map(mapRef.current!, {
-          center: userLocation,
-          zoom: 12,
-          styles: [
-            {
-              featureType: 'poi',
-              elementType: 'labels',
-              stylers: [{ visibility: 'off' }],
-            },
-          ],
-        });
+      googleMapRef.current = map;
+      setMapLoaded(true);
+    }).catch(error => {
+      if (!isMounted) return;
+      console.error('Error loading Google Maps:', error);
+      setMapError('Failed to load map');
+      toast.error('Failed to load map. Please check your API key configuration.');
+    });
 
-        googleMapRef.current = map;
-
-        // Add user location marker
-        new google.maps.Marker({
-          position: userLocation,
-          map,
-          icon: {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 8,
-            fillColor: '#074F98',
-            fillOpacity: 1,
-            strokeColor: '#fff',
-            strokeWeight: 2,
-          },
-          title: 'Your Location',
-        });
-      } catch (error) {
-        console.error('Error loading Google Maps:', error);
-        toast.error('Failed to load map. Please check your API key.');
-      }
+    return () => {
+      isMounted = false;
     };
+  }, []);
 
-    initMap();
-  }, [userLocation]);
+  // Update map center and add user marker when location becomes available
+  useEffect(() => {
+    if (!googleMapRef.current || !userLocation || !mapLoaded) return;
+    
+    // Center map on user location
+    googleMapRef.current.setCenter(userLocation);
+    
+    // Add user location marker if not already added
+    if (!userMarkerRef.current) {
+      userMarkerRef.current = new google.maps.Marker({
+        position: userLocation,
+        map: googleMapRef.current,
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 8,
+          fillColor: '#074F98',
+          fillOpacity: 1,
+          strokeColor: '#fff',
+          strokeWeight: 2,
+        },
+        title: 'Your Location',
+        zIndex: 1000,
+      });
+    }
+  }, [userLocation, mapLoaded]);
 
   // Update markers when safe spaces or filters change
   useEffect(() => {
-    if (!googleMapRef.current || !safeSpaces) return;
+    if (!googleMapRef.current || !safeSpaces || !mapLoaded) return;
 
-    // Clear existing markers
+    // Clear existing markers (except user marker)
     markersRef.current.forEach(marker => marker.setMap(null));
     markersRef.current = [];
 
@@ -141,11 +205,11 @@ const CommunityMap = () => {
 
       markersRef.current.push(marker);
     });
-  }, [safeSpaces, selectedType, showVerifiedOnly, searchQuery]);
+  }, [safeSpaces, selectedType, showVerifiedOnly, searchQuery, mapLoaded]);
 
   // Calculate distance between two coordinates
-  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): string => {
-    const R = 6371; // Earth's radius in km
+  const calculateDistance = useCallback((lat1: number, lon1: number, lat2: number, lon2: number): string => {
+    const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
     const a = 
@@ -155,10 +219,10 @@ const CommunityMap = () => {
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     const distance = R * c;
     return distance < 1 ? `${Math.round(distance * 1000)}m` : `${distance.toFixed(1)}km`;
-  };
+  }, []);
 
   // Get filtered and sorted safe spaces
-  const getFilteredSpaces = (): AdminSafeSpace[] => {
+  const getFilteredSpaces = useCallback((): AdminSafeSpace[] => {
     if (!safeSpaces) return [];
     
     return safeSpaces
@@ -176,7 +240,7 @@ const CommunityMap = () => {
         const distB = parseFloat(calculateDistance(userLocation.lat, userLocation.lng, b.latitude, b.longitude));
         return distA - distB;
       });
-  };
+  }, [safeSpaces, showVerifiedOnly, selectedType, searchQuery, userLocation, calculateDistance]);
 
   const filteredSpaces = getFilteredSpaces();
 
@@ -202,15 +266,15 @@ const CommunityMap = () => {
     return types[type] || type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
   };
 
-  const handleGoToLocation = () => {
+  const handleGoToLocation = useCallback(() => {
     if (userLocation && googleMapRef.current) {
       googleMapRef.current.panTo(userLocation);
       googleMapRef.current.setZoom(14);
       toast.success('Centered on your location');
     }
-  };
+  }, [userLocation]);
 
-  if (isLoading) {
+  if (isLoading && !mapLoaded) {
     return (
       <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-6">
@@ -218,6 +282,26 @@ const CommunityMap = () => {
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
             <p className="mt-4 text-muted-foreground">Loading safe spaces...</p>
           </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (mapError || !GOOGLE_MAPS_API_KEY) {
+    return (
+      <section className="py-16 bg-muted/30">
+        <div className="container mx-auto px-6">
+          <Card className="max-w-2xl mx-auto p-8">
+            <div className="text-center">
+              <AlertTriangle className="w-12 h-12 mx-auto mb-4 text-destructive" />
+              <h3 className="text-xl font-semibold text-foreground mb-2">Map Loading Failed</h3>
+              <p className="text-muted-foreground mb-4">
+                {GOOGLE_MAPS_API_KEY 
+                  ? 'The Google Maps API failed to load. Please check that the Maps JavaScript API is enabled and billing is configured.'
+                  : 'Google Maps API key is not configured.'}
+              </p>
+            </div>
+          </Card>
         </div>
       </section>
     );
@@ -290,20 +374,14 @@ const CommunityMap = () => {
 
         {/* Interactive Map */}
         <div className="max-w-6xl mx-auto mb-8">
-          <Card className="overflow-hidden bg-card border-accent/20 shadow-story">
+          <Card className="overflow-hidden bg-card border-accent/20 shadow-story relative">
             <div 
               ref={mapRef} 
               className="w-full h-[500px]"
             />
-            {!import.meta.env.VITE_GOOGLE_MAPS_API_KEY && (
-              <div className="absolute inset-0 flex items-center justify-center bg-muted/90 backdrop-blur-sm">
-                <div className="text-center p-6">
-                  <MapPin className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-foreground font-semibold mb-2">Map Unavailable</p>
-                  <p className="text-sm text-muted-foreground">
-                    Please configure Google Maps API key to view the interactive map
-                  </p>
-                </div>
+            {!mapLoaded && !mapError && (
+              <div className="absolute inset-0 flex items-center justify-center bg-muted/50">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
               </div>
             )}
           </Card>
@@ -427,6 +505,8 @@ const CommunityMap = () => {
       </div>
     </section>
   );
-};
+});
+
+CommunityMap.displayName = 'CommunityMap';
 
 export default CommunityMap;

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, memo } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { Card } from './ui/card';
@@ -26,20 +26,23 @@ const AFRICAN_COUNTRIES = [
   { name: 'South Africa', iso: 'ZA', center: [22.9375, -30.5595] },
 ];
 
-const AfricaMap = () => {
+const AfricaMap = memo(() => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
+  const markersRef = useRef<mapboxgl.Marker[]>([]);
+  const initAttemptedRef = useRef(false);
+  
   const [mapboxToken, setMapboxToken] = useState<string>(() => {
-    // Load token from localStorage on mount
     return localStorage.getItem('mapbox_token') || '';
   });
   const [tokenInput, setTokenInput] = useState<string>('');
+  const [mapLoaded, setMapLoaded] = useState(false);
   const { selectedCountry, setSelectedCountry } = useJurisdiction();
 
-  // Save token to localStorage whenever it changes
   const handleSaveToken = (token: string) => {
     localStorage.setItem('mapbox_token', token);
     setMapboxToken(token);
+    initAttemptedRef.current = false; // Allow re-initialization with new token
   };
 
   // Fetch incident counts per country
@@ -62,89 +65,113 @@ const AfricaMap = () => {
     },
   });
 
+  // Initialize map - only once
   useEffect(() => {
-    if (!mapContainer.current || !mapboxToken) return;
+    if (!mapContainer.current || !mapboxToken || initAttemptedRef.current || map.current) return;
+    initAttemptedRef.current = true;
 
     mapboxgl.accessToken = mapboxToken;
     
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/light-v11',
-      center: [20, 0],
-      zoom: 3,
-      minZoom: 2,
-      maxZoom: 8,
-    });
-
-    map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
-
-    map.current.on('load', () => {
-      // Add markers for each African country
-      AFRICAN_COUNTRIES.forEach((country) => {
-        const count = incidentCounts?.[country.name] || 0;
-        
-        const el = document.createElement('div');
-        el.className = 'country-marker';
-        el.style.cssText = `
-          width: ${count > 0 ? Math.min(40 + count * 2, 80) : 30}px;
-          height: ${count > 0 ? Math.min(40 + count * 2, 80) : 30}px;
-          background: ${count > 0 ? 'hsl(var(--destructive))' : 'hsl(var(--primary))'};
-          border: 3px solid white;
-          border-radius: 50%;
-          cursor: pointer;
-          opacity: 0.8;
-          transition: all 0.3s ease;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: white;
-          font-weight: bold;
-          font-size: 12px;
-          box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        `;
-        
-        if (count > 0) {
-          el.textContent = count.toString();
-        }
-
-        el.addEventListener('mouseenter', () => {
-          el.style.transform = 'scale(1.2)';
-          el.style.opacity = '1';
-          el.style.zIndex = '1000';
-        });
-
-        el.addEventListener('mouseleave', () => {
-          el.style.transform = 'scale(1)';
-          el.style.opacity = '0.8';
-        });
-
-        el.addEventListener('click', () => {
-          setSelectedCountry(country.name);
-          map.current?.flyTo({
-            center: country.center as [number, number],
-            zoom: 6,
-            duration: 2000,
-          });
-        });
-
-        const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(
-          `<div style="padding: 8px;">
-            <strong>${country.name}</strong><br/>
-            ${count > 0 ? `<span style="color: hsl(var(--destructive))">${count} incidents reported</span>` : 'No incidents'}
-          </div>`
-        );
-
-        new mapboxgl.Marker(el)
-          .setLngLat(country.center as [number, number])
-          .setPopup(popup)
-          .addTo(map.current!);
+    try {
+      map.current = new mapboxgl.Map({
+        container: mapContainer.current,
+        style: 'mapbox://styles/mapbox/light-v11',
+        center: [20, 0],
+        zoom: 3,
+        minZoom: 2,
+        maxZoom: 8,
       });
-    });
 
+      map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+
+      map.current.on('load', () => {
+        setMapLoaded(true);
+      });
+
+      map.current.on('error', (e) => {
+        console.error('Mapbox error:', e);
+      });
+    } catch (error) {
+      console.error('Error initializing Mapbox:', error);
+    }
+
+    // Cleanup only on unmount, not on re-renders
     return () => {
-      map.current?.remove();
+      // Don't remove map on cleanup to prevent flickering
     };
-  }, [mapboxToken, incidentCounts, setSelectedCountry]);
+  }, [mapboxToken]);
+
+  // Add markers when map is loaded and incident counts are available
+  useEffect(() => {
+    if (!map.current || !mapLoaded) return;
+
+    // Clear existing markers
+    markersRef.current.forEach(marker => marker.remove());
+    markersRef.current = [];
+
+    // Add markers for each African country
+    AFRICAN_COUNTRIES.forEach((country) => {
+      const count = incidentCounts?.[country.name] || 0;
+      
+      const el = document.createElement('div');
+      el.className = 'country-marker';
+      el.style.cssText = `
+        width: ${count > 0 ? Math.min(40 + count * 2, 80) : 30}px;
+        height: ${count > 0 ? Math.min(40 + count * 2, 80) : 30}px;
+        background: ${count > 0 ? 'hsl(var(--destructive))' : 'hsl(var(--primary))'};
+        border: 3px solid white;
+        border-radius: 50%;
+        cursor: pointer;
+        opacity: 0.8;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      `;
+      
+      if (count > 0) {
+        el.textContent = count.toString();
+      }
+
+      el.addEventListener('mouseenter', () => {
+        el.style.transform = 'scale(1.2)';
+        el.style.opacity = '1';
+        el.style.zIndex = '1000';
+      });
+
+      el.addEventListener('mouseleave', () => {
+        el.style.transform = 'scale(1)';
+        el.style.opacity = '0.8';
+      });
+
+      el.addEventListener('click', () => {
+        setSelectedCountry(country.name);
+        map.current?.flyTo({
+          center: country.center as [number, number],
+          zoom: 6,
+          duration: 2000,
+        });
+      });
+
+      const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(
+        `<div style="padding: 8px;">
+          <strong>${country.name}</strong><br/>
+          ${count > 0 ? `<span style="color: hsl(var(--destructive))">${count} incidents reported</span>` : 'No incidents'}
+        </div>`
+      );
+
+      const marker = new mapboxgl.Marker(el)
+        .setLngLat(country.center as [number, number])
+        .setPopup(popup)
+        .addTo(map.current!);
+
+      markersRef.current.push(marker);
+    });
+  }, [incidentCounts, setSelectedCountry, mapLoaded]);
 
   if (!mapboxToken) {
     return (
@@ -195,6 +222,11 @@ const AfricaMap = () => {
       )}
       <div className="relative w-full h-[600px] rounded-xl overflow-hidden shadow-lg border-2 border-border">
         <div ref={mapContainer} className="absolute inset-0" />
+        {!mapLoaded && (
+          <div className="absolute inset-0 flex items-center justify-center bg-muted/50">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        )}
         <div className="absolute bottom-4 left-4 bg-background/95 backdrop-blur-sm p-4 rounded-lg shadow-lg border border-border max-w-xs">
           <h4 className="font-semibold mb-2 text-sm">How to Use</h4>
           <ul className="text-xs text-muted-foreground space-y-1">
@@ -207,6 +239,8 @@ const AfricaMap = () => {
       </div>
     </div>
   );
-};
+});
+
+AfricaMap.displayName = 'AfricaMap';
 
 export default AfricaMap;
