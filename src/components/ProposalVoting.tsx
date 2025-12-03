@@ -101,10 +101,10 @@ const ProposalVoting = ({ proposalId, supportCount, opposeCount, abstainCount }:
         <Button
           onClick={() => handleVote(1)}
           disabled={voteProposal.isPending}
-          variant={userVote?.vote_value === 1 ? 'default' : 'outline'}
+          variant={userVote?.vote === 'for' ? 'default' : 'outline'}
           className={cn(
             'flex-1 gap-2 transition-all duration-200',
-            userVote?.vote_value === 1 && 'bg-green-500 hover:bg-green-600 text-white'
+            userVote?.vote === 'for' && 'bg-green-500 hover:bg-green-600 text-white'
           )}
         >
           <CheckCircle className="w-4 h-4" />
@@ -113,10 +113,10 @@ const ProposalVoting = ({ proposalId, supportCount, opposeCount, abstainCount }:
         <Button
           onClick={() => handleVote(-1)}
           disabled={voteProposal.isPending}
-          variant={userVote?.vote_value === -1 ? 'default' : 'outline'}
+          variant={userVote?.vote === 'against' ? 'default' : 'outline'}
           className={cn(
             'flex-1 gap-2 transition-all duration-200',
-            userVote?.vote_value === -1 && 'bg-red-500 hover:bg-red-600 text-white'
+            userVote?.vote === 'against' && 'bg-red-500 hover:bg-red-600 text-white'
           )}
         >
           <XCircle className="w-4 h-4" />
@@ -125,10 +125,10 @@ const ProposalVoting = ({ proposalId, supportCount, opposeCount, abstainCount }:
         <Button
           onClick={() => handleVote(0)}
           disabled={voteProposal.isPending}
-          variant={userVote?.vote_value === 0 ? 'default' : 'outline'}
+          variant={userVote?.vote === 'abstain' ? 'default' : 'outline'}
           className={cn(
             'flex-1 gap-2 transition-all duration-200',
-            userVote?.vote_value === 0 && 'bg-gray-500 hover:bg-gray-600 text-white'
+            userVote?.vote === 'abstain' && 'bg-gray-500 hover:bg-gray-600 text-white'
           )}
         >
           <MinusCircle className="w-4 h-4" />
@@ -187,7 +187,7 @@ const ProposalVoting = ({ proposalId, supportCount, opposeCount, abstainCount }:
 
       {userVote && (
         <p className="text-sm text-muted-foreground text-center">
-          You voted to {userVote.vote_value === 1 ? 'approve' : userVote.vote_value === -1 ? 'reject' : 'abstain'} on this proposal
+          You voted to {userVote.vote === 'for' ? 'approve' : userVote.vote === 'against' ? 'reject' : 'abstain'} on this proposal
           {userVote.display_anonymous && ' (anonymously)'}
         </p>
       )}

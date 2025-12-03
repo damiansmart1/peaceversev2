@@ -160,12 +160,15 @@ export const useVoteProposal = () => {
       // Allow anonymous voting by generating a temporary ID
       const userId = user?.id || null;
 
+      // Convert numeric vote value to text format used in database
+      const voteText = voteValue === 1 ? 'for' : voteValue === -1 ? 'against' : 'abstain';
+
       const { data, error } = await supabase
         .from('proposal_votes')
         .upsert({
           proposal_id: proposalId,
           user_id: userId,
-          vote_value: voteValue,
+          vote: voteText,
           display_anonymous: displayAnonymous || !user,
         } as any)
         .select()
