@@ -2481,6 +2481,66 @@ export type Database = {
         }
         Relationships: []
       }
+      public_profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string | null
+          creator_tier: string | null
+          current_level: number | null
+          display_name: string | null
+          followers_count: number | null
+          following_count: number | null
+          id: string | null
+          is_creator: boolean | null
+          is_verified: boolean | null
+          peace_points: number | null
+          posts_count: number | null
+          social_links: Json | null
+          total_views: number | null
+          user_type: string | null
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          creator_tier?: string | null
+          current_level?: number | null
+          display_name?: string | null
+          followers_count?: number | null
+          following_count?: number | null
+          id?: string | null
+          is_creator?: boolean | null
+          is_verified?: boolean | null
+          peace_points?: number | null
+          posts_count?: number | null
+          social_links?: Json | null
+          total_views?: number | null
+          user_type?: string | null
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          creator_tier?: string | null
+          current_level?: number | null
+          display_name?: string | null
+          followers_count?: number | null
+          following_count?: number | null
+          id?: string | null
+          is_creator?: boolean | null
+          is_verified?: boolean | null
+          peace_points?: number | null
+          posts_count?: number | null
+          social_links?: Json | null
+          total_views?: number | null
+          user_type?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       _postgis_deprecate: {
