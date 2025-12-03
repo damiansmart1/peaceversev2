@@ -13,13 +13,16 @@ import {
   Users, 
   Zap,
   Clock,
-  TrendingUp
+  TrendingUp,
+  Loader2
 } from "lucide-react";
 import { useTranslationContext } from './TranslationProvider';
+import { useSafetyStats } from '@/hooks/useSafetyStats';
 
 const ContentModerationSection = () => {
   const [selectedDemo, setSelectedDemo] = useState<string | null>(null);
   const { t } = useTranslationContext();
+  const { data: stats, isLoading } = useSafetyStats();
 
   const moderationFeatures = [
     {
@@ -67,10 +70,10 @@ const ContentModerationSection = () => {
   ];
 
   const moderationStats = [
-    { label: t('safety.moderation.stats.contentReviewed'), value: "2,500+", icon: Eye },
-    { label: t('safety.moderation.stats.harmfulBlocked'), value: "12%", icon: XCircle },
-    { label: t('safety.moderation.stats.falsePositives'), value: "<3%", icon: AlertTriangle },
-    { label: t('safety.moderation.stats.appealsResolved'), value: "96%", icon: CheckCircle2 }
+    { label: t('safety.moderation.stats.contentReviewed'), value: stats?.moderation.contentReviewed?.toLocaleString() || '0', icon: Eye },
+    { label: t('safety.moderation.stats.harmfulBlocked'), value: stats?.moderation.harmfulBlocked || '0%', icon: XCircle },
+    { label: t('safety.moderation.stats.falsePositives'), value: stats?.moderation.falsePositives || '<3%', icon: AlertTriangle },
+    { label: t('safety.moderation.stats.appealsResolved'), value: stats?.moderation.appealsResolved || '0%', icon: CheckCircle2 }
   ];
 
   const demoContent = [
@@ -106,18 +109,24 @@ const ContentModerationSection = () => {
 
         {/* Stats Overview */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
-          {moderationStats.map((stat) => {
-            const IconComponent = stat.icon;
-            return (
-              <Card key={stat.label} className="p-6 text-center bg-card/80 backdrop-blur-sm shadow-story">
-                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <IconComponent className="w-6 h-6 text-primary" />
-                </div>
-                <div className="text-2xl font-bold text-card-foreground mb-1">{stat.value}</div>
-                <div className="text-sm text-muted-foreground">{stat.label}</div>
-              </Card>
-            );
-          })}
+          {isLoading ? (
+            <div className="col-span-4 flex justify-center py-8">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          ) : (
+            moderationStats.map((stat) => {
+              const IconComponent = stat.icon;
+              return (
+                <Card key={stat.label} className="p-6 text-center bg-card/80 backdrop-blur-sm shadow-story">
+                  <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <IconComponent className="w-6 h-6 text-primary" />
+                  </div>
+                  <div className="text-2xl font-bold text-card-foreground mb-1">{stat.value}</div>
+                  <div className="text-sm text-muted-foreground">{stat.label}</div>
+                </Card>
+              );
+            })
+          )}
         </div>
 
         {/* Moderation Features */}
