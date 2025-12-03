@@ -18,6 +18,7 @@ import VoiceCommands from "@/components/VoiceCommands";
 import EnhancedKeyboardNav from "@/components/EnhancedKeyboardNav";
 import FocusManager from "@/components/FocusManager";
 import GlobalAlertBanner from "@/components/GlobalAlertBanner";
+import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Proposals from "./pages/Proposals";
@@ -135,6 +136,7 @@ const App = () => (
                   </Routes>
                   <OnboardingTour />
                   <QuickActionFAB />
+                  <PWAInstallPrompt />
                 </BrowserRouter>
               </TooltipProvider>
               </JurisdictionProvider>

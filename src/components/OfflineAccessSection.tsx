@@ -3,7 +3,6 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
 import { 
   Smartphone, 
   Radio, 
@@ -19,11 +18,15 @@ import {
   CheckCircle,
   AlertCircle,
   Cloud,
-  HardDrive
+  HardDrive,
+  FileText,
+  List
 } from "lucide-react";
 import { useTranslationContext } from './TranslationProvider';
 import { useOfflineStatus } from '@/hooks/useOfflineStatus';
 import SMSIntegrationSection from './SMSIntegrationSection';
+import OfflineReportQueue from './OfflineReportQueue';
+import EmergencyContactsManager from './EmergencyContactsManager';
 import { toast } from 'sonner';
 
 const OfflineAccessSection = () => {
@@ -242,8 +245,14 @@ const OfflineAccessSection = () => {
           </div>
         </Card>
 
+        {/* Offline Report Queue & Emergency Contacts */}
+        <div className="grid lg:grid-cols-2 gap-6 max-w-6xl mx-auto mb-8">
+          <OfflineReportQueue />
+          <EmergencyContactsManager />
+        </div>
+
         {/* SMS/USSD Integration Section */}
-        <div className="max-w-6xl mx-auto mb-12">
+        <div className="max-w-6xl mx-auto mb-8">
           <SMSIntegrationSection />
         </div>
 
