@@ -32,3 +32,9 @@ verify_jwt = false
 
 [functions.translate-content]
 verify_jwt = false
+
+[functions.public-api]
+verify_jwt = false
+
+[functions.webhook-trigger]
+verify_jwt = false
