@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   Users,
@@ -13,7 +13,9 @@ import {
   AlertTriangle,
   ChevronDown,
   Brain,
+  Home,
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
   Sidebar,
   SidebarContent,
@@ -106,10 +108,26 @@ export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarPro
     );
   };
 
+  const navigate = useNavigate();
+
   return (
     <Sidebar className="border-r border-border">
       <SidebarContent>
         <div className="px-6 py-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate('/')}
+              className="h-8 w-8 text-muted-foreground hover:text-foreground"
+              title="Back to Homepage"
+            >
+              <Home className="h-4 w-4" />
+            </Button>
+            {!collapsed && (
+              <span className="text-xs text-muted-foreground">Home</span>
+            )}
+          </div>
           <h2 className={`font-bold text-lg ${collapsed ? 'text-center' : ''}`}>
             {collapsed ? 'AP' : 'Admin Portal'}
           </h2>
