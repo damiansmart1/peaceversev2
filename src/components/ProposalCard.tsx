@@ -31,26 +31,23 @@ const ProposalCard = ({ proposal, className }: ProposalCardProps) => {
     });
   };
 
-  const totalVotes = proposal.vote_support_count + proposal.vote_oppose_count + proposal.vote_abstain_count;
-  const approvePercentage = totalVotes > 0 ? (proposal.vote_support_count / totalVotes) * 100 : 0;
-  const rejectPercentage = totalVotes > 0 ? (proposal.vote_oppose_count / totalVotes) * 100 : 0;
-  const abstainPercentage = totalVotes > 0 ? (proposal.vote_abstain_count / totalVotes) * 100 : 0;
+  const totalVotes = proposal.votes_for + proposal.votes_against + proposal.votes_abstain;
+  const approvePercentage = totalVotes > 0 ? (proposal.votes_for / totalVotes) * 100 : 0;
+  const rejectPercentage = totalVotes > 0 ? (proposal.votes_against / totalVotes) * 100 : 0;
+  const abstainPercentage = totalVotes > 0 ? (proposal.votes_abstain / totalVotes) * 100 : 0;
 
-  const getStatusLabel = (status: string, stage?: string | null) => {
-    if (stage) {
-      return stage.split('_').map(word => 
-        word.charAt(0).toUpperCase() + word.slice(1)
-      ).join(' ');
-    }
+  const getStatusLabel = (status: string) => {
     const statusMap: Record<string, string> = {
       'draft': 'Draft',
       'published': 'Published',
-      'archived': 'Archived'
+      'active': 'Active',
+      'archived': 'Archived',
+      'closed': 'Closed'
     };
     return statusMap[status] || status;
   };
 
-  const authorName = proposal.bill_proposer_name || proposal.profiles?.display_name || proposal.profiles?.username || 'Anonymous';
+  const authorName = proposal.profiles?.display_name || proposal.profiles?.username || 'Anonymous';
 
   return (
     <Card
@@ -58,7 +55,7 @@ const ProposalCard = ({ proposal, className }: ProposalCardProps) => {
         'group cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 border border-border/50 hover:border-primary/20',
         className
       )}
-      onClick={() => navigate(`/proposals/${proposal.slug}`)}
+      onClick={() => navigate(`/proposals/${proposal.id}`)}
     >
       <CardHeader>
         <div className="flex items-start justify-between gap-4">
@@ -66,31 +63,29 @@ const ProposalCard = ({ proposal, className }: ProposalCardProps) => {
             {proposal.title}
           </CardTitle>
           <Badge variant="secondary" className="shrink-0">
-            {getStatusLabel(proposal.status, proposal.parliamentary_stage)}
+            {getStatusLabel(proposal.status)}
           </Badge>
         </div>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
           <span>Proposed by: <span className="font-medium text-foreground">{authorName}</span></span>
         </div>
         <div className="flex flex-wrap gap-2 mt-2">
-          {proposal.tags.map((tag) => (
-            <Badge key={tag} variant="outline" className="text-xs">
-              {tag}
-            </Badge>
-          ))}
+          <Badge variant="outline" className="text-xs">
+            {proposal.category}
+          </Badge>
         </div>
       </CardHeader>
       <CardContent>
         <p className="text-muted-foreground text-sm line-clamp-3 mb-4">
-          {proposal.summary}
+          {proposal.description}
         </p>
 
         {/* Vote Progress Bar */}
         <div className="mb-4 space-y-2">
           <div className="flex justify-between text-xs text-muted-foreground gap-2">
-            <span className="text-green-600 font-medium">Approve: {proposal.vote_support_count} ({approvePercentage.toFixed(0)}%)</span>
-            <span className="text-red-600 font-medium">Reject: {proposal.vote_oppose_count} ({rejectPercentage.toFixed(0)}%)</span>
-            <span className="text-gray-600 font-medium">Abstain: {proposal.vote_abstain_count} ({abstainPercentage.toFixed(0)}%)</span>
+            <span className="text-green-600 font-medium">Approve: {proposal.votes_for} ({approvePercentage.toFixed(0)}%)</span>
+            <span className="text-red-600 font-medium">Reject: {proposal.votes_against} ({rejectPercentage.toFixed(0)}%)</span>
+            <span className="text-gray-600 font-medium">Abstain: {proposal.votes_abstain} ({abstainPercentage.toFixed(0)}%)</span>
           </div>
           <div className="w-full h-2 bg-muted rounded-full overflow-hidden flex">
             <div
@@ -154,15 +149,7 @@ const ProposalCard = ({ proposal, className }: ProposalCardProps) => {
         <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-1">
             <Users className="w-4 h-4" />
-            <span>{proposal.unique_contributors}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <MessageSquare className="w-4 h-4" />
-            <span>{proposal.comment_count}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Share2 className="w-4 h-4" />
-            <span>{proposal.share_count}</span>
+            <span>{totalVotes} votes</span>
           </div>
         </div>
       </CardContent>

@@ -4,27 +4,16 @@ import { toast } from 'sonner';
 
 export interface Proposal {
   id: string;
-  slug: string;
   title: string;
-  summary: string;
-  body: string;
-  status: 'draft' | 'published' | 'closed' | 'archived';
-  author_id: string;
-  co_authors: string[];
-  tags: string[];
-  signature_goal: number | null;
-  signature_count: number;
-  view_count: number;
-  unique_contributors: number;
-  like_count: number;
-  comment_count: number;
-  share_count: number;
-  vote_support_count: number;
-  vote_oppose_count: number;
-  vote_abstain_count: number;
-  bill_proposer_name: string | null;
-  parliamentary_stage: string | null;
-  attachments: any[];
+  description: string;
+  category: string;
+  status: string;
+  creator_id: string;
+  visibility: string;
+  votes_for: number;
+  votes_against: number;
+  votes_abstain: number;
+  ends_at: string | null;
   created_at: string;
   updated_at: string;
   profiles?: {
@@ -45,28 +34,28 @@ export const useProposals = () => {
         .order('created_at', { ascending: false });
 
       if (proposalsError) throw proposalsError;
-      if (!proposalsData) return [];
+      if (!proposalsData || proposalsData.length === 0) return [];
 
-      // Get unique author IDs
-      const authorIds = [...new Set(proposalsData.map(p => p.author_id))];
+      // Get unique creator IDs
+      const creatorIds = [...new Set(proposalsData.map(p => p.creator_id))];
 
       // Fetch author profiles
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
-        .select('user_id, display_name, username')
-        .in('user_id', authorIds);
+        .select('id, display_name, username')
+        .in('id', creatorIds);
 
       if (profilesError) throw profilesError;
 
-      // Create a map of profiles by user_id
+      // Create a map of profiles by id
       const profilesMap = new Map(
-        (profilesData || []).map(p => [p.user_id, p])
+        (profilesData || []).map(p => [p.id, p])
       );
 
       // Merge profiles with proposals
       const enrichedProposals = proposalsData.map(proposal => ({
         ...proposal,
-        profiles: profilesMap.get(proposal.author_id) || null
+        profiles: profilesMap.get(proposal.creator_id) || null
       }));
 
       return enrichedProposals as Proposal[];

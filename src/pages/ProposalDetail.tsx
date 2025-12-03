@@ -6,10 +6,9 @@ import ProposalComments from '@/components/ProposalComments';
 import ProposalShareButtons from '@/components/ProposalShareButtons';
 import ProposalPolls from '@/components/ProposalPolls';
 import ProposalReportDownload from '@/components/ProposalReportDownload';
-import SafeHTML from '@/components/SafeHTML';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Users, Eye, Heart } from 'lucide-react';
+import { ArrowLeft, Users } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -50,6 +49,8 @@ const ProposalDetail = () => {
     );
   }
 
+  const totalVotes = proposal.votes_for + proposal.votes_against + proposal.votes_abstain;
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -66,43 +67,16 @@ const ProposalDetail = () => {
               <Badge variant="secondary">{proposal.status}</Badge>
             </div>
 
-            {proposal.bill_proposer_name && (
-              <div className="text-lg text-muted-foreground">
-                <span className="font-semibold text-foreground">Bill Proposer:</span> {proposal.bill_proposer_name}
-              </div>
-            )}
-
-            {proposal.parliamentary_stage && (
-              <div className="text-lg text-muted-foreground">
-                <span className="font-semibold text-foreground">Parliamentary Stage:</span>{' '}
-                <Badge variant="outline" className="ml-2">
-                  {proposal.parliamentary_stage.split('_').map(word => 
-                    word.charAt(0).toUpperCase() + word.slice(1)
-                  ).join(' ')}
-                </Badge>
-              </div>
-            )}
-
             <div className="flex flex-wrap gap-2">
-              {proposal.tags.map((tag) => (
-                <Badge key={tag} variant="outline">
-                  {tag}
-                </Badge>
-              ))}
+              <Badge variant="outline">
+                {proposal.category}
+              </Badge>
             </div>
 
             <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-1">
                 <Users className="w-4 h-4" />
-                <span>{proposal.unique_contributors} contributors</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Eye className="w-4 h-4" />
-                <span>{proposal.view_count} views</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Heart className="w-4 h-4" />
-                <span>{proposal.like_count} likes</span>
+                <span>{totalVotes} total votes</span>
               </div>
               <span>
                 Created {formatDistanceToNow(new Date(proposal.created_at), { addSuffix: true })}
@@ -111,23 +85,15 @@ const ProposalDetail = () => {
           </div>
 
           <div className="p-6 bg-card border border-border rounded-lg">
-            <h2 className="text-xl font-semibold mb-4">Summary</h2>
-            <p className="text-foreground leading-relaxed">{proposal.summary}</p>
-          </div>
-
-          <div className="p-6 bg-card border border-border rounded-lg">
-            <h2 className="text-xl font-semibold mb-4">Full Proposal</h2>
-            <SafeHTML 
-              html={proposal.body}
-              className="prose-content"
-            />
+            <h2 className="text-xl font-semibold mb-4">Description</h2>
+            <p className="text-foreground leading-relaxed">{proposal.description}</p>
           </div>
 
           <ProposalVoting
             proposalId={proposal.id}
-            supportCount={proposal.vote_support_count}
-            opposeCount={proposal.vote_oppose_count}
-            abstainCount={proposal.vote_abstain_count || 0}
+            supportCount={proposal.votes_for}
+            opposeCount={proposal.votes_against}
+            abstainCount={proposal.votes_abstain || 0}
           />
 
           <ProposalPolls proposalId={proposal.id} />
@@ -137,8 +103,8 @@ const ProposalDetail = () => {
             <ProposalReportDownload
               proposal={proposal}
               voteStats={{
-                supportCount: proposal.vote_support_count || 0,
-                opposeCount: proposal.vote_oppose_count || 0,
+                supportCount: proposal.votes_for || 0,
+                opposeCount: proposal.votes_against || 0,
               }}
             />
           </div>
@@ -146,8 +112,8 @@ const ProposalDetail = () => {
           <ProposalShareButtons
             proposalId={proposal.id}
             title={proposal.title}
-            summary={proposal.summary}
-            slug={proposal.slug}
+            summary={proposal.description}
+            slug={proposal.id}
           />
 
           <ProposalComments proposalId={proposal.id} />
