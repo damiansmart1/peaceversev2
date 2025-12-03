@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase-typed';
 import { useAuth } from '@/contexts/AuthContext';
@@ -7,10 +7,12 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, Play, DollarSign, Flag, Copy, ExternalLink } from 'lucide-react';
+import { Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, Play, DollarSign, Flag, Copy, Repeat2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TipDialog } from './TipDialog';
+import { FeedComments } from './FeedComments';
+import { ReportContentDialog } from './ReportContentDialog';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -22,20 +24,79 @@ interface SocialFeedProps {
 export const SocialFeed = ({ userId, showAll = true }: SocialFeedProps) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
   const [savedPosts, setSavedPosts] = useState<Set<string>>(new Set());
+  const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set());
   const [tipDialogOpen, setTipDialogOpen] = useState(false);
   const [selectedContent, setSelectedContent] = useState<any>(null);
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
+  const [reportContent, setReportContent] = useState<any>(null);
 
-  const handleShare = (post: any) => {
-    const url = `${window.location.origin}/content/${post.id}`;
-    navigator.clipboard.writeText(url);
-    toast.success('Link copied to clipboard!');
-  };
+  // Fetch posts with likes and comments count
+  const { data: posts, isLoading } = useQuery({
+    queryKey: ['social-feed', userId],
+    queryFn: async () => {
+      let query = supabase
+        .from('content')
+        .select('*')
+        .eq('approval_status', 'approved')
+        .order('created_at', { ascending: false })
+        .limit(50);
 
-  const handleReport = (postId: string) => {
-    toast.success('Content reported. Our team will review it.');
-  };
+      if (userId) {
+        query = query.eq('user_id', userId);
+      }
+
+      const { data: content } = await query;
+      if (!content || content.length === 0) return [];
+
+      const userIds = [...new Set(content.map(c => c.user_id))];
+      const contentIds = content.map(c => c.id);
+
+      // Fetch profiles, likes count, and comments count in parallel
+      const [profilesRes, likesRes, commentsRes, userLikesRes] = await Promise.all([
+        supabase.from('profiles').select('id, username, display_name, avatar_url, is_creator, creator_tier').in('id', userIds),
+        supabase.from('likes').select('content_id').in('content_id', contentIds),
+        supabase.from('comments').select('content_id').in('content_id', contentIds),
+        user?.id ? supabase.from('likes').select('content_id').eq('user_id', user.id).in('content_id', contentIds) : Promise.resolve({ data: [] })
+      ]);
+
+      const likesCount = contentIds.reduce((acc, id) => {
+        acc[id] = likesRes.data?.filter(l => l.content_id === id).length || 0;
+        return acc;
+      }, {} as Record<string, number>);
+
+      const commentsCount = contentIds.reduce((acc, id) => {
+        acc[id] = commentsRes.data?.filter(c => c.content_id === id).length || 0;
+        return acc;
+      }, {} as Record<string, number>);
+
+      const userLikedPosts = new Set(userLikesRes.data?.map(l => l.content_id) || []);
+
+      return content.map(c => ({
+        ...c,
+        profile: profilesRes.data?.find(p => p.id === c.user_id),
+        likesCount: likesCount[c.id] || 0,
+        commentsCount: commentsCount[c.id] || 0,
+        isLiked: userLikedPosts.has(c.id)
+      }));
+    },
+  });
+
+  const likeMutation = useMutation({
+    mutationFn: async ({ postId, isLiked }: { postId: string; isLiked: boolean }) => {
+      if (!user?.id) throw new Error('Not authenticated');
+      
+      if (isLiked) {
+        await supabase.from('likes').delete().eq('content_id', postId).eq('user_id', user.id);
+      } else {
+        await supabase.from('likes').insert({ content_id: postId, user_id: user.id });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['social-feed'] });
+    },
+    onError: () => toast.error('Failed to update like'),
+  });
 
   const repostMutation = useMutation({
     mutationFn: async (content: any) => {
@@ -58,63 +119,66 @@ export const SocialFeed = ({ userId, showAll = true }: SocialFeedProps) => {
     onError: () => toast.error('Failed to repost'),
   });
 
-  const { data: posts, isLoading } = useQuery({
-    queryKey: ['social-feed', userId],
-    queryFn: async () => {
-      let query = supabase
-        .from('content')
-        .select('*')
-        .eq('approval_status', 'approved')
-        .order('created_at', { ascending: false })
-        .limit(50);
-
-      if (userId) {
-        query = query.eq('user_id', userId);
-      }
-
-      const { data: content } = await query;
-      if (!content || content.length === 0) return [];
-
-      const userIds = [...new Set(content.map(c => c.user_id))];
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('id, username, display_name, avatar_url, is_creator, creator_tier')
-        .in('id', userIds);
-
-      return content.map(c => ({
-        ...c,
-        profile: profiles?.find(p => p.id === c.user_id)
-      }));
-    },
-  });
-
-  const handleLike = async (postId: string) => {
-    if (!user) return;
-    
-    const newLiked = new Set(likedPosts);
-    if (newLiked.has(postId)) {
-      newLiked.delete(postId);
-      await supabase.from('likes').delete().eq('content_id', postId).eq('user_id', user.id);
-    } else {
-      newLiked.add(postId);
-      await supabase.from('likes').insert({ content_id: postId, user_id: user.id });
+  const handleLike = (post: any) => {
+    if (!user) {
+      toast.error('Please login to like posts');
+      return;
     }
-    setLikedPosts(newLiked);
+    likeMutation.mutate({ postId: post.id, isLiked: post.isLiked });
+  };
+
+  const handleShare = (post: any) => {
+    const url = `${window.location.origin}/content/${post.id}`;
+    navigator.clipboard.writeText(url);
+    toast.success('Link copied to clipboard!');
+  };
+
+  const handleReport = (post: any) => {
+    if (!user) {
+      toast.error('Please login to report content');
+      return;
+    }
+    setReportContent(post);
+    setReportDialogOpen(true);
+  };
+
+  const handleRepost = (post: any) => {
+    if (!user) {
+      toast.error('Please login to repost');
+      return;
+    }
+    repostMutation.mutate(post);
   };
 
   const handleSave = (postId: string) => {
     const newSaved = new Set(savedPosts);
     if (newSaved.has(postId)) {
       newSaved.delete(postId);
+      toast.success('Removed from saved');
     } else {
       newSaved.add(postId);
+      toast.success('Saved to collection');
     }
     setSavedPosts(newSaved);
   };
 
   const handleTip = (content: any) => {
+    if (!user) {
+      toast.error('Please login to tip creators');
+      return;
+    }
     setSelectedContent(content);
     setTipDialogOpen(true);
+  };
+
+  const toggleComments = (postId: string) => {
+    const newExpanded = new Set(expandedComments);
+    if (newExpanded.has(postId)) {
+      newExpanded.delete(postId);
+    } else {
+      newExpanded.add(postId);
+    }
+    setExpandedComments(newExpanded);
   };
 
   const getCreatorBadge = (tier: string) => {
@@ -166,7 +230,7 @@ export const SocialFeed = ({ userId, showAll = true }: SocialFeedProps) => {
               key={post.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
+              transition={{ delay: index * 0.05 }}
             >
               <Card className="overflow-hidden hover:shadow-lg transition-shadow">
                 <CardHeader className="flex flex-row items-center gap-4 pb-3">
@@ -202,12 +266,12 @@ export const SocialFeed = ({ userId, showAll = true }: SocialFeedProps) => {
                         <Copy className="h-4 w-4 mr-2" />
                         Copy Link
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => repostMutation.mutate(post)}>
-                        <Share2 className="h-4 w-4 mr-2" />
+                      <DropdownMenuItem onClick={() => handleRepost(post)}>
+                        <Repeat2 className="h-4 w-4 mr-2" />
                         Repost
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => handleReport(post.id)} className="text-destructive">
+                      <DropdownMenuItem onClick={() => handleReport(post)} className="text-destructive">
                         <Flag className="h-4 w-4 mr-2" />
                         Report Content
                       </DropdownMenuItem>
@@ -232,11 +296,6 @@ export const SocialFeed = ({ userId, showAll = true }: SocialFeedProps) => {
                         className="w-full h-full object-contain"
                         controls
                       />
-                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div className="bg-black/50 rounded-full p-4">
-                          <Play className="h-8 w-8 text-white fill-white" />
-                        </div>
-                      </div>
                     </div>
                   )}
                   {post.file_type?.startsWith('audio') && (
@@ -255,25 +314,40 @@ export const SocialFeed = ({ userId, showAll = true }: SocialFeedProps) => {
                   </div>
                 </CardContent>
 
-                <CardFooter className="border-t p-3">
+                <CardFooter className="border-t p-3 flex-col">
                   <div className="flex items-center justify-between w-full">
                     <div className="flex items-center gap-1">
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleLike(post.id)}
-                        className={cn(likedPosts.has(post.id) && "text-red-500")}
+                        onClick={() => handleLike(post)}
+                        className={cn(post.isLiked && "text-red-500")}
+                        disabled={likeMutation.isPending}
                       >
-                        <Heart className={cn("h-5 w-5 mr-1", likedPosts.has(post.id) && "fill-current")} />
-                        {post.like_count + (likedPosts.has(post.id) ? 1 : 0)}
+                        <Heart className={cn("h-5 w-5 mr-1", post.isLiked && "fill-current")} />
+                        {post.likesCount}
                       </Button>
-                      <Button variant="ghost" size="sm">
-                        <MessageCircle className="h-5 w-5 mr-1" />
-                        Comment
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => toggleComments(post.id)}
+                        className={cn(expandedComments.has(post.id) && "text-primary")}
+                      >
+                        <MessageCircle className={cn("h-5 w-5 mr-1", expandedComments.has(post.id) && "fill-current")} />
+                        {post.commentsCount}
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => handleRepost(post)}
+                        disabled={repostMutation.isPending}
+                      >
+                        <Repeat2 className="h-5 w-5 mr-1" />
+                        Repost
                       </Button>
                       <Button variant="ghost" size="sm" onClick={() => handleShare(post)}>
                         <Share2 className="h-5 w-5 mr-1" />
-                        {post.share_count}
+                        Share
                       </Button>
                     </div>
                     <div className="flex items-center gap-1">
@@ -298,6 +372,12 @@ export const SocialFeed = ({ userId, showAll = true }: SocialFeedProps) => {
                       </Button>
                     </div>
                   </div>
+
+                  {/* Comments Section */}
+                  <FeedComments 
+                    contentId={post.id} 
+                    isExpanded={expandedComments.has(post.id)} 
+                  />
                 </CardFooter>
               </Card>
             </motion.div>
@@ -310,6 +390,15 @@ export const SocialFeed = ({ userId, showAll = true }: SocialFeedProps) => {
         onOpenChange={setTipDialogOpen}
         content={selectedContent}
       />
+
+      {reportContent && (
+        <ReportContentDialog
+          open={reportDialogOpen}
+          onOpenChange={setReportDialogOpen}
+          contentId={reportContent.id}
+          contentTitle={reportContent.title}
+        />
+      )}
     </>
   );
 };
