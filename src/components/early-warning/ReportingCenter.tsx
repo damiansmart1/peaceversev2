@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -40,9 +40,13 @@ interface ReportFilters {
   dataType: 'incidents' | 'alerts' | 'risks' | 'hotspots';
 }
 
-const ReportingCenter = () => {
+interface ReportingCenterProps {
+  selectedCountry?: string;
+}
+
+const ReportingCenter = ({ selectedCountry = 'ALL' }: ReportingCenterProps) => {
   const [filters, setFilters] = useState<ReportFilters>({
-    country: 'ALL',
+    country: selectedCountry,
     dateFrom: '',
     dateTo: '',
     severity: 'all',
@@ -51,6 +55,11 @@ const ReportingCenter = () => {
     dataType: 'incidents',
   });
   const [isExporting, setIsExporting] = useState(false);
+
+  // Sync selectedCountry prop with filters state
+  useEffect(() => {
+    setFilters(prev => ({ ...prev, country: selectedCountry }));
+  }, [selectedCountry]);
 
   // Fetch data based on filters
   const { data: reportData, isLoading, refetch } = useQuery({

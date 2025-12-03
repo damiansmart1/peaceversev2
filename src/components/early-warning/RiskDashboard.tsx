@@ -5,11 +5,31 @@ import { Badge } from '@/components/ui/badge';
 import { AlertTriangle, TrendingUp, Users, MapPin } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
-const RiskDashboard = () => {
+interface RiskDashboardProps {
+  selectedCountry?: string;
+}
+
+const RiskDashboard = ({ selectedCountry = 'ALL' }: RiskDashboardProps) => {
   const { data: highRiskIncidents, isLoading } = useQuery({
-    queryKey: ['high-risk-incidents'],
+    queryKey: ['high-risk-incidents', selectedCountry],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // First get incident IDs filtered by country
+      let incidentQuery = supabase
+        .from('citizen_reports')
+        .select('id');
+      
+      if (selectedCountry !== 'ALL') {
+        incidentQuery = incidentQuery.eq('location_country', selectedCountry);
+      }
+      
+      const { data: incidents } = await incidentQuery;
+      const incidentIds = incidents?.map(i => i.id) || [];
+      
+      if (incidentIds.length === 0 && selectedCountry !== 'ALL') {
+        return [];
+      }
+
+      let query = supabase
         .from('incident_risk_scores')
         .select(`
           *,
@@ -18,25 +38,49 @@ const RiskDashboard = () => {
         .gte('overall_risk_score', 60)
         .order('overall_risk_score', { ascending: false })
         .limit(10);
+      
+      if (selectedCountry !== 'ALL' && incidentIds.length > 0) {
+        query = query.in('incident_id', incidentIds);
+      }
 
+      const { data, error } = await query;
       if (error) throw error;
       return data;
     },
   });
 
   const { data: statistics } = useQuery({
-    queryKey: ['risk-statistics'],
+    queryKey: ['risk-statistics', selectedCountry],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // First get incident IDs filtered by country
+      let incidentQuery = supabase
+        .from('citizen_reports')
+        .select('id');
+      
+      if (selectedCountry !== 'ALL') {
+        incidentQuery = incidentQuery.eq('location_country', selectedCountry);
+      }
+      
+      const { data: incidents } = await incidentQuery;
+      const incidentIds = incidents?.map(i => i.id) || [];
+
+      let query = supabase
         .from('incident_risk_scores')
         .select('threat_level, overall_risk_score');
+      
+      if (selectedCountry !== 'ALL' && incidentIds.length > 0) {
+        query = query.in('incident_id', incidentIds);
+      } else if (selectedCountry !== 'ALL') {
+        return { critical: 0, high: 0, medium: 0, avgRisk: '0.0' };
+      }
 
+      const { data, error } = await query;
       if (error) throw error;
 
       const critical = data?.filter(r => r.threat_level === 'critical' || r.threat_level === 'imminent').length || 0;
       const high = data?.filter(r => r.threat_level === 'high').length || 0;
       const medium = data?.filter(r => r.threat_level === 'medium').length || 0;
-      const avgRisk = data?.reduce((sum, r) => sum + r.overall_risk_score, 0) / (data?.length || 1);
+      const avgRisk = data?.length ? (data.reduce((sum, r) => sum + r.overall_risk_score, 0) / data.length) : 0;
 
       return { critical, high, medium, avgRisk: avgRisk.toFixed(1) };
     },

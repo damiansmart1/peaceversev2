@@ -6,19 +6,28 @@ import { AlertCircle, TrendingUp, MapPin, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 
-const PredictiveHotspotMap = () => {
+interface PredictiveHotspotMapProps {
+  selectedCountry?: string;
+}
+
+const PredictiveHotspotMap = ({ selectedCountry = 'ALL' }: PredictiveHotspotMapProps) => {
   const { toast } = useToast();
 
   const { data: hotspots, isLoading, refetch } = useQuery({
-    queryKey: ['predictive-hotspots'],
+    queryKey: ['predictive-hotspots', selectedCountry],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('predictive_hotspots')
         .select('*')
         .eq('status', 'active')
         .gte('valid_until', new Date().toISOString())
         .order('hotspot_score', { ascending: false });
 
+      if (selectedCountry !== 'ALL') {
+        query = query.eq('country', selectedCountry);
+      }
+
+      const { data, error } = await query;
       if (error) throw error;
       return data;
     },

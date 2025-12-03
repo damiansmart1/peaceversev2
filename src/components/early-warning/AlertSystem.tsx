@@ -6,13 +6,41 @@ import { Button } from '@/components/ui/button';
 import { AlertTriangle, Bell, CheckCircle2, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
-const AlertSystem = () => {
+interface AlertSystemProps {
+  selectedCountry?: string;
+}
+
+const AlertSystem = ({ selectedCountry = 'ALL' }: AlertSystemProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: alerts, isLoading } = useQuery({
-    queryKey: ['alert-logs'],
+    queryKey: ['alert-logs', selectedCountry],
     queryFn: async () => {
+      // Get incident IDs for the selected country
+      if (selectedCountry !== 'ALL') {
+        const { data: incidents } = await supabase
+          .from('citizen_reports')
+          .select('id')
+          .eq('location_country', selectedCountry);
+        
+        const incidentIds = incidents?.map(i => i.id) || [];
+        
+        const { data, error } = await supabase
+          .from('alert_logs')
+          .select('*')
+          .order('triggered_at', { ascending: false })
+          .limit(20);
+
+        if (error) throw error;
+        
+        // Filter alerts that have incident_ids matching the country
+        return data?.filter(alert => {
+          if (!alert.incident_ids || alert.incident_ids.length === 0) return false;
+          return alert.incident_ids.some((id: string) => incidentIds.includes(id));
+        }) || [];
+      }
+
       const { data, error } = await supabase
         .from('alert_logs')
         .select('*')

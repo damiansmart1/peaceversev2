@@ -101,19 +101,19 @@ const EarlyWarningDashboard = () => {
             </TabsList>
 
             <TabsContent value="risk" className="animate-fade-in">
-              <RiskDashboard />
+              <RiskDashboard selectedCountry={selectedCountry} />
             </TabsContent>
 
             <TabsContent value="hotspots" className="animate-fade-in">
-              <PredictiveHotspotMap />
+              <PredictiveHotspotMap selectedCountry={selectedCountry} />
             </TabsContent>
 
             <TabsContent value="alerts" className="animate-fade-in">
-              <AlertSystem />
+              <AlertSystem selectedCountry={selectedCountry} />
             </TabsContent>
 
             <TabsContent value="reports" className="animate-fade-in">
-              <ReportingCenter />
+              <ReportingCenter selectedCountry={selectedCountry} />
             </TabsContent>
           </Tabs>
 
