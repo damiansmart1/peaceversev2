@@ -15,7 +15,8 @@ import { FeaturedStories } from '@/components/FeaturedStories';
 import { useContentFilters } from '@/hooks/useContentFilters';
 import { useTranslationContext } from '@/components/TranslationProvider';
 import SectionImageBanner from '@/components/SectionImageBanner';
-import { Map, MessageSquare, Users, Calendar, BookOpen, Award, Radio as RadioIcon, Mic } from 'lucide-react';
+import { SocialHub } from '@/components/social/SocialHub';
+import { Map, MessageSquare, Users, Calendar, BookOpen, Award, Radio as RadioIcon, Mic, Sparkles } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import communityUnity from "@/assets/community-unity.jpg";
 import radioBroadcasting from "@/assets/radio-broadcasting.jpg";
@@ -39,8 +40,12 @@ const Community = () => {
           />
         </div>
         
-        <Tabs defaultValue="map" className="max-w-6xl mx-auto">
-          <TabsList className="grid w-full grid-cols-7 mb-8">
+        <Tabs defaultValue="social" className="max-w-7xl mx-auto">
+          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8 mb-8">
+            <TabsTrigger value="social" className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4" />
+              Social
+            </TabsTrigger>
             <TabsTrigger value="map" className="flex items-center gap-2">
               <Map className="w-4 h-4" />
               {t('community.tabs.safeSpaces')}
@@ -70,6 +75,10 @@ const Community = () => {
               {t('community.tabs.resources')}
             </TabsTrigger>
           </TabsList>
+          
+          <TabsContent value="social" className="space-y-4">
+            <SocialHub />
+          </TabsContent>
           
           <TabsContent value="map" className="space-y-4">
             <CommunityMap />
