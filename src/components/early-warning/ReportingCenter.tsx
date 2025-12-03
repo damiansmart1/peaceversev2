@@ -19,7 +19,8 @@ import {
   TrendingUp,
   Bell,
   RefreshCw,
-  CheckCircle
+  CheckCircle,
+  MapPin
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase-typed';
 import { toast } from 'sonner';
@@ -427,6 +428,28 @@ const ReportingCenter = () => {
         </Button>
       </div>
 
+      {/* Country Selection - Prominent */}
+      <div className="mb-6 p-4 bg-primary/10 rounded-lg border border-primary/20">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <MapPin className="w-5 h-5 text-primary" />
+            <Label className="text-sm font-semibold text-foreground">Select Country/Region:</Label>
+          </div>
+          <div className="flex-1 max-w-md">
+            <CountrySelector
+              value={filters.country}
+              onValueChange={(v) => handleFilterChange('country', v)}
+              className="h-10 bg-background"
+            />
+          </div>
+          {filters.country !== 'ALL' && (
+            <Badge variant="secondary" className="bg-primary/20 text-primary">
+              Filtering: {getCountryName(filters.country)}
+            </Badge>
+          )}
+        </div>
+      </div>
+
       {/* Data Type Tabs */}
       <Tabs value={filters.dataType} onValueChange={(v) => handleFilterChange('dataType', v as any)} className="mb-6">
         <TabsList className="grid grid-cols-4 w-full">
@@ -450,15 +473,7 @@ const ReportingCenter = () => {
       </Tabs>
 
       {/* Filters */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6 p-4 bg-muted/50 rounded-lg">
-        <div className="space-y-2">
-          <Label className="text-xs font-medium">Country</Label>
-          <CountrySelector
-            value={filters.country}
-            onValueChange={(v) => handleFilterChange('country', v)}
-            className="h-9"
-          />
-        </div>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6 p-4 bg-muted/50 rounded-lg">
 
         <div className="space-y-2">
           <Label className="text-xs font-medium">From Date</Label>
