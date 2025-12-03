@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { IncidentStatsCards } from '@/components/IncidentStatsCards';
+import { IncidentAnalyticsDashboard } from '@/components/IncidentAnalyticsDashboard';
 import InteractiveHeatmap from '@/components/InteractiveHeatmap';
 import { ReportSubmissionForm } from '@/components/ReportSubmissionForm';
 import { ReportTracker } from '@/components/ReportTracker';
@@ -48,7 +48,7 @@ export default function Incidents() {
           )}
         </div>
 
-        <IncidentStatsCards />
+        <IncidentAnalyticsDashboard />
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6 md:mt-8">
           <TabsList className="grid w-full max-w-3xl grid-cols-4 h-auto">
