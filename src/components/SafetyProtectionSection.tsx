@@ -17,126 +17,128 @@ import {
   Heart,
   Crown
 } from "lucide-react";
+import { useTranslationContext } from './TranslationProvider';
 
 const SafetyProtectionSection = () => {
   const [anonymousMode, setAnonymousMode] = useState(false);
   const [locationSharing, setLocationSharing] = useState(false);
   const [secureMode, setSecureMode] = useState(true);
+  const { t } = useTranslationContext();
 
   const safetyFeatures = [
     {
       id: "anonymous-participation",
       icon: EyeOff,
-      title: "Anonymous Participation",
-      description: "Share stories anonymously",
+      title: t('safety.protection.anonymousParticipation.title'),
+      description: t('safety.protection.anonymousParticipation.description'),
       details: [
-        "Voice modification technology",
-        "No personal data collection", 
-        "Untraceable story submissions",
-        "Anonymous voting & commenting"
+        t('safety.protection.anonymousParticipation.detail1'),
+        t('safety.protection.anonymousParticipation.detail2'), 
+        t('safety.protection.anonymousParticipation.detail3'),
+        t('safety.protection.anonymousParticipation.detail4')
       ],
       riskLevel: "low",
-      userControl: "full"
+      userControl: t('safety.protection.userControl.full')
     },
     {
       id: "secure-encryption",
       icon: Lock,
-      title: "End-to-End Encryption",
-      description: "Mawasiliano yote yamehifadhiwa",
+      title: t('safety.protection.encryption.title'),
+      description: t('safety.protection.encryption.description'),
       details: [
-        "Military-grade encryption",
-        "Encrypted voice messages",
-        "Secure file transfers",
-        "Zero-knowledge architecture"
+        t('safety.protection.encryption.detail1'),
+        t('safety.protection.encryption.detail2'),
+        t('safety.protection.encryption.detail3'),
+        t('safety.protection.encryption.detail4')
       ],
       riskLevel: "minimal", 
-      userControl: "automatic"
+      userControl: t('safety.protection.userControl.automatic')
     },
     {
       id: "anti-surveillance",
       icon: Shield,
-      title: "Anti-Surveillance Protection",
-      description: "Kujificha na mifumo ya ufuatiliaji",
+      title: t('safety.protection.antiSurveillance.title'),
+      description: t('safety.protection.antiSurveillance.description'),
       details: [
-        "VPN integration",
-        "Traffic obfuscation",
-        "Metadata scrubbing",
-        "Decentralized hosting"
+        t('safety.protection.antiSurveillance.detail1'),
+        t('safety.protection.antiSurveillance.detail2'),
+        t('safety.protection.antiSurveillance.detail3'),
+        t('safety.protection.antiSurveillance.detail4')
       ],
       riskLevel: "low",
-      userControl: "enabled"
+      userControl: t('safety.protection.userControl.enabled')
     },
     {
       id: "identity-protection",
       icon: UserX,
-      title: "Identity Shielding",
-      description: "Kulinda utambulisho wa kibinafsi",
+      title: t('safety.protection.identityShielding.title'),
+      description: t('safety.protection.identityShielding.description'),
       details: [
-        "Temporary user IDs",
-        "Location masking",
-        "Device fingerprint blocking",
-        "Social graph protection"
+        t('safety.protection.identityShielding.detail1'),
+        t('safety.protection.identityShielding.detail2'),
+        t('safety.protection.identityShielding.detail3'),
+        t('safety.protection.identityShielding.detail4')
       ],
       riskLevel: "minimal",
-      userControl: "full"
+      userControl: t('safety.protection.userControl.full')
     }
   ];
 
   const crisisProtocols = [
     {
-      title: "Immediate Threat Response",
-      description: "Quick actions for dangerous situations",
+      title: t('safety.protection.crisis.immediateResponse.title'),
+      description: t('safety.protection.crisis.immediateResponse.description'),
       actions: [
-        "Panic button for instant deletion",
-        "Emergency contact alerts", 
-        "Safe house directory access",
-        "Legal aid connections"
+        t('safety.protection.crisis.immediateResponse.action1'),
+        t('safety.protection.crisis.immediateResponse.action2'), 
+        t('safety.protection.crisis.immediateResponse.action3'),
+        t('safety.protection.crisis.immediateResponse.action4')
       ],
-      response: "<5 minutes"
+      response: t('safety.protection.crisis.immediateResponse.time')
     },
     {
-      title: "Digital Security Training",
-      description: "Mafunzo ya usalama wa kidijitali",
+      title: t('safety.protection.crisis.digitalSecurity.title'),
+      description: t('safety.protection.crisis.digitalSecurity.description'),
       actions: [
-        "Security awareness workshops",
-        "Safe communication practices",
-        "Privacy protection guides",
-        "Threat assessment tools"
+        t('safety.protection.crisis.digitalSecurity.action1'),
+        t('safety.protection.crisis.digitalSecurity.action2'),
+        t('safety.protection.crisis.digitalSecurity.action3'),
+        t('safety.protection.crisis.digitalSecurity.action4')
       ],
-      response: "Ongoing"
+      response: t('safety.protection.crisis.digitalSecurity.time')
     },
     {
-      title: "Psychosocial Support",
-      description: "Msaada wa kisaikolojia na kijamii",
+      title: t('safety.protection.crisis.psychosocial.title'),
+      description: t('safety.protection.crisis.psychosocial.description'),
       actions: [
-        "Trauma counseling referrals",
-        "Peer support networks",
-        "Mental health resources",
-        "Community healing circles"
+        t('safety.protection.crisis.psychosocial.action1'),
+        t('safety.protection.crisis.psychosocial.action2'),
+        t('safety.protection.crisis.psychosocial.action3'),
+        t('safety.protection.crisis.psychosocial.action4')
       ],
-      response: "24/7 access"
+      response: t('safety.protection.crisis.psychosocial.time')
     }
   ];
 
   const threatMitigation = [
     {
-      threat: "Online Harassment",
-      mitigation: "Advanced blocking, community moderation, quick reporting",
+      threat: t('safety.protection.threats.onlineHarassment.threat'),
+      mitigation: t('safety.protection.threats.onlineHarassment.mitigation'),
       success: "94%"
     },
     {
-      threat: "Political Targeting", 
-      mitigation: "Anonymous modes, encryption, identity protection",
+      threat: t('safety.protection.threats.politicalTargeting.threat'), 
+      mitigation: t('safety.protection.threats.politicalTargeting.mitigation'),
       success: "98%"
     },
     {
-      threat: "Surveillance Risks",
-      mitigation: "VPN, metadata scrubbing, decentralized architecture", 
+      threat: t('safety.protection.threats.surveillance.threat'),
+      mitigation: t('safety.protection.threats.surveillance.mitigation'), 
       success: "96%"
     },
     {
-      threat: "Social Pressure",
-      mitigation: "Peer networks, community support, safe spaces",
+      threat: t('safety.protection.threats.socialPressure.threat'),
+      mitigation: t('safety.protection.threats.socialPressure.mitigation'),
       success: "89%"
     }
   ];
@@ -146,25 +148,25 @@ const SafetyProtectionSection = () => {
       <div className="container mx-auto px-6">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold mb-4 text-foreground">
-            Safety & Protection
+            {t('safety.protection.title')}
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Protecting youth facing political, social, and systemic risks
+            {t('safety.protection.subtitle')}
           </p>
         </div>
 
         {/* Safety Controls Demo */}
         <Card className="max-w-4xl mx-auto mb-12 p-8 bg-card/80 backdrop-blur-sm shadow-story">
           <h3 className="text-xl font-semibold mb-6 text-card-foreground text-center">
-            Personal Safety Controls
+            {t('safety.protection.personalControls')}
           </h3>
           
           <div className="grid md:grid-cols-3 gap-6">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
-                  <div className="text-sm font-medium text-card-foreground">Anonymous Mode</div>
-                  <div className="text-xs text-muted-foreground">Hide your identity completely</div>
+                  <div className="text-sm font-medium text-card-foreground">{t('safety.protection.controls.anonymousMode')}</div>
+                  <div className="text-xs text-muted-foreground">{t('safety.protection.controls.anonymousModeDesc')}</div>
                 </div>
                 <Switch 
                   checked={anonymousMode} 
@@ -175,7 +177,7 @@ const SafetyProtectionSection = () => {
                 <div className="bg-success/10 rounded-lg p-3">
                   <div className="flex items-center space-x-2">
                     <EyeOff className="w-4 h-4 text-success" />
-                    <span className="text-xs text-success-foreground">Identity protected</span>
+                    <span className="text-xs text-success-foreground">{t('safety.protection.controls.identityProtected')}</span>
                   </div>
                 </div>
               )}
@@ -184,8 +186,8 @@ const SafetyProtectionSection = () => {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
-                  <div className="text-sm font-medium text-card-foreground">Location Sharing</div>
-                  <div className="text-xs text-muted-foreground">Share your general location</div>
+                  <div className="text-sm font-medium text-card-foreground">{t('safety.protection.controls.locationSharing')}</div>
+                  <div className="text-xs text-muted-foreground">{t('safety.protection.controls.locationSharingDesc')}</div>
                 </div>
                 <Switch 
                   checked={locationSharing} 
@@ -196,7 +198,7 @@ const SafetyProtectionSection = () => {
                 <div className="bg-primary/10 rounded-lg p-3">
                   <div className="flex items-center space-x-2">
                     <Lock className="w-4 h-4 text-primary" />
-                    <span className="text-xs text-primary-foreground">Location hidden</span>
+                    <span className="text-xs text-primary-foreground">{t('safety.protection.controls.locationHidden')}</span>
                   </div>
                 </div>
               )}
@@ -205,8 +207,8 @@ const SafetyProtectionSection = () => {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
-                  <div className="text-sm font-medium text-card-foreground">Secure Mode</div>
-                  <div className="text-xs text-muted-foreground">Maximum security enabled</div>
+                  <div className="text-sm font-medium text-card-foreground">{t('safety.protection.controls.secureMode')}</div>
+                  <div className="text-xs text-muted-foreground">{t('safety.protection.controls.secureModeDesc')}</div>
                 </div>
                 <Switch 
                   checked={secureMode} 
@@ -217,7 +219,7 @@ const SafetyProtectionSection = () => {
                 <div className="bg-warning/10 rounded-lg p-3">
                   <div className="flex items-center space-x-2">
                     <Shield className="w-4 h-4 text-warning" />
-                    <span className="text-xs text-warning-foreground">Full protection active</span>
+                    <span className="text-xs text-warning-foreground">{t('safety.protection.controls.fullProtection')}</span>
                   </div>
                 </div>
               )}
@@ -263,7 +265,7 @@ const SafetyProtectionSection = () => {
 
                   <div className="bg-accent-light/30 rounded p-2">
                     <p className="text-xs text-accent-foreground">
-                      <span className="font-medium">User Control:</span> {feature.userControl}
+                      <span className="font-medium">{t('safety.protection.userControlLabel')}:</span> {feature.userControl}
                     </p>
                   </div>
                 </div>
@@ -275,7 +277,7 @@ const SafetyProtectionSection = () => {
         {/* Crisis Response Protocols */}
         <div className="mb-12">
           <h3 className="text-2xl font-bold text-center mb-8 text-foreground">
-            Mipango ya Dharura | Crisis Response Protocols
+            {t('safety.protection.crisisProtocols')}
           </h3>
           
           <div className="grid md:grid-cols-3 gap-6">
@@ -301,7 +303,7 @@ const SafetyProtectionSection = () => {
 
                   <div className="bg-destructive/10 rounded p-3 text-center">
                     <p className="text-sm font-medium text-destructive">
-                      Response Time: {protocol.response}
+                      {t('safety.protection.responseTime')}: {protocol.response}
                     </p>
                   </div>
                 </div>
@@ -313,7 +315,7 @@ const SafetyProtectionSection = () => {
         {/* Threat Mitigation Stats */}
         <Card className="max-w-4xl mx-auto p-8 bg-card/80 backdrop-blur-sm shadow-story">
           <h3 className="text-xl font-semibold mb-6 text-card-foreground text-center">
-            Kuzuia Hatari | Threat Mitigation Effectiveness
+            {t('safety.protection.threatMitigation')}
           </h3>
           
           <div className="space-y-4">
@@ -325,7 +327,7 @@ const SafetyProtectionSection = () => {
                 </div>
                 <div className="text-right">
                   <div className="text-2xl font-bold text-success">{item.success}</div>
-                  <div className="text-xs text-muted-foreground">Success Rate</div>
+                  <div className="text-xs text-muted-foreground">{t('safety.protection.successRate')}</div>
                 </div>
               </div>
             ))}
@@ -336,10 +338,9 @@ const SafetyProtectionSection = () => {
         <Card className="max-w-4xl mx-auto mt-12 p-8 bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20">
           <div className="text-center">
             <Crown className="w-16 h-16 text-primary mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-card-foreground mb-4">Protection Guarantee</h3>
+            <h3 className="text-2xl font-bold text-card-foreground mb-4">{t('safety.protection.protectionGuarantee')}</h3>
             <p className="text-muted-foreground leading-relaxed">
-              Every youth on Peace Verse has the right to feel safe while participating in peace conversations. 
-              We don't make false promises - we provide real protection through modern technology and community strategies.
+              {t('safety.protection.protectionGuaranteeText')}
             </p>
           </div>
         </Card>
