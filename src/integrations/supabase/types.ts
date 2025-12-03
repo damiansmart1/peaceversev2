@@ -2307,6 +2307,9 @@ export type Database = {
       }
       safe_spaces: {
         Row: {
+          capacity: number | null
+          contact_phone: string | null
+          country_code: string | null
           created_at: string
           created_by: string | null
           description: string | null
@@ -2316,11 +2319,15 @@ export type Database = {
           location_name: string
           longitude: number | null
           name: string
+          region: string | null
           space_type: string
           updated_at: string
           verified: boolean | null
         }
         Insert: {
+          capacity?: number | null
+          contact_phone?: string | null
+          country_code?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -2330,11 +2337,15 @@ export type Database = {
           location_name: string
           longitude?: number | null
           name: string
+          region?: string | null
           space_type?: string
           updated_at?: string
           verified?: boolean | null
         }
         Update: {
+          capacity?: number | null
+          contact_phone?: string | null
+          country_code?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -2344,6 +2355,7 @@ export type Database = {
           location_name?: string
           longitude?: number | null
           name?: string
+          region?: string | null
           space_type?: string
           updated_at?: string
           verified?: boolean | null
