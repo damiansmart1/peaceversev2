@@ -14,6 +14,7 @@ import {
   ChevronDown,
   Brain,
   Home,
+  Plug,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -91,6 +92,7 @@ const menuItems = [
     children: [
       { id: 'ai-analytics', label: 'AI Analytics' },
       { id: 'api-analytics', label: 'API Usage' },
+      { id: 'integrations', label: 'Integrations' },
       { id: 'sponsors', label: 'Sponsors' },
       { id: 'settings', label: 'System Settings' },
     ],
