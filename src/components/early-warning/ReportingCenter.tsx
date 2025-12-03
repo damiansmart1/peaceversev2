@@ -55,11 +55,11 @@ const ReportingCenter = () => {
   const { data: reportData, isLoading, refetch } = useQuery({
     queryKey: ['report-data', filters],
     queryFn: async () => {
-      let query;
+      let data: any[] = [];
       
       switch (filters.dataType) {
-        case 'incidents':
-          query = supabase
+        case 'incidents': {
+          let query = supabase
             .from('citizen_reports')
             .select('*')
             .order('created_at', { ascending: false });
@@ -82,10 +82,16 @@ const ReportingCenter = () => {
           if (filters.dateTo) {
             query = query.lte('created_at', filters.dateTo);
           }
+          
+          const { data: incidents, error } = await query.limit(500);
+          if (error) throw error;
+          data = incidents || [];
           break;
+        }
 
-        case 'alerts':
-          query = supabase
+        case 'alerts': {
+          // Alerts don't have country field, so we filter by linked incidents
+          let query = supabase
             .from('alert_logs')
             .select('*')
             .order('triggered_at', { ascending: false });
@@ -102,10 +108,40 @@ const ReportingCenter = () => {
           if (filters.dateTo) {
             query = query.lte('triggered_at', filters.dateTo);
           }
+          
+          const { data: alerts, error } = await query.limit(500);
+          if (error) throw error;
+          
+          // If country filter is set, we need to filter alerts by their linked incidents
+          if (filters.country !== 'ALL' && alerts) {
+            // Get all incident IDs from alerts
+            const incidentIds = alerts.flatMap(a => a.incident_ids || []);
+            if (incidentIds.length > 0) {
+              const { data: incidents } = await supabase
+                .from('citizen_reports')
+                .select('id, location_country')
+                .in('id', incidentIds);
+              
+              const countryIncidentIds = new Set(
+                (incidents || [])
+                  .filter(i => i.location_country === filters.country)
+                  .map(i => i.id)
+              );
+              
+              data = alerts.filter(alert => 
+                (alert.incident_ids || []).some((id: string) => countryIncidentIds.has(id))
+              );
+            } else {
+              data = [];
+            }
+          } else {
+            data = alerts || [];
+          }
           break;
+        }
 
-        case 'risks':
-          query = supabase
+        case 'risks': {
+          let query = supabase
             .from('incident_risk_scores')
             .select('*, citizen_reports(title, location_country, location_city)')
             .order('created_at', { ascending: false });
@@ -119,10 +155,23 @@ const ReportingCenter = () => {
           if (filters.dateTo) {
             query = query.lte('created_at', filters.dateTo);
           }
+          
+          const { data: risks, error } = await query.limit(500);
+          if (error) throw error;
+          
+          // Filter by country through the joined citizen_reports
+          if (filters.country !== 'ALL' && risks) {
+            data = risks.filter(risk => 
+              risk.citizen_reports?.location_country === filters.country
+            );
+          } else {
+            data = risks || [];
+          }
           break;
+        }
 
-        case 'hotspots':
-          query = supabase
+        case 'hotspots': {
+          let query = supabase
             .from('predictive_hotspots')
             .select('*')
             .order('predicted_at', { ascending: false });
@@ -136,11 +185,14 @@ const ReportingCenter = () => {
           if (filters.status !== 'all') {
             query = query.eq('status', filters.status);
           }
+          
+          const { data: hotspots, error } = await query.limit(500);
+          if (error) throw error;
+          data = hotspots || [];
           break;
+        }
       }
 
-      const { data, error } = await query.limit(500);
-      if (error) throw error;
       return data;
     },
   });
