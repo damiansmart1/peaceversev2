@@ -385,31 +385,57 @@ const InteractiveHeatmap = memo(() => {
   }
 
   if (mapError || !GOOGLE_MAPS_API_KEY) {
+    const hasKey = !!GOOGLE_MAPS_API_KEY;
     return (
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-destructive">
             <AlertTriangle className="w-5 h-5" />
-            {mapError || 'Google Maps API Key Required'}
+            {hasKey ? 'Map Loading Failed' : 'Google Maps API Key Required'}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-muted-foreground">
-            The interactive map requires a Google Maps API key to function. Please follow these steps:
-          </p>
-          <ol className="list-decimal list-inside space-y-2 text-sm">
-            <li>Visit the <a href="https://console.cloud.google.com/google/maps-apis" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Google Cloud Console</a></li>
-            <li>Create or select a project</li>
-            <li>Enable the Maps JavaScript API and Places API</li>
-            <li>Create an API key with appropriate restrictions</li>
-            <li>Add the API key to your <code className="bg-muted px-2 py-1 rounded">VITE_GOOGLE_MAPS_API_KEY</code> environment variable</li>
-          </ol>
-          <div className="bg-muted p-4 rounded-lg">
-            <p className="text-xs font-mono">
-              # Add to your .env file:<br />
-              VITE_GOOGLE_MAPS_API_KEY=your_api_key_here
-            </p>
-          </div>
+          {hasKey ? (
+            <>
+              <p className="text-muted-foreground">
+                The Google Maps API key is configured but failed to load. This usually happens when:
+              </p>
+              <ul className="list-disc list-inside space-y-2 text-sm text-muted-foreground">
+                <li><strong>Maps JavaScript API not enabled</strong> - Enable it in Google Cloud Console</li>
+                <li><strong>API key restrictions</strong> - Check HTTP referrer or IP restrictions</li>
+                <li><strong>Billing not enabled</strong> - Google Maps requires billing to be enabled</li>
+                <li><strong>Quota exceeded</strong> - Check your API usage limits</li>
+              </ul>
+              <div className="bg-primary/10 p-4 rounded-lg">
+                <p className="text-sm font-medium text-primary mb-2">Quick Fix Steps:</p>
+                <ol className="list-decimal list-inside space-y-1 text-sm">
+                  <li>Go to <a href="https://console.cloud.google.com/apis/library/maps-backend.googleapis.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">Google Cloud Console</a></li>
+                  <li>Enable "Maps JavaScript API"</li>
+                  <li>Check API key restrictions match your domain</li>
+                  <li>Ensure billing is enabled on the project</li>
+                </ol>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="text-muted-foreground">
+                The interactive map requires a Google Maps API key to function. Please follow these steps:
+              </p>
+              <ol className="list-decimal list-inside space-y-2 text-sm">
+                <li>Visit the <a href="https://console.cloud.google.com/google/maps-apis" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Google Cloud Console</a></li>
+                <li>Create or select a project</li>
+                <li>Enable the Maps JavaScript API and Places API</li>
+                <li>Create an API key with appropriate restrictions</li>
+                <li>Add the API key to your <code className="bg-muted px-2 py-1 rounded">VITE_GOOGLE_MAPS_API_KEY</code> environment variable</li>
+              </ol>
+              <div className="bg-muted p-4 rounded-lg">
+                <p className="text-xs font-mono">
+                  # Add to your .env file:<br />
+                  VITE_GOOGLE_MAPS_API_KEY=your_api_key_here
+                </p>
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
     );
