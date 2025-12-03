@@ -90,6 +90,7 @@ const menuItems = [
     icon: Settings,
     children: [
       { id: 'ai-analytics', label: 'AI Analytics' },
+      { id: 'api-analytics', label: 'API Usage' },
       { id: 'sponsors', label: 'Sponsors' },
       { id: 'settings', label: 'System Settings' },
     ],
