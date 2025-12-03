@@ -70,18 +70,33 @@ export const ProfileEditor = ({ profile, open, onOpenChange }: ProfileEditorProp
       // Upload new avatar if selected
       if (avatarFile) {
         const fileExt = avatarFile.name.split('.').pop();
-        const fileName = `${user.id}/avatar.${fileExt}`;
+        const fileName = `${user.id}/avatar-${Date.now()}.${fileExt}`;
 
-        const { error: uploadError } = await supabase.storage
-          .from('avatars')
-          .upload(fileName, avatarFile, { upsert: true });
-
-        if (!uploadError) {
-          const { data: { publicUrl } } = supabase.storage
-            .from('avatars')
-            .getPublicUrl(fileName);
-          avatarUrl = publicUrl;
+        // First, try to remove old avatar if it exists
+        const oldAvatarPath = profile?.avatar_url?.split('/avatars/')[1];
+        if (oldAvatarPath) {
+          await supabase.storage.from('avatars').remove([oldAvatarPath]);
         }
+
+        const { error: uploadError, data: uploadData } = await supabase.storage
+          .from('avatars')
+          .upload(fileName, avatarFile, { 
+            upsert: true,
+            cacheControl: '3600',
+            contentType: avatarFile.type
+          });
+
+        if (uploadError) {
+          console.error('Avatar upload error:', uploadError);
+          throw new Error(`Failed to upload avatar: ${uploadError.message}`);
+        }
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('avatars')
+          .getPublicUrl(fileName);
+        
+        // Add cache-busting timestamp
+        avatarUrl = `${publicUrl}?t=${Date.now()}`;
       }
 
       // Update profile
@@ -102,10 +117,12 @@ export const ProfileEditor = ({ profile, open, onOpenChange }: ProfileEditorProp
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['social-profile'] });
       queryClient.invalidateQueries({ queryKey: ['profiles'] });
+      queryClient.invalidateQueries({ queryKey: ['user-profile'] });
       toast.success('Profile updated successfully');
       onOpenChange(false);
     },
     onError: (error: Error) => {
+      console.error('Profile update error:', error);
       toast.error(error.message || 'Failed to update profile');
     },
   });
