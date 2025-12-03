@@ -6,9 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Loader2, Shield, CheckCircle, Mail, MailCheck, Edit, Trash2, Download, Users, TrendingUp, Award, Filter, X, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Loader2, Shield, CheckCircle, Mail, MailCheck, Edit, Trash2, Download, Users, Award, Filter, X, RefreshCw, ChevronLeft, ChevronRight, Search, Calendar, Clock, ShieldCheck, UserCog, Key, Plus, Minus, Info, AlertCircle } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -16,9 +16,39 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
 
 type SortField = 'display_name' | 'email' | 'created_at' | 'peace_points' | 'current_level';
 type SortOrder = 'asc' | 'desc';
+type AppRole = 'citizen' | 'verifier' | 'partner' | 'government' | 'admin';
+
+const ROLE_DESCRIPTIONS: Record<AppRole, { title: string; description: string; permissions: string[] }> = {
+  citizen: {
+    title: 'Citizen',
+    description: 'Standard community member with basic platform access',
+    permissions: ['View public content', 'Submit reports', 'Participate in discussions', 'Vote on proposals']
+  },
+  verifier: {
+    title: 'Verifier',
+    description: 'Trusted member who verifies incident reports',
+    permissions: ['All Citizen permissions', 'Verify incident reports', 'Add verification notes', 'Access verification queue']
+  },
+  partner: {
+    title: 'Partner',
+    description: 'Organization partner with extended access',
+    permissions: ['All Citizen permissions', 'Access analytics dashboards', 'View detailed reports', 'Export data']
+  },
+  government: {
+    title: 'Government',
+    description: 'Government official with oversight capabilities',
+    permissions: ['All Partner permissions', 'Access early warning system', 'View risk assessments', 'Coordinate response teams']
+  },
+  admin: {
+    title: 'Administrator',
+    description: 'Full platform control and management',
+    permissions: ['All permissions', 'Manage users & roles', 'Configure system settings', 'Access all data & logs']
+  }
+};
 
 export const AdminUsersManager = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -34,6 +64,11 @@ export const AdminUsersManager = () => {
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
+  const [selectedRoles, setSelectedRoles] = useState<AppRole[]>([]);
+  const [roleExpiry, setRoleExpiry] = useState<string>('');
+  const [roleActive, setRoleActive] = useState(true);
+  const [bulkRoleDialogOpen, setBulkRoleDialogOpen] = useState(false);
+  const [bulkRole, setBulkRole] = useState<AppRole>('citizen');
   const queryClient = useQueryClient();
 
   // Real-time subscription for live updates
@@ -125,20 +160,56 @@ export const AdminUsersManager = () => {
   });
 
   const updateRoleMutation = useMutation({
-    mutationFn: async ({ userId, role }: { userId: string; role: 'citizen' | 'verifier' | 'partner' | 'government' | 'admin' }) => {
+    mutationFn: async ({ userId, roles, expiresAt, isActive }: { 
+      userId: string; 
+      roles: AppRole[]; 
+      expiresAt?: string;
+      isActive?: boolean;
+    }) => {
+      // Remove existing roles
       await (supabase as any).from('user_roles').delete().eq('user_id', userId);
-      const { error } = await (supabase as any)
-        .from('user_roles')
-        .insert({ user_id: userId, role: role as any, is_active: true });
-      if (error) throw error;
+      
+      // Add new roles
+      if (roles.length > 0) {
+        const roleInserts = roles.map(role => ({
+          user_id: userId,
+          role: role as any,
+          is_active: isActive !== undefined ? isActive : true,
+          expires_at: expiresAt || null
+        }));
+        const { error } = await (supabase as any).from('user_roles').insert(roleInserts);
+        if (error) throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
-      toast.success('User role updated successfully');
+      toast.success('User roles updated successfully');
     },
     onError: (error: any) => {
-      toast.error(`Failed to update role: ${error.message}`);
+      toast.error(`Failed to update roles: ${error.message}`);
+    },
+  });
+
+  const bulkUpdateRoleMutation = useMutation({
+    mutationFn: async ({ userIds, role, expiresAt }: { userIds: string[]; role: AppRole; expiresAt?: string }) => {
+      for (const userId of userIds) {
+        await (supabase as any).from('user_roles').delete().eq('user_id', userId);
+        const { error } = await (supabase as any)
+          .from('user_roles')
+          .insert({ user_id: userId, role: role as any, is_active: true, expires_at: expiresAt || null });
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
+      toast.success(`Roles updated for ${selectedUsers.size} users`);
+      setSelectedUsers(new Set());
+      setBulkRoleDialogOpen(false);
+    },
+    onError: (error: any) => {
+      toast.error(`Failed to bulk update roles: ${error.message}`);
     },
   });
 
@@ -217,6 +288,13 @@ export const AdminUsersManager = () => {
     setSelectedUser(user);
     setDisplayName(user.display_name || '');
     setBio(user.bio || '');
+    // Set existing roles
+    const userRoles = user.user_roles?.filter((r: any) => r.is_active !== false).map((r: any) => r.role as AppRole) || [];
+    setSelectedRoles(userRoles.length > 0 ? userRoles : ['citizen']);
+    // Set expiry if exists
+    const existingExpiry = user.user_roles?.[0]?.expires_at;
+    setRoleExpiry(existingExpiry ? existingExpiry.split('T')[0] : '');
+    setRoleActive(user.user_roles?.[0]?.is_active !== false);
     setEditDialogOpen(true);
   };
 
@@ -278,16 +356,30 @@ export const AdminUsersManager = () => {
     }
   };
 
-  // Apply filters and sorting
+  // Apply filters and sorting - enhanced search including roles
   const filteredUsers = users?.filter((user: any) => {
-    const matchesSearch = 
-      user.display_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.id?.toLowerCase().includes(searchQuery.toLowerCase());
+    const searchLower = searchQuery.toLowerCase();
+    
+    // Search by name, username, email, ID
+    const matchesBasicSearch = 
+      user.display_name?.toLowerCase().includes(searchLower) ||
+      user.username?.toLowerCase().includes(searchLower) ||
+      user.email?.toLowerCase().includes(searchLower) ||
+      user.id?.toLowerCase().includes(searchLower);
 
+    // Search by role
+    const userRoleNames = user.user_roles?.map((r: any) => r.role?.toLowerCase()) || ['citizen'];
+    const matchesRoleSearch = userRoleNames.some((role: string) => role?.includes(searchLower));
+
+    // Search by user type
+    const matchesTypeSearch = user.user_type?.toLowerCase().includes(searchLower);
+
+    const matchesSearch = matchesBasicSearch || matchesRoleSearch || matchesTypeSearch;
+
+    // Filter by role dropdown
     const matchesRole = roleFilter === 'all' || 
-      user.user_roles?.some((r: any) => r.role === roleFilter && r.is_active);
+      user.user_roles?.some((r: any) => r.role === roleFilter && r.is_active !== false) ||
+      (roleFilter === 'citizen' && (!user.user_roles || user.user_roles.length === 0));
 
     const matchesVerified = verifiedFilter === 'all' ||
       (verifiedFilter === 'verified' && user.is_verified) ||
@@ -404,13 +496,19 @@ export const AdminUsersManager = () => {
         <CardContent className="space-y-4">
           {/* Search and Filters */}
           <div className="flex flex-col sm:flex-row gap-4">
-            <Input
-              placeholder="Search users by name, username, email, or ID..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1"
-            />
-            <Select value={roleFilter} onValueChange={setRoleFilter}>
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by name, email, ID, or role (e.g., 'admin', 'verifier')..."
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setCurrentPage(1); // Reset to first page on search
+                }}
+                className="pl-10"
+              />
+            </div>
+            <Select value={roleFilter} onValueChange={(v) => { setRoleFilter(v); setCurrentPage(1); }}>
               <SelectTrigger className="w-[180px]">
                 <Filter className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Filter by role" />
@@ -424,7 +522,7 @@ export const AdminUsersManager = () => {
                 <SelectItem value="admin">Admin</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={verifiedFilter} onValueChange={setVerifiedFilter}>
+            <Select value={verifiedFilter} onValueChange={(v) => { setVerifiedFilter(v); setCurrentPage(1); }}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
@@ -438,9 +536,17 @@ export const AdminUsersManager = () => {
 
           {/* Bulk Actions */}
           {selectedUsers.size > 0 && (
-            <div className="flex items-center gap-2 p-3 bg-primary/10 rounded-lg">
+            <div className="flex items-center gap-2 p-3 bg-primary/10 rounded-lg flex-wrap">
               <span className="text-sm font-medium">{selectedUsers.size} selected</span>
               <Separator orientation="vertical" className="h-4" />
+              <Button 
+                variant="secondary" 
+                size="sm" 
+                onClick={() => setBulkRoleDialogOpen(true)}
+              >
+                <UserCog className="h-4 w-4 mr-2" />
+                Assign Role
+              </Button>
               <Button 
                 variant="destructive" 
                 size="sm" 
@@ -655,25 +761,137 @@ export const AdminUsersManager = () => {
                 Save Changes
               </Button>
             </TabsContent>
-            <TabsContent value="role" className="space-y-4">
-              <div className="space-y-2">
-                <Label>User Role</Label>
-                <Select
-                  defaultValue={(selectedUser?.user_roles as any)?.[0]?.role || 'citizen'}
-                  onValueChange={(role: any) => updateRoleMutation.mutate({ userId: selectedUser?.id, role })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="citizen">Citizen</SelectItem>
-                    <SelectItem value="verifier">Verifier</SelectItem>
-                    <SelectItem value="partner">Partner</SelectItem>
-                    <SelectItem value="government">Government</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
-                  </SelectContent>
-                </Select>
+            <TabsContent value="role" className="space-y-6">
+              {/* Role Selection */}
+              <div className="space-y-3">
+                <Label className="flex items-center gap-2">
+                  <UserCog className="h-4 w-4" />
+                  Assigned Roles
+                </Label>
+                <div className="grid grid-cols-1 gap-3">
+                  {(Object.keys(ROLE_DESCRIPTIONS) as AppRole[]).map((role) => {
+                    const roleInfo = ROLE_DESCRIPTIONS[role];
+                    const isSelected = selectedRoles.includes(role);
+                    return (
+                      <div
+                        key={role}
+                        className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                          isSelected 
+                            ? 'border-primary bg-primary/5' 
+                            : 'border-border hover:border-primary/50'
+                        }`}
+                        onClick={() => {
+                          if (isSelected) {
+                            setSelectedRoles(selectedRoles.filter(r => r !== role));
+                          } else {
+                            setSelectedRoles([...selectedRoles, role]);
+                          }
+                        }}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <Checkbox checked={isSelected} />
+                              <span className="font-medium">{roleInfo.title}</span>
+                              {role === 'admin' && <ShieldCheck className="h-4 w-4 text-destructive" />}
+                            </div>
+                            <p className="text-sm text-muted-foreground mt-1">{roleInfo.description}</p>
+                          </div>
+                        </div>
+                        {isSelected && (
+                          <div className="mt-3 pt-3 border-t">
+                            <p className="text-xs font-medium text-muted-foreground mb-2">Permissions:</p>
+                            <div className="flex flex-wrap gap-1">
+                              {roleInfo.permissions.map((perm, idx) => (
+                                <Badge key={idx} variant="secondary" className="text-xs">
+                                  {perm}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
+
+              <Separator />
+
+              {/* Role Settings */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    Role Expiration (Optional)
+                  </Label>
+                  <Input
+                    type="date"
+                    value={roleExpiry}
+                    onChange={(e) => setRoleExpiry(e.target.value)}
+                    min={new Date().toISOString().split('T')[0]}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Leave empty for permanent role assignment
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    Role Status
+                  </Label>
+                  <div className="flex items-center space-x-2 pt-2">
+                    <Switch
+                      checked={roleActive}
+                      onCheckedChange={setRoleActive}
+                    />
+                    <span className="text-sm">
+                      {roleActive ? 'Active' : 'Suspended'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Suspended roles retain assignment but deny access
+                  </p>
+                </div>
+              </div>
+
+              {/* Warning for admin role */}
+              {selectedRoles.includes('admin') && (
+                <div className="flex items-start gap-2 p-3 bg-destructive/10 rounded-lg border border-destructive/20">
+                  <AlertCircle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+                  <div className="text-sm">
+                    <p className="font-medium text-destructive">Admin Role Warning</p>
+                    <p className="text-muted-foreground">
+                      Admin users have full platform control including access to all data, user management, and system settings.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              <Button 
+                onClick={() => {
+                  if (selectedRoles.length === 0) {
+                    toast.error('Please select at least one role');
+                    return;
+                  }
+                  updateRoleMutation.mutate({ 
+                    userId: selectedUser?.id, 
+                    roles: selectedRoles,
+                    expiresAt: roleExpiry || undefined,
+                    isActive: roleActive
+                  });
+                }}
+                disabled={updateRoleMutation.isPending || selectedRoles.length === 0}
+                className="w-full"
+              >
+                {updateRoleMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <Key className="h-4 w-4 mr-2" />
+                )}
+                Save Role Assignment
+              </Button>
             </TabsContent>
           </Tabs>
         </DialogContent>
@@ -699,6 +917,94 @@ export const AdminUsersManager = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Bulk Role Assignment Dialog */}
+      <Dialog open={bulkRoleDialogOpen} onOpenChange={setBulkRoleDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserCog className="h-5 w-5" />
+              Bulk Role Assignment
+            </DialogTitle>
+            <DialogDescription>
+              Assign a role to {selectedUsers.size} selected users
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-3">
+              <Label>Select Role</Label>
+              <div className="grid gap-2">
+                {(Object.keys(ROLE_DESCRIPTIONS) as AppRole[]).map((role) => {
+                  const roleInfo = ROLE_DESCRIPTIONS[role];
+                  return (
+                    <div
+                      key={role}
+                      className={`p-3 rounded-lg border cursor-pointer transition-all ${
+                        bulkRole === role 
+                          ? 'border-primary bg-primary/5' 
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                      onClick={() => setBulkRole(role)}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Checkbox checked={bulkRole === role} />
+                        <span className="font-medium">{roleInfo.title}</span>
+                        {role === 'admin' && <ShieldCheck className="h-4 w-4 text-destructive" />}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1 ml-6">{roleInfo.description}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                Expiration Date (Optional)
+              </Label>
+              <Input
+                type="date"
+                value={roleExpiry}
+                onChange={(e) => setRoleExpiry(e.target.value)}
+                min={new Date().toISOString().split('T')[0]}
+              />
+            </div>
+
+            {bulkRole === 'admin' && (
+              <div className="flex items-start gap-2 p-3 bg-destructive/10 rounded-lg border border-destructive/20">
+                <AlertCircle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+                <div className="text-sm">
+                  <p className="font-medium text-destructive">Admin Role Warning</p>
+                  <p className="text-muted-foreground">
+                    You are about to grant admin privileges to {selectedUsers.size} users.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setBulkRoleDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={() => bulkUpdateRoleMutation.mutate({
+                userIds: Array.from(selectedUsers),
+                role: bulkRole,
+                expiresAt: roleExpiry || undefined
+              })}
+              disabled={bulkUpdateRoleMutation.isPending}
+            >
+              {bulkUpdateRoleMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <Key className="h-4 w-4 mr-2" />
+              )}
+              Assign Role to {selectedUsers.size} Users
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
