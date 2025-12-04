@@ -12,11 +12,12 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, MessageSquare, Send, ArrowLeft, Plus, MapPin, Hash, Globe, Heart, Gamepad2, Music, BookOpen } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Users, MessageSquare, Send, ArrowLeft, Plus, MapPin, Hash, Globe, Heart, Gamepad2, Music, BookOpen, Smile } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
 
 const CATEGORIES = [
   { value: 'all', label: 'All', icon: Globe },
@@ -28,12 +29,74 @@ const CATEGORIES = [
   { value: 'local', label: 'Local', icon: MapPin },
 ];
 
+const QUICK_EMOJIS = ['👍', '❤️', '😂', '😮', '🎉', '🙏', '✊', '🕊️'];
+
+// Inline message emoji reactions component
+const MessageReactions = ({ 
+  reactions, 
+  onReact 
+}: { 
+  reactions: { emoji: string; count: number; hasReacted: boolean }[];
+  onReact: (emoji: string) => void;
+}) => {
+  const [showPicker, setShowPicker] = useState(false);
+
+  return (
+    <div className="flex items-center gap-0.5 flex-wrap mt-1">
+      <AnimatePresence>
+        {reactions.filter(r => r.count > 0).map((reaction) => (
+          <motion.button
+            key={reaction.emoji}
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            exit={{ scale: 0 }}
+            onClick={() => onReact(reaction.emoji)}
+            className={cn(
+              "inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-xs transition-all",
+              reaction.hasReacted 
+                ? "bg-primary/15 border border-primary/30" 
+                : "bg-muted/70 border border-transparent hover:bg-muted"
+            )}
+          >
+            <span>{reaction.emoji}</span>
+            <span className="font-medium">{reaction.count}</span>
+          </motion.button>
+        ))}
+      </AnimatePresence>
+      
+      <Popover open={showPicker} onOpenChange={setShowPicker}>
+        <PopoverTrigger asChild>
+          <button className="inline-flex items-center justify-center w-6 h-6 rounded-full hover:bg-muted transition-colors opacity-0 group-hover:opacity-100">
+            <Smile className="w-3.5 h-3.5 text-muted-foreground" />
+          </button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-2" side="top" align="start">
+          <div className="flex gap-1">
+            {QUICK_EMOJIS.map((emoji) => (
+              <motion.button
+                key={emoji}
+                onClick={() => { onReact(emoji); setShowPicker(false); }}
+                className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-muted transition-colors"
+                whileHover={{ scale: 1.2 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                {emoji}
+              </motion.button>
+            ))}
+          </div>
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+};
+
 export const Chatrooms = () => {
   const { user } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState('');
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [messageReactions, setMessageReactions] = useState<Record<string, Record<string, { count: number; hasReacted: boolean }>>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const { data: chatrooms, isLoading: loadingRooms, refetch: refetchRooms } = useChatrooms(selectedCategory);
@@ -104,6 +167,38 @@ export const Chatrooms = () => {
         refetchRooms();
       }
     });
+  };
+
+  const handleMessageReaction = (messageId: string, emoji: string) => {
+    if (!user) {
+      toast.error('Please login to react');
+      return;
+    }
+    
+    setMessageReactions(prev => {
+      const msgEmojis = prev[messageId] || {};
+      const current = msgEmojis[emoji] || { count: 0, hasReacted: false };
+      
+      return {
+        ...prev,
+        [messageId]: {
+          ...msgEmojis,
+          [emoji]: {
+            count: current.hasReacted ? current.count - 1 : current.count + 1,
+            hasReacted: !current.hasReacted
+          }
+        }
+      };
+    });
+  };
+
+  const getMessageReactions = (messageId: string) => {
+    const reactions = messageReactions[messageId] || {};
+    return Object.entries(reactions).map(([emoji, data]) => ({
+      emoji,
+      count: data.count,
+      hasReacted: data.hasReacted
+    }));
   };
 
   const selectedChatroom = chatrooms?.find(r => r.id === selectedRoom);
@@ -312,7 +407,7 @@ export const Chatrooms = () => {
                           key={msg.id}
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
-                          className="flex gap-3"
+                          className="flex gap-3 group"
                         >
                           <Avatar className="h-8 w-8 shrink-0">
                             <AvatarImage src={msg.profile?.avatar_url} />
@@ -330,6 +425,11 @@ export const Chatrooms = () => {
                               </span>
                             </div>
                             <p className="text-sm mt-0.5 break-words">{msg.content}</p>
+                            {/* Message Emoji Reactions */}
+                            <MessageReactions
+                              reactions={getMessageReactions(msg.id)}
+                              onReact={(emoji) => handleMessageReaction(msg.id, emoji)}
+                            />
                           </div>
                         </motion.div>
                       ))}

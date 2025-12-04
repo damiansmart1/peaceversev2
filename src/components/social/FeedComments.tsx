@@ -9,6 +9,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { Send, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
+import { EmojiReactions } from './EmojiReactions';
 
 interface FeedCommentsProps {
   contentId: string;
@@ -19,6 +20,7 @@ export const FeedComments = ({ contentId, isExpanded }: FeedCommentsProps) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [newComment, setNewComment] = useState('');
+  const [commentReactions, setCommentReactions] = useState<Record<string, Record<string, { count: number; hasReacted: boolean }>>>({});
 
   const { data: comments, isLoading } = useQuery({
     queryKey: ['feed-comments', contentId],
@@ -82,6 +84,38 @@ export const FeedComments = ({ contentId, isExpanded }: FeedCommentsProps) => {
       return;
     }
     addCommentMutation.mutate(newComment.trim());
+  };
+
+  const handleCommentReaction = (commentId: string, emoji: string) => {
+    if (!user) {
+      toast.error('Please login to react');
+      return;
+    }
+    
+    setCommentReactions(prev => {
+      const commentEmojis = prev[commentId] || {};
+      const current = commentEmojis[emoji] || { count: 0, hasReacted: false };
+      
+      return {
+        ...prev,
+        [commentId]: {
+          ...commentEmojis,
+          [emoji]: {
+            count: current.hasReacted ? current.count - 1 : current.count + 1,
+            hasReacted: !current.hasReacted
+          }
+        }
+      };
+    });
+  };
+
+  const getCommentReactions = (commentId: string) => {
+    const reactions = commentReactions[commentId] || {};
+    return Object.entries(reactions).map(([emoji, data]) => ({
+      emoji,
+      count: data.count,
+      hasReacted: data.hasReacted
+    }));
   };
 
   if (!isExpanded) return null;
@@ -155,6 +189,14 @@ export const FeedComments = ({ contentId, isExpanded }: FeedCommentsProps) => {
                       </span>
                     </div>
                     <p className="text-sm mt-1">{comment.text}</p>
+                  </div>
+                  {/* Comment Emoji Reactions */}
+                  <div className="mt-1 ml-1">
+                    <EmojiReactions
+                      reactions={getCommentReactions(comment.id)}
+                      onReact={(emoji) => handleCommentReaction(comment.id, emoji)}
+                      size="sm"
+                    />
                   </div>
                 </div>
                 {user?.id === comment.user_id && (
