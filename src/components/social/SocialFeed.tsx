@@ -7,12 +7,13 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, Play, DollarSign, Flag, Copy, Repeat2 } from 'lucide-react';
+import { Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, Play, DollarSign, Flag, Copy, Repeat2, Smile } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TipDialog } from './TipDialog';
 import { FeedComments } from './FeedComments';
 import { ReportContentDialog } from './ReportContentDialog';
+import { EmojiReactions } from './EmojiReactions';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -30,6 +31,7 @@ export const SocialFeed = ({ userId, showAll = true }: SocialFeedProps) => {
   const [selectedContent, setSelectedContent] = useState<any>(null);
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const [reportContent, setReportContent] = useState<any>(null);
+  const [postReactions, setPostReactions] = useState<Record<string, Record<string, { count: number; hasReacted: boolean }>>>({});
 
   // Fetch posts with likes and comments count
   const { data: posts, isLoading } = useQuery({
@@ -204,6 +206,38 @@ export const SocialFeed = ({ userId, showAll = true }: SocialFeedProps) => {
       newExpanded.add(postId);
     }
     setExpandedComments(newExpanded);
+  };
+
+  const handlePostReaction = (postId: string, emoji: string) => {
+    if (!user) {
+      toast.error('Please login to react');
+      return;
+    }
+    
+    setPostReactions(prev => {
+      const postEmojis = prev[postId] || {};
+      const current = postEmojis[emoji] || { count: 0, hasReacted: false };
+      
+      return {
+        ...prev,
+        [postId]: {
+          ...postEmojis,
+          [emoji]: {
+            count: current.hasReacted ? current.count - 1 : current.count + 1,
+            hasReacted: !current.hasReacted
+          }
+        }
+      };
+    });
+  };
+
+  const getPostReactions = (postId: string) => {
+    const reactions = postReactions[postId] || {};
+    return Object.entries(reactions).map(([emoji, data]) => ({
+      emoji,
+      count: data.count,
+      hasReacted: data.hasReacted
+    }));
   };
 
   const getCreatorBadge = (tier: string) => {
@@ -394,6 +428,12 @@ export const SocialFeed = ({ userId, showAll = true }: SocialFeedProps) => {
                       </Button>
                     </div>
                     <div className="flex items-center gap-0.5 sm:gap-1">
+                      {/* Emoji Reactions */}
+                      <EmojiReactions
+                        reactions={getPostReactions(post.id)}
+                        onReact={(emoji) => handlePostReaction(post.id, emoji)}
+                        size="sm"
+                      />
                       {post.profile?.is_creator && user?.id !== post.user_id && (
                         <Button
                           variant="outline"
