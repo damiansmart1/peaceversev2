@@ -9,44 +9,9 @@ import { useAdminSafeSpaces, AdminSafeSpace } from "@/hooks/useAdminSafeSpaces";
 import { useAdminCheck } from "@/hooks/useAdminCheck";
 import { useJurisdiction } from "@/contexts/JurisdictionContext";
 import { toast } from "sonner";
-import { Loader } from '@googlemaps/js-api-loader';
+import { preloadGoogleMaps, getGoogleMaps } from '@/hooks/useGoogleMapsPreloader';
 
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
-
-// Singleton loader to prevent multiple loads
-let loaderInstance: Loader | null = null;
-let isGoogleMapsLoaded = false;
-let loadPromise: Promise<typeof google> | null = null;
-
-const getLoader = () => {
-  if (!loaderInstance && GOOGLE_MAPS_API_KEY) {
-    loaderInstance = new Loader({
-      apiKey: GOOGLE_MAPS_API_KEY,
-      version: 'weekly',
-    });
-  }
-  return loaderInstance;
-};
-
-const loadGoogleMaps = async (): Promise<typeof google | null> => {
-  if (isGoogleMapsLoaded && window.google) {
-    return window.google;
-  }
-  
-  if (loadPromise) {
-    return loadPromise;
-  }
-  
-  const loader = getLoader();
-  if (!loader) return null;
-  
-  loadPromise = loader.load().then((google) => {
-    isGoogleMapsLoaded = true;
-    return google;
-  });
-  
-  return loadPromise;
-};
 
 const CommunityMap = memo(() => {
   const [selectedHub, setSelectedHub] = useState<string | null>(null);
@@ -91,7 +56,7 @@ const CommunityMap = memo(() => {
     }
   }, [userLocation]);
 
-  // Initialize Google Maps - only once
+  // Initialize Google Maps - use preloaded instance if available
   useEffect(() => {
     if (!mapRef.current || initAttemptedRef.current || googleMapRef.current) return;
     initAttemptedRef.current = true;
@@ -101,25 +66,32 @@ const CommunityMap = memo(() => {
       return;
     }
 
+    const defaultCenter = { lat: -1.286389, lng: 36.817223 };
     let isMounted = true;
 
-    loadGoogleMaps().then((google) => {
-      if (!isMounted || !mapRef.current || !google) return;
+    // Check if already loaded (from preload)
+    const existingGoogle = getGoogleMaps();
+    if (existingGoogle && mapRef.current) {
+      const map = new existingGoogle.maps.Map(mapRef.current, {
+        center: userLocation || defaultCenter,
+        zoom: 12,
+        gestureHandling: 'greedy',
+        styles: [{ featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] }],
+      });
+      googleMapRef.current = map;
+      setMapLoaded(true);
+      return;
+    }
 
-      // Default center (Nairobi) - will be updated when user location is available
-      const defaultCenter = { lat: -1.286389, lng: 36.817223 };
+    // Load if not already loaded
+    preloadGoogleMaps().then((google) => {
+      if (!isMounted || !mapRef.current || !google) return;
 
       const map = new google.maps.Map(mapRef.current, {
         center: userLocation || defaultCenter,
         zoom: 12,
         gestureHandling: 'greedy',
-        styles: [
-          {
-            featureType: 'poi',
-            elementType: 'labels',
-            stylers: [{ visibility: 'off' }],
-          },
-        ],
+        styles: [{ featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] }],
       });
 
       googleMapRef.current = map;

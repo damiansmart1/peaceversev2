@@ -47,6 +47,9 @@ import EarlyWarningDashboard from "./pages/dashboards/EarlyWarningDashboard";
 import Integrations from "./pages/Integrations";
 import Install from "./pages/Install";
 
+// Preload Google Maps API on app startup for faster map loading
+import '@/hooks/useGoogleMapsPreloader';
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
