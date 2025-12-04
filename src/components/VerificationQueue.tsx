@@ -28,163 +28,15 @@ const STATUS_COLORS = {
   escalated: 'bg-red-500',
 };
 
-// Comprehensive mock data for demonstration
-const MOCK_VERIFICATION_TASKS = [
-  {
-    id: 'task-001',
-    status: 'pending',
-    priority: 'critical',
-    task_type: 'incident_verification',
-    created_at: '2024-12-03T14:30:00Z',
-    assigned_at: null,
-    ai_recommendation: 'High-priority incident with multiple corroborating reports. AI confidence: 85%. Recommend immediate verification due to potential escalation risk.',
-    citizen_reports: {
-      id: 'report-001',
-      title: 'Community Tension at Kibera Market',
-      description: 'Witnessed escalating tensions between two groups at the main market area around 2pm. Several people were shouting and there was pushing. Police arrived within 30 minutes but the situation remained tense. Local leaders are attempting mediation. Approximately 50 people were involved.',
-      category: 'Community Conflict',
-      severity_level: 'high',
-      location_name: 'Kibera Market, Nairobi',
-      location_country: 'Kenya',
-      location_latitude: -1.3133,
-      location_longitude: 36.7866,
-      created_at: '2024-12-03T14:25:00Z',
-      is_anonymous: false,
-      ai_threat_level: 'medium-high',
-      ai_sentiment: 'negative',
-      credibility_score: 78,
-      media_urls: ['photo1.jpg', 'photo2.jpg'],
-      witness_count: 5,
-      estimated_people_affected: 200,
-      tags: ['market', 'tension', 'police-response', 'mediation'],
-    },
-  },
-  {
-    id: 'task-002',
-    status: 'pending',
-    priority: 'high',
-    task_type: 'incident_verification',
-    created_at: '2024-12-03T11:15:00Z',
-    ai_recommendation: 'Credible report with photo evidence. Location verified via GPS. Similar incidents reported in area last month. Recommend thorough cross-reference check.',
-    citizen_reports: {
-      id: 'report-002',
-      title: 'Road Blockade by Youth Group',
-      description: 'A group of approximately 30 young people have blocked the main road near the junction. They are demanding employment opportunities and dialogue with local government. Traffic is being diverted. The protest has been peaceful so far but blocking essential services.',
-      category: 'Protest/Demonstration',
-      severity_level: 'medium',
-      location_name: 'Mathare Junction, Nairobi',
-      location_country: 'Kenya',
-      location_latitude: -1.2634,
-      location_longitude: 36.8573,
-      created_at: '2024-12-03T11:00:00Z',
-      is_anonymous: true,
-      ai_threat_level: 'medium',
-      ai_sentiment: 'frustrated',
-      credibility_score: 72,
-      media_urls: ['video1.mp4'],
-      witness_count: 3,
-      estimated_people_affected: 500,
-      tags: ['protest', 'youth', 'unemployment', 'road-block'],
-    },
-  },
-  {
-    id: 'task-003',
-    status: 'pending',
-    priority: 'medium',
-    task_type: 'incident_verification',
-    created_at: '2024-12-02T16:45:00Z',
-    ai_recommendation: 'Report from trusted source with good track record. Content appears genuine. Recommend standard verification process.',
-    citizen_reports: {
-      id: 'report-003',
-      title: 'Ethnic Tensions at Local School',
-      description: 'Parents from different communities had a heated argument at the school gate regarding the upcoming school board elections. The principal intervened but tensions remain. Some parents are threatening to withdraw their children.',
-      category: 'Community Conflict',
-      severity_level: 'medium',
-      location_name: 'Kawangware Primary School',
-      location_country: 'Kenya',
-      location_latitude: -1.2789,
-      location_longitude: 36.7456,
-      created_at: '2024-12-02T16:30:00Z',
-      is_anonymous: false,
-      ai_threat_level: 'medium',
-      ai_sentiment: 'negative',
-      credibility_score: 85,
-      media_urls: [],
-      witness_count: 8,
-      estimated_people_affected: 150,
-      tags: ['school', 'ethnic-tension', 'elections', 'community'],
-    },
-  },
-  {
-    id: 'task-004',
-    status: 'pending',
-    priority: 'low',
-    task_type: 'peace_initiative',
-    created_at: '2024-12-02T10:00:00Z',
-    ai_recommendation: 'Positive peace initiative report. Verify organizer details and impact claims. Low urgency.',
-    citizen_reports: {
-      id: 'report-004',
-      title: 'Successful Interfaith Dialogue Session',
-      description: 'Local religious leaders held a successful interfaith dialogue bringing together 100+ community members from different faiths. They signed a peace charter and agreed to monthly meetings. This is part of an ongoing peace initiative.',
-      category: 'Peace Initiative',
-      severity_level: 'low',
-      location_name: 'Eastleigh Community Center',
-      location_country: 'Kenya',
-      location_latitude: -1.2723,
-      location_longitude: 36.8456,
-      created_at: '2024-12-02T09:30:00Z',
-      is_anonymous: false,
-      ai_threat_level: 'none',
-      ai_sentiment: 'positive',
-      credibility_score: 92,
-      media_urls: ['photo1.jpg', 'photo2.jpg', 'document.pdf'],
-      witness_count: 12,
-      estimated_people_affected: 100,
-      tags: ['interfaith', 'dialogue', 'peace-charter', 'community'],
-    },
-  },
-  {
-    id: 'task-005',
-    status: 'pending',
-    priority: 'high',
-    task_type: 'incident_verification',
-    created_at: '2024-12-03T08:20:00Z',
-    ai_recommendation: 'Cross-border incident report requiring coordination. Multiple sources mention similar activity. High priority for regional early warning.',
-    citizen_reports: {
-      id: 'report-005',
-      title: 'Cattle Rustling Incident Near Border',
-      description: 'Armed group crossed from neighboring area and took approximately 50 cattle from local herders. One herder was injured. Community members are organizing a response. Authorities have been notified but response is slow.',
-      category: 'Armed Violence',
-      severity_level: 'high',
-      location_name: 'Turkana Border Region',
-      location_country: 'Kenya',
-      location_latitude: 3.1234,
-      location_longitude: 35.9876,
-      created_at: '2024-12-03T07:45:00Z',
-      is_anonymous: true,
-      ai_threat_level: 'high',
-      ai_sentiment: 'alarmed',
-      credibility_score: 68,
-      media_urls: ['photo1.jpg'],
-      witness_count: 4,
-      estimated_people_affected: 80,
-      tags: ['cattle-rustling', 'armed-group', 'border', 'retaliation-risk'],
-    },
-  },
-];
-
 export const VerificationQueue = () => {
-  const { tasks: dbTasks, isLoading, assignTask, isAssigning } = useVerificationTasks();
+  const { tasks, isLoading, assignTask, isAssigning } = useVerificationTasks();
   const { data: myTasks } = useMyTasks();
   const [selectedTask, setSelectedTask] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
-
-  // Use mock data if no DB tasks
-  const tasks = dbTasks?.length ? dbTasks : MOCK_VERIFICATION_TASKS;
   
-  const filteredTasks = tasks?.filter(t => {
+  const filteredTasks = (tasks || []).filter(t => {
     const matchesSearch = !searchQuery || 
       t.citizen_reports?.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       t.citizen_reports?.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -194,15 +46,18 @@ export const VerificationQueue = () => {
     const matchesCategory = categoryFilter === 'all' || t.citizen_reports?.category === categoryFilter;
     
     return matchesSearch && matchesPriority && matchesCategory;
-  }) || [];
+  });
 
   const availableTasks = filteredTasks.filter(t => t.status === 'pending');
   const activeTasks = myTasks || [];
 
   // Statistics
-  const criticalCount = tasks?.filter(t => t.priority === 'critical' && t.status === 'pending').length || 0;
-  const highCount = tasks?.filter(t => t.priority === 'high' && t.status === 'pending').length || 0;
-  const avgCredibility = tasks?.reduce((acc, t) => acc + (t.citizen_reports?.credibility_score || 0), 0) / (tasks?.length || 1);
+  const allTasks = tasks || [];
+  const criticalCount = allTasks.filter(t => t.priority === 'critical' && t.status === 'pending').length;
+  const highCount = allTasks.filter(t => t.priority === 'high' && t.status === 'pending').length;
+  const avgCredibility = allTasks.length > 0 
+    ? allTasks.reduce((acc, t) => acc + (t.citizen_reports?.credibility_score || 0), 0) / allTasks.length
+    : 0;
 
   if (isLoading) {
     return (
@@ -311,7 +166,12 @@ export const VerificationQueue = () => {
             <Card>
               <CardContent className="py-12 text-center">
                 <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
-                <p className="text-muted-foreground">No pending tasks matching your filters</p>
+                <h3 className="text-lg font-semibold mb-2">No Pending Verification Tasks</h3>
+                <p className="text-muted-foreground max-w-md mx-auto">
+                  {searchQuery || priorityFilter !== 'all' || categoryFilter !== 'all' 
+                    ? 'No tasks match your current filters. Try adjusting your search criteria.'
+                    : 'There are no citizen reports waiting for verification. New tasks will appear here when reports are submitted.'}
+                </p>
               </CardContent>
             </Card>
           ) : (
