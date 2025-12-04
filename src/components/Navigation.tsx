@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
-import { Menu, X, Mic, Users, Radio, Map, Award, Shield, Globe, Heart, User, LogOut, Settings, Search, HelpCircle, AlertTriangle, Plug } from "lucide-react";
+import { Menu, X, Users, Map, Award, Shield, Globe, Heart, User, LogOut, Settings, Search, HelpCircle, AlertTriangle, Plug, Sparkles } from "lucide-react";
 import peaceverselogo from "@/assets/peaceverse-logo.png";
 import GlobalSearch from '@/components/GlobalSearch';
 import KeyboardShortcuts from '@/components/KeyboardShortcuts';
@@ -16,35 +15,23 @@ import { useToast } from "@/hooks/use-toast";
 import { useAdminCheck } from "@/hooks/useAdminCheck";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useUserRoles } from "@/hooks/useRoleCheck";
+import { motion, AnimatePresence } from "framer-motion";
+
 const Navigation = () => {
-  const {
-    t
-  } = useTranslationContext();
+  const { t } = useTranslationContext();
   const location = useLocation();
   const navigate = useNavigate();
-  const {
-    user,
-    isAnonymous,
-    isLoading
-  } = useAuth();
-  const {
-    toast
-  } = useToast();
+  const { user, isAnonymous, isLoading } = useAuth();
+  const { toast } = useToast();
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const {
-    data: isAdmin
-  } = useAdminCheck();
-  const {
-    data: userProfile
-  } = useUserProfile();
-  const {
-    data: userRoles
-  } = useUserRoles();
+  const { data: isAdmin } = useAdminCheck();
+  const { data: userProfile } = useUserProfile();
+  const { data: userRoles } = useUserRoles();
   const safeProfile: any = userProfile as any;
 
-  // Extract role strings for easier checking
   const roleStrings = userRoles?.map((r: any) => r.role) || [];
+  
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     toast({
@@ -53,216 +40,328 @@ const Navigation = () => {
     });
     navigate('/');
   };
+
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      setIsScrolled(window.scrollY > 20);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Base navigation items - all users can see these
-  const publicNavItems = [{
-    path: '/about',
-    label: t('nav.about'),
-    icon: Heart
-  }, {
-    path: '/community',
-    label: t('nav.community'),
-    icon: Users
-  }, {
-    path: '/incidents',
-    label: t('nav.incidents'),
-    icon: Shield
-  }, {
-    path: '/peace-pulse',
-    label: t('nav.peacePulse'),
-    icon: Globe
-  }, {
-    path: '/proposals',
-    label: t('nav.pollsProposals'),
-    icon: Map
-  }, {
-    path: '/safety',
-    label: t('nav.safetyPortal'),
-    icon: Shield
-  }];
+  const publicNavItems = [
+    { path: '/about', label: t('nav.about'), icon: Heart },
+    { path: '/community', label: t('nav.community'), icon: Users },
+    { path: '/incidents', label: t('nav.incidents'), icon: Shield },
+    { path: '/peace-pulse', label: t('nav.peacePulse'), icon: Globe },
+    { path: '/proposals', label: t('nav.pollsProposals'), icon: Map },
+    { path: '/safety', label: t('nav.safetyPortal'), icon: Shield }
+  ];
 
-  // Role-specific navigation items
   const roleBasedItems = [];
 
-  // Add Dashboard for all authenticated users
   if (user && !isAnonymous) {
-    roleBasedItems.push({
-      path: '/dashboard',
-      label: t('nav.dashboard'),
-      icon: User
-    });
+    roleBasedItems.push({ path: '/dashboard', label: t('nav.dashboard'), icon: User });
   }
 
-  // Add Verification only for verifiers, admins, and government officials
   if (roleStrings.includes('verifier') || roleStrings.includes('admin') || roleStrings.includes('government')) {
-    roleBasedItems.push({
-      path: '/verification',
-      label: t('nav.verification'),
-      icon: Award
-    });
+    roleBasedItems.push({ path: '/verification', label: t('nav.verification'), icon: Award });
   }
 
-  // Add Early Warning Dashboard for admins, government, and partners
   if (roleStrings.includes('admin') || roleStrings.includes('government') || roleStrings.includes('partner')) {
-    roleBasedItems.push({
-      path: '/early-warning',
-      label: t('nav.earlyWarning'),
-      icon: AlertTriangle
-    });
-    roleBasedItems.push({
-      path: '/integrations',
-      label: 'Integrations',
-      icon: Plug
-    });
+    roleBasedItems.push({ path: '/early-warning', label: t('nav.earlyWarning'), icon: AlertTriangle });
+    roleBasedItems.push({ path: '/integrations', label: 'Integrations', icon: Plug });
   }
 
-  // Combine and sort navigation items alphabetically
   const navItems = [...publicNavItems, ...roleBasedItems].sort((a, b) => a.label.localeCompare(b.label));
-  return <>
+
+  return (
+    <>
       <KeyboardShortcuts onSearchOpen={() => setSearchOpen(true)} />
       <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled ? 'bg-gradient-to-r from-primary via-secondary to-earth backdrop-blur-xl border-b border-accent/40 shadow-[0_4px_30px_-4px_hsl(var(--primary)/0.3)]' : 'bg-gradient-to-r from-primary/90 via-secondary/85 to-earth/90 backdrop-blur-md'}`}>
-      <div className="container mx-auto px-3 sm:px-4">
-        <div className="flex items-center justify-between h-14 sm:h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 hover:scale-105 transition-all duration-300 flex-shrink-0 group">
-            <img src={peaceverselogo} alt="PeaceVerse Logo" className="h-10 sm:h-12 w-auto drop-shadow-[0_2px_8px_hsl(var(--accent)/0.4)] group-hover:drop-shadow-[0_4px_12px_hsl(var(--accent)/0.6)] transition-all" />
-          </Link>
+      
+      <motion.nav
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+          isScrolled 
+            ? 'glass border-b border-primary/20 shadow-[0_4px_30px_-4px_hsl(270_70%_55%/0.3)]' 
+            : 'bg-transparent'
+        }`}
+      >
+        {/* Animated border gradient at bottom */}
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+        
+        <div className="container mx-auto px-3 sm:px-4">
+          <div className="flex items-center justify-between h-16 sm:h-18">
+            {/* Logo */}
+            <Link to="/" className="flex items-center gap-3 group relative">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="relative"
+              >
+                <div className="absolute inset-0 bg-primary/30 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <img 
+                  src={peaceverselogo} 
+                  alt="PeaceVerse Logo" 
+                  className="h-10 sm:h-12 w-auto relative z-10 drop-shadow-[0_0_15px_hsl(270_90%_70%/0.5)]" 
+                />
+              </motion.div>
+              <div className="hidden sm:block">
+                <span className="text-lg font-bold text-gradient-primary">Peace</span>
+                <span className="text-lg font-bold text-foreground">Verse</span>
+              </div>
+            </Link>
 
-          {/* Desktop Navigation - Single line layout */}
-          <div className="hidden lg:flex items-center flex-1 justify-center">
-            <div className="flex items-center gap-0.5 xl:gap-1">
-              {navItems.map(item => {
-                const Icon = item.icon;
-                const isActive = location.pathname === item.path;
-                return <Button key={item.path} variant="ghost" size="sm" asChild className={`flex items-center gap-1 transition-all duration-300 whitespace-nowrap text-[10px] xl:text-xs px-2 xl:px-2.5 py-1.5 h-8 rounded-full border ${isActive ? 'bg-accent text-primary font-semibold shadow-md shadow-accent/40 border-accent' : 'text-primary-foreground/90 hover:bg-accent/20 hover:text-accent border-transparent hover:border-accent/30'}`}>
-                    <Link to={item.path}>
-                      <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-primary' : 'text-accent'}`} />
-                      <span className="font-medium hidden xl:inline">{item.label}</span>
-                    </Link>
-                  </Button>;
-              })}
-            </div>
-          </div>
-
-          {/* Right Side Actions */}
-          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-            <Button variant="ghost" size="sm" onClick={() => setSearchOpen(true)} className="gap-2 hidden xl:flex text-primary-foreground/90 hover:bg-accent/20 hover:text-accent rounded-full transition-all duration-300">
-              <Search className="w-4 h-4 text-accent" />
-              <span className="text-xs text-primary-foreground/60">⌘K</span>
-            </Button>
-            <NotificationCenter />
-            <Button variant="ghost" size="sm" onClick={() => navigate('/help')} className="gap-2 hidden xl:flex text-primary-foreground/90 hover:bg-accent/20 hover:text-accent rounded-full transition-all duration-300">
-              <HelpCircle className="w-4 h-4 text-accent" />
-            </Button>
-            <div className="hidden sm:block">
-              <LanguageToggle />
-            </div>
-            
-            {/* Authentication Section */}
-            <div className="flex items-center gap-1 sm:gap-2 ml-1 sm:ml-2 pl-1 sm:pl-2 border-l border-primary-foreground/20">
-              {isLoading ? <div className="flex items-center gap-2 text-primary-foreground">
-                  <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-                </div> : user ? <>
-                  {isAdmin && <Button variant="outline" size="sm" onClick={() => navigate('/admin')} className="gap-1.5 bg-accent/20 hover:bg-accent/30 border-accent/50 hidden xl:flex text-xs text-primary-foreground hover:text-accent rounded-full transition-all duration-300">
-                      <Settings className="w-3.5 h-3.5 text-accent" />
-                      <span className="font-semibold">Admin</span>
-                    </Button>}
-                  
-                  <Button variant="ghost" size="sm" onClick={handleSignOut} className="gap-1.5 text-xs sm:text-sm h-8 px-3 sm:px-4 rounded-full bg-primary-foreground/10 hover:bg-destructive text-primary-foreground hover:text-destructive-foreground transition-all duration-300 shadow-md border border-transparent hover:border-destructive">
-                    <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                    <span className="hidden lg:inline font-medium">Sign Out</span>
-                  </Button>
-                </> : <Button variant="default" size="sm" onClick={() => navigate('/auth')} className="gap-1.5 bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-earth text-primary font-bold text-xs sm:text-sm h-8 px-3 sm:px-4 rounded-full shadow-lg shadow-accent/40 hover:shadow-xl transition-all duration-300 border border-accent/30">
-                  <User className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                  <span className="whitespace-nowrap">Sign In</span>
-                </Button>}
-            </div>
-            
-            {/* Mobile Menu */}
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="sm" className="lg:hidden h-8 w-8 p-0">
-                  <Menu className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-[85vw] max-w-sm bg-background z-[60]">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-2">
-                    <img src={peaceverselogo} alt="PeaceVerse Logo" className="h-8 w-auto" />
-                  </div>
-                  <SheetClose asChild>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                      <X className="w-4 h-4" />
-                    </Button>
-                  </SheetClose>
-                </div>
-                
-                <div className="space-y-1">
-                  {navItems.map(item => {
-                    const Icon = item.icon;
-                    const isActive = location.pathname === item.path;
-                    return <SheetClose key={item.path} asChild>
-                        <Button variant="ghost" asChild className={`w-full justify-start gap-3 h-12 text-left text-sm ${isActive ? 'bg-primary/10 text-primary font-medium' : ''}`}>
-                          <Link to={item.path}>
-                            <Icon className="w-4.5 h-4.5" />
-                            <span>{item.label}</span>
-                          </Link>
+            {/* Desktop Navigation */}
+            <div className="hidden lg:flex items-center flex-1 justify-center">
+              <div className="flex items-center gap-1">
+                {navItems.map((item, index) => {
+                  const Icon = item.icon;
+                  const isActive = location.pathname === item.path;
+                  return (
+                    <motion.div
+                      key={item.path}
+                      initial={{ opacity: 0, y: -20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                    >
+                      <Link to={item.path}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className={`relative flex items-center gap-1.5 px-3 py-2 h-9 rounded-lg transition-all duration-300 group overflow-hidden ${
+                            isActive 
+                              ? 'text-primary bg-primary/10' 
+                              : 'text-foreground/70 hover:text-foreground hover:bg-muted/50'
+                          }`}
+                        >
+                          {/* Active indicator glow */}
+                          {isActive && (
+                            <motion.div
+                              layoutId="navIndicator"
+                              className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/10 to-accent/20 rounded-lg"
+                              transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                            />
+                          )}
+                          <Icon className={`w-4 h-4 relative z-10 transition-colors ${isActive ? 'text-primary' : 'text-primary/60 group-hover:text-primary'}`} />
+                          <span className="font-medium text-xs relative z-10 hidden xl:inline">{item.label}</span>
+                          
+                          {/* Hover effect */}
+                          <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/5 to-primary/0 opacity-0 group-hover:opacity-100 transition-opacity" />
                         </Button>
-                      </SheetClose>;
-                  })}
-                </div>
-                
-                 <div className="mt-6 pt-6 border-t border-border space-y-3">
-                   <div className="flex items-center justify-between px-1 py-2">
-                     <span className="text-sm font-medium">Language</span>
-                     <LanguageToggle />
-                   </div>
-                   
-                   {isLoading ? <div className="flex items-center justify-center gap-2 text-muted-foreground py-4">
-                       <div className="w-4.5 h-4.5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                       <span className="text-sm">Loading...</span>
-                     </div> : user ? <>
-                      {/* User Welcome Section */}
-                      <div className="px-3 py-2.5 bg-primary/5 rounded-lg border border-primary/20">
-                        <p className="text-sm font-semibold text-foreground truncate">
-                          {isAnonymous ? 'Guest User' : `Welcome, ${safeProfile?.display_name || safeProfile?.username || 'User'}!`}
-                        </p>
-                        {!isAnonymous && safeProfile?.user_type && <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                            {safeProfile.user_type}
-                          </p>}
-                      </div>
-                      
-                      {isAdmin && <SheetClose asChild>
-                          <Button variant="outline" onClick={() => navigate('/admin')} className="w-full justify-start gap-2 bg-primary/10 border-primary/30 h-11 text-sm">
-                            <Settings className="w-4 h-4" />
-                            Admin Portal
-                          </Button>
-                        </SheetClose>}
-                      <Button variant="ghost" onClick={handleSignOut} className="w-full justify-start gap-2 h-11 text-sm">
+                      </Link>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Right Side Actions */}
+            <div className="flex items-center gap-2 sm:gap-3">
+              {/* Search Button */}
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSearchOpen(true)}
+                  className="hidden xl:flex items-center gap-2 px-3 h-9 rounded-lg bg-muted/30 hover:bg-muted/50 border border-border/50 text-foreground/70 hover:text-foreground transition-all"
+                >
+                  <Search className="w-4 h-4" />
+                  <span className="text-xs text-muted-foreground">⌘K</span>
+                </Button>
+              </motion.div>
+
+              <NotificationCenter />
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/help')}
+                className="hidden xl:flex h-9 w-9 p-0 rounded-lg text-foreground/70 hover:text-foreground hover:bg-muted/50"
+              >
+                <HelpCircle className="w-4 h-4" />
+              </Button>
+              
+              <div className="hidden sm:block">
+                <LanguageToggle />
+              </div>
+              
+              {/* Authentication Section */}
+              <div className="flex items-center gap-2 ml-2 pl-2 border-l border-border/30">
+                {isLoading ? (
+                  <div className="flex items-center">
+                    <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                  </div>
+                ) : user ? (
+                  <>
+                    {isAdmin && (
+                      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => navigate('/admin')}
+                          className="hidden xl:flex items-center gap-2 h-9 px-4 rounded-lg bg-primary/10 border-primary/30 hover:bg-primary/20 hover:border-primary/50 text-primary transition-all"
+                        >
+                          <Settings className="w-4 h-4" />
+                          <span className="font-semibold text-xs">Admin</span>
+                        </Button>
+                      </motion.div>
+                    )}
+                    
+                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleSignOut}
+                        className="flex items-center gap-2 h-9 px-3 rounded-lg bg-destructive/10 hover:bg-destructive text-destructive hover:text-destructive-foreground transition-all"
+                      >
                         <LogOut className="w-4 h-4" />
-                        {isAnonymous ? 'Sign Out (Guest)' : 'Sign Out'}
+                        <span className="hidden lg:inline text-xs font-medium">Sign Out</span>
                       </Button>
-                    </> : <SheetClose asChild>
-                      <Button variant="default" onClick={() => navigate('/auth')} className="w-full gap-2 bg-gradient-to-r from-primary to-primary/80 font-semibold h-11">
-                        <User className="w-4 h-4" />
-                        Sign In
+                    </motion.div>
+                  </>
+                ) : (
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Button
+                      size="sm"
+                      onClick={() => navigate('/auth')}
+                      className="relative flex items-center gap-2 h-9 px-4 rounded-lg overflow-hidden group"
+                      style={{
+                        background: 'linear-gradient(135deg, hsl(270 70% 55%) 0%, hsl(25 100% 55%) 100%)'
+                      }}
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-primary via-accent to-gold opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                      <Sparkles className="w-4 h-4 relative z-10" />
+                      <span className="font-semibold text-xs relative z-10">Sign In</span>
+                    </Button>
+                  </motion.div>
+                )}
+              </div>
+              
+              {/* Mobile Menu */}
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="sm" className="lg:hidden h-9 w-9 p-0 rounded-lg hover:bg-muted/50">
+                    <Menu className="w-5 h-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-[85vw] max-w-sm glass border-l border-primary/20 z-[60]">
+                  <div className="flex items-center justify-between mb-8">
+                    <div className="flex items-center gap-2">
+                      <img src={peaceverselogo} alt="PeaceVerse Logo" className="h-8 w-auto" />
+                      <span className="text-lg font-bold text-gradient-primary">PeaceVerse</span>
+                    </div>
+                    <SheetClose asChild>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-lg">
+                        <X className="w-4 h-4" />
                       </Button>
-                     </SheetClose>}
-                 </div>
-              </SheetContent>
-            </Sheet>
+                    </SheetClose>
+                  </div>
+                  
+                  <div className="space-y-1">
+                    {navItems.map((item, index) => {
+                      const Icon = item.icon;
+                      const isActive = location.pathname === item.path;
+                      return (
+                        <motion.div
+                          key={item.path}
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.05 }}
+                        >
+                          <SheetClose asChild>
+                            <Button
+                              variant="ghost"
+                              asChild
+                              className={`w-full justify-start gap-3 h-12 rounded-lg text-left ${
+                                isActive 
+                                  ? 'bg-primary/10 text-primary border border-primary/20' 
+                                  : 'text-foreground/70 hover:text-foreground hover:bg-muted/50'
+                              }`}
+                            >
+                              <Link to={item.path}>
+                                <Icon className={`w-5 h-5 ${isActive ? 'text-primary' : 'text-primary/60'}`} />
+                                <span className="font-medium">{item.label}</span>
+                              </Link>
+                            </Button>
+                          </SheetClose>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                  
+                  <div className="mt-8 pt-6 border-t border-border/30 space-y-4">
+                    <div className="flex items-center justify-between px-1 py-2">
+                      <span className="text-sm font-medium text-foreground/70">Language</span>
+                      <LanguageToggle />
+                    </div>
+                    
+                    {isLoading ? (
+                      <div className="flex items-center justify-center gap-2 text-muted-foreground py-4">
+                        <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                        <span className="text-sm">Loading...</span>
+                      </div>
+                    ) : user ? (
+                      <>
+                        <div className="px-3 py-3 glass-card rounded-xl">
+                          <p className="text-sm font-semibold text-foreground truncate">
+                            {isAnonymous ? 'Guest User' : `Welcome, ${safeProfile?.display_name || safeProfile?.username || 'User'}!`}
+                          </p>
+                          {!isAnonymous && safeProfile?.user_type && (
+                            <p className="text-xs text-muted-foreground mt-1 truncate">
+                              {safeProfile.user_type}
+                            </p>
+                          )}
+                        </div>
+                        
+                        {isAdmin && (
+                          <SheetClose asChild>
+                            <Button
+                              variant="outline"
+                              onClick={() => navigate('/admin')}
+                              className="w-full justify-start gap-2 h-11 rounded-lg bg-primary/10 border-primary/30"
+                            >
+                              <Settings className="w-4 h-4" />
+                              Admin Portal
+                            </Button>
+                          </SheetClose>
+                        )}
+                        
+                        <Button
+                          variant="ghost"
+                          onClick={handleSignOut}
+                          className="w-full justify-start gap-2 h-11 rounded-lg bg-destructive/10 hover:bg-destructive text-destructive hover:text-destructive-foreground"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          {isAnonymous ? 'Sign Out (Guest)' : 'Sign Out'}
+                        </Button>
+                      </>
+                    ) : (
+                      <SheetClose asChild>
+                        <Button
+                          onClick={() => navigate('/auth')}
+                          className="w-full gap-2 h-11 rounded-lg font-semibold"
+                          style={{
+                            background: 'linear-gradient(135deg, hsl(270 70% 55%) 0%, hsl(25 100% 55%) 100%)'
+                          }}
+                        >
+                          <Sparkles className="w-4 h-4" />
+                          Sign In
+                        </Button>
+                      </SheetClose>
+                    )}
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
           </div>
         </div>
-      </div>
-    </nav>
-    </>;
+      </motion.nav>
+    </>
+  );
 };
+
 export default Navigation;

@@ -2,171 +2,160 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
+/* African Futuristic Design System
+   Inspired by: Afrofuturism, Wakandan aesthetics, sunset savannas, geometric patterns
+   All colors MUST be HSL.
 */
 
 @layer base {
   :root {
-    /* Official Peaceverse Color Palette - Light Mode */
-    --background: 0 0% 100%;
-    --foreground: 209 91% 15%;
+    /* African Futuristic Color Palette - Light Mode */
+    --background: 240 15% 3%;
+    --foreground: 45 100% 96%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 209 91% 15%;
+    --card: 240 15% 6%;
+    --card-foreground: 45 100% 96%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 209 91% 15%;
+    --popover: 240 15% 8%;
+    --popover-foreground: 45 100% 96%;
 
-    /* Primary - Peaceverse Blue (#074F98) */
-    --primary: 209 91% 31%;
-    --primary-dark: 209 91% 20%;
+    /* Primary - Deep Indigo/Violet */
+    --primary: 270 70% 55%;
+    --primary-dark: 270 70% 35%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 209 91% 45%;
+    --primary-glow: 270 90% 70%;
     
-    /* Gold Accent */
-    --gold: 39 76% 58%;
-    --gold-light: 39 76% 68%;
+    /* Gold - Warm African Gold */
+    --gold: 38 95% 55%;
+    --gold-light: 38 100% 70%;
 
-    /* Secondary - Peace Green (#275432) */
-    --secondary: 135 37% 24%;
+    /* Secondary - Teal/Cyan */
+    --secondary: 175 80% 45%;
     --secondary-foreground: 0 0% 100%;
     
-    /* Accent - Golden Hope (#E1AD40) */
-    --accent: 41 73% 50%;
+    /* Accent - Sunset Orange */
+    --accent: 25 100% 55%;
     --accent-foreground: 0 0% 100%;
-    --accent-light: 41 73% 60%;
+    --accent-light: 25 100% 65%;
 
-    /* Earth & Stability - Brown (#986135) */
-    --earth: 27 48% 40%;
+    /* Earth - Rich Terracotta */
+    --earth: 15 65% 45%;
     --earth-foreground: 0 0% 100%;
 
-    /* Soft backgrounds - Cream (#E9D8B8) */
-    --muted: 39 55% 92%;
-    --muted-foreground: 209 91% 25%;
+    /* Muted backgrounds */
+    --muted: 240 15% 12%;
+    --muted-foreground: 45 30% 70%;
 
-    /* Success - Peace Green */
-    --success: 135 37% 30%;
+    /* Success - Emerald */
+    --success: 160 70% 45%;
     --success-foreground: 0 0% 100%;
     
-    /* Warning - Golden Alert */
-    --warning: 41 73% 45%;
-    --warning-foreground: 0 0% 100%;
+    /* Warning - Amber */
+    --warning: 38 95% 50%;
+    --warning-foreground: 0 0% 0%;
 
-    --destructive: 0 84% 50%;
+    --destructive: 0 85% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 39 40% 80%;
-    --input: 39 55% 92%;
-    --ring: 209 91% 31%;
+    --border: 240 15% 18%;
+    --input: 240 15% 15%;
+    --ring: 270 70% 55%;
 
-    /* Peaceverse Brand Gradients */
-    --peace-gradient: linear-gradient(135deg, hsl(209 91% 31%) 0%, hsl(135 37% 24%) 100%);
-    --community-gradient: linear-gradient(135deg, hsl(135 37% 24%) 0%, hsl(41 73% 57%) 100%);
-    --story-gradient: linear-gradient(135deg, hsl(41 73% 57%) 0%, hsl(27 48% 40%) 100%);
-    --hero-gradient: linear-gradient(135deg, hsl(209 91% 31% / 0.95) 0%, hsl(135 37% 24% / 0.95) 100%);
+    /* African Futuristic Gradients */
+    --peace-gradient: linear-gradient(135deg, hsl(270 70% 55%) 0%, hsl(175 80% 45%) 50%, hsl(25 100% 55%) 100%);
+    --community-gradient: linear-gradient(135deg, hsl(25 100% 55%) 0%, hsl(38 95% 55%) 100%);
+    --story-gradient: linear-gradient(135deg, hsl(38 95% 55%) 0%, hsl(15 65% 45%) 100%);
+    --hero-gradient: linear-gradient(135deg, hsl(270 70% 25% / 0.95) 0%, hsl(240 15% 5% / 0.98) 50%, hsl(175 80% 20% / 0.95) 100%);
+    --sunset-gradient: linear-gradient(180deg, hsl(270 70% 35%) 0%, hsl(25 100% 45%) 50%, hsl(38 95% 55%) 100%);
+    --cyber-gradient: linear-gradient(90deg, hsl(270 90% 70% / 0.3) 0%, hsl(175 80% 50% / 0.3) 50%, hsl(25 100% 60% / 0.3) 100%);
     
-    /* Brand-aligned shadows */
-    --shadow-peace: 0 4px 20px -4px hsl(209 91% 31% / 0.20);
-    --shadow-warm: 0 4px 20px -4px hsl(27 48% 40% / 0.15);
-    --shadow-story: 0 4px 20px -4px hsl(41 73% 57% / 0.18);
-    --shadow-elevated: 0 8px 30px -8px hsl(209 91% 31% / 0.15);
+    /* Futuristic shadows with glow */
+    --shadow-peace: 0 4px 30px -4px hsl(270 70% 55% / 0.4);
+    --shadow-warm: 0 4px 30px -4px hsl(25 100% 55% / 0.3);
+    --shadow-story: 0 4px 30px -4px hsl(38 95% 55% / 0.3);
+    --shadow-elevated: 0 8px 40px -8px hsl(270 70% 55% / 0.3), 0 0 60px -15px hsl(175 80% 45% / 0.2);
+    --shadow-glow: 0 0 40px hsl(270 90% 70% / 0.4);
 
     /* Voice interaction highlights */
-    --voice-active: 209 91% 31%;
-    --voice-recording: 0 84% 55%;
-    --voice-success: 135 37% 35%;
+    --voice-active: 270 70% 55%;
+    --voice-recording: 0 85% 55%;
+    --voice-success: 160 70% 45%;
 
-    --radius: 0.25rem;
+    --radius: 0.75rem;
 
-    --sidebar-background: 39 55% 97%;
-    --sidebar-foreground: 209 91% 15%;
-    --sidebar-primary: 209 91% 31%;
+    --sidebar-background: 240 15% 6%;
+    --sidebar-foreground: 45 100% 96%;
+    --sidebar-primary: 270 70% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 39 55% 92%;
-    --sidebar-accent-foreground: 209 91% 15%;
-    --sidebar-border: 39 40% 80%;
-    --sidebar-ring: 209 91% 31%;
+    --sidebar-accent: 240 15% 15%;
+    --sidebar-accent-foreground: 45 100% 96%;
+    --sidebar-border: 240 15% 18%;
+    --sidebar-ring: 270 70% 55%;
   }
 
   .dark {
-    /* Official Peaceverse Color Palette - Dark Mode */
-    --background: 209 60% 10%;
-    --foreground: 39 55% 95%;
+    /* Dark mode is the default for African Futuristic theme */
+    --background: 240 15% 3%;
+    --foreground: 45 100% 96%;
 
-    --card: 209 50% 12%;
-    --card-foreground: 39 55% 95%;
+    --card: 240 15% 6%;
+    --card-foreground: 45 100% 96%;
 
-    --popover: 209 50% 12%;
-    --popover-foreground: 39 55% 95%;
+    --popover: 240 15% 8%;
+    --popover-foreground: 45 100% 96%;
 
-    /* Primary - Peaceverse Blue (enhanced for dark) */
-    --primary: 209 91% 50%;
-    --primary-dark: 209 91% 20%;
+    --primary: 270 70% 60%;
+    --primary-dark: 270 70% 35%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 209 91% 65%;
+    --primary-glow: 270 90% 75%;
     
-    /* Gold Accent */
-    --gold: 39 76% 58%;
-    --gold-light: 39 76% 68%;
+    --gold: 38 95% 60%;
+    --gold-light: 38 100% 75%;
 
-    /* Secondary - Peace Green (dark) */
-    --secondary: 135 37% 35%;
+    --secondary: 175 80% 50%;
     --secondary-foreground: 0 0% 100%;
     
-    /* Accent - Golden Hope (enhanced for dark) */
-    --accent: 41 73% 60%;
+    --accent: 25 100% 60%;
     --accent-foreground: 0 0% 100%;
-    --accent-light: 41 73% 70%;
+    --accent-light: 25 100% 70%;
 
-    /* Earth & Stability */
-    --earth: 27 48% 50%;
+    --earth: 15 65% 50%;
     --earth-foreground: 0 0% 100%;
 
-    /* Dark backgrounds */
-    --muted: 209 40% 18%;
-    --muted-foreground: 39 55% 85%;
+    --muted: 240 15% 15%;
+    --muted-foreground: 45 30% 75%;
 
-    /* Success - Peace Green */
-    --success: 135 37% 45%;
+    --success: 160 70% 50%;
     --success-foreground: 0 0% 100%;
     
-    /* Warning - Golden Alert */
-    --warning: 41 73% 55%;
-    --warning-foreground: 0 0% 100%;
+    --warning: 38 95% 55%;
+    --warning-foreground: 0 0% 0%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 85% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 209 40% 25%;
-    --input: 209 40% 20%;
-    --ring: 209 91% 50%;
+    --border: 240 15% 20%;
+    --input: 240 15% 18%;
+    --ring: 270 70% 60%;
 
-    /* Peaceverse Brand Gradients (dark) */
-    --peace-gradient: linear-gradient(135deg, hsl(209 91% 35%) 0%, hsl(135 37% 30%) 100%);
-    --community-gradient: linear-gradient(135deg, hsl(135 37% 30%) 0%, hsl(41 73% 60%) 100%);
-    --story-gradient: linear-gradient(135deg, hsl(41 73% 60%) 0%, hsl(27 48% 45%) 100%);
-    --hero-gradient: linear-gradient(135deg, hsl(209 91% 35% / 0.95) 0%, hsl(135 37% 30% / 0.95) 100%);
+    --peace-gradient: linear-gradient(135deg, hsl(270 70% 60%) 0%, hsl(175 80% 50%) 50%, hsl(25 100% 60%) 100%);
+    --community-gradient: linear-gradient(135deg, hsl(25 100% 60%) 0%, hsl(38 95% 60%) 100%);
+    --story-gradient: linear-gradient(135deg, hsl(38 95% 60%) 0%, hsl(15 65% 50%) 100%);
+    --hero-gradient: linear-gradient(135deg, hsl(270 70% 20% / 0.95) 0%, hsl(240 15% 3% / 0.98) 50%, hsl(175 80% 15% / 0.95) 100%);
     
-    /* Dark mode shadows */
-    --shadow-peace: 0 4px 20px -4px hsl(209 91% 45% / 0.30);
-    --shadow-warm: 0 4px 20px -4px hsl(27 48% 45% / 0.20);
-    --shadow-story: 0 4px 20px -4px hsl(41 73% 65% / 0.25);
-    --shadow-elevated: 0 8px 30px -8px hsl(209 91% 45% / 0.20);
-
-    /* Voice interaction */
-    --voice-active: 209 91% 45%;
-    --voice-recording: 0 84% 60%;
-    --voice-success: 135 37% 40%;
+    --shadow-peace: 0 4px 30px -4px hsl(270 70% 60% / 0.5);
+    --shadow-warm: 0 4px 30px -4px hsl(25 100% 60% / 0.4);
+    --shadow-story: 0 4px 30px -4px hsl(38 95% 60% / 0.4);
+    --shadow-elevated: 0 8px 40px -8px hsl(270 70% 60% / 0.4), 0 0 60px -15px hsl(175 80% 50% / 0.3);
     
-    --sidebar-background: 209 50% 12%;
-    --sidebar-foreground: 39 55% 95%;
-    --sidebar-primary: 209 91% 50%;
+    --sidebar-background: 240 15% 6%;
+    --sidebar-foreground: 45 100% 96%;
+    --sidebar-primary: 270 70% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 209 40% 18%;
-    --sidebar-accent-foreground: 39 55% 95%;
-    --sidebar-border: 209 40% 25%;
-    --sidebar-ring: 41 73% 60%;
+    --sidebar-accent: 240 15% 18%;
+    --sidebar-accent-foreground: 45 100% 96%;
+    --sidebar-border: 240 15% 20%;
+    --sidebar-ring: 270 70% 60%;
   }
 }
 
@@ -180,7 +169,7 @@ All colors MUST be HSL.
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
-  /* Enhanced accessibility for PeaceVerse */
+  /* Enhanced accessibility */
   .focus-visible {
     @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
   }
@@ -196,7 +185,7 @@ All colors MUST be HSL.
     animation: pulse-recording 1s infinite;
   }
 
-  /* Peace-themed animations */
+  /* African Futuristic Animations */
   @keyframes pulse-voice {
     0%, 100% { opacity: 1; transform: scale(1); }
     50% { opacity: 0.8; transform: scale(1.05); }
@@ -210,7 +199,7 @@ All colors MUST be HSL.
   @keyframes fade-in-up {
     from {
       opacity: 0;
-      transform: translateY(20px);
+      transform: translateY(30px);
     }
     to {
       opacity: 1;
@@ -218,39 +207,177 @@ All colors MUST be HSL.
     }
   }
 
-  @keyframes spin-slow {
+  @keyframes slide-in-left {
     from {
-      transform: rotate(0deg);
+      opacity: 0;
+      transform: translateX(-50px);
     }
     to {
-      transform: rotate(360deg);
+      opacity: 1;
+      transform: translateX(0);
     }
   }
 
-  .animate-spin-slow {
-    animation: spin-slow linear infinite;
+  @keyframes slide-in-right {
+    from {
+      opacity: 0;
+      transform: translateX(50px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
   }
 
-  .bg-grid-pattern {
-    background-image: 
-      linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-    background-size: 40px 40px;
+  @keyframes glow-pulse {
+    0%, 100% { 
+      box-shadow: 0 0 20px hsl(270 90% 70% / 0.3), 0 0 40px hsl(175 80% 50% / 0.2);
+    }
+    50% { 
+      box-shadow: 0 0 30px hsl(270 90% 70% / 0.5), 0 0 60px hsl(175 80% 50% / 0.3);
+    }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  @keyframes rotate-slow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes border-flow {
+    0%, 100% { 
+      border-color: hsl(270 70% 55%);
+    }
+    33% { 
+      border-color: hsl(175 80% 50%);
+    }
+    66% { 
+      border-color: hsl(25 100% 55%);
+    }
   }
 
   .animate-fade-in-up {
     animation: fade-in-up 0.6s ease-out;
   }
 
+  .animate-slide-in-left {
+    animation: slide-in-left 0.6s ease-out;
+  }
+
+  .animate-slide-in-right {
+    animation: slide-in-right 0.6s ease-out;
+  }
+
+  .animate-glow-pulse {
+    animation: glow-pulse 3s ease-in-out infinite;
+  }
+
+  .animate-float {
+    animation: float 4s ease-in-out infinite;
+  }
+
+  .animate-shimmer {
+    background: linear-gradient(90deg, transparent, hsl(270 90% 70% / 0.2), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+
+  .animate-rotate-slow {
+    animation: rotate-slow 20s linear infinite;
+  }
+
+  .animate-border-flow {
+    animation: border-flow 3s ease-in-out infinite;
+  }
+
+  /* Geometric African Pattern Background */
+  .bg-african-pattern {
+    background-image: 
+      repeating-linear-gradient(60deg, hsl(270 70% 55% / 0.03) 0px, hsl(270 70% 55% / 0.03) 1px, transparent 1px, transparent 30px),
+      repeating-linear-gradient(-60deg, hsl(175 80% 50% / 0.03) 0px, hsl(175 80% 50% / 0.03) 1px, transparent 1px, transparent 30px);
+  }
+
+  .bg-grid-futuristic {
+    background-image: 
+      linear-gradient(hsl(270 70% 55% / 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(270 70% 55% / 0.05) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+
+  .bg-dots-pattern {
+    background-image: radial-gradient(circle at center, hsl(270 70% 55% / 0.15) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  /* Glassmorphism */
+  .glass {
+    background: hsl(240 15% 10% / 0.6);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid hsl(270 70% 55% / 0.2);
+  }
+
+  .glass-card {
+    background: linear-gradient(135deg, hsl(240 15% 10% / 0.8) 0%, hsl(240 15% 5% / 0.9) 100%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid hsl(270 70% 55% / 0.15);
+    box-shadow: 0 8px 32px hsl(0 0% 0% / 0.3), inset 0 1px 0 hsl(270 70% 55% / 0.1);
+  }
+
+  /* Neon text effects */
+  .text-glow {
+    text-shadow: 0 0 10px hsl(270 90% 70% / 0.5), 0 0 20px hsl(270 90% 70% / 0.3), 0 0 30px hsl(270 90% 70% / 0.2);
+  }
+
+  .text-glow-gold {
+    text-shadow: 0 0 10px hsl(38 95% 60% / 0.5), 0 0 20px hsl(38 95% 60% / 0.3), 0 0 30px hsl(38 95% 60% / 0.2);
+  }
+
+  .text-glow-accent {
+    text-shadow: 0 0 10px hsl(25 100% 60% / 0.5), 0 0 20px hsl(25 100% 60% / 0.3);
+  }
+
+  /* Gradient text */
+  .text-gradient-primary {
+    background: linear-gradient(135deg, hsl(270 70% 60%) 0%, hsl(175 80% 50%) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-gold {
+    background: linear-gradient(135deg, hsl(38 95% 55%) 0%, hsl(25 100% 60%) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-sunset {
+    background: linear-gradient(135deg, hsl(25 100% 55%) 0%, hsl(38 95% 55%) 50%, hsl(15 65% 50%) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
   /* High contrast mode support */
   @media (prefers-contrast: high) {
     :root {
-      --border: 0 0% 20%;
-      --input: 0 0% 90%;
+      --border: 0 0% 40%;
+      --input: 0 0% 20%;
     }
     
     .dark {
-      --border: 0 0% 80%;
+      --border: 0 0% 60%;
       --input: 0 0% 10%;
     }
   }
@@ -276,7 +403,7 @@ All colors MUST be HSL.
     font-family: 'OpenDyslexic', sans-serif !important;
   }
 
-  /* Enhanced Focus Indicators for Accessibility */
+  /* Enhanced Focus Indicators */
   .enhanced-focus *:focus-visible {
     @apply outline-none ring-4 ring-primary ring-offset-4 ring-offset-background;
     outline: 3px solid hsl(var(--primary));
@@ -285,26 +412,16 @@ All colors MUST be HSL.
 
   /* High Contrast Mode */
   .high-contrast {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 0%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 0%;
-    --primary: 210 100% 40%;
-    --primary-foreground: 0 0% 100%;
-    --border: 0 0% 20%;
-  }
-
-  .dark.high-contrast {
     --background: 0 0% 0%;
     --foreground: 0 0% 100%;
-    --card: 0 0% 10%;
+    --card: 0 0% 5%;
     --card-foreground: 0 0% 100%;
-    --primary: 210 100% 70%;
+    --primary: 270 100% 70%;
     --primary-foreground: 0 0% 0%;
-    --border: 0 0% 80%;
+    --border: 0 0% 60%;
   }
 
-  /* Simplified Mode - Reduce visual complexity */
+  /* Simplified Mode */
   .simplified-mode {
     --radius: 0.25rem;
   }
@@ -314,11 +431,7 @@ All colors MUST be HSL.
     transition: none !important;
   }
 
-  .simplified-mode [class*="gradient"] {
-    background: hsl(var(--background)) !important;
-  }
-
-  /* Reading Mode - Clean reading experience */
+  /* Reading Mode */
   .reading-mode {
     font-size: 118% !important;
     line-height: 1.8 !important;
@@ -330,7 +443,7 @@ All colors MUST be HSL.
     margin-right: auto !important;
   }
 
-  /* Skip to main content link (visible on focus) */
+  /* Skip to main content */
   .sr-only:not(:focus):not(:active) {
     clip: rect(0 0 0 0);
     clip-path: inset(50%);
@@ -452,14 +565,13 @@ All colors MUST be HSL.
     text-wrap: pretty;
   }
 
-  /* Prevent text overflow */
   .break-word {
     word-wrap: break-word;
     overflow-wrap: break-word;
     hyphens: auto;
   }
 
-  /* Safe area insets for notched devices */
+  /* Safe area insets */
   .safe-top {
     padding-top: env(safe-area-inset-top);
   }
@@ -487,7 +599,7 @@ All colors MUST be HSL.
     @apply px-4 sm:px-6 lg:px-8;
   }
 
-  /* Clamp font sizes for fluid typography */
+  /* Fluid typography */
   .text-fluid-xs {
     font-size: clamp(0.75rem, 2vw, 0.875rem);
   }
@@ -513,18 +625,14 @@ All colors MUST be HSL.
   }
 
   .text-fluid-3xl {
-    font-size: clamp(1.875rem, 6vw, 2.5rem);
+    font-size: clamp(2rem, 6vw, 3rem);
   }
 
   .text-fluid-4xl {
-    font-size: clamp(2.25rem, 7vw, 3rem);
+    font-size: clamp(2.5rem, 8vw, 4rem);
   }
 
-  .text-fluid-5xl {
-    font-size: clamp(2.5rem, 8vw, 3.75rem);
-  }
-
-  /* Responsive grid utilities */
+  /* Responsive grids */
   .grid-auto-fit {
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
   }
@@ -533,7 +641,7 @@ All colors MUST be HSL.
     grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
   }
 
-  /* Truncate multiline text */
+  /* Line clamping */
   .line-clamp-1 {
     display: -webkit-box;
     -webkit-line-clamp: 1;
@@ -557,40 +665,40 @@ All colors MUST be HSL.
 }
 
 /* Global responsive improvements */
-@layer base {
-  html {
-    -webkit-text-size-adjust: 100%;
-    text-size-adjust: 100%;
-    scroll-behavior: smooth;
-  }
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
-  /* Prevent horizontal scroll on mobile */
-  body {
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-  }
+body {
+  overflow-x: hidden;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
 
-  /* Better tap highlighting on mobile */
-  a, button {
-    -webkit-tap-highlight-color: transparent;
+/* Improve tap highlight */
+@media (hover: none) {
+  * {
+    -webkit-tap-highlight-color: hsl(270 70% 55% / 0.2);
   }
+}
 
-  /* Responsive images */
-  img, video {
-    max-width: 100%;
-    height: auto;
-  }
+/* Responsive images */
+img {
+  max-width: 100%;
+  height: auto;
+}
 
-  /* Responsive tables */
+/* Responsive tables */
+table {
+  display: block;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (min-width: 640px) {
   table {
-    display: block;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  @media (min-width: 640px) {
-    table {
-      display: table;
-    }
+    display: table;
   }
 }
