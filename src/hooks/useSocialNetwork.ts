@@ -424,11 +424,34 @@ export const useSocialProfile = (userId?: string) => {
     queryFn: async () => {
       if (!targetId) return null;
 
-      const { data: profile } = await supabase
+      const { data: profile, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', targetId)
-        .single();
+        .maybeSingle();
+
+      // If no profile exists, return a default profile structure
+      if (!profile) {
+        return {
+          id: targetId,
+          username: null,
+          display_name: user?.user_metadata?.first_name || 'User',
+          avatar_url: null,
+          bio: null,
+          user_type: 'citizen',
+          is_creator: false,
+          is_verified: false,
+          creator_tier: 'starter',
+          peace_points: 0,
+          current_level: 1,
+          social_links: {},
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          content: [],
+          followersCount: 0,
+          followingCount: 0
+        };
+      }
 
       const { data: content } = await supabase
         .from('content')
