@@ -19,6 +19,8 @@ import { CreatorDashboard } from './CreatorDashboard';
 import { ContentManager } from './ContentManager';
 import { PrivacySettings } from './PrivacySettings';
 import { ContentCreator } from './ContentCreator';
+import { UserSearch } from './UserSearch';
+import { QuickPostCreator } from './QuickPostCreator';
 import { Link } from 'react-router-dom';
 
 export const SocialHub = () => {
@@ -27,6 +29,7 @@ export const SocialHub = () => {
   const { data: profile } = useUserProfile();
   const [activeTab, setActiveTab] = useState('feed');
   const [showContentCreator, setShowContentCreator] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
   // Extract first name from display_name or email
   const getFirstName = () => {
@@ -114,12 +117,42 @@ export const SocialHub = () => {
 
         <TabsContent value="feed">
           <div className="grid lg:grid-cols-4 gap-6">
-            <div className="lg:col-span-3"><SocialFeed showAll /></div>
+            <div className="lg:col-span-3">
+              {/* Quick Post Creator */}
+              <QuickPostCreator onOpenFullCreator={() => setShowContentCreator(true)} />
+              
+              {/* Social Feed */}
+              <SocialFeed showAll />
+            </div>
             <div className="space-y-6">
+              {/* User Search */}
               <Card>
-                <div className="p-4 border-b"><h3 className="font-semibold flex items-center gap-2"><TrendingUp className="h-5 w-5 text-primary" />Trending</h3></div>
+                <div className="p-4 border-b">
+                  <h3 className="font-semibold flex items-center gap-2">
+                    <Users className="h-5 w-5 text-primary" />
+                    Find People
+                  </h3>
+                </div>
+                <div className="p-4">
+                  <UserSearch 
+                    onSelectUser={(userId) => {
+                      setSelectedUserId(userId);
+                      setActiveTab('profile');
+                    }}
+                  />
+                </div>
+              </Card>
+              
+              {/* Trending */}
+              <Card>
+                <div className="p-4 border-b">
+                  <h3 className="font-semibold flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5 text-primary" />
+                    Trending
+                  </h3>
+                </div>
                 <div className="p-4 space-y-3">
-                  {['#PeaceBuilding', '#CommunityUnity', '#YouthVoices'].map((tag, i) => (
+                  {['#PeaceBuilding', '#CommunityUnity', '#YouthVoices'].map((tag) => (
                     <div key={tag} className="flex items-center justify-between">
                       <span className="text-sm font-medium text-primary hover:underline cursor-pointer">{tag}</span>
                       <Badge variant="secondary" className="text-xs">{Math.floor(Math.random() * 500) + 50} posts</Badge>
@@ -127,16 +160,29 @@ export const SocialHub = () => {
                   ))}
                 </div>
               </Card>
+              
+              {/* Earn Money Card */}
               <Card className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border-green-500/20">
-                <div className="p-4"><h3 className="font-semibold flex items-center gap-2"><DollarSign className="h-5 w-5 text-green-500" />Earn Money</h3></div>
-                <div className="p-4"><Button className="w-full bg-green-500 hover:bg-green-600" onClick={() => setShowContentCreator(true)}>Start Creating</Button></div>
+                <div className="p-4">
+                  <h3 className="font-semibold flex items-center gap-2">
+                    <DollarSign className="h-5 w-5 text-green-500" />
+                    Earn Money
+                  </h3>
+                </div>
+                <div className="p-4 pt-0">
+                  <Button className="w-full bg-green-500 hover:bg-green-600" onClick={() => setShowContentCreator(true)}>
+                    Start Creating
+                  </Button>
+                </div>
               </Card>
             </div>
           </div>
         </TabsContent>
         <TabsContent value="messages"><DirectMessages /></TabsContent>
         <TabsContent value="chatrooms"><Chatrooms /></TabsContent>
-        <TabsContent value="profile"><UserProfile /></TabsContent>
+        <TabsContent value="profile">
+          <UserProfile userId={selectedUserId || undefined} />
+        </TabsContent>
         <TabsContent value="content"><ContentManager /></TabsContent>
         <TabsContent value="earnings"><CreatorDashboard /></TabsContent>
         <TabsContent value="settings"><PrivacySettings /></TabsContent>

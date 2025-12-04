@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase-typed';
 import { useAuth } from '@/contexts/AuthContext';
@@ -7,13 +7,14 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, Play, DollarSign, Flag, Copy, Repeat2, Smile } from 'lucide-react';
+import { Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, Flag, Copy, Repeat2, DollarSign } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TipDialog } from './TipDialog';
 import { FeedComments } from './FeedComments';
 import { ReportContentDialog } from './ReportContentDialog';
 import { EmojiReactions } from './EmojiReactions';
+import { FollowButton } from './FollowButton';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -299,43 +300,51 @@ export const SocialFeed = ({ userId, showAll = true }: SocialFeedProps) => {
                       {post.profile?.display_name?.[0] || post.profile?.username?.[0] || 'U'}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-semibold truncate">
                         {post.profile?.display_name || post.profile?.username || 'Anonymous'}
                       </span>
                       {post.profile?.is_creator && (
-                        <Badge className={cn("text-xs", getCreatorBadge(post.profile.creator_tier).className)}>
+                        <Badge className={cn("text-xs shrink-0", getCreatorBadge(post.profile.creator_tier).className)}>
                           {getCreatorBadge(post.profile.creator_tier).label}
                         </Badge>
                       )}
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
-                    </p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <p className="text-sm text-muted-foreground">
+                        {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
+                      </p>
+                      {post.profile?.username && (
+                        <span className="text-sm text-muted-foreground">@{post.profile.username}</span>
+                      )}
+                    </div>
                   </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <MoreHorizontal className="h-5 w-5" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => handleShare(post)}>
-                        <Copy className="h-4 w-4 mr-2" />
-                        Copy Link
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleRepost(post)}>
-                        <Repeat2 className="h-4 w-4 mr-2" />
-                        Repost
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => handleReport(post)} className="text-destructive">
-                        <Flag className="h-4 w-4 mr-2" />
-                        Report Content
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <FollowButton userId={post.user_id} size="sm" />
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreHorizontal className="h-5 w-5" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleShare(post)}>
+                          <Copy className="h-4 w-4 mr-2" />
+                          Copy Link
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleRepost(post)}>
+                          <Repeat2 className="h-4 w-4 mr-2" />
+                          Repost
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => handleReport(post)} className="text-destructive">
+                          <Flag className="h-4 w-4 mr-2" />
+                          Report Content
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </CardHeader>
 
                 <CardContent className="p-0">
