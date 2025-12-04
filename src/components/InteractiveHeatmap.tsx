@@ -380,7 +380,8 @@ const InteractiveHeatmap = memo(() => {
 
   const totalAffected = incidents?.reduce((sum, incident) => sum + (incident.affected_population || 0), 0) || 0;
 
-  if (isLoading && !mapLoaded && !mapError) {
+  // Show loading until map is ready (not just when data is loading)
+  if (!mapLoaded && !mapError && GOOGLE_MAPS_API_KEY) {
     return <LoadingSpinner />;
   }
 
