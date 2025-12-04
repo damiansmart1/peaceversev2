@@ -45,6 +45,7 @@ import PartnerDashboard from "./pages/dashboards/PartnerDashboard";
 import GovernmentDashboard from "./pages/dashboards/GovernmentDashboard";
 import EarlyWarningDashboard from "./pages/dashboards/EarlyWarningDashboard";
 import Integrations from "./pages/Integrations";
+import Install from "./pages/Install";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -131,6 +132,7 @@ const App = () => (
                     <Route path="/peace-pulse" element={<PeacePulse />} />
                     <Route path="/incidents" element={<Incidents />} />
                     <Route path="/integrations" element={<Integrations />} />
+                    <Route path="/install" element={<Install />} />
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>
