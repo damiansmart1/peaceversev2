@@ -161,10 +161,12 @@ export const UserProfile = ({ userId }: UserProfileProps) => {
                     <Badge variant="outline">{profile.user_type}</Badge>
                   </span>
                 )}
-                <span className="flex items-center gap-1">
-                  <Calendar className="h-4 w-4" />
-                  Joined {format(new Date(profile.created_at), 'MMMM yyyy')}
-                </span>
+                {profile.created_at && (
+                  <span className="flex items-center gap-1">
+                    <Calendar className="h-4 w-4" />
+                    Joined {format(new Date(profile.created_at), 'MMMM yyyy')}
+                  </span>
+                )}
               </div>
 
               {/* Social Links */}
