@@ -2,8 +2,9 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, TrendingUp, Users, MapPin } from 'lucide-react';
+import { AlertTriangle, TrendingUp, Users, MapPin, Brain, Sparkles } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import RecommendedActionsPanel from './RecommendedActionsPanel';
 
 interface RiskDashboardProps {
   selectedCountry?: string;
@@ -236,19 +237,11 @@ const RiskDashboard = ({ selectedCountry = 'ALL' }: RiskDashboardProps) => {
                   )}
 
                   {item.recommended_actions && item.recommended_actions.length > 0 && (
-                    <div className="bg-primary/10 p-3 rounded space-y-2">
-                      <p className="font-semibold text-sm">Recommended Actions:</p>
-                      <ul className="space-y-1">
-                        {item.recommended_actions.map((action: any, i: number) => (
-                          <li key={i} className="text-sm flex items-start gap-2">
-                            <Badge variant="outline" className="mt-0.5 flex-shrink-0">
-                              {action.priority}
-                            </Badge>
-                            <span>{action.action} ({action.target})</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                    <RecommendedActionsPanel 
+                      actions={item.recommended_actions}
+                      threatLevel={item.threat_level}
+                      incidentCategory={item.incident?.category}
+                    />
                   )}
                 </div>
               ))}

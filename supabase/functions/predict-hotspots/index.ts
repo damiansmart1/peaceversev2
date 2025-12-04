@@ -95,10 +95,17 @@ serve(async (req) => {
       const trend = last30Days.length > previous30Days.length ? 'increasing' :
                     last30Days.length < previous30Days.length ? 'decreasing' : 'stable';
 
-      // Prepare AI analysis
-      const systemPrompt = `You are an expert in predictive analytics for conflict early warning systems.
-Analyze incident patterns to predict future hotspots where violence or conflict may escalate.
-Consider historical patterns, trends, and contextual factors.`;
+      // Prepare AI analysis with scientific frameworks
+      const systemPrompt = `You are an expert in predictive analytics for conflict early warning systems, trained on UN OCHA Early Warning Framework, CEWARN (Conflict Early Warning and Response Mechanism) for Africa, OECD Risk Governance Guidelines, and AU Continental Early Warning System (CEWS) standards.
+
+Analyze incident patterns to predict future hotspots where violence or conflict may escalate using:
+1. Temporal Pattern Analysis (frequency, acceleration, cyclical patterns)
+2. Spatial Clustering (geographic concentration, spread trajectories)
+3. Severity Progression (escalation pathways, violence intensity trends)
+4. Actor Dynamics (group behavior, mobilization signals)
+5. Contextual Risk Factors (political, economic, environmental triggers)
+
+Generate evidence-based interventions following the Prevention-Mitigation-Preparedness-Response framework.`;
 
       const analysisPrompt = `Analyze this location for hotspot prediction:
 
@@ -141,13 +148,20 @@ Provide analysis in this JSON format:
   },
   "recommended_interventions": [
     {
-      "intervention": "<description>",
-      "timing": "<immediate|within_week|within_month>",
-      "priority": "<high|medium|low>"
+      "action": "<specific, actionable intervention based on OCHA/CEWARN standards>",
+      "priority": "<immediate|urgent|high|medium|low>",
+      "target": "<Government Authorities|Security Forces|Humanitarian Organizations|Community Leaders|UN Agencies|Regional Bodies|Civil Society>",
+      "category": "<security|humanitarian|government|community|communication|logistics>",
+      "timeframe": "<Within 24 hours|Within 72 hours|Within 1 week|Within 2 weeks>",
+      "rationale": "<evidence basis from early warning best practices>",
+      "resources": ["<resource1>", "<resource2>"],
+      "kpis": ["<measurable indicator 1>", "<measurable indicator 2>"]
     }
   ],
   "monitoring_priority": "<low|medium|high|urgent>"
-}`;
+}
+
+IMPORTANT: Generate 6-10 recommended interventions across ALL priority levels (immediate, urgent, high, medium, low) covering prevention, mitigation, preparedness, and response actions. Each intervention must be specific to this location's risk profile and grounded in CEWARN, AU CEWS, or UN early warning standards.`;
 
       try {
         const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {

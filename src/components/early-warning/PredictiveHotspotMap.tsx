@@ -2,9 +2,10 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, TrendingUp, MapPin, Clock } from 'lucide-react';
+import { AlertCircle, TrendingUp, MapPin, Clock, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import RecommendedActionsPanel from './RecommendedActionsPanel';
 
 interface PredictiveHotspotMapProps {
   selectedCountry?: string;
@@ -167,22 +168,19 @@ const PredictiveHotspotMap = ({ selectedCountry = 'ALL' }: PredictiveHotspotMapP
                     )}
 
                     {hotspot.recommended_interventions && hotspot.recommended_interventions.length > 0 && (
-                      <div className="bg-primary/10 p-4 rounded space-y-2">
-                        <p className="font-semibold text-sm">Recommended Interventions:</p>
-                        <ul className="space-y-1">
-                          {hotspot.recommended_interventions.map((intervention: any, i: number) => (
-                            <li key={i} className="text-sm flex items-start gap-2">
-                              <Badge variant="outline" className="mt-0.5 flex-shrink-0">
-                                {intervention.priority}
-                              </Badge>
-                              <div>
-                                <p className="font-medium">{intervention.intervention}</p>
-                                <p className="text-xs text-muted-foreground">Timing: {intervention.timing}</p>
-                              </div>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
+                      <RecommendedActionsPanel 
+                        actions={hotspot.recommended_interventions.map((intervention: any) => ({
+                          action: intervention.action || intervention.intervention,
+                          priority: intervention.priority || 'medium',
+                          target: intervention.target || 'Government Authorities',
+                          category: intervention.category || 'government',
+                          timeframe: intervention.timeframe || intervention.timing || 'Within 1 week',
+                          rationale: intervention.rationale,
+                          resources: intervention.resources,
+                          kpis: intervention.kpis
+                        }))}
+                        threatLevel={hotspot.risk_level}
+                      />
                     )}
 
                     <div className="flex items-center justify-between pt-2 border-t">
