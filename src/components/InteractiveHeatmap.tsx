@@ -1,6 +1,5 @@
 /// <reference types="google.maps" />
-import { useEffect, useRef, useState, useCallback, memo } from 'react';
-import { Loader } from '@googlemaps/js-api-loader';
+import { useEffect, useRef, useState, memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -12,6 +11,7 @@ import { exportToJSON, exportToCSV, exportToPDF, exportToWord } from '@/lib/expo
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { preloadGoogleMaps, isGoogleMapsReady, getGoogleMaps } from '@/hooks/useGoogleMapsPreloader';
 
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
 
@@ -22,42 +22,6 @@ const SEVERITY_LEVELS = [
   { value: 'medium', label: 'Medium' },
   { value: 'low', label: 'Low' },
 ];
-
-// Singleton loader instance to prevent multiple loads
-let loaderInstance: Loader | null = null;
-let isGoogleMapsLoaded = false;
-let loadPromise: Promise<typeof google> | null = null;
-
-const getLoader = () => {
-  if (!loaderInstance && GOOGLE_MAPS_API_KEY) {
-    loaderInstance = new Loader({
-      apiKey: GOOGLE_MAPS_API_KEY,
-      version: 'weekly',
-      libraries: ['visualization', 'marker'],
-    });
-  }
-  return loaderInstance;
-};
-
-const loadGoogleMaps = async (): Promise<typeof google | null> => {
-  if (isGoogleMapsLoaded && window.google) {
-    return window.google;
-  }
-  
-  if (loadPromise) {
-    return loadPromise;
-  }
-  
-  const loader = getLoader();
-  if (!loader) return null;
-  
-  loadPromise = loader.load().then((google) => {
-    isGoogleMapsLoaded = true;
-    return google;
-  });
-  
-  return loadPromise;
-};
 
 const InteractiveHeatmap = memo(() => {
   const mapRef = useRef<HTMLDivElement>(null);
@@ -84,7 +48,7 @@ const InteractiveHeatmap = memo(() => {
   
   const { userLocation, locationPermission } = useIncidentNotifications(50);
 
-  // Initialize Google Maps - only once
+  // Initialize Google Maps - use preloaded instance if available
   useEffect(() => {
     if (!mapRef.current || initAttemptedRef.current || mapInstanceRef.current) return;
     initAttemptedRef.current = true;
@@ -96,11 +60,11 @@ const InteractiveHeatmap = memo(() => {
 
     let isMounted = true;
 
-    loadGoogleMaps().then((google) => {
-      if (!isMounted || !mapRef.current || !google) return;
-
-      const map = new google.maps.Map(mapRef.current, {
-        center: { lat: 0, lng: 20 }, // Center on Africa
+    // Check if already loaded (from preload)
+    const existingGoogle = getGoogleMaps();
+    if (existingGoogle && mapRef.current) {
+      const map = new existingGoogle.maps.Map(mapRef.current, {
+        center: { lat: 0, lng: 20 },
         zoom: 4,
         minZoom: 3,
         maxZoom: 18,
@@ -111,22 +75,39 @@ const InteractiveHeatmap = memo(() => {
         zoomControl: true,
         gestureHandling: 'greedy',
         styles: [
-          {
-            featureType: 'poi',
-            stylers: [{ visibility: 'off' }],
-          },
-          {
-            featureType: 'transit',
-            stylers: [{ visibility: 'simplified' }],
-          },
+          { featureType: 'poi', stylers: [{ visibility: 'off' }] },
+          { featureType: 'transit', stylers: [{ visibility: 'simplified' }] },
+        ],
+      });
+      mapInstanceRef.current = map;
+      infoWindowRef.current = new existingGoogle.maps.InfoWindow({ maxWidth: 320 });
+      setMapLoaded(true);
+      return;
+    }
+
+    // Load if not already loaded
+    preloadGoogleMaps().then((google) => {
+      if (!isMounted || !mapRef.current || !google) return;
+
+      const map = new google.maps.Map(mapRef.current, {
+        center: { lat: 0, lng: 20 },
+        zoom: 4,
+        minZoom: 3,
+        maxZoom: 18,
+        mapTypeId: 'roadmap',
+        streetViewControl: false,
+        mapTypeControl: true,
+        fullscreenControl: true,
+        zoomControl: true,
+        gestureHandling: 'greedy',
+        styles: [
+          { featureType: 'poi', stylers: [{ visibility: 'off' }] },
+          { featureType: 'transit', stylers: [{ visibility: 'simplified' }] },
         ],
       });
 
       mapInstanceRef.current = map;
-      infoWindowRef.current = new google.maps.InfoWindow({
-        maxWidth: 320,
-      });
-      
+      infoWindowRef.current = new google.maps.InfoWindow({ maxWidth: 320 });
       setMapLoaded(true);
     }).catch(error => {
       if (!isMounted) return;
