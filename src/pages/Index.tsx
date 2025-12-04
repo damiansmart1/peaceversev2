@@ -5,31 +5,22 @@ import AfricaMap from "@/components/AfricaMap";
 import { useNavigate } from "react-router-dom";
 import { 
   Mic, Users, Radio, Award, Shield, Vote, Activity, AlertCircle,
-  ArrowRight, Globe, Eye, CheckCircle, Zap, BarChart3, MapPin, Bell
+  ArrowRight, Globe, Eye, CheckCircle, Zap, BarChart3, MapPin, Bell, Heart, Leaf
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import { useRef } from "react";
 
 const Index = () => {
   const navigate = useNavigate();
-  const featuresRef = useRef<HTMLElement>(null);
-  const mapRef = useRef<HTMLElement>(null);
-  
-  const { scrollYProgress: featuresProgress } = useScroll({
-    target: featuresRef,
-    offset: ["start end", "end start"]
-  });
-  
-  const featuresY = useTransform(featuresProgress, [0, 1], [100, -100]);
 
   const features = [
-    { icon: AlertCircle, color: "bg-destructive", path: "/incidents", label: "Report", desc: "Submit incidents" },
-    { icon: Activity, color: "bg-primary", path: "/peace-pulse", label: "Analytics", desc: "Live data" },
-    { icon: Users, color: "bg-secondary", path: "/community", label: "Community", desc: "Connect" },
-    { icon: Shield, color: "bg-earth", path: "/safety", label: "Safety", desc: "Protection" },
-    { icon: Vote, color: "bg-accent", path: "/proposals", label: "Vote", desc: "Democracy" },
-    { icon: Mic, color: "bg-voice-active", path: "/community", label: "Voice", desc: "Share stories" },
+    { icon: AlertCircle, color: "bg-destructive", path: "/incidents", label: "Report", desc: "Submit incidents securely" },
+    { icon: Activity, color: "bg-primary", path: "/peace-pulse", label: "Analytics", desc: "Real-time intelligence" },
+    { icon: Users, color: "bg-secondary", path: "/community", label: "Community", desc: "Connect & collaborate" },
+    { icon: Shield, color: "bg-earth", path: "/safety", label: "Safety", desc: "Find safe spaces" },
+    { icon: Vote, color: "bg-gold", path: "/proposals", label: "Vote", desc: "Shape policies" },
+    { icon: Mic, color: "bg-accent", path: "/community", label: "Voice", desc: "Share your story" },
   ];
 
   const processSteps = [
@@ -39,33 +30,46 @@ const Index = () => {
     { step: "04", icon: CheckCircle, title: "Respond", desc: "Coordinated action and prevention" },
   ];
 
+  const impactStats = [
+    { value: "54", label: "Countries Covered", suffix: "" },
+    { value: "10K", label: "Reports Processed", suffix: "+" },
+    { value: "99", label: "System Uptime", suffix: "%" },
+    { value: "24", label: "Average Response", suffix: "h" },
+  ];
+
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
       <Navigation />
       <HeroSection />
       
-      {/* Features Bento Grid */}
-      <section ref={featuresRef} className="py-20 bg-background relative">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent" />
+      {/* Features Grid Section */}
+      <section className="py-24 bg-background relative">
+        {/* Subtle pattern background */}
+        <div className="absolute inset-0 bg-adinkra-pattern opacity-30" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-muted/20 to-transparent" />
         
         <div className="container mx-auto px-6 relative z-10">
           <motion.div 
-            className="text-center mb-12"
+            className="text-center mb-16"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <motion.span 
-              className="inline-block text-primary text-sm font-semibold tracking-wider uppercase mb-3"
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
+            <motion.div
+              className="inline-flex items-center gap-2 bg-gold/10 border border-gold/30 px-4 py-2 rounded-full mb-6"
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
             >
-              Platform Features
-            </motion.span>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground">
-              Everything in <span className="text-primary">One Place</span>
+              <Leaf className="w-4 h-4 text-gold" />
+              <span className="text-gold text-sm font-semibold tracking-wider uppercase">Platform Features</span>
+            </motion.div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4">
+              Everything You Need in <span className="text-gradient-gold">One Place</span>
             </h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+              A comprehensive suite of tools designed to empower communities and build lasting peace across Africa.
+            </p>
           </motion.div>
 
           {/* Bento Grid */}
@@ -84,7 +88,7 @@ const Index = () => {
                 <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 <feature.icon className={`${i === 0 ? 'w-12 h-12' : 'w-8 h-8'} text-white mb-3 group-hover:scale-110 transition-transform`} />
                 <h3 className={`font-bold text-white ${i === 0 ? 'text-2xl mb-2' : 'text-lg'}`}>{feature.label}</h3>
-                <p className={`text-white/70 ${i === 0 ? 'text-base' : 'text-xs'}`}>{feature.desc}</p>
+                <p className={`text-white/80 ${i === 0 ? 'text-base' : 'text-xs'}`}>{feature.desc}</p>
                 <ArrowRight className="absolute bottom-4 right-4 w-5 h-5 text-white/50 group-hover:text-white group-hover:translate-x-1 transition-all" />
               </motion.div>
             ))}
@@ -93,22 +97,22 @@ const Index = () => {
       </section>
 
       {/* Interactive Map Section */}
-      <section ref={mapRef} className="py-20 bg-muted/30 relative overflow-hidden">
-        {/* Background decoration */}
-        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-        <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+      <section className="py-24 bg-muted/30 relative overflow-hidden">
+        {/* Decorative elements */}
+        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-gold/40 to-transparent" />
+        <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
         
         <div className="container mx-auto px-6">
           <div className="grid lg:grid-cols-2 gap-12 items-center max-w-7xl mx-auto">
             {/* Left - Map */}
             <motion.div 
-              className="relative"
+              className="relative order-2 lg:order-1"
               initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 via-accent/20 to-success/20 rounded-3xl blur-3xl opacity-30" />
+              <div className="absolute -inset-4 bg-gradient-to-r from-primary/15 via-gold/15 to-secondary/15 rounded-3xl blur-3xl opacity-50" />
               <div className="relative bg-card rounded-2xl border border-border overflow-hidden shadow-elevated">
                 <AfricaMap />
               </div>
@@ -116,19 +120,20 @@ const Index = () => {
 
             {/* Right - Content */}
             <motion.div
+              className="order-1 lg:order-2"
               initial={{ opacity: 0, x: 50 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <span className="inline-flex items-center gap-2 text-primary text-sm font-semibold tracking-wider uppercase mb-4">
-                <Globe className="w-4 h-4" />
-                Continental Coverage
-              </span>
+              <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/30 px-4 py-2 rounded-full mb-6">
+                <Globe className="w-4 h-4 text-primary" />
+                <span className="text-primary text-sm font-semibold tracking-wider uppercase">Continental Coverage</span>
+              </div>
               <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-6 leading-tight">
-                Real-time Intelligence Across <span className="text-primary">54 Nations</span>
+                Real-time Intelligence Across <span className="text-gradient-primary">54 Nations</span>
               </h2>
-              <p className="text-muted-foreground mb-8 leading-relaxed">
+              <p className="text-muted-foreground text-lg mb-8 leading-relaxed">
                 Our advanced monitoring system tracks incidents, analyzes patterns, and predicts hotspots across the entire African continent in real-time.
               </p>
               
@@ -141,21 +146,21 @@ const Index = () => {
                 ].map((item, i) => (
                   <motion.div
                     key={item.label}
-                    className="flex items-center gap-3 p-3 bg-background rounded-xl border border-border"
+                    className="flex items-center gap-3 p-3 bg-card rounded-xl border border-border/50 hover-lift"
                     initial={{ opacity: 0, y: 10 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: 0.1 * i }}
                   >
-                    <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                      <item.icon className="w-5 h-5 text-primary" />
+                    <div className="w-10 h-10 bg-gold/10 rounded-lg flex items-center justify-center">
+                      <item.icon className="w-5 h-5 text-gold" />
                     </div>
                     <span className="text-sm font-medium text-foreground">{item.label}</span>
                   </motion.div>
                 ))}
               </div>
 
-              <Button size="lg" className="gap-2 group" onClick={() => navigate('/peace-pulse')}>
+              <Button size="lg" className="gap-2 group bg-primary hover:bg-primary-dark text-primary-foreground shadow-peace" onClick={() => navigate('/peace-pulse')}>
                 Explore Dashboard
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Button>
@@ -164,14 +169,21 @@ const Index = () => {
         </div>
       </section>
 
-      {/* How It Works - Horizontal Scroll Feel */}
-      <section className="py-20 bg-primary relative overflow-hidden">
-        {/* Background elements */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px]" />
+      {/* How It Works Section */}
+      <section className="py-24 bg-primary relative overflow-hidden">
+        {/* Background pattern */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:50px_50px]" />
+        
+        {/* Floating orbs */}
         <motion.div 
-          className="absolute top-20 -left-20 w-80 h-80 bg-gold/10 rounded-full blur-3xl"
-          animate={{ x: [0, 50, 0], opacity: [0.3, 0.5, 0.3] }}
-          transition={{ duration: 10, repeat: Infinity }}
+          className="absolute top-20 -left-20 w-80 h-80 bg-gold/15 rounded-full blur-3xl"
+          animate={{ x: [0, 40, 0], opacity: [0.3, 0.5, 0.3] }}
+          transition={{ duration: 12, repeat: Infinity }}
+        />
+        <motion.div 
+          className="absolute bottom-20 -right-20 w-60 h-60 bg-secondary/20 rounded-full blur-3xl"
+          animate={{ x: [0, -30, 0], opacity: [0.2, 0.4, 0.2] }}
+          transition={{ duration: 10, repeat: Infinity, delay: 2 }}
         />
         
         <div className="container mx-auto px-6 relative z-10">
@@ -181,11 +193,12 @@ const Index = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <span className="inline-block text-gold text-sm font-semibold tracking-wider uppercase mb-3">
-              The Process
-            </span>
+            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 px-4 py-2 rounded-full mb-6">
+              <Activity className="w-4 h-4 text-gold" />
+              <span className="text-gold text-sm font-semibold tracking-wider uppercase">The Process</span>
+            </div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white">
-              How It Works
+              How It <span className="text-gold text-glow-gold">Works</span>
             </h2>
           </motion.div>
 
@@ -209,28 +222,27 @@ const Index = () => {
                     whileHover={{ scale: 1.1, rotate: 5 }}
                   >
                     <item.icon className="w-8 h-8 text-gold" />
-                    <span className="absolute -top-2 -right-2 w-6 h-6 bg-gold text-primary-dark text-xs font-bold rounded-full flex items-center justify-center">
+                    <span className="absolute -top-2 -right-2 w-7 h-7 bg-gold text-primary-dark text-xs font-bold rounded-full flex items-center justify-center shadow-warm">
                       {item.step}
                     </span>
                   </motion.div>
                   
                   <h3 className="text-xl font-bold text-white mb-2">{item.title}</h3>
-                  <p className="text-white/60 text-sm leading-relaxed">{item.desc}</p>
+                  <p className="text-white/70 text-sm leading-relaxed">{item.desc}</p>
                 </motion.div>
               ))}
             </div>
           </div>
 
           <motion.div 
-            className="text-center mt-12"
+            className="text-center mt-14"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
           >
             <Button 
               size="lg" 
-              variant="secondary"
-              className="gap-2 group h-12"
+              className="gap-2 group h-12 bg-gold hover:bg-gold-light text-primary-dark font-semibold shadow-warm"
               onClick={() => navigate('/incidents')}
             >
               Start Reporting Now
@@ -240,16 +252,11 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Stats Banner */}
-      <section className="py-16 bg-background border-y border-border">
+      {/* Stats Section */}
+      <section className="py-20 bg-card border-y border-border">
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
-            {[
-              { value: "54", label: "Countries", suffix: "" },
-              { value: "10K", label: "Reports Processed", suffix: "+" },
-              { value: "99", label: "Uptime", suffix: "%" },
-              { value: "24", label: "Response Time", suffix: "h" },
-            ].map((stat, i) => (
+            {impactStats.map((stat, i) => (
               <motion.div 
                 key={stat.label}
                 className="text-center"
@@ -258,10 +265,10 @@ const Index = () => {
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
               >
-                <div className="text-4xl sm:text-5xl font-bold text-foreground mb-1">
-                  {stat.value}<span className="text-primary">{stat.suffix}</span>
+                <div className="text-4xl sm:text-5xl font-bold text-foreground mb-2">
+                  {stat.value}<span className="text-gold">{stat.suffix}</span>
                 </div>
-                <div className="text-muted-foreground text-sm">{stat.label}</div>
+                <div className="text-muted-foreground text-sm font-medium">{stat.label}</div>
               </motion.div>
             ))}
           </div>
@@ -269,8 +276,9 @@ const Index = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-br from-muted/50 via-background to-muted/50 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent" />
+      <section className="py-24 bg-gradient-to-br from-muted/30 via-background to-muted/30 relative overflow-hidden">
+        <div className="absolute inset-0 bg-african-pattern opacity-20" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-gold/10 via-transparent to-transparent" />
         
         <div className="container mx-auto px-6 relative z-10">
           <motion.div 
@@ -279,18 +287,22 @@ const Index = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
+            <div className="inline-flex items-center gap-2 bg-secondary/10 border border-secondary/30 px-4 py-2 rounded-full mb-6">
+              <Heart className="w-4 h-4 text-secondary" />
+              <span className="text-secondary text-sm font-semibold tracking-wider uppercase">Join the Movement</span>
+            </div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-6">
-              Ready to Make a <span className="text-primary">Difference</span>?
+              Ready to Make a <span className="text-gradient-gold">Difference</span>?
             </h2>
-            <p className="text-muted-foreground text-lg mb-8 max-w-xl mx-auto">
+            <p className="text-muted-foreground text-lg mb-10 max-w-xl mx-auto leading-relaxed">
               Join thousands of citizens working together to build safer, more peaceful communities across Africa.
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
-              <Button size="lg" className="gap-2 h-14 px-8 text-lg group" onClick={() => navigate('/auth')}>
+              <Button size="lg" className="gap-2 h-14 px-8 text-lg group bg-primary hover:bg-primary-dark text-primary-foreground shadow-peace" onClick={() => navigate('/auth')}>
                 Get Started Free
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Button>
-              <Button size="lg" variant="outline" className="h-14 px-8 text-lg" onClick={() => navigate('/about')}>
+              <Button size="lg" variant="outline" className="h-14 px-8 text-lg border-border hover:border-gold/50 hover:bg-gold/5" onClick={() => navigate('/about')}>
                 Learn More
               </Button>
             </div>
@@ -320,7 +332,7 @@ const Index = () => {
                 <button 
                   key={link}
                   onClick={() => navigate(`/${link.toLowerCase()}`)} 
-                  className="hover:text-foreground transition-colors"
+                  className="hover:text-gold transition-colors"
                 >
                   {link}
                 </button>

@@ -86,12 +86,12 @@ const Navigation = () => {
         transition={{ duration: 0.5, ease: "easeOut" }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           isScrolled 
-            ? 'glass border-b border-primary/20 shadow-[0_4px_30px_-4px_hsl(270_70%_55%/0.3)]' 
+            ? 'bg-card/95 backdrop-blur-xl border-b border-gold/20 shadow-warm' 
             : 'bg-transparent'
         }`}
       >
-        {/* Animated border gradient at bottom */}
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+        {/* Gold accent line at bottom */}
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gold/40 to-transparent" />
         
         <div className="container mx-auto px-3 sm:px-4">
           <div className="flex items-center justify-between h-16 sm:h-18">
@@ -102,16 +102,16 @@ const Navigation = () => {
                 whileTap={{ scale: 0.95 }}
                 className="relative"
               >
-                <div className="absolute inset-0 bg-primary/30 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute inset-0 bg-gold/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <img 
                   src={peaceverselogo} 
                   alt="PeaceVerse Logo" 
-                  className="h-10 sm:h-12 w-auto relative z-10 drop-shadow-[0_0_15px_hsl(270_90%_70%/0.5)]" 
+                  className="h-10 sm:h-12 w-auto relative z-10" 
                 />
               </motion.div>
               <div className="hidden sm:block">
-                <span className="text-lg font-bold text-gradient-primary">Peace</span>
-                <span className="text-lg font-bold text-foreground">Verse</span>
+                <span className="text-lg font-bold text-primary">Peace</span>
+                <span className="text-lg font-bold text-gold">Verse</span>
               </div>
             </Link>
 
@@ -138,19 +138,19 @@ const Navigation = () => {
                               : 'text-foreground/70 hover:text-foreground hover:bg-muted/50'
                           }`}
                         >
-                          {/* Active indicator glow */}
+                          {/* Active indicator */}
                           {isActive && (
                             <motion.div
                               layoutId="navIndicator"
-                              className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/10 to-accent/20 rounded-lg"
+                              className="absolute inset-0 bg-gradient-to-r from-primary/15 via-gold/10 to-secondary/15 rounded-lg"
                               transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                             />
                           )}
-                          <Icon className={`w-4 h-4 relative z-10 transition-colors ${isActive ? 'text-primary' : 'text-primary/60 group-hover:text-primary'}`} />
+                          <Icon className={`w-4 h-4 relative z-10 transition-colors ${isActive ? 'text-primary' : 'text-gold/70 group-hover:text-gold'}`} />
                           <span className="font-medium text-xs relative z-10 hidden xl:inline">{item.label}</span>
                           
-                          {/* Hover effect */}
-                          <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/5 to-primary/0 opacity-0 group-hover:opacity-100 transition-opacity" />
+                          {/* Hover underline */}
+                          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gold group-hover:w-3/4 transition-all duration-300" />
                         </Button>
                       </Link>
                     </motion.div>
@@ -167,7 +167,7 @@ const Navigation = () => {
                   variant="ghost"
                   size="sm"
                   onClick={() => setSearchOpen(true)}
-                  className="hidden xl:flex items-center gap-2 px-3 h-9 rounded-lg bg-muted/30 hover:bg-muted/50 border border-border/50 text-foreground/70 hover:text-foreground transition-all"
+                  className="hidden xl:flex items-center gap-2 px-3 h-9 rounded-lg bg-muted/50 hover:bg-muted border border-border/50 text-foreground/70 hover:text-foreground transition-all"
                 >
                   <Search className="w-4 h-4" />
                   <span className="text-xs text-muted-foreground">⌘K</span>
@@ -193,7 +193,7 @@ const Navigation = () => {
               <div className="flex items-center gap-2 ml-2 pl-2 border-l border-border/30">
                 {isLoading ? (
                   <div className="flex items-center">
-                    <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                    <div className="w-4 h-4 border-2 border-gold border-t-transparent rounded-full animate-spin" />
                   </div>
                 ) : user ? (
                   <>
@@ -228,12 +228,9 @@ const Navigation = () => {
                     <Button
                       size="sm"
                       onClick={() => navigate('/auth')}
-                      className="relative flex items-center gap-2 h-9 px-4 rounded-lg overflow-hidden group"
-                      style={{
-                        background: 'linear-gradient(135deg, hsl(270 70% 55%) 0%, hsl(25 100% 55%) 100%)'
-                      }}
+                      className="relative flex items-center gap-2 h-9 px-4 rounded-lg overflow-hidden group bg-primary hover:bg-primary-dark text-primary-foreground shadow-peace"
                     >
-                      <div className="absolute inset-0 bg-gradient-to-r from-primary via-accent to-gold opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                      <div className="absolute inset-0 bg-gradient-to-r from-gold/20 to-secondary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                       <Sparkles className="w-4 h-4 relative z-10" />
                       <span className="font-semibold text-xs relative z-10">Sign In</span>
                     </Button>
@@ -248,11 +245,14 @@ const Navigation = () => {
                     <Menu className="w-5 h-5" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="right" className="w-[85vw] max-w-sm glass border-l border-primary/20 z-[60]">
+                <SheetContent side="right" className="w-[85vw] max-w-sm bg-card/98 backdrop-blur-xl border-l border-gold/20 z-[60]">
                   <div className="flex items-center justify-between mb-8">
                     <div className="flex items-center gap-2">
                       <img src={peaceverselogo} alt="PeaceVerse Logo" className="h-8 w-auto" />
-                      <span className="text-lg font-bold text-gradient-primary">PeaceVerse</span>
+                      <div>
+                        <span className="text-lg font-bold text-primary">Peace</span>
+                        <span className="text-lg font-bold text-gold">Verse</span>
+                      </div>
                     </div>
                     <SheetClose asChild>
                       <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-lg">
@@ -283,7 +283,7 @@ const Navigation = () => {
                               }`}
                             >
                               <Link to={item.path}>
-                                <Icon className={`w-5 h-5 ${isActive ? 'text-primary' : 'text-primary/60'}`} />
+                                <Icon className={`w-5 h-5 ${isActive ? 'text-primary' : 'text-gold/70'}`} />
                                 <span className="font-medium">{item.label}</span>
                               </Link>
                             </Button>
@@ -301,12 +301,12 @@ const Navigation = () => {
                     
                     {isLoading ? (
                       <div className="flex items-center justify-center gap-2 text-muted-foreground py-4">
-                        <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                        <div className="w-5 h-5 border-2 border-gold border-t-transparent rounded-full animate-spin" />
                         <span className="text-sm">Loading...</span>
                       </div>
                     ) : user ? (
                       <>
-                        <div className="px-3 py-3 glass-card rounded-xl">
+                        <div className="px-3 py-3 bg-muted/50 rounded-xl border border-border/50">
                           <p className="text-sm font-semibold text-foreground truncate">
                             {isAnonymous ? 'Guest User' : `Welcome, ${safeProfile?.display_name || safeProfile?.username || 'User'}!`}
                           </p>
@@ -343,10 +343,7 @@ const Navigation = () => {
                       <SheetClose asChild>
                         <Button
                           onClick={() => navigate('/auth')}
-                          className="w-full gap-2 h-11 rounded-lg font-semibold"
-                          style={{
-                            background: 'linear-gradient(135deg, hsl(270 70% 55%) 0%, hsl(25 100% 55%) 100%)'
-                          }}
+                          className="w-full gap-2 h-11 rounded-lg font-semibold bg-primary hover:bg-primary-dark text-primary-foreground"
                         >
                           <Sparkles className="w-4 h-4" />
                           Sign In
