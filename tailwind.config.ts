@@ -78,6 +78,10 @@ export default {
           DEFAULT: "hsl(var(--gold))",
           light: "hsl(var(--gold-light))",
         },
+        cream: {
+          DEFAULT: "hsl(var(--cream))",
+          foreground: "hsl(var(--cream-foreground))",
+        },
         voice: {
           active: "hsl(var(--voice-active))",
           recording: "hsl(var(--voice-recording))",
@@ -121,8 +125,8 @@ export default {
         'neon-gold': '0 0 5px theme(colors.gold.DEFAULT), 0 0 20px theme(colors.gold.DEFAULT)',
       },
       fontFamily: {
-        sans: ['Space Grotesk', 'system-ui', 'sans-serif'],
-        display: ['Orbitron', 'Space Grotesk', 'system-ui', 'sans-serif'],
+        sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+        display: ['Playfair Display', 'Georgia', 'serif'],
         mono: ['JetBrains Mono', 'monospace'],
       },
       fontSize: {
