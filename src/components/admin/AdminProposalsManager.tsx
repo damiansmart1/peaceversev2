@@ -36,6 +36,7 @@ export const AdminProposalsManager = () => {
     summary: '',
     body: '',
     status: 'published',
+    stage: 'first_reading',
     tags: '',
   });
 
@@ -45,6 +46,7 @@ export const AdminProposalsManager = () => {
       summary: '',
       body: '',
       status: 'published',
+      stage: 'first_reading',
       tags: '',
     });
     setEditingItem(null);
@@ -78,6 +80,7 @@ export const AdminProposalsManager = () => {
       summary: item.summary,
       body: item.body,
       status: item.status,
+      stage: item.stage || 'first_reading',
       tags: item.tags?.join(', ') || '',
     });
     setDialogOpen(true);
@@ -134,6 +137,7 @@ export const AdminProposalsManager = () => {
         <TableHeader>
           <TableRow>
             <TableHead>Title</TableHead>
+            <TableHead>Stage</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Signatures</TableHead>
             <TableHead>Views</TableHead>
@@ -144,7 +148,7 @@ export const AdminProposalsManager = () => {
         <TableBody>
           {items.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+              <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                 No proposals found
               </TableCell>
             </TableRow>
@@ -152,6 +156,11 @@ export const AdminProposalsManager = () => {
             items.map((item) => (
               <TableRow key={item.id}>
                 <TableCell className="font-medium">{item.title}</TableCell>
+                <TableCell>
+                  <Badge variant="outline" className="capitalize">
+                    {(item.stage || 'first_reading').replace(/_/g, ' ')}
+                  </Badge>
+                </TableCell>
                 <TableCell>
                   <Badge 
                     variant={
@@ -343,17 +352,35 @@ export const AdminProposalsManager = () => {
                   minHeight="250px"
                 />
               </div>
-              <div>
-                <Label htmlFor="status">Status</Label>
-                <select
-                  id="status"
-                  className="w-full rounded-md border border-input bg-background px-3 py-2"
-                  value={formData.status}
-                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                >
-                  <option value="draft">Draft</option>
-                  <option value="published">Published</option>
-                </select>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="status">Status</Label>
+                  <select
+                    id="status"
+                    className="w-full rounded-md border border-input bg-background px-3 py-2"
+                    value={formData.status}
+                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                  >
+                    <option value="draft">Draft</option>
+                    <option value="published">Published</option>
+                  </select>
+                </div>
+                <div>
+                  <Label htmlFor="stage">Bill Stage</Label>
+                  <select
+                    id="stage"
+                    className="w-full rounded-md border border-input bg-background px-3 py-2"
+                    value={formData.stage}
+                    onChange={(e) => setFormData({ ...formData, stage: e.target.value })}
+                  >
+                    <option value="first_reading">First Reading</option>
+                    <option value="second_reading">Second Reading</option>
+                    <option value="committee">Committee Stage</option>
+                    <option value="third_reading">Third Reading</option>
+                    <option value="passed">Passed</option>
+                    <option value="rejected">Rejected</option>
+                  </select>
+                </div>
               </div>
               <div>
                 <Label htmlFor="tags">Tags (comma-separated)</Label>

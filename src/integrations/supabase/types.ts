@@ -2204,7 +2204,9 @@ export type Database = {
           description: string
           ends_at: string | null
           id: string
+          stage: string | null
           status: string
+          tags: string[] | null
           title: string
           updated_at: string
           visibility: string
@@ -2219,7 +2221,9 @@ export type Database = {
           description: string
           ends_at?: string | null
           id?: string
+          stage?: string | null
           status?: string
+          tags?: string[] | null
           title: string
           updated_at?: string
           visibility?: string
@@ -2234,7 +2238,9 @@ export type Database = {
           description?: string
           ends_at?: string | null
           id?: string
+          stage?: string | null
           status?: string
+          tags?: string[] | null
           title?: string
           updated_at?: string
           visibility?: string
