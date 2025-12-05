@@ -122,7 +122,7 @@ const GamificationDashboard = () => {
   };
   const totalEarned = userAchievements?.length || achievements.filter(a => a.earned).length;
   const totalPoints = profile?.peace_points || 0;
-  const livesImpacted = profile ? profile.total_stories * 10 + profile.total_actions * 5 : 127;
+  const livesImpacted = profile ? (profile.peace_points || 0) + (profile.current_level || 1) * 10 : 127;
   return <section className="py-8">
       <div className="container px-[16px] py-0 mx-0 rounded-full shadow-md">
         <div className="text-center mb-10">

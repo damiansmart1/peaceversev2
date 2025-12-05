@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase-typed';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { createNotification } from './useNotifications';
 
@@ -14,19 +14,14 @@ export interface Level {
 }
 
 export interface UserProfile {
-  user_id: string;
+  id: string;
   username: string;
   display_name: string;
   avatar_url: string;
   peace_points: number;
-  xp_points: number;
   current_level: number;
-  login_streak: number;
-  total_stories: number;
-  total_actions: number;
-  region: string;
-  profile_frame: string;
-  avatar_accessories: any[];
+  is_verified: boolean;
+  bio: string;
 }
 
 export interface WeeklyChallenge {
@@ -37,10 +32,7 @@ export interface WeeklyChallenge {
   start_date: string;
   end_date: string;
   points_reward: number;
-  badge_reward: string;
   is_active: boolean;
-  image_url: string;
-  guidelines: string;
 }
 
 export interface ChallengeSubmission {
@@ -56,17 +48,14 @@ export interface ChallengeSubmission {
 }
 
 export interface LeaderboardEntry {
-  user_id: string;
+  id: string;
   username: string;
   display_name: string;
   avatar_url: string;
   peace_points: number;
-  xp_points: number;
   current_level: number;
-  region: string;
   rank_global: number;
   rank_regional: number;
-  weekly_points: number;
 }
 
 // Fetch all levels
@@ -91,12 +80,12 @@ export const useUserGamificationProfile = () => {
     queryKey: ['userGamificationProfile'],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      if (!user) return null;
 
       const { data, error } = await supabase
         .from('profiles')
-        .select('*')
-        .eq('user_id', user.id)
+        .select('id, username, display_name, avatar_url, peace_points, current_level, is_verified, bio')
+        .eq('id', user.id)
         .single();
       
       if (error) throw error;
@@ -201,21 +190,16 @@ export const useLeaderboard = (filter: 'global' | 'regional' | 'weekly' = 'globa
   return useQuery({
     queryKey: ['leaderboard', filter, region],
     queryFn: async () => {
-      let query = supabase
+      const { data, error } = await supabase
         .from('profiles')
-        .select('user_id, username, display_name, avatar_url, peace_points, xp_points, current_level, region');
+        .select('id, username, display_name, avatar_url, peace_points, current_level')
+        .order('peace_points', { ascending: false })
+        .limit(100);
 
-      if (filter === 'regional' && region) {
-        query = query.eq('region', region);
-      }
-
-      query = query.order('xp_points', { ascending: false }).limit(100);
-
-      const { data, error } = await query;
       if (error) throw error;
 
       // Add ranking
-      return data.map((user, index) => ({
+      return (data || []).map((user, index) => ({
         ...user,
         rank_global: index + 1,
         rank_regional: index + 1
@@ -237,12 +221,18 @@ export const useAwardPoints = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      const { error } = await supabase.rpc('award_points', {
-        p_user_id: user.id,
-        p_action_type: params.action_type,
-        p_points: params.points,
-        p_description: params.description
-      });
+      // Update peace_points directly in profiles table
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('peace_points')
+        .eq('id', user.id)
+        .single();
+
+      const currentPoints = profile?.peace_points || 0;
+      const { error } = await supabase
+        .from('profiles')
+        .update({ peace_points: currentPoints + params.points })
+        .eq('id', user.id);
 
       if (error) throw error;
 
@@ -262,7 +252,7 @@ export const useAwardPoints = () => {
   });
 };
 
-// Update streak
+// Update streak (simplified - just refreshes profile)
 export const useUpdateStreak = () => {
   const queryClient = useQueryClient();
 
@@ -270,12 +260,7 @@ export const useUpdateStreak = () => {
     mutationFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
-
-      const { error } = await supabase.rpc('update_user_streak', {
-        p_user_id: user.id
-      });
-
-      if (error) throw error;
+      // Just refresh the profile - streak logic can be added to backend later
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['userGamificationProfile'] });

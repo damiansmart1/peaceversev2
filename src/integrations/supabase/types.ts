@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievements: {
+        Row: {
+          badge_icon: string
+          category: string
+          created_at: string
+          description: string
+          id: string
+          is_active: boolean
+          name: string
+          points_required: number
+          points_reward: number
+        }
+        Insert: {
+          badge_icon?: string
+          category?: string
+          created_at?: string
+          description: string
+          id?: string
+          is_active?: boolean
+          name: string
+          points_required?: number
+          points_reward?: number
+        }
+        Update: {
+          badge_icon?: string
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          points_required?: number
+          points_reward?: number
+        }
+        Relationships: []
+      }
       actor_networks: {
         Row: {
           activity_timeline: Json | null
@@ -1591,6 +1627,39 @@ export type Database = {
         }
         Relationships: []
       }
+      levels: {
+        Row: {
+          created_at: string
+          description: string | null
+          icon: string
+          id: string
+          level_number: number
+          rewards: Json | null
+          title: string
+          xp_required: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          icon?: string
+          id?: string
+          level_number: number
+          rewards?: Json | null
+          title: string
+          xp_required: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          icon?: string
+          id?: string
+          level_number?: number
+          rewards?: Json | null
+          title?: string
+          xp_required?: number
+        }
+        Relationships: []
+      }
       likes: {
         Row: {
           content_id: string
@@ -2355,6 +2424,42 @@ export type Database = {
         }
         Relationships: []
       }
+      reward_store_items: {
+        Row: {
+          cost_points: number
+          created_at: string
+          description: string
+          id: string
+          image_url: string | null
+          is_available: boolean
+          item_type: string
+          name: string
+          stock_quantity: number | null
+        }
+        Insert: {
+          cost_points?: number
+          created_at?: string
+          description: string
+          id?: string
+          image_url?: string | null
+          is_available?: boolean
+          item_type?: string
+          name: string
+          stock_quantity?: number | null
+        }
+        Update: {
+          cost_points?: number
+          created_at?: string
+          description?: string
+          id?: string
+          image_url?: string | null
+          is_available?: boolean
+          item_type?: string
+          name?: string
+          stock_quantity?: number | null
+        }
+        Relationships: []
+      }
       safe_spaces: {
         Row: {
           capacity: number | null
@@ -2560,6 +2665,35 @@ export type Database = {
           website_url?: string | null
         }
         Relationships: []
+      }
+      user_achievements: {
+        Row: {
+          achievement_id: string
+          earned_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          earned_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string
+          earned_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_achievements_achievement_id_fkey"
+            columns: ["achievement_id"]
+            isOneToOne: false
+            referencedRelation: "achievements"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_follows: {
         Row: {
