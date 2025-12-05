@@ -2,6 +2,8 @@ import Navigation from '@/components/Navigation';
 import SectionHeader from '@/components/SectionHeader';
 import PeacebuildingChallenges from '@/components/PeacebuildingChallenges';
 import GamificationDashboard from '@/components/GamificationDashboard';
+import ChallengeLeaderboard from '@/components/ChallengeLeaderboard';
+import WeeklyChallengesSection from '@/components/WeeklyChallengesSection';
 import { useTranslationContext } from '@/components/TranslationProvider';
 import { Award } from 'lucide-react';
 
@@ -20,6 +22,10 @@ const Challenges = () => {
         />
         
         <div className="space-y-16">
+          <div className="grid lg:grid-cols-2 gap-8">
+            <WeeklyChallengesSection />
+            <ChallengeLeaderboard />
+          </div>
           <PeacebuildingChallenges />
           <GamificationDashboard />
         </div>

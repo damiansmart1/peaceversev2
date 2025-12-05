@@ -10,7 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 const LeaderboardSection = () => {
   const [filter, setFilter] = useState<'global' | 'regional' | 'weekly'>('global');
   const { data: profile } = useUserGamificationProfile();
-  const { data: leaderboard, isLoading } = useLeaderboard(filter, profile?.region);
+  const { data: leaderboard, isLoading } = useLeaderboard(filter);
 
   const getRankIcon = (rank: number) => {
     if (rank === 1) return <Trophy className="w-5 h-5 text-warning" />;
@@ -49,11 +49,11 @@ const LeaderboardSection = () => {
         <TabsContent value={filter} className="space-y-3">
           {leaderboard && leaderboard.length > 0 ? (
             leaderboard.slice(0, 10).map((entry) => {
-              const isCurrentUser = entry.user_id === profile?.user_id;
+              const isCurrentUser = entry.id === profile?.id;
               
               return (
                 <div
-                  key={entry.user_id}
+                  key={entry.id}
                   className={`flex items-center gap-4 p-4 rounded-2xl transition-all duration-200 ${
                     isCurrentUser 
                       ? 'bg-gradient-to-r from-primary/10 to-accent/10 border-2 border-primary/30 shadow-story' 
@@ -81,17 +81,16 @@ const LeaderboardSection = () => {
                       )}
                     </div>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <span>Level {entry.current_level}</span>
-                      {entry.region && <span>• {entry.region}</span>}
+                      <span>Level {entry.current_level || 1}</span>
                     </div>
                   </div>
 
                   <div className="text-right">
                     <div className="flex items-center gap-1 justify-end">
                       <TrendingUp className="w-4 h-4 text-accent" />
-                      <span className="text-lg font-bold text-accent">{entry.xp_points}</span>
+                      <span className="text-lg font-bold text-accent">{entry.peace_points || 0}</span>
                     </div>
-                    <p className="text-xs text-muted-foreground">XP</p>
+                    <p className="text-xs text-muted-foreground">Points</p>
                   </div>
                 </div>
               );
