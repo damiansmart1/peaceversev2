@@ -9,6 +9,7 @@ export interface AdminProposal {
   body: string;
   slug: string;
   status: string;
+  stage: string;
   author_id: string;
   is_archived: boolean;
   reviewed_by: string | null;
@@ -51,6 +52,7 @@ export const useCreateProposal = () => {
           summary: proposal.summary!,
           body: proposal.body!,
           status: proposal.status as any,
+          stage: proposal.stage || 'first_reading',
           tags: proposal.tags,
           author_id: user.id,
         } as any)
