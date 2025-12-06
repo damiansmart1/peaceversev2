@@ -2785,6 +2785,71 @@ export type Database = {
         }
         Relationships: []
       }
+      verification_tasks: {
+        Row: {
+          assigned_at: string | null
+          assigned_to: string | null
+          category: string | null
+          completed_at: string | null
+          confidence_score: number | null
+          created_at: string
+          credibility_score: number | null
+          evidence_urls: string[] | null
+          id: string
+          priority: string
+          recommended_action: string | null
+          report_id: string | null
+          status: string
+          updated_at: string
+          verdict: string | null
+          verification_notes: string | null
+        }
+        Insert: {
+          assigned_at?: string | null
+          assigned_to?: string | null
+          category?: string | null
+          completed_at?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          credibility_score?: number | null
+          evidence_urls?: string[] | null
+          id?: string
+          priority?: string
+          recommended_action?: string | null
+          report_id?: string | null
+          status?: string
+          updated_at?: string
+          verdict?: string | null
+          verification_notes?: string | null
+        }
+        Update: {
+          assigned_at?: string | null
+          assigned_to?: string | null
+          category?: string | null
+          completed_at?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          credibility_score?: number | null
+          evidence_urls?: string[] | null
+          id?: string
+          priority?: string
+          recommended_action?: string | null
+          report_id?: string | null
+          status?: string
+          updated_at?: string
+          verdict?: string | null
+          verification_notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "verification_tasks_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "citizen_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       webhook_deliveries: {
         Row: {
           attempt_number: number | null

@@ -56,7 +56,7 @@ export const VerificationQueue = () => {
   const criticalCount = allTasks.filter(t => t.priority === 'critical' && t.status === 'pending').length;
   const highCount = allTasks.filter(t => t.priority === 'high' && t.status === 'pending').length;
   const avgCredibility = allTasks.length > 0 
-    ? allTasks.reduce((acc, t) => acc + (t.citizen_reports?.credibility_score || 0), 0) / allTasks.length
+    ? allTasks.reduce((acc, t) => acc + (t.credibility_score || t.citizen_reports?.credibility_score || 0), 0) / allTasks.length
     : 0;
 
   if (isLoading) {
@@ -244,10 +244,10 @@ export const VerificationQueue = () => {
                           {task.citizen_reports.location_name}
                         </div>
                       )}
-                      {task.citizen_reports?.credibility_score && (
+                      {(task.credibility_score || task.citizen_reports?.credibility_score) && (
                         <div className="flex items-center gap-1">
                           <TrendingUp className="w-4 h-4" />
-                          AI Credibility: {task.citizen_reports.credibility_score}%
+                          AI Credibility: {task.credibility_score || task.citizen_reports?.credibility_score}%
                         </div>
                       )}
                       {task.citizen_reports?.witness_count && (
