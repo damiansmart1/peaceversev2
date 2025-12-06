@@ -22,8 +22,13 @@ export const useVerificationTasks = () => {
         .from('verification_tasks')
         .select(`
           *,
-          citizen_reports(*),
-          assigned_user:profiles!verification_tasks_assigned_to_fkey(username, display_name, avatar_url)
+          citizen_reports:report_id(
+            id, title, description, category, sub_category, severity_level, urgency_level,
+            location_name, location_city, location_country, location_latitude, location_longitude,
+            ai_threat_level, ai_sentiment, credibility_score, is_anonymous, witness_count,
+            media_urls, tags, created_at, verification_status
+          ),
+          assigned_user:assigned_to(id, username:raw_user_meta_data->username, display_name:raw_user_meta_data->display_name)
         `)
         .order('created_at', { ascending: false });
 
@@ -111,7 +116,12 @@ export const useMyTasks = () => {
         .from('verification_tasks')
         .select(`
           *,
-          citizen_reports(*)
+          citizen_reports:report_id(
+            id, title, description, category, sub_category, severity_level, urgency_level,
+            location_name, location_city, location_country, location_latitude, location_longitude,
+            ai_threat_level, ai_sentiment, credibility_score, is_anonymous, witness_count,
+            media_urls, tags, created_at, verification_status
+          )
         `)
         .eq('assigned_to', user.id)
         .in('status', ['pending', 'in_progress'])
