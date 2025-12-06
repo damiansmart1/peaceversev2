@@ -433,7 +433,7 @@ const APIKeysManager = () => {
                       )}
                     </div>
                     <div className="flex gap-1 mt-2">
-                      {(key.permissions as string[])?.map((perm: string) => (
+                      {Array.isArray(key.permissions) && key.permissions.map((perm: string) => (
                         <Badge key={perm} variant="outline" className="text-xs">
                           {perm}
                         </Badge>
