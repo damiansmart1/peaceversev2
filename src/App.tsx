@@ -19,6 +19,7 @@ import EnhancedKeyboardNav from "@/components/EnhancedKeyboardNav";
 import FocusManager from "@/components/FocusManager";
 import GlobalAlertBanner from "@/components/GlobalAlertBanner";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
+import { RealtimeSyncProvider } from "@/components/RealtimeSyncProvider";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Proposals from "./pages/Proposals";
@@ -67,13 +68,14 @@ const App = () => (
           <AccessibilityProvider>
             <AuthProvider>
               <JurisdictionProvider>
-                <TooltipProvider>
-                  <Toaster />
-                  <Sonner position="top-right" />
-                  <SkipNavigation />
-                  <OfflineIndicator />
-                  <GlobalAlertBanner />
-                  <BrowserRouter>
+                <RealtimeSyncProvider>
+                  <TooltipProvider>
+                    <Toaster />
+                    <Sonner position="top-right" />
+                    <SkipNavigation />
+                    <OfflineIndicator />
+                    <GlobalAlertBanner />
+                    <BrowserRouter>
                   <FocusManager />
                   <EnhancedKeyboardNav />
                   <AccessibilityMenu />
@@ -142,8 +144,9 @@ const App = () => (
                   <OnboardingTour />
                   <QuickActionFAB />
                   <PWAInstallPrompt />
-                </BrowserRouter>
-              </TooltipProvider>
+                  </BrowserRouter>
+                </TooltipProvider>
+              </RealtimeSyncProvider>
               </JurisdictionProvider>
             </AuthProvider>
           </AccessibilityProvider>
