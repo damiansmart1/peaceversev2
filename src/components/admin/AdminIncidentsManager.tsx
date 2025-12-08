@@ -118,12 +118,12 @@ export const AdminIncidentsManager = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="reported">Reported</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="under_review">Under Review</SelectItem>
                     <SelectItem value="verified">Verified</SelectItem>
+                    <SelectItem value="rejected">Rejected</SelectItem>
                     <SelectItem value="escalated">Escalated</SelectItem>
-                    <SelectItem value="in_progress">In Progress</SelectItem>
                     <SelectItem value="resolved">Resolved</SelectItem>
-                    <SelectItem value="closed">Closed</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -158,9 +158,9 @@ export const AdminIncidentsManager = () => {
   // Enhanced Stats
   const stats = {
     total: incidents?.length || 0,
-    pending: incidents?.filter(i => i.status === 'reported').length || 0,
+    pending: incidents?.filter(i => i.status === 'pending').length || 0,
     verified: incidents?.filter(i => i.status === 'verified').length || 0,
-    inProgress: incidents?.filter(i => i.status === 'in_progress').length || 0,
+    underReview: incidents?.filter(i => i.status === 'under_review').length || 0,
     resolved: incidents?.filter(i => i.status === 'resolved').length || 0,
     critical: incidents?.filter(i => i.severity === 'critical').length || 0,
     high: incidents?.filter(i => i.severity === 'high').length || 0,
@@ -194,9 +194,9 @@ export const AdminIncidentsManager = () => {
             <CardTitle className="text-sm">Active Cases</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-blue-500">{stats.pending + stats.inProgress}</div>
+            <div className="text-3xl font-bold text-blue-500">{stats.pending + stats.underReview}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              {stats.pending} pending, {stats.inProgress} in progress
+              {stats.pending} pending, {stats.underReview} under review
             </p>
           </CardContent>
         </Card>
@@ -250,10 +250,10 @@ export const AdminIncidentsManager = () => {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm">In Progress</CardTitle>
+            <CardTitle className="text-sm">Under Review</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-purple-500">{stats.inProgress}</div>
+            <div className="text-2xl font-bold text-purple-500">{stats.underReview}</div>
           </CardContent>
         </Card>
         <Card>
