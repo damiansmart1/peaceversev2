@@ -8,7 +8,7 @@ export interface Incident {
   description: string;
   incident_type: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
-  status: 'reported' | 'verified' | 'escalated' | 'in_progress' | 'resolved' | 'closed';
+  status: 'pending' | 'under_review' | 'verified' | 'rejected' | 'escalated' | 'resolved';
   geo_location: any;
   location_name: string | null;
   country_code: string | null;

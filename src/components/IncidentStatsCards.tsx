@@ -8,7 +8,7 @@ interface IncidentStatsCardsProps {
 
 export const IncidentStatsCards = ({ incidents = [] }: IncidentStatsCardsProps) => {
   const totalIncidents = incidents.length;
-  const reportedCount = incidents.filter(i => i.status === 'reported').length;
+  const pendingCount = incidents.filter(i => i.status === 'pending').length;
   const verifiedCount = incidents.filter(i => i.status === 'verified').length;
   const resolvedCount = incidents.filter(i => i.status === 'resolved').length;
   const criticalCount = incidents.filter(i => i.severity === 'critical').length;
@@ -30,7 +30,7 @@ export const IncidentStatsCards = ({ incidents = [] }: IncidentStatsCardsProps) 
     },
     {
       title: 'Pending Review',
-      value: reportedCount,
+      value: pendingCount,
       icon: Clock,
       color: 'text-orange-500',
       bgColor: 'bg-orange-500/10',
