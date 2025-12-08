@@ -2785,6 +2785,86 @@ export type Database = {
         }
         Relationships: []
       }
+      ussd_logs: {
+        Row: {
+          action: string
+          carrier: string | null
+          country_code: string | null
+          created_at: string | null
+          id: string
+          input_text: string | null
+          phone_number: string
+          report_id: string | null
+          response_text: string | null
+          session_id: string | null
+        }
+        Insert: {
+          action: string
+          carrier?: string | null
+          country_code?: string | null
+          created_at?: string | null
+          id?: string
+          input_text?: string | null
+          phone_number: string
+          report_id?: string | null
+          response_text?: string | null
+          session_id?: string | null
+        }
+        Update: {
+          action?: string
+          carrier?: string | null
+          country_code?: string | null
+          created_at?: string | null
+          id?: string
+          input_text?: string | null
+          phone_number?: string
+          report_id?: string | null
+          response_text?: string | null
+          session_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ussd_logs_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "citizen_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ussd_sessions: {
+        Row: {
+          created_at: string | null
+          current_state: string
+          data: Json | null
+          id: string
+          language: string | null
+          phone_number: string
+          session_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          current_state?: string
+          data?: Json | null
+          id?: string
+          language?: string | null
+          phone_number: string
+          session_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          current_state?: string
+          data?: Json | null
+          id?: string
+          language?: string | null
+          phone_number?: string
+          session_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       verification_tasks: {
         Row: {
           assigned_at: string | null
