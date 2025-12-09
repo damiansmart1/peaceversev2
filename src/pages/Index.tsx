@@ -5,11 +5,11 @@ import AfricaMap from "@/components/AfricaMap";
 import { useNavigate } from "react-router-dom";
 import { 
   Mic, Users, Radio, Award, Shield, Vote, Activity, AlertCircle,
-  ArrowRight, Globe, Eye, CheckCircle, Zap, BarChart3, MapPin, Bell, Heart, Leaf
+  ArrowRight, Globe, Eye, CheckCircle, Zap, BarChart3, MapPin, Bell, Heart, Leaf,
+  Scale, Target, Handshake, BookOpen
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { useRef } from "react";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -37,10 +37,157 @@ const Index = () => {
     { value: "24", label: "Average Response", suffix: "h" },
   ];
 
+  const frameworks = [
+    {
+      icon: Users,
+      badge: "UNSCR 2250",
+      title: "Youth, Peace & Security",
+      description: "Empowering young Africans as agents of peace through participation, protection, prevention, partnerships, and disengagement & reintegration.",
+      highlights: ["Youth-led reporting", "Community participation", "Preventive action"],
+      color: "primary"
+    },
+    {
+      icon: Globe,
+      badge: "Agenda 2063",
+      title: "The Africa We Want",
+      description: "Contributing to the African Union's 50-year vision for an integrated, prosperous, and peaceful Africa driven by its own citizens.",
+      highlights: ["Pan-African coverage", "Continental solidarity", "African-led solutions"],
+      color: "secondary"
+    },
+    {
+      icon: Shield,
+      badge: "Aspiration 4",
+      title: "A Peaceful & Secure Africa",
+      description: "Advancing conflict prevention, peacekeeping, and post-conflict reconstruction through citizen-powered early warning systems.",
+      highlights: ["Early warning", "Conflict prevention", "Peace infrastructure"],
+      color: "gold"
+    },
+    {
+      icon: Scale,
+      badge: "SDG 16",
+      title: "Peace, Justice & Strong Institutions",
+      description: "Promoting peaceful and inclusive societies, providing access to justice for all, and building effective, accountable institutions.",
+      highlights: ["Inclusive participation", "Transparent reporting", "Accountable governance"],
+      color: "earth"
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
       <Navigation />
       <HeroSection />
+
+      {/* International Frameworks Alignment Section */}
+      <section className="py-24 bg-gradient-to-b from-muted/50 via-background to-background relative overflow-hidden">
+        {/* Decorative elements */}
+        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-gold/40 to-transparent" />
+        <motion.div 
+          className="absolute -top-40 -right-40 w-96 h-96 bg-primary/5 rounded-full blur-3xl"
+          animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.5, 0.3] }}
+          transition={{ duration: 10, repeat: Infinity }}
+        />
+        <motion.div 
+          className="absolute -bottom-40 -left-40 w-80 h-80 bg-gold/5 rounded-full blur-3xl"
+          animate={{ scale: [1, 1.15, 1], opacity: [0.2, 0.4, 0.2] }}
+          transition={{ duration: 12, repeat: Infinity, delay: 2 }}
+        />
+        
+        <div className="container mx-auto px-6 relative z-10">
+          <motion.div 
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <motion.div
+              className="inline-flex items-center gap-2 bg-primary/10 border border-primary/30 px-4 py-2 rounded-full mb-6"
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+            >
+              <BookOpen className="w-4 h-4 text-primary" />
+              <span className="text-primary text-sm font-semibold tracking-wider uppercase">International Alignment</span>
+            </motion.div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4">
+              Grounded in <span className="text-gradient-gold">Global Frameworks</span>
+            </h2>
+            <p className="text-muted-foreground text-lg max-w-3xl mx-auto leading-relaxed">
+              PeaceVerse is strategically aligned with international peace and security frameworks, ensuring our approach contributes to globally recognized goals for sustainable peace in Africa.
+            </p>
+          </motion.div>
+
+          {/* Frameworks Grid */}
+          <div className="grid md:grid-cols-2 gap-6 max-w-6xl mx-auto">
+            {frameworks.map((framework, i) => (
+              <motion.div
+                key={framework.badge}
+                className="group relative bg-card border border-border rounded-2xl p-8 hover:border-gold/50 transition-all duration-500 hover:shadow-elevated overflow-hidden"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+              >
+                {/* Gradient overlay on hover */}
+                <div className={`absolute inset-0 bg-gradient-to-br from-${framework.color}/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+                
+                <div className="relative z-10">
+                  {/* Header */}
+                  <div className="flex items-start gap-4 mb-4">
+                    <div className={`w-14 h-14 bg-${framework.color}/10 rounded-xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300`}>
+                      <framework.icon className={`w-7 h-7 text-${framework.color}`} />
+                    </div>
+                    <div>
+                      <span className={`inline-block px-3 py-1 bg-${framework.color}/10 text-${framework.color} text-xs font-bold rounded-full mb-2`}>
+                        {framework.badge}
+                      </span>
+                      <h3 className="text-xl font-bold text-foreground">{framework.title}</h3>
+                    </div>
+                  </div>
+                  
+                  {/* Description */}
+                  <p className="text-muted-foreground mb-5 leading-relaxed">
+                    {framework.description}
+                  </p>
+                  
+                  {/* Highlights */}
+                  <div className="flex flex-wrap gap-2">
+                    {framework.highlights.map((highlight) => (
+                      <span 
+                        key={highlight}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-muted/50 border border-border/50 rounded-lg text-sm text-foreground/80"
+                      >
+                        <CheckCircle className="w-3.5 h-3.5 text-gold" />
+                        {highlight}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Bottom CTA */}
+          <motion.div 
+            className="text-center mt-12"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+          >
+            <p className="text-muted-foreground mb-4">
+              Learn more about how PeaceVerse contributes to these global initiatives
+            </p>
+            <Button 
+              variant="outline" 
+              className="gap-2 group border-gold/30 hover:border-gold hover:bg-gold/5"
+              onClick={() => navigate('/about')}
+            >
+              <Target className="w-4 h-4" />
+              Explore Our Impact
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </Button>
+          </motion.div>
+        </div>
+      </section>
       
       {/* Features Grid Section */}
       <section className="py-24 bg-background relative">
