@@ -24,11 +24,18 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase-typed';
 import { toast } from 'sonner';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import { Document, Packer, Paragraph, Table, TableCell, TableRow, TextRun, AlignmentType, WidthType, HeadingLevel } from 'docx';
 import CountrySelector, { getCountryName } from './CountrySelector';
 import { format } from 'date-fns';
+import {
+  exportProfessionalJSON,
+  exportProfessionalCSV,
+  exportProfessionalPDF,
+  exportProfessionalWord,
+  createIncidentExportConfig,
+  createAlertExportConfig,
+  createHotspotExportConfig,
+  createRiskScoreExportConfig,
+} from '@/lib/professionalExportUtils';
 
 interface ReportFilters {
   country: string;
@@ -211,25 +218,37 @@ const ReportingCenter = ({ selectedCountry = 'ALL' }: ReportingCenterProps) => {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
 
-  const downloadBlob = (blob: Blob, filename: string) => {
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+  const getExportConfig = () => {
+    const countryName = getCountryName(filters.country);
+    const filterInfo = {
+      country: countryName,
+      dateFrom: filters.dateFrom,
+      dateTo: filters.dateTo,
+      severity: filters.severity !== 'all' ? filters.severity : undefined,
+      category: filters.category !== 'all' ? filters.category : undefined,
+      status: filters.status !== 'all' ? filters.status : undefined,
+    };
+    
+    switch (filters.dataType) {
+      case 'incidents':
+        return createIncidentExportConfig(reportData || [], filterInfo, countryName);
+      case 'alerts':
+        return createAlertExportConfig(reportData || [], countryName);
+      case 'hotspots':
+        return createHotspotExportConfig(reportData || [], countryName);
+      case 'risks':
+        return createRiskScoreExportConfig(reportData || [], countryName);
+      default:
+        return createIncidentExportConfig(reportData || [], filterInfo, countryName);
+    }
   };
 
   const exportToJSON = () => {
     if (!reportData?.length) return toast.error('No data to export');
     setIsExporting(true);
     try {
-      const jsonStr = JSON.stringify(reportData, null, 2);
-      const blob = new Blob([jsonStr], { type: 'application/json' });
-      downloadBlob(blob, `peaceverse-${filters.dataType}-report-${Date.now()}.json`);
-      toast.success('JSON report downloaded successfully');
+      exportProfessionalJSON(getExportConfig());
+      toast.success('Professional JSON report downloaded successfully');
     } catch (error) {
       toast.error('Failed to export JSON');
     } finally {
@@ -241,19 +260,10 @@ const ReportingCenter = ({ selectedCountry = 'ALL' }: ReportingCenterProps) => {
     if (!reportData?.length) return toast.error('No data to export');
     setIsExporting(true);
     try {
-      // Create CSV for Excel compatibility
-      const headers = Object.keys(reportData[0]).join(',');
-      const rows = reportData.map(row => 
-        Object.values(row).map(val => 
-          typeof val === 'object' ? JSON.stringify(val) : `"${String(val).replace(/"/g, '""')}"`
-        ).join(',')
-      );
-      const csvContent = [headers, ...rows].join('\n');
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      downloadBlob(blob, `peaceverse-${filters.dataType}-report-${Date.now()}.csv`);
-      toast.success('Excel/CSV report downloaded successfully');
+      exportProfessionalCSV(getExportConfig());
+      toast.success('Professional CSV report downloaded successfully');
     } catch (error) {
-      toast.error('Failed to export Excel');
+      toast.error('Failed to export CSV');
     } finally {
       setIsExporting(false);
     }
@@ -263,45 +273,8 @@ const ReportingCenter = ({ selectedCountry = 'ALL' }: ReportingCenterProps) => {
     if (!reportData?.length) return toast.error('No data to export');
     setIsExporting(true);
     try {
-      const doc = new jsPDF('landscape');
-      
-      // Header
-      doc.setFontSize(20);
-      doc.setTextColor(7, 79, 152);
-      doc.text('Peaceverse Early Warning Report', 14, 20);
-      
-      // Report info
-      doc.setFontSize(10);
-      doc.setTextColor(60, 60, 60);
-      doc.text(`Report Type: ${filters.dataType.toUpperCase()}`, 14, 30);
-      doc.text(`Country: ${getCountryName(filters.country)}`, 14, 36);
-      doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 42);
-      doc.text(`Total Records: ${reportData.length}`, 14, 48);
-
-      // Summary stats
-      const severityCounts = reportData.reduce((acc: Record<string, number>, item: any) => {
-        const sev = item.severity_level || item.severity || item.threat_level || item.risk_level || 'unknown';
-        acc[sev] = (acc[sev] || 0) + 1;
-        return acc;
-      }, {});
-      
-      doc.text(`Severity Breakdown: Critical: ${severityCounts.critical || 0} | High: ${severityCounts.high || 0} | Medium: ${severityCounts.medium || 0} | Low: ${severityCounts.low || 0}`, 14, 54);
-
-      // Table
-      const columns = getTableColumns(filters.dataType);
-      const tableData = reportData.map((row: any) => getTableRow(row, filters.dataType));
-
-      autoTable(doc, {
-        startY: 60,
-        head: [columns],
-        body: tableData,
-        styles: { fontSize: 7, cellPadding: 2 },
-        headStyles: { fillColor: [7, 79, 152], textColor: 255 },
-        alternateRowStyles: { fillColor: [245, 245, 245] },
-      });
-
-      doc.save(`peaceverse-${filters.dataType}-report-${Date.now()}.pdf`);
-      toast.success('PDF report downloaded successfully');
+      exportProfessionalPDF(getExportConfig());
+      toast.success('Professional PDF report downloaded successfully');
     } catch (error) {
       toast.error('Failed to export PDF');
     } finally {
@@ -313,51 +286,8 @@ const ReportingCenter = ({ selectedCountry = 'ALL' }: ReportingCenterProps) => {
     if (!reportData?.length) return toast.error('No data to export');
     setIsExporting(true);
     try {
-      const columns = getTableColumns(filters.dataType);
-      
-      const doc = new Document({
-        sections: [{
-          children: [
-            new Paragraph({
-              text: 'Peaceverse Early Warning Report',
-              heading: HeadingLevel.TITLE,
-              alignment: AlignmentType.CENTER,
-            }),
-            new Paragraph({
-              children: [
-                new TextRun({ text: `Report Type: ${filters.dataType.toUpperCase()}`, break: 1 }),
-                new TextRun({ text: `Country: ${getCountryName(filters.country)}`, break: 1 }),
-                new TextRun({ text: `Generated: ${new Date().toLocaleString()}`, break: 1 }),
-                new TextRun({ text: `Total Records: ${reportData.length}`, break: 2 }),
-              ],
-            }),
-            new Table({
-              width: { size: 100, type: WidthType.PERCENTAGE },
-              rows: [
-                new TableRow({
-                  children: columns.map(col => 
-                    new TableCell({ 
-                      children: [new Paragraph({ text: col, alignment: AlignmentType.CENTER })],
-                      shading: { fill: '074F98' },
-                    })
-                  ),
-                }),
-                ...reportData.slice(0, 100).map((row: any) => 
-                  new TableRow({
-                    children: getTableRow(row, filters.dataType).map(cell =>
-                      new TableCell({ children: [new Paragraph(String(cell))] })
-                    ),
-                  })
-                ),
-              ],
-            }),
-          ],
-        }],
-      });
-
-      const blob = await Packer.toBlob(doc);
-      downloadBlob(blob, `peaceverse-${filters.dataType}-report-${Date.now()}.docx`);
-      toast.success('Word document downloaded successfully');
+      await exportProfessionalWord(getExportConfig());
+      toast.success('Professional Word document downloaded successfully');
     } catch (error) {
       toast.error('Failed to export Word document');
     } finally {
