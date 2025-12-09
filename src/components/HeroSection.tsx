@@ -1,9 +1,42 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Shield, Globe, Activity, Play, Zap, Radio, MapPin } from "lucide-react";
+import { ArrowRight, Shield, Globe, Activity, Play, Radio, Users, Handshake, HeartHandshake, RefreshCw } from "lucide-react";
 import heroImage from "@/assets/hero-image.jpg";
 import { useNavigate } from "react-router-dom";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
+
+const unscr2250Pillars = [
+  { 
+    name: "Participation", 
+    icon: Users, 
+    description: "Inclusive youth engagement in peace processes and decision-making",
+    color: "primary"
+  },
+  { 
+    name: "Prevention", 
+    icon: Shield, 
+    description: "Early warning systems to prevent violence and conflict escalation",
+    color: "secondary"
+  },
+  { 
+    name: "Protection", 
+    icon: HeartHandshake, 
+    description: "Safeguarding young people's rights, safety and well-being",
+    color: "gold"
+  },
+  { 
+    name: "Partnerships", 
+    icon: Handshake, 
+    description: "Multi-stakeholder collaboration for sustainable peace",
+    color: "accent"
+  },
+  { 
+    name: "Disengagement", 
+    icon: RefreshCw, 
+    description: "Reintegration pathways for youth affected by conflict",
+    color: "earth"
+  },
+];
 
 const HeroSection = () => {
   const navigate = useNavigate();
@@ -242,43 +275,60 @@ const HeroSection = () => {
               </motion.div>
             </motion.div>
 
-            {/* Right Content - Stats Cards */}
+            {/* Right Content - UNSCR 2250 Pillars */}
             <motion.div
-              className="grid grid-cols-2 gap-4 sm:gap-5"
+              className="space-y-3"
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.7, delay: 0.3 }}
             >
-              {[
-                { value: "54", label: "Countries", icon: Globe, color: "primary", shadowColor: "shadow-peace" },
-                { value: "24/7", label: "Monitoring", icon: Shield, color: "secondary", shadowColor: "shadow-[0_0_30px_hsl(136_37%_24%/0.25)]" },
-                { value: "AI", label: "Powered", icon: Zap, color: "gold", shadowColor: "shadow-warm" },
-                { value: "Live", label: "Intelligence", icon: Activity, color: "accent", shadowColor: "shadow-story" },
-              ].map((stat, i) => (
-                <motion.div
-                  key={stat.label}
-                  className={`relative overflow-hidden bg-card/90 backdrop-blur-sm rounded-2xl p-5 sm:p-6 border border-border/50 group cursor-pointer hover-lift ${stat.shadowColor}`}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 + i * 0.1 }}
-                  whileHover={{ scale: 1.02 }}
-                >
-                  {/* Gradient overlay */}
-                  <div className={`absolute inset-0 bg-gradient-to-br from-${stat.color}/10 to-transparent opacity-60`} />
-                  
-                  {/* Icon */}
-                  <stat.icon className={`w-7 h-7 sm:w-8 sm:h-8 text-${stat.color} mb-3 sm:mb-4 relative z-10 group-hover:scale-110 transition-transform`} />
-                  
-                  {/* Value */}
-                  <div className="text-3xl sm:text-4xl font-bold text-foreground mb-1 relative z-10">{stat.value}</div>
-                  
-                  {/* Label */}
-                  <div className="text-muted-foreground text-sm sm:text-base relative z-10">{stat.label}</div>
-                  
-                  {/* Hover glow effect */}
-                  <div className={`absolute -bottom-8 -right-8 w-24 h-24 bg-${stat.color}/15 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity`} />
-                </motion.div>
-              ))}
+              {/* UNSCR 2250 Header */}
+              <motion.div
+                className="bg-card/80 backdrop-blur-sm rounded-xl p-4 border border-gold/30 mb-4"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <Globe className="w-5 h-5 text-gold" />
+                  <span className="text-sm font-semibold text-gold uppercase tracking-wide">UNSCR 2250</span>
+                </div>
+                <h3 className="text-lg font-bold text-foreground">Youth, Peace & Security</h3>
+                <p className="text-sm text-muted-foreground mt-1">Peaceverse aligns with all five pillars of the UN Security Council Resolution</p>
+              </motion.div>
+
+              {/* Pillars Grid */}
+              <div className="grid grid-cols-1 gap-2.5">
+                {unscr2250Pillars.map((pillar, i) => (
+                  <motion.div
+                    key={pillar.name}
+                    className="relative overflow-hidden bg-card/80 backdrop-blur-sm rounded-xl p-3.5 border border-border/50 group cursor-pointer hover:border-gold/40 transition-colors"
+                    initial={{ opacity: 0, x: 30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.5 + i * 0.08 }}
+                    whileHover={{ x: 5 }}
+                  >
+                    <div className="flex items-center gap-3">
+                      {/* Icon */}
+                      <div className={`flex-shrink-0 w-10 h-10 rounded-lg bg-${pillar.color}/15 flex items-center justify-center`}>
+                        <pillar.icon className={`w-5 h-5 text-${pillar.color}`} />
+                      </div>
+                      
+                      {/* Content */}
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-foreground text-sm">{pillar.name}</div>
+                        <div className="text-xs text-muted-foreground line-clamp-1">{pillar.description}</div>
+                      </div>
+
+                      {/* Arrow */}
+                      <ArrowRight className="w-4 h-4 text-muted-foreground/50 group-hover:text-gold group-hover:translate-x-1 transition-all flex-shrink-0" />
+                    </div>
+                    
+                    {/* Hover glow */}
+                    <div className={`absolute -right-4 -bottom-4 w-16 h-16 bg-${pillar.color}/10 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity`} />
+                  </motion.div>
+                ))}
+              </div>
             </motion.div>
           </div>
         </div>
