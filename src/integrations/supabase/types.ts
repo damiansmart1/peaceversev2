@@ -1579,6 +1579,53 @@ export type Database = {
           },
         ]
       }
+      incident_timeline: {
+        Row: {
+          actor_id: string | null
+          actor_name: string | null
+          actor_role: string | null
+          created_at: string
+          event_description: string | null
+          event_title: string
+          event_type: string
+          id: string
+          incident_id: string
+          metadata: Json | null
+        }
+        Insert: {
+          actor_id?: string | null
+          actor_name?: string | null
+          actor_role?: string | null
+          created_at?: string
+          event_description?: string | null
+          event_title: string
+          event_type: string
+          id?: string
+          incident_id: string
+          metadata?: Json | null
+        }
+        Update: {
+          actor_id?: string | null
+          actor_name?: string | null
+          actor_role?: string | null
+          created_at?: string
+          event_description?: string | null
+          event_title?: string
+          event_type?: string
+          id?: string
+          incident_id?: string
+          metadata?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incident_timeline_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "citizen_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       integration_connections: {
         Row: {
           config: Json

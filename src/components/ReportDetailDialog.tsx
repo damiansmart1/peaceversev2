@@ -7,9 +7,10 @@ import { Separator } from '@/components/ui/separator';
 import { 
   MapPin, Clock, User, AlertTriangle, CheckCircle, Shield, 
   FileText, Users, Building, Phone, Mail, Eye, Share2,
-  Calendar, Activity, Brain, Flag, MessageSquare
+  Calendar, Activity, Brain, Flag, MessageSquare, History
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { IncidentTimelineDetail } from './IncidentTimelineDetail';
 
 interface ReportDetailDialogProps {
   report: any;
@@ -96,14 +97,26 @@ export const ReportDetailDialog = ({ report, open, onOpenChange }: ReportDetailD
               )}
             </div>
 
-            <Tabs defaultValue="details" className="w-full">
-              <TabsList className="grid w-full grid-cols-5">
+            <Tabs defaultValue="timeline" className="w-full">
+              <TabsList className="grid w-full grid-cols-6">
+                <TabsTrigger value="timeline" className="gap-1">
+                  <History className="w-3 h-3" />
+                  Timeline
+                </TabsTrigger>
                 <TabsTrigger value="details">Details</TabsTrigger>
                 <TabsTrigger value="location">Location</TabsTrigger>
                 <TabsTrigger value="impact">Impact</TabsTrigger>
                 <TabsTrigger value="evidence">Evidence</TabsTrigger>
                 <TabsTrigger value="analysis">AI Analysis</TabsTrigger>
               </TabsList>
+
+              {/* Timeline Tab */}
+              <TabsContent value="timeline" className="mt-4">
+                <IncidentTimelineDetail 
+                  incidentId={report.id} 
+                  incidentTitle={report.title}
+                />
+              </TabsContent>
 
               {/* Details Tab */}
               <TabsContent value="details" className="space-y-4 mt-4">
