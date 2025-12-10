@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useMyReports } from '@/hooks/useMyReports';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ReportStatusTimeline } from './ReportStatusTimeline';
+import { ReportDetailDialog } from './ReportDetailDialog';
 import LoadingSpinner from './LoadingSpinner';
 import EmptyState from './EmptyState';
 import { FileText, TrendingUp, AlertCircle, Clock } from 'lucide-react';
@@ -9,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 
 export const ReportTracker = () => {
+  const [selectedReport, setSelectedReport] = useState<any>(null);
   const { reports, isLoading } = useMyReports();
 
   if (isLoading) {
@@ -167,7 +170,10 @@ export const ReportTracker = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: index * 0.1 }}
               >
-                <Card className="border-2">
+                <Card 
+                  className="border-2 cursor-pointer hover:border-primary/50 hover:shadow-md transition-all"
+                  onClick={() => setSelectedReport(report)}
+                >
                   <CardContent className="pt-6">
                     <ReportStatusTimeline report={report} />
                   </CardContent>
@@ -192,7 +198,10 @@ export const ReportTracker = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: index * 0.1 }}
               >
-                <Card className="border-2 opacity-75">
+                <Card 
+                  className="border-2 opacity-75 cursor-pointer hover:border-primary/50 hover:shadow-md hover:opacity-100 transition-all"
+                  onClick={() => setSelectedReport(report)}
+                >
                   <CardContent className="pt-6">
                     <ReportStatusTimeline report={report} />
                   </CardContent>
@@ -202,6 +211,12 @@ export const ReportTracker = () => {
           )}
         </TabsContent>
       </Tabs>
+
+      <ReportDetailDialog
+        report={selectedReport}
+        open={!!selectedReport}
+        onOpenChange={(open) => !open && setSelectedReport(null)}
+      />
     </div>
   );
 };
