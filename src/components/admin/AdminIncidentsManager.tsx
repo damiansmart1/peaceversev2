@@ -8,13 +8,15 @@ import { useIncidents, useUpdateIncident, Incident } from '@/hooks/useIncidents'
 import DataTable from '@/components/DataTable';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { CheckCircle2, XCircle, AlertTriangle, CheckCircle } from 'lucide-react';
+import { IncidentDetailDialog } from '@/components/IncidentDetailDialog';
+import { CheckCircle2, XCircle, AlertTriangle, CheckCircle, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 
 export const AdminIncidentsManager = () => {
   const { data: incidents = [], isLoading } = useIncidents();
   const updateIncident = useUpdateIncident();
   const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
+  const [viewIncident, setViewIncident] = useState<Incident | null>(null);
   const [newStatus, setNewStatus] = useState('');
   const [resolutionNotes, setResolutionNotes] = useState('');
 
@@ -88,65 +90,74 @@ export const AdminIncidentsManager = () => {
       key: 'actions',
       label: 'Actions',
       render: (incident: Incident) => (
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => {
-                setSelectedIncident(incident);
-                setNewStatus(incident.status);
-              }}
-            >
-              Manage
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Manage Incident</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <h4 className="font-semibold mb-2">{incident.title}</h4>
-                <p className="text-sm text-muted-foreground">{incident.description}</p>
-              </div>
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => setViewIncident(incident)}
+          >
+            <Eye className="w-4 h-4" />
+          </Button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setSelectedIncident(incident);
+                  setNewStatus(incident.status);
+                }}
+              >
+                Manage
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Manage Incident</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-semibold mb-2">{incident.title}</h4>
+                  <p className="text-sm text-muted-foreground">{incident.description}</p>
+                </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Update Status</label>
-                <Select value={newStatus} onValueChange={setNewStatus}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="under_review">Under Review</SelectItem>
-                    <SelectItem value="verified">Verified</SelectItem>
-                    <SelectItem value="rejected">Rejected</SelectItem>
-                    <SelectItem value="escalated">Escalated</SelectItem>
-                    <SelectItem value="resolved">Resolved</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Update Status</label>
+                  <Select value={newStatus} onValueChange={setNewStatus}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="under_review">Under Review</SelectItem>
+                      <SelectItem value="verified">Verified</SelectItem>
+                      <SelectItem value="rejected">Rejected</SelectItem>
+                      <SelectItem value="escalated">Escalated</SelectItem>
+                      <SelectItem value="resolved">Resolved</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Resolution Notes</label>
-                <Textarea
-                  value={resolutionNotes}
-                  onChange={(e) => setResolutionNotes(e.target.value)}
-                  placeholder="Add notes about the incident resolution..."
-                  rows={4}
-                />
-              </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Resolution Notes</label>
+                  <Textarea
+                    value={resolutionNotes}
+                    onChange={(e) => setResolutionNotes(e.target.value)}
+                    placeholder="Add notes about the incident resolution..."
+                    rows={4}
+                  />
+                </div>
 
-              <div className="flex gap-2">
-                <Button onClick={handleUpdateStatus} className="flex-1">
-                  <CheckCircle2 className="w-4 h-4 mr-2" />
-                  Update Status
-                </Button>
+                <div className="flex gap-2">
+                  <Button onClick={handleUpdateStatus} className="flex-1">
+                    <CheckCircle2 className="w-4 h-4 mr-2" />
+                    Update Status
+                  </Button>
+                </div>
               </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+            </DialogContent>
+          </Dialog>
+        </div>
       ),
     },
   ];
@@ -283,6 +294,12 @@ export const AdminIncidentsManager = () => {
           />
         </CardContent>
       </Card>
+
+      <IncidentDetailDialog
+        incident={viewIncident}
+        open={!!viewIncident}
+        onOpenChange={(open) => !open && setViewIncident(null)}
+      />
     </div>
   );
 };

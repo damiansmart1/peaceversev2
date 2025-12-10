@@ -12,6 +12,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { format, formatDistanceToNow } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ReportDetailDialog } from './ReportDetailDialog';
 
 interface TimelineEvent {
   id: string;
@@ -61,6 +62,7 @@ const categoryIcons: Record<string, any> = {
 export const IncidentTimeline = () => {
   const [filter, setFilter] = useState<string>('all');
   const [severityFilter, setSeverityFilter] = useState<string>('all');
+  const [selectedReport, setSelectedReport] = useState<any>(null);
 
   const { data: incidents, isLoading } = useQuery({
     queryKey: ['incident-timeline', filter, severityFilter],
@@ -180,7 +182,10 @@ export const IncidentTimeline = () => {
 
                 {/* Content Card */}
                 <div className={`ml-12 md:ml-0 md:w-[calc(50%-2rem)] ${isLeft ? 'md:pr-8' : 'md:pl-8'}`}>
-                  <Card className={`border-l-4 ${severityColors[incident.severity_level] || 'border-border'} hover:shadow-xl transition-all duration-300 overflow-hidden`}>
+                  <Card 
+                    className={`border-l-4 ${severityColors[incident.severity_level] || 'border-border'} hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer`}
+                    onClick={() => setSelectedReport(incident)}
+                  >
                     {/* Header */}
                     <CardHeader className="pb-2">
                       <div className="flex items-start justify-between gap-2">
@@ -346,6 +351,12 @@ export const IncidentTimeline = () => {
           </div>
         </div>
       </Card>
+
+      <ReportDetailDialog
+        report={selectedReport}
+        open={!!selectedReport}
+        onOpenChange={(open) => !open && setSelectedReport(null)}
+      />
     </div>
   );
 };
