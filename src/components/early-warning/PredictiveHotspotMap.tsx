@@ -6,8 +6,8 @@ import { AlertCircle, TrendingUp, MapPin, Clock, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import RecommendedActionsPanel from './RecommendedActionsPanel';
-import { useEffect, useRef, useState } from 'react';
-import { preloadGoogleMaps, isGoogleMapsReady } from '@/hooks/useGoogleMapsPreloader';
+import { useEffect, useRef, useState, useCallback } from 'react';
+import { Loader } from '@googlemaps/js-api-loader';
 
 interface PredictiveHotspotMapProps {
   selectedCountry?: string;
@@ -17,8 +17,9 @@ const PredictiveHotspotMap = ({ selectedCountry = 'ALL' }: PredictiveHotspotMapP
   const { toast } = useToast();
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
-  const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
+  const markersRef = useRef<google.maps.Marker[]>([]);
   const circlesRef = useRef<google.maps.Circle[]>([]);
+  const infoWindowRef = useRef<google.maps.InfoWindow | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
   const [selectedHotspot, setSelectedHotspot] = useState<any>(null);
@@ -58,20 +59,21 @@ const PredictiveHotspotMap = ({ selectedCountry = 'ALL' }: PredictiveHotspotMapP
 
     const initMap = async () => {
       try {
-        if (!isGoogleMapsReady()) {
-          await preloadGoogleMaps();
-        }
+        const loader = new Loader({
+          apiKey: GOOGLE_MAPS_API_KEY,
+          version: 'weekly',
+          libraries: ['visualization'],
+        });
+
+        await loader.load();
 
         if (!window.google || !mapRef.current) {
-          setMapError('Failed to load Google Maps. Please check your API key configuration.');
+          setMapError('Failed to load Google Maps.');
           return;
         }
 
-        const { Map } = await google.maps.importLibrary("maps") as google.maps.MapsLibrary;
-        await google.maps.importLibrary("marker");
-
-        mapInstanceRef.current = new Map(mapRef.current, {
-          center: { lat: 0, lng: 20 }, // Center on Africa
+        mapInstanceRef.current = new google.maps.Map(mapRef.current, {
+          center: { lat: 0, lng: 20 },
           zoom: 3,
           mapTypeId: 'terrain',
           styles: [
@@ -83,13 +85,13 @@ const PredictiveHotspotMap = ({ selectedCountry = 'ALL' }: PredictiveHotspotMapP
             { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#1d3461' }] },
             { featureType: 'poi', elementType: 'geometry', stylers: [{ color: '#1a1a2e' }] },
           ],
-          mapId: 'hotspot-map',
         });
 
+        infoWindowRef.current = new google.maps.InfoWindow();
         setMapLoaded(true);
       } catch (error) {
         console.error('Map initialization error:', error);
-        setMapError('Failed to initialize the map. Please try refreshing the page.');
+        setMapError('Failed to initialize the map. Please check your Google Maps API configuration.');
       }
     };
 
@@ -101,13 +103,21 @@ const PredictiveHotspotMap = ({ selectedCountry = 'ALL' }: PredictiveHotspotMapP
     if (!mapLoaded || !mapInstanceRef.current || !hotspots) return;
 
     // Clear existing markers and circles
-    markersRef.current.forEach(marker => marker.map = null);
+    markersRef.current.forEach(marker => marker.setMap(null));
     markersRef.current = [];
     circlesRef.current.forEach(circle => circle.setMap(null));
     circlesRef.current = [];
 
     const bounds = new google.maps.LatLngBounds();
     let hasValidLocations = false;
+
+    const riskColors: Record<string, string> = {
+      critical: '#dc2626',
+      severe: '#ef4444',
+      high: '#f97316',
+      moderate: '#eab308',
+      low: '#22c55e',
+    };
 
     hotspots.forEach((hotspot: any) => {
       if (!hotspot.latitude || !hotspot.longitude) return;
@@ -116,21 +126,13 @@ const PredictiveHotspotMap = ({ selectedCountry = 'ALL' }: PredictiveHotspotMapP
       bounds.extend(position);
       hasValidLocations = true;
 
-      // Get color based on risk level
-      const riskColors: Record<string, string> = {
-        critical: '#dc2626',
-        severe: '#ef4444',
-        high: '#f97316',
-        moderate: '#eab308',
-        low: '#22c55e',
-      };
       const color = riskColors[hotspot.risk_level] || '#22c55e';
 
       // Create circle to show radius
       const circle = new google.maps.Circle({
         map: mapInstanceRef.current,
         center: position,
-        radius: (hotspot.radius_km || 10) * 1000, // Convert km to meters
+        radius: (hotspot.radius_km || 10) * 1000,
         fillColor: color,
         fillOpacity: 0.2,
         strokeColor: color,
@@ -139,47 +141,47 @@ const PredictiveHotspotMap = ({ selectedCountry = 'ALL' }: PredictiveHotspotMapP
       });
       circlesRef.current.push(circle);
 
-      // Create marker
-      const markerDiv = document.createElement('div');
-      markerDiv.innerHTML = `
-        <div style="
-          background: ${color};
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: white;
-          font-weight: bold;
-          font-size: 14px;
-          border: 3px solid white;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-          cursor: pointer;
-          transition: transform 0.2s;
-        ">
-          ${hotspot.hotspot_score}%
-        </div>
-      `;
-      markerDiv.addEventListener('mouseenter', () => {
-        markerDiv.firstElementChild?.setAttribute('style', markerDiv.firstElementChild.getAttribute('style')?.replace('transform: scale(1)', 'transform: scale(1.2)') || '');
-      });
-
-      const marker = new google.maps.marker.AdvancedMarkerElement({
+      // Create standard marker with custom icon
+      const marker = new google.maps.Marker({
         map: mapInstanceRef.current,
         position,
-        content: markerDiv,
         title: `${hotspot.region_name}, ${hotspot.country}`,
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 15,
+          fillColor: color,
+          fillOpacity: 1,
+          strokeColor: '#ffffff',
+          strokeWeight: 3,
+        },
+        label: {
+          text: `${hotspot.hotspot_score}%`,
+          color: '#ffffff',
+          fontSize: '10px',
+          fontWeight: 'bold',
+        },
       });
 
       marker.addListener('click', () => {
         setSelectedHotspot(hotspot);
+        if (infoWindowRef.current) {
+          infoWindowRef.current.setContent(`
+            <div style="padding: 8px; min-width: 200px;">
+              <strong style="font-size: 14px;">${hotspot.region_name}, ${hotspot.country}</strong>
+              <div style="margin-top: 8px; font-size: 12px;">
+                <div>Risk Level: <strong style="color: ${color};">${hotspot.risk_level?.toUpperCase()}</strong></div>
+                <div>Score: <strong>${hotspot.hotspot_score}%</strong></div>
+                <div>Incidents (30d): <strong>${hotspot.incident_count_30d}</strong></div>
+              </div>
+            </div>
+          `);
+          infoWindowRef.current.open(mapInstanceRef.current, marker);
+        }
       });
 
       markersRef.current.push(marker);
     });
 
-    // Fit bounds if we have valid locations
     if (hasValidLocations && markersRef.current.length > 0) {
       mapInstanceRef.current.fitBounds(bounds, 50);
       if (markersRef.current.length === 1) {
@@ -261,7 +263,7 @@ const PredictiveHotspotMap = ({ selectedCountry = 'ALL' }: PredictiveHotspotMapP
         <CardContent>
           {mapError ? (
             <div className="h-[400px] flex items-center justify-center bg-muted rounded-lg">
-              <div className="text-center space-y-2">
+              <div className="text-center space-y-2 p-4">
                 <AlertCircle className="w-12 h-12 mx-auto text-destructive" />
                 <p className="text-destructive font-medium">{mapError}</p>
               </div>
@@ -270,11 +272,10 @@ const PredictiveHotspotMap = ({ selectedCountry = 'ALL' }: PredictiveHotspotMapP
             <div className="relative">
               <div 
                 ref={mapRef} 
-                className="w-full h-[400px] rounded-lg overflow-hidden"
-                style={{ minHeight: '400px' }}
+                className="w-full h-[400px] rounded-lg overflow-hidden bg-muted"
               />
               {!mapLoaded && (
-                <div className="absolute inset-0 flex items-center justify-center bg-muted/80 rounded-lg">
+                <div className="absolute inset-0 flex items-center justify-center bg-muted rounded-lg">
                   <div className="text-center space-y-2">
                     <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
                     <p className="text-sm text-muted-foreground">Loading map...</p>
@@ -282,27 +283,29 @@ const PredictiveHotspotMap = ({ selectedCountry = 'ALL' }: PredictiveHotspotMapP
                 </div>
               )}
               {/* Legend */}
-              <div className="absolute bottom-4 left-4 bg-background/90 backdrop-blur-sm p-3 rounded-lg border">
-                <p className="font-semibold text-xs mb-2">Risk Level</p>
-                <div className="space-y-1 text-xs">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-red-600" />
-                    <span>Critical</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-orange-500" />
-                    <span>High</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-yellow-500" />
-                    <span>Moderate</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-green-500" />
-                    <span>Low</span>
+              {mapLoaded && (
+                <div className="absolute bottom-4 left-4 bg-background/90 backdrop-blur-sm p-3 rounded-lg border">
+                  <p className="font-semibold text-xs mb-2">Risk Level</p>
+                  <div className="space-y-1 text-xs">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-red-600" />
+                      <span>Critical</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-orange-500" />
+                      <span>High</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                      <span>Moderate</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-green-500" />
+                      <span>Low</span>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
         </CardContent>
