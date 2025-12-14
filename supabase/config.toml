@@ -44,3 +44,18 @@ verify_jwt = false
 
 [functions.ussd-handler]
 verify_jwt = false
+
+[functions.analyze-reporter-safety]
+verify_jwt = false
+
+[functions.detect-patterns]
+verify_jwt = false
+
+[functions.analyze-data-quality]
+verify_jwt = false
+
+[functions.analyze-geographic-clusters]
+verify_jwt = false
+
+[functions.comprehensive-incident-analysis]
+verify_jwt = false
