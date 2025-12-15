@@ -19,12 +19,43 @@ import { ActiveHotspotsMap } from '@/components/verifier/ActiveHotspotsMap';
 import { QuickVerificationActions } from '@/components/verifier/QuickVerificationActions';
 import { ReporterSafetyAlerts } from '@/components/verifier/ReporterSafetyAlerts';
 import { VerificationQueue } from '@/components/VerificationQueue';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 const VerifierDashboard = () => {
   const navigate = useNavigate();
-  const { tasks, isLoading } = useVerificationTasks();
+  const { tasks, isLoading, refetch } = useVerificationTasks();
   const [activeTab, setActiveTab] = useState('overview');
   const [lastRefresh, setLastRefresh] = useState(new Date());
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const { toast } = useToast();
+
+  // Real-time sync for verification dashboard
+  useEffect(() => {
+    const channel = supabase
+      .channel('verifier-dashboard-sync')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'verification_tasks' },
+        () => {
+          refetch();
+          setLastRefresh(new Date());
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'citizen_reports' },
+        () => {
+          refetch();
+          setLastRefresh(new Date());
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [refetch]);
 
   const pendingTasks = tasks?.filter(t => t.status === 'pending').length || 0;
   const completedTasks = tasks?.filter(t => t.status === 'completed').length || 0;
@@ -42,9 +73,15 @@ const VerifierDashboard = () => {
     patternsDetected: 12,
   };
 
-  const handleRefresh = () => {
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await refetch();
     setLastRefresh(new Date());
-    // Trigger refetch logic if needed
+    setIsRefreshing(false);
+    toast({
+      title: 'Dashboard Refreshed',
+      description: 'All data has been synchronized.',
+    });
   };
 
   return (
@@ -75,9 +112,10 @@ const VerifierDashboard = () => {
                 variant="outline" 
                 size="sm" 
                 onClick={handleRefresh}
+                disabled={isRefreshing}
                 className="bg-white/10 border-white/20 text-white hover:bg-white/20"
               >
-                <RefreshCw className="w-4 h-4 mr-2" />
+                <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
                 Refresh
               </Button>
               <Button 

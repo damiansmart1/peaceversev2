@@ -253,6 +253,45 @@ serve(async (req) => {
 
     console.log(`Comprehensive report created successfully: ${report.id}`);
 
+    // Determine priority based on severity and urgency
+    const priorityMap: Record<string, string> = {
+      'critical': 'critical',
+      'high': 'high',
+      'medium': 'medium',
+      'low': 'low'
+    };
+    const taskPriority = priorityMap[submission.severity_level || 'medium'] || 'medium';
+
+    // Automatically create a verification task for the new report
+    const { data: verificationTask, error: taskError } = await supabase
+      .from('verification_tasks')
+      .insert({
+        report_id: report.id,
+        status: 'pending',
+        priority: taskPriority,
+        category: submission.category,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .select()
+      .single();
+
+    if (taskError) {
+      console.error('Error creating verification task:', taskError);
+      // Don't fail the entire submission if task creation fails
+    } else {
+      console.log(`Verification task created: ${verificationTask.id}`);
+    }
+
+    // Update report status to indicate it's in verification queue
+    await supabase
+      .from('citizen_reports')
+      .update({ 
+        verification_status: 'pending',
+        status: 'pending_verification'
+      })
+      .eq('id', report.id);
+
     // Trigger AI analysis asynchronously
     const analysisUrl = `${supabaseUrl}/functions/v1/analyze-citizen-report`;
     fetch(analysisUrl, {

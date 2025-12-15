@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useVerificationTasks, useMyTasks } from '@/hooks/useVerificationTasks';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,12 +8,13 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   Shield, Clock, CheckCircle, AlertTriangle, MapPin, Calendar, User, 
-  Search, Filter, TrendingUp, Eye, FileText, Activity
+  Search, Filter, TrendingUp, Eye, FileText, Activity, RefreshCw
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { VerificationTaskDetail } from './VerificationTaskDetail';
 import { motion } from 'framer-motion';
-
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 const PRIORITY_COLORS = {
   critical: 'bg-red-500',
   high: 'bg-orange-500',
@@ -29,13 +30,66 @@ const STATUS_COLORS = {
 };
 
 export const VerificationQueue = () => {
-  const { tasks, isLoading, assignTask, isAssigning } = useVerificationTasks();
-  const { data: myTasks } = useMyTasks();
+  const { tasks, isLoading, assignTask, isAssigning, refetch } = useVerificationTasks();
+  const { data: myTasks, refetch: refetchMyTasks } = useMyTasks();
   const [selectedTask, setSelectedTask] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
-  
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const { toast } = useToast();
+
+  // Real-time subscription for verification tasks and citizen reports
+  useEffect(() => {
+    const channel = supabase
+      .channel('verification-sync')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'verification_tasks'
+        },
+        (payload) => {
+          console.log('Verification task update:', payload);
+          refetch();
+          refetchMyTasks();
+          if (payload.eventType === 'INSERT') {
+            toast({
+              title: 'New Report for Verification',
+              description: 'A new incident report has been submitted for verification.',
+            });
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'citizen_reports'
+        },
+        (payload) => {
+          console.log('Citizen report update:', payload);
+          refetch();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [refetch, refetchMyTasks, toast]);
+
+  const handleManualRefresh = async () => {
+    setIsRefreshing(true);
+    await Promise.all([refetch(), refetchMyTasks()]);
+    setIsRefreshing(false);
+    toast({
+      title: 'Refreshed',
+      description: 'Verification queue has been updated.',
+    });
+  };
   const filteredTasks = (tasks || []).filter(t => {
     const matchesSearch = !searchQuery || 
       t.citizen_reports?.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -75,10 +129,21 @@ export const VerificationQueue = () => {
       {/* Header with Stats */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold flex items-center gap-2">
-            <Shield className="w-8 h-8 text-primary" />
-            Verification Queue
-          </h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-3xl font-bold flex items-center gap-2">
+              <Shield className="w-8 h-8 text-primary" />
+              Verification Queue
+            </h2>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleManualRefresh}
+              disabled={isRefreshing}
+              className="h-8 w-8"
+            >
+              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            </Button>
+          </div>
           <p className="text-muted-foreground mt-2">
             Review and verify citizen reports to maintain platform integrity
           </p>
