@@ -226,6 +226,13 @@ export type Database = {
             referencedRelation: "citizen_reports"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "ai_analysis_logs_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "citizen_reports_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       ai_analytics_summary: {
@@ -1368,6 +1375,13 @@ export type Database = {
             referencedRelation: "citizen_reports"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "data_quality_metrics_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "citizen_reports_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       direct_messages: {
@@ -1637,10 +1651,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "incident_correlations_primary_incident_id_fkey"
+            columns: ["primary_incident_id"]
+            isOneToOne: false
+            referencedRelation: "citizen_reports_safe"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "incident_correlations_related_incident_id_fkey"
             columns: ["related_incident_id"]
             isOneToOne: false
             referencedRelation: "citizen_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incident_correlations_related_incident_id_fkey"
+            columns: ["related_incident_id"]
+            isOneToOne: false
+            referencedRelation: "citizen_reports_safe"
             referencedColumns: ["id"]
           },
         ]
@@ -1786,6 +1814,13 @@ export type Database = {
             referencedRelation: "citizen_reports"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "incident_risk_scores_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "citizen_reports_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       incident_timeline: {
@@ -1831,6 +1866,13 @@ export type Database = {
             columns: ["incident_id"]
             isOneToOne: false
             referencedRelation: "citizen_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incident_timeline_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "citizen_reports_safe"
             referencedColumns: ["id"]
           },
         ]
@@ -2750,6 +2792,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "response_deployments_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "citizen_reports_safe"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "response_deployments_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
@@ -2977,6 +3026,13 @@ export type Database = {
             referencedRelation: "citizen_reports"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "safety_alerts_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "citizen_reports_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       scenario_models: {
@@ -3058,6 +3114,13 @@ export type Database = {
             columns: ["base_incident_id"]
             isOneToOne: false
             referencedRelation: "citizen_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scenario_models_base_incident_id_fkey"
+            columns: ["base_incident_id"]
+            isOneToOne: false
+            referencedRelation: "citizen_reports_safe"
             referencedColumns: ["id"]
           },
         ]
@@ -3355,6 +3418,13 @@ export type Database = {
             referencedRelation: "citizen_reports"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "ussd_logs_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "citizen_reports_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       ussd_sessions: {
@@ -3451,6 +3521,13 @@ export type Database = {
             columns: ["report_id"]
             isOneToOne: false
             referencedRelation: "citizen_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "verification_tasks_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "citizen_reports_safe"
             referencedColumns: ["id"]
           },
         ]
@@ -3603,6 +3680,264 @@ export type Database = {
       }
     }
     Views: {
+      citizen_reports_safe: {
+        Row: {
+          ai_key_entities: Json | null
+          ai_sentiment: string | null
+          ai_threat_level: string | null
+          assistance_provider: string | null
+          assistance_received: boolean | null
+          assistance_type: string[] | null
+          authorities_notified: boolean | null
+          authorities_responded: boolean | null
+          authority_response_details: string | null
+          casualties_reported: number | null
+          category: string | null
+          children_involved: boolean | null
+          community_impact_level: string | null
+          community_response: string | null
+          confidential_notes: string | null
+          created_at: string | null
+          credibility_score: number | null
+          description: string | null
+          duration_minutes: number | null
+          economic_impact_estimate: number | null
+          engagement_score: number | null
+          estimated_people_affected: number | null
+          evidence_description: string | null
+          first_occurrence: boolean | null
+          follow_up_contact_consent: boolean | null
+          follow_up_required: boolean | null
+          has_physical_evidence: boolean | null
+          has_witnesses: boolean | null
+          historical_context: string | null
+          id: string | null
+          immediate_actions_taken: string[] | null
+          immediate_needs: string[] | null
+          incident_date: string | null
+          incident_time: string | null
+          infrastructure_damage: string[] | null
+          injuries_reported: number | null
+          is_anonymous: boolean | null
+          language: string | null
+          last_activity_at: string | null
+          location_accuracy: string | null
+          location_address: string | null
+          location_city: string | null
+          location_country: string | null
+          location_latitude: number | null
+          location_longitude: number | null
+          location_name: string | null
+          location_postal_code: string | null
+          location_region: string | null
+          location_type: string | null
+          media_types: string[] | null
+          media_urls: string[] | null
+          perpetrator_description: string | null
+          perpetrator_type: string | null
+          preferred_contact_method: string | null
+          previous_reports_filed: boolean | null
+          recurring_issue: boolean | null
+          related_incidents: string[] | null
+          reporter_contact_email: string | null
+          reporter_contact_phone: string | null
+          reporter_id: string | null
+          resolution_date: string | null
+          resolution_notes: string | null
+          resolution_status: string | null
+          services_disrupted: string[] | null
+          severity_level: string | null
+          share_count: number | null
+          source: string | null
+          status: string | null
+          sub_category: string | null
+          tags: string[] | null
+          title: string | null
+          translated_from: string | null
+          updated_at: string | null
+          urgency_level: string | null
+          verification_notes: string | null
+          verification_status: string | null
+          verified_at: string | null
+          verified_by: string | null
+          view_count: number | null
+          visibility: string | null
+          vulnerable_groups_affected: string[] | null
+          witness_contact_info: Json | null
+          witness_count: number | null
+        }
+        Insert: {
+          ai_key_entities?: Json | null
+          ai_sentiment?: string | null
+          ai_threat_level?: string | null
+          assistance_provider?: string | null
+          assistance_received?: boolean | null
+          assistance_type?: string[] | null
+          authorities_notified?: boolean | null
+          authorities_responded?: boolean | null
+          authority_response_details?: string | null
+          casualties_reported?: number | null
+          category?: string | null
+          children_involved?: boolean | null
+          community_impact_level?: string | null
+          community_response?: string | null
+          confidential_notes?: never
+          created_at?: string | null
+          credibility_score?: number | null
+          description?: string | null
+          duration_minutes?: number | null
+          economic_impact_estimate?: number | null
+          engagement_score?: number | null
+          estimated_people_affected?: number | null
+          evidence_description?: string | null
+          first_occurrence?: boolean | null
+          follow_up_contact_consent?: boolean | null
+          follow_up_required?: boolean | null
+          has_physical_evidence?: boolean | null
+          has_witnesses?: boolean | null
+          historical_context?: string | null
+          id?: string | null
+          immediate_actions_taken?: string[] | null
+          immediate_needs?: string[] | null
+          incident_date?: string | null
+          incident_time?: string | null
+          infrastructure_damage?: string[] | null
+          injuries_reported?: number | null
+          is_anonymous?: boolean | null
+          language?: string | null
+          last_activity_at?: string | null
+          location_accuracy?: string | null
+          location_address?: string | null
+          location_city?: string | null
+          location_country?: string | null
+          location_latitude?: number | null
+          location_longitude?: number | null
+          location_name?: string | null
+          location_postal_code?: string | null
+          location_region?: string | null
+          location_type?: string | null
+          media_types?: string[] | null
+          media_urls?: string[] | null
+          perpetrator_description?: string | null
+          perpetrator_type?: string | null
+          preferred_contact_method?: string | null
+          previous_reports_filed?: boolean | null
+          recurring_issue?: boolean | null
+          related_incidents?: string[] | null
+          reporter_contact_email?: never
+          reporter_contact_phone?: never
+          reporter_id?: string | null
+          resolution_date?: string | null
+          resolution_notes?: string | null
+          resolution_status?: string | null
+          services_disrupted?: string[] | null
+          severity_level?: string | null
+          share_count?: number | null
+          source?: string | null
+          status?: string | null
+          sub_category?: string | null
+          tags?: string[] | null
+          title?: string | null
+          translated_from?: string | null
+          updated_at?: string | null
+          urgency_level?: string | null
+          verification_notes?: string | null
+          verification_status?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+          view_count?: number | null
+          visibility?: string | null
+          vulnerable_groups_affected?: string[] | null
+          witness_contact_info?: Json | null
+          witness_count?: number | null
+        }
+        Update: {
+          ai_key_entities?: Json | null
+          ai_sentiment?: string | null
+          ai_threat_level?: string | null
+          assistance_provider?: string | null
+          assistance_received?: boolean | null
+          assistance_type?: string[] | null
+          authorities_notified?: boolean | null
+          authorities_responded?: boolean | null
+          authority_response_details?: string | null
+          casualties_reported?: number | null
+          category?: string | null
+          children_involved?: boolean | null
+          community_impact_level?: string | null
+          community_response?: string | null
+          confidential_notes?: never
+          created_at?: string | null
+          credibility_score?: number | null
+          description?: string | null
+          duration_minutes?: number | null
+          economic_impact_estimate?: number | null
+          engagement_score?: number | null
+          estimated_people_affected?: number | null
+          evidence_description?: string | null
+          first_occurrence?: boolean | null
+          follow_up_contact_consent?: boolean | null
+          follow_up_required?: boolean | null
+          has_physical_evidence?: boolean | null
+          has_witnesses?: boolean | null
+          historical_context?: string | null
+          id?: string | null
+          immediate_actions_taken?: string[] | null
+          immediate_needs?: string[] | null
+          incident_date?: string | null
+          incident_time?: string | null
+          infrastructure_damage?: string[] | null
+          injuries_reported?: number | null
+          is_anonymous?: boolean | null
+          language?: string | null
+          last_activity_at?: string | null
+          location_accuracy?: string | null
+          location_address?: string | null
+          location_city?: string | null
+          location_country?: string | null
+          location_latitude?: number | null
+          location_longitude?: number | null
+          location_name?: string | null
+          location_postal_code?: string | null
+          location_region?: string | null
+          location_type?: string | null
+          media_types?: string[] | null
+          media_urls?: string[] | null
+          perpetrator_description?: string | null
+          perpetrator_type?: string | null
+          preferred_contact_method?: string | null
+          previous_reports_filed?: boolean | null
+          recurring_issue?: boolean | null
+          related_incidents?: string[] | null
+          reporter_contact_email?: never
+          reporter_contact_phone?: never
+          reporter_id?: string | null
+          resolution_date?: string | null
+          resolution_notes?: string | null
+          resolution_status?: string | null
+          services_disrupted?: string[] | null
+          severity_level?: string | null
+          share_count?: number | null
+          source?: string | null
+          status?: string | null
+          sub_category?: string | null
+          tags?: string[] | null
+          title?: string | null
+          translated_from?: string | null
+          updated_at?: string | null
+          urgency_level?: string | null
+          verification_notes?: string | null
+          verification_status?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+          view_count?: number | null
+          visibility?: string | null
+          vulnerable_groups_affected?: string[] | null
+          witness_contact_info?: Json | null
+          witness_count?: number | null
+        }
+        Relationships: []
+      }
       geography_columns: {
         Row: {
           coord_dimension: number | null
