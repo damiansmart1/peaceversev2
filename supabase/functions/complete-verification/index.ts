@@ -90,8 +90,8 @@ serve(async (req) => {
       .update({
         status: 'completed',
         verdict: result.verdict,
-        verifier_confidence: result.confidence_score,
-        verifier_notes: result.notes,
+        confidence_score: result.confidence_score,
+        verification_notes: result.notes,
         evidence_urls: result.evidence_urls || [],
         completed_at: new Date().toISOString()
       })
