@@ -3289,6 +3289,36 @@ export type Database = {
           },
         ]
       }
+      user_feature_access: {
+        Row: {
+          created_at: string | null
+          feature_key: string
+          granted_by: string | null
+          id: string
+          is_enabled: boolean | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          feature_key: string
+          granted_by?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          feature_key?: string
+          granted_by?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_follows: {
         Row: {
           created_at: string
