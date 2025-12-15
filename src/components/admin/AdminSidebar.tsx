@@ -54,6 +54,7 @@ const menuItems = [
     children: [
       { id: 'users', label: 'Users' },
       { id: 'roles', label: 'Role Management' },
+      { id: 'feature-access', label: 'Feature Access' },
     ],
   },
   {
