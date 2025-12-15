@@ -15,7 +15,7 @@ export const useVerificationTasks = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: tasks, isLoading } = useQuery({
+  const { data: tasks, isLoading, refetch } = useQuery({
     queryKey: ['verification-tasks'],
     queryFn: async () => {
       const { data, error }: any = await supabase
@@ -26,15 +26,16 @@ export const useVerificationTasks = () => {
             id, title, description, category, sub_category, severity_level, urgency_level,
             location_name, location_city, location_country, location_latitude, location_longitude,
             ai_threat_level, ai_sentiment, credibility_score, is_anonymous, witness_count,
-            media_urls, tags, created_at, verification_status
-          ),
-          assigned_user:assigned_to(id, username:raw_user_meta_data->username, display_name:raw_user_meta_data->display_name)
+            media_urls, tags, created_at, verification_status, status
+          )
         `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
       return data;
     },
+    refetchInterval: 30000, // Refetch every 30 seconds for real-time sync
+    staleTime: 10000, // Consider data stale after 10 seconds
   });
 
   const assignTask = useMutation({
@@ -91,6 +92,7 @@ export const useVerificationTasks = () => {
   return {
     tasks,
     isLoading,
+    refetch,
     assignTask: assignTask.mutate,
     isAssigning: assignTask.isPending,
     completeVerification: completeVerification.mutate,
