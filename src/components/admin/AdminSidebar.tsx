@@ -72,6 +72,7 @@ const menuItems = [
     icon: AlertTriangle,
     children: [
       { id: 'incidents', label: 'Incident Reports' },
+      { id: 'incident-timeline', label: 'Timeline Tracker' },
       { id: 'safe-spaces', label: 'Safe Spaces' },
       { id: 'peace-metrics', label: 'Peace Metrics' },
     ],
