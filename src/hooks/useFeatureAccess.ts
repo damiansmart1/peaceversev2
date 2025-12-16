@@ -128,10 +128,15 @@ export const useUpdateUserFeatureAccess = () => {
       if (!user) throw new Error('Not authenticated');
 
       // Delete existing feature access for user
-      await supabase
+      const { error: deleteError } = await supabase
         .from('user_feature_access')
         .delete()
         .eq('user_id', userId);
+
+      if (deleteError) {
+        console.error('Delete error:', deleteError);
+        throw new Error(`Failed to clear existing access: ${deleteError.message}`);
+      }
 
       // Insert new feature access records
       const records = features.map(f => ({
@@ -141,11 +146,15 @@ export const useUpdateUserFeatureAccess = () => {
         granted_by: user.id,
       }));
 
-      const { error } = await supabase
+      const { error: insertError } = await supabase
         .from('user_feature_access')
         .insert(records);
 
-      if (error) throw error;
+      if (insertError) {
+        console.error('Insert error:', insertError);
+        throw new Error(`Failed to save feature access: ${insertError.message}`);
+      }
+      
       return true;
     },
     onSuccess: (_, variables) => {
