@@ -13,6 +13,7 @@ import { AdminGamificationManager } from '@/components/admin/AdminGamificationMa
 import { AdminSettingsManager } from '@/components/admin/AdminSettingsManager';
 import { AdminSponsorsManager } from '@/components/admin/AdminSponsorsManager';
 import { AdminIncidentsManager } from '@/components/admin/AdminIncidentsManager';
+import { AdminIncidentTimelineTracker } from '@/components/admin/AdminIncidentTimelineTracker';
 import { AdminAIAnalytics } from '@/components/admin/AdminAIAnalytics';
 import { AdminAPIUsageAnalytics } from '@/components/admin/AdminAPIUsageAnalytics';
 import { AdminIntegrationsManager } from '@/components/admin/AdminIntegrationsManager';
@@ -62,6 +63,8 @@ const Admin = () => {
         return <AdminProposalsManager />;
       case 'incidents':
         return <AdminIncidentsManager />;
+      case 'incident-timeline':
+        return <AdminIncidentTimelineTracker />;
       case 'safe-spaces':
         return <AdminSafeSpacesManager />;
       case 'challenges':
