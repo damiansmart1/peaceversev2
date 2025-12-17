@@ -6,14 +6,16 @@ import { AlertCircle, TrendingUp, MapPin, Clock, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import RecommendedActionsPanel from './RecommendedActionsPanel';
-import { useEffect, useRef, useState, useCallback } from 'react';
-import { Loader } from '@googlemaps/js-api-loader';
+import { useEffect, useRef, useState, memo } from 'react';
+import { preloadGoogleMaps, getGoogleMaps } from '@/hooks/useGoogleMapsPreloader';
+
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
 
 interface PredictiveHotspotMapProps {
   selectedCountry?: string;
 }
 
-const PredictiveHotspotMap = ({ selectedCountry = 'ALL' }: PredictiveHotspotMapProps) => {
+const PredictiveHotspotMap = memo(({ selectedCountry = 'ALL' }: PredictiveHotspotMapProps) => {
   const { toast } = useToast();
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
@@ -45,57 +47,79 @@ const PredictiveHotspotMap = ({ selectedCountry = 'ALL' }: PredictiveHotspotMapP
     },
   });
 
-  // Initialize map
+  // Initialize map using shared preloader
   useEffect(() => {
-    if (initAttemptedRef.current || !mapRef.current) return;
+    if (!mapRef.current || initAttemptedRef.current || mapInstanceRef.current) return;
     initAttemptedRef.current = true;
 
-    const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-    
     if (!GOOGLE_MAPS_API_KEY) {
       setMapError('Google Maps API key is not configured. Please add VITE_GOOGLE_MAPS_API_KEY to your environment secrets.');
       return;
     }
 
-    const initMap = async () => {
-      try {
-        const loader = new Loader({
-          apiKey: GOOGLE_MAPS_API_KEY,
-          version: 'weekly',
-          libraries: ['visualization'],
-        });
+    let isMounted = true;
 
-        await loader.load();
+    // Check if already loaded (from preload)
+    const existingGoogle = getGoogleMaps();
+    if (existingGoogle && mapRef.current) {
+      const map = new existingGoogle.maps.Map(mapRef.current, {
+        center: { lat: 0, lng: 20 },
+        zoom: 3,
+        mapTypeId: 'terrain',
+        gestureHandling: 'greedy',
+        styles: [
+          { elementType: 'geometry', stylers: [{ color: '#1a1a2e' }] },
+          { elementType: 'labels.text.stroke', stylers: [{ color: '#1a1a2e' }] },
+          { elementType: 'labels.text.fill', stylers: [{ color: '#8892b0' }] },
+          { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0a192f' }] },
+          { featureType: 'landscape', elementType: 'geometry', stylers: [{ color: '#112240' }] },
+          { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#1d3461' }] },
+          { featureType: 'poi', elementType: 'geometry', stylers: [{ color: '#1a1a2e' }] },
+        ],
+      });
+      mapInstanceRef.current = map;
+      infoWindowRef.current = new existingGoogle.maps.InfoWindow();
+      setMapLoaded(true);
+      return;
+    }
 
-        if (!window.google || !mapRef.current) {
-          setMapError('Failed to load Google Maps.');
-          return;
+    // Load if not already loaded
+    preloadGoogleMaps().then((google) => {
+      if (!isMounted || !mapRef.current || !google) {
+        if (isMounted && !google) {
+          setMapError('Failed to load Google Maps. Please check your API configuration.');
         }
-
-        mapInstanceRef.current = new google.maps.Map(mapRef.current, {
-          center: { lat: 0, lng: 20 },
-          zoom: 3,
-          mapTypeId: 'terrain',
-          styles: [
-            { elementType: 'geometry', stylers: [{ color: '#1a1a2e' }] },
-            { elementType: 'labels.text.stroke', stylers: [{ color: '#1a1a2e' }] },
-            { elementType: 'labels.text.fill', stylers: [{ color: '#8892b0' }] },
-            { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0a192f' }] },
-            { featureType: 'landscape', elementType: 'geometry', stylers: [{ color: '#112240' }] },
-            { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#1d3461' }] },
-            { featureType: 'poi', elementType: 'geometry', stylers: [{ color: '#1a1a2e' }] },
-          ],
-        });
-
-        infoWindowRef.current = new google.maps.InfoWindow();
-        setMapLoaded(true);
-      } catch (error) {
-        console.error('Map initialization error:', error);
-        setMapError('Failed to initialize the map. Please check your Google Maps API configuration.');
+        return;
       }
-    };
 
-    initMap();
+      const map = new google.maps.Map(mapRef.current, {
+        center: { lat: 0, lng: 20 },
+        zoom: 3,
+        mapTypeId: 'terrain',
+        gestureHandling: 'greedy',
+        styles: [
+          { elementType: 'geometry', stylers: [{ color: '#1a1a2e' }] },
+          { elementType: 'labels.text.stroke', stylers: [{ color: '#1a1a2e' }] },
+          { elementType: 'labels.text.fill', stylers: [{ color: '#8892b0' }] },
+          { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0a192f' }] },
+          { featureType: 'landscape', elementType: 'geometry', stylers: [{ color: '#112240' }] },
+          { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#1d3461' }] },
+          { featureType: 'poi', elementType: 'geometry', stylers: [{ color: '#1a1a2e' }] },
+        ],
+      });
+
+      mapInstanceRef.current = map;
+      infoWindowRef.current = new google.maps.InfoWindow();
+      setMapLoaded(true);
+    }).catch(error => {
+      if (!isMounted) return;
+      console.error('Map initialization error:', error);
+      setMapError('Failed to initialize the map. Please check your Google Maps API configuration.');
+    });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // Update markers when hotspots change
@@ -449,6 +473,8 @@ const PredictiveHotspotMap = ({ selectedCountry = 'ALL' }: PredictiveHotspotMapP
       )}
     </div>
   );
-};
+});
+
+PredictiveHotspotMap.displayName = 'PredictiveHotspotMap';
 
 export default PredictiveHotspotMap;
