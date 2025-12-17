@@ -1411,6 +1411,48 @@ export type Database = {
         }
         Relationships: []
       }
+      emergency_contacts: {
+        Row: {
+          category: string | null
+          country_code: string
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          is_verified: boolean | null
+          name: string
+          phone_number: string
+          priority: number | null
+          region: string | null
+        }
+        Insert: {
+          category?: string | null
+          country_code: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_verified?: boolean | null
+          name: string
+          phone_number: string
+          priority?: number | null
+          region?: string | null
+        }
+        Update: {
+          category?: string | null
+          country_code?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_verified?: boolean | null
+          name?: string
+          phone_number?: string
+          priority?: number | null
+          region?: string | null
+        }
+        Relationships: []
+      }
       external_data_records: {
         Row: {
           ai_extracted_entities: Json | null
@@ -2022,6 +2064,63 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      offline_report_queue: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          id: string
+          parsed_data: Json | null
+          phone_number: string
+          processed_at: string | null
+          processing_status: string | null
+          raw_data: Json
+          report_id: string | null
+          retry_count: number | null
+          source: string
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          parsed_data?: Json | null
+          phone_number: string
+          processed_at?: string | null
+          processing_status?: string | null
+          raw_data: Json
+          report_id?: string | null
+          retry_count?: number | null
+          source: string
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          parsed_data?: Json | null
+          phone_number?: string
+          processed_at?: string | null
+          processing_status?: string | null
+          raw_data?: Json
+          report_id?: string | null
+          retry_count?: number | null
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offline_report_queue_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "citizen_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offline_report_queue_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "citizen_reports_safe"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       peace_accountability_metrics: {
         Row: {
@@ -3124,6 +3223,177 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      sms_broadcasts: {
+        Row: {
+          alert_id: string | null
+          completed_at: string | null
+          created_at: string | null
+          delivered_count: number | null
+          failed_count: number | null
+          id: string
+          message: string
+          recipient_count: number | null
+          status: string | null
+        }
+        Insert: {
+          alert_id?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          delivered_count?: number | null
+          failed_count?: number | null
+          id?: string
+          message: string
+          recipient_count?: number | null
+          status?: string | null
+        }
+        Update: {
+          alert_id?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          delivered_count?: number | null
+          failed_count?: number | null
+          id?: string
+          message?: string
+          recipient_count?: number | null
+          status?: string | null
+        }
+        Relationships: []
+      }
+      sms_logs: {
+        Row: {
+          command: string | null
+          created_at: string | null
+          direction: string
+          error_message: string | null
+          id: string
+          message: string
+          metadata: Json | null
+          phone_number: string
+          provider_message_id: string | null
+          report_id: string | null
+          status: string | null
+        }
+        Insert: {
+          command?: string | null
+          created_at?: string | null
+          direction: string
+          error_message?: string | null
+          id?: string
+          message: string
+          metadata?: Json | null
+          phone_number: string
+          provider_message_id?: string | null
+          report_id?: string | null
+          status?: string | null
+        }
+        Update: {
+          command?: string | null
+          created_at?: string | null
+          direction?: string
+          error_message?: string | null
+          id?: string
+          message?: string
+          metadata?: Json | null
+          phone_number?: string
+          provider_message_id?: string | null
+          report_id?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sms_logs_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "citizen_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sms_logs_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "citizen_reports_safe"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sms_sessions: {
+        Row: {
+          created_at: string | null
+          current_state: string | null
+          data: Json | null
+          expires_at: string | null
+          id: string
+          language: string | null
+          phone_number: string
+          session_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          current_state?: string | null
+          data?: Json | null
+          expires_at?: string | null
+          id?: string
+          language?: string | null
+          phone_number: string
+          session_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          current_state?: string | null
+          data?: Json | null
+          expires_at?: string | null
+          id?: string
+          language?: string | null
+          phone_number?: string
+          session_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      sms_subscribers: {
+        Row: {
+          alert_types: string[] | null
+          country_code: string | null
+          id: string
+          is_active: boolean | null
+          language: string | null
+          phone_number: string
+          region: string | null
+          subscribed_at: string | null
+          unsubscribed_at: string | null
+          verification_code: string | null
+          verified: boolean | null
+        }
+        Insert: {
+          alert_types?: string[] | null
+          country_code?: string | null
+          id?: string
+          is_active?: boolean | null
+          language?: string | null
+          phone_number: string
+          region?: string | null
+          subscribed_at?: string | null
+          unsubscribed_at?: string | null
+          verification_code?: string | null
+          verified?: boolean | null
+        }
+        Update: {
+          alert_types?: string[] | null
+          country_code?: string | null
+          id?: string
+          is_active?: boolean | null
+          language?: string | null
+          phone_number?: string
+          region?: string | null
+          subscribed_at?: string | null
+          unsubscribed_at?: string | null
+          verification_code?: string | null
+          verified?: boolean | null
+        }
+        Relationships: []
       }
       spatial_ref_sys: {
         Row: {
