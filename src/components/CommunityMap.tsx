@@ -26,7 +26,6 @@ const CommunityMap = memo(() => {
   const googleMapRef = useRef<google.maps.Map | null>(null);
   const markersRef = useRef<google.maps.Marker[]>([]);
   const userMarkerRef = useRef<google.maps.Marker | null>(null);
-  const initAttemptedRef = useRef(false);
   
   const { data: safeSpaces, isLoading } = useAdminSafeSpaces();
   const { data: isAdmin } = useAdminCheck();
@@ -58,8 +57,7 @@ const CommunityMap = memo(() => {
 
   // Initialize Google Maps - use preloaded instance if available
   useEffect(() => {
-    if (!mapRef.current || initAttemptedRef.current || googleMapRef.current) return;
-    initAttemptedRef.current = true;
+    if (!mapRef.current || googleMapRef.current) return;
 
     if (!GOOGLE_MAPS_API_KEY) {
       setMapError('Google Maps API key is not configured');
@@ -69,38 +67,40 @@ const CommunityMap = memo(() => {
     const defaultCenter = { lat: -1.286389, lng: 36.817223 };
     let isMounted = true;
 
-    // Check if already loaded (from preload)
-    const existingGoogle = getGoogleMaps();
-    if (existingGoogle && mapRef.current) {
-      const map = new existingGoogle.maps.Map(mapRef.current, {
-        center: userLocation || defaultCenter,
-        zoom: 12,
-        gestureHandling: 'greedy',
-        styles: [{ featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] }],
-      });
-      googleMapRef.current = map;
-      setMapLoaded(true);
-      return;
-    }
-
-    // Load if not already loaded
-    preloadGoogleMaps().then((google) => {
-      if (!isMounted || !mapRef.current || !google) return;
-
+    const initMap = (google: typeof window.google) => {
+      if (!isMounted || !mapRef.current || googleMapRef.current) return;
+      
       const map = new google.maps.Map(mapRef.current, {
         center: userLocation || defaultCenter,
         zoom: 12,
         gestureHandling: 'greedy',
         styles: [{ featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] }],
       });
-
       googleMapRef.current = map;
       setMapLoaded(true);
+      setMapError(null);
+    };
+
+    // Check if already loaded (from preload)
+    const existingGoogle = getGoogleMaps();
+    if (existingGoogle) {
+      initMap(existingGoogle);
+      return;
+    }
+
+    // Load if not already loaded
+    preloadGoogleMaps().then((google) => {
+      if (!isMounted || !google) {
+        if (isMounted && !google) {
+          setMapError('Failed to load Google Maps');
+        }
+        return;
+      }
+      initMap(google);
     }).catch(error => {
       if (!isMounted) return;
       console.error('Error loading Google Maps:', error);
       setMapError('Failed to load map');
-      toast.error('Failed to load map. Please check your API key configuration.');
     });
 
     return () => {

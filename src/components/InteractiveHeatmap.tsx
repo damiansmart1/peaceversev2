@@ -30,7 +30,6 @@ const InteractiveHeatmap = memo(() => {
   const heatmapLayerRef = useRef<google.maps.visualization.HeatmapLayer | null>(null);
   const infoWindowRef = useRef<google.maps.InfoWindow | null>(null);
   const userMarkerRef = useRef<google.maps.Marker | null>(null);
-  const initAttemptedRef = useRef(false);
 
   const [selectedCountry, setSelectedCountry] = useState('all');
   const [selectedSeverity, setSelectedSeverity] = useState('all');
@@ -50,8 +49,7 @@ const InteractiveHeatmap = memo(() => {
 
   // Initialize Google Maps - use preloaded instance if available
   useEffect(() => {
-    if (!mapRef.current || initAttemptedRef.current || mapInstanceRef.current) return;
-    initAttemptedRef.current = true;
+    if (!mapRef.current || mapInstanceRef.current) return;
 
     if (!GOOGLE_MAPS_API_KEY) {
       setMapError('Google Maps API key is not configured');
@@ -60,35 +58,9 @@ const InteractiveHeatmap = memo(() => {
 
     let isMounted = true;
 
-    // Check if already loaded (from preload)
-    const existingGoogle = getGoogleMaps();
-    if (existingGoogle && mapRef.current) {
-      const map = new existingGoogle.maps.Map(mapRef.current, {
-        center: { lat: 0, lng: 20 },
-        zoom: 4,
-        minZoom: 3,
-        maxZoom: 18,
-        mapTypeId: 'roadmap',
-        streetViewControl: false,
-        mapTypeControl: true,
-        fullscreenControl: true,
-        zoomControl: true,
-        gestureHandling: 'greedy',
-        styles: [
-          { featureType: 'poi', stylers: [{ visibility: 'off' }] },
-          { featureType: 'transit', stylers: [{ visibility: 'simplified' }] },
-        ],
-      });
-      mapInstanceRef.current = map;
-      infoWindowRef.current = new existingGoogle.maps.InfoWindow({ maxWidth: 320 });
-      setMapLoaded(true);
-      return;
-    }
-
-    // Load if not already loaded
-    preloadGoogleMaps().then((google) => {
-      if (!isMounted || !mapRef.current || !google) return;
-
+    const initMap = (google: typeof window.google) => {
+      if (!isMounted || !mapRef.current || mapInstanceRef.current) return;
+      
       const map = new google.maps.Map(mapRef.current, {
         center: { lat: 0, lng: 20 },
         zoom: 4,
@@ -105,15 +77,32 @@ const InteractiveHeatmap = memo(() => {
           { featureType: 'transit', stylers: [{ visibility: 'simplified' }] },
         ],
       });
-
       mapInstanceRef.current = map;
       infoWindowRef.current = new google.maps.InfoWindow({ maxWidth: 320 });
       setMapLoaded(true);
+      setMapError(null);
+    };
+
+    // Check if already loaded (from preload)
+    const existingGoogle = getGoogleMaps();
+    if (existingGoogle) {
+      initMap(existingGoogle);
+      return;
+    }
+
+    // Load if not already loaded
+    preloadGoogleMaps().then((google) => {
+      if (!isMounted || !google) {
+        if (isMounted && !google) {
+          setMapError('Failed to load Google Maps');
+        }
+        return;
+      }
+      initMap(google);
     }).catch(error => {
       if (!isMounted) return;
       console.error('Error loading Google Maps:', error);
       setMapError('Failed to load map');
-      toast.error('Failed to load map. Please check your API key configuration.');
     });
 
     return () => {

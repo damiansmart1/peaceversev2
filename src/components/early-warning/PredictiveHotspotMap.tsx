@@ -25,7 +25,6 @@ const PredictiveHotspotMap = memo(({ selectedCountry = 'ALL' }: PredictiveHotspo
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
   const [selectedHotspot, setSelectedHotspot] = useState<any>(null);
-  const initAttemptedRef = useRef(false);
 
   const { data: hotspots, isLoading, refetch } = useQuery({
     queryKey: ['predictive-hotspots', selectedCountry],
@@ -49,8 +48,7 @@ const PredictiveHotspotMap = memo(({ selectedCountry = 'ALL' }: PredictiveHotspo
 
   // Initialize map using shared preloader
   useEffect(() => {
-    if (!mapRef.current || initAttemptedRef.current || mapInstanceRef.current) return;
-    initAttemptedRef.current = true;
+    if (!mapRef.current || mapInstanceRef.current) return;
 
     if (!GOOGLE_MAPS_API_KEY) {
       setMapError('Google Maps API key is not configured. Please add VITE_GOOGLE_MAPS_API_KEY to your environment secrets.');
@@ -59,58 +57,48 @@ const PredictiveHotspotMap = memo(({ selectedCountry = 'ALL' }: PredictiveHotspo
 
     let isMounted = true;
 
-    // Check if already loaded (from preload)
-    const existingGoogle = getGoogleMaps();
-    if (existingGoogle && mapRef.current) {
-      const map = new existingGoogle.maps.Map(mapRef.current, {
-        center: { lat: 0, lng: 20 },
-        zoom: 3,
-        mapTypeId: 'terrain',
-        gestureHandling: 'greedy',
-        styles: [
-          { elementType: 'geometry', stylers: [{ color: '#1a1a2e' }] },
-          { elementType: 'labels.text.stroke', stylers: [{ color: '#1a1a2e' }] },
-          { elementType: 'labels.text.fill', stylers: [{ color: '#8892b0' }] },
-          { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0a192f' }] },
-          { featureType: 'landscape', elementType: 'geometry', stylers: [{ color: '#112240' }] },
-          { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#1d3461' }] },
-          { featureType: 'poi', elementType: 'geometry', stylers: [{ color: '#1a1a2e' }] },
-        ],
-      });
-      mapInstanceRef.current = map;
-      infoWindowRef.current = new existingGoogle.maps.InfoWindow();
-      setMapLoaded(true);
-      return;
-    }
+    const mapStyles = [
+      { elementType: 'geometry', stylers: [{ color: '#1a1a2e' }] },
+      { elementType: 'labels.text.stroke', stylers: [{ color: '#1a1a2e' }] },
+      { elementType: 'labels.text.fill', stylers: [{ color: '#8892b0' }] },
+      { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0a192f' }] },
+      { featureType: 'landscape', elementType: 'geometry', stylers: [{ color: '#112240' }] },
+      { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#1d3461' }] },
+      { featureType: 'poi', elementType: 'geometry', stylers: [{ color: '#1a1a2e' }] },
+    ];
 
-    // Load if not already loaded
-    preloadGoogleMaps().then((google) => {
-      if (!isMounted || !mapRef.current || !google) {
-        if (isMounted && !google) {
-          setMapError('Failed to load Google Maps. Please check your API configuration.');
-        }
-        return;
-      }
-
+    const initMap = (google: typeof window.google) => {
+      if (!isMounted || !mapRef.current || mapInstanceRef.current) return;
+      
       const map = new google.maps.Map(mapRef.current, {
         center: { lat: 0, lng: 20 },
         zoom: 3,
         mapTypeId: 'terrain',
         gestureHandling: 'greedy',
-        styles: [
-          { elementType: 'geometry', stylers: [{ color: '#1a1a2e' }] },
-          { elementType: 'labels.text.stroke', stylers: [{ color: '#1a1a2e' }] },
-          { elementType: 'labels.text.fill', stylers: [{ color: '#8892b0' }] },
-          { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0a192f' }] },
-          { featureType: 'landscape', elementType: 'geometry', stylers: [{ color: '#112240' }] },
-          { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#1d3461' }] },
-          { featureType: 'poi', elementType: 'geometry', stylers: [{ color: '#1a1a2e' }] },
-        ],
+        styles: mapStyles,
       });
-
       mapInstanceRef.current = map;
       infoWindowRef.current = new google.maps.InfoWindow();
       setMapLoaded(true);
+      setMapError(null);
+    };
+
+    // Check if already loaded (from preload)
+    const existingGoogle = getGoogleMaps();
+    if (existingGoogle) {
+      initMap(existingGoogle);
+      return;
+    }
+
+    // Load if not already loaded
+    preloadGoogleMaps().then((google) => {
+      if (!isMounted || !google) {
+        if (isMounted && !google) {
+          setMapError('Failed to load Google Maps. Please check your API configuration.');
+        }
+        return;
+      }
+      initMap(google);
     }).catch(error => {
       if (!isMounted) return;
       console.error('Map initialization error:', error);

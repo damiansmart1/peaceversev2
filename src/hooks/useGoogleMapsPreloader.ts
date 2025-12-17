@@ -6,7 +6,6 @@ const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
 let loaderInstance: Loader | null = null;
 let loadPromise: Promise<typeof google> | null = null;
 let isLoaded = false;
-let loadError: Error | null = null;
 
 // Initialize loader immediately if key exists
 const initLoader = () => {
@@ -27,13 +26,7 @@ export const preloadGoogleMaps = (): Promise<typeof google | null> => {
     return Promise.resolve(window.google);
   }
 
-  // Previous load failed - allow retry
-  if (loadError) {
-    loadError = null;
-    loadPromise = null;
-  }
-
-  // Loading in progress
+  // Loading in progress - return existing promise
   if (loadPromise) {
     return loadPromise;
   }
@@ -47,15 +40,14 @@ export const preloadGoogleMaps = (): Promise<typeof google | null> => {
   loadPromise = loader.load()
     .then((google) => {
       isLoaded = true;
-      loadError = null;
       console.log('Google Maps loaded successfully');
       return google;
     })
     .catch((error) => {
       console.error('Google Maps preload failed:', error);
-      loadError = error;
-      loadPromise = null; // Allow retry
-      return null;
+      // Reset state to allow retry
+      loadPromise = null;
+      throw error;
     });
 
   return loadPromise;
@@ -69,6 +61,11 @@ export const isGoogleMapsReady = (): boolean => {
 // Get the Google Maps instance synchronously if available
 export const getGoogleMaps = (): typeof google | null => {
   if (isLoaded && window.google?.maps) {
+    return window.google;
+  }
+  // Also check if it was loaded externally
+  if (window.google?.maps) {
+    isLoaded = true;
     return window.google;
   }
   return null;
