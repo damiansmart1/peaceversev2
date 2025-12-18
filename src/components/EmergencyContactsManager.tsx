@@ -9,9 +9,11 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Label } from '@/components/ui/label';
 import { 
   Phone, Plus, Trash2, Edit2, Shield, Heart, 
-  Building, AlertTriangle, Save, Globe
+  Building, AlertTriangle, Save, Globe, RefreshCw, Database
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { useQuery } from '@tanstack/react-query';
 
 interface EmergencyContact {
   id: string;
@@ -20,6 +22,7 @@ interface EmergencyContact {
   country: string;
   category: 'emergency' | 'medical' | 'police' | 'humanitarian' | 'other';
   isDefault?: boolean;
+  isFromDB?: boolean;
 }
 
 const AFRICAN_COUNTRIES = [
@@ -33,6 +36,9 @@ const AFRICAN_COUNTRIES = [
   { code: 'RW', name: 'Rwanda', dialCode: '+250' },
   { code: 'SN', name: 'Senegal', dialCode: '+221' },
   { code: 'CD', name: 'DR Congo', dialCode: '+243' },
+  { code: 'SD', name: 'Sudan', dialCode: '+249' },
+  { code: 'SS', name: 'South Sudan', dialCode: '+211' },
+  { code: 'SO', name: 'Somalia', dialCode: '+252' },
   { code: 'ALL', name: 'All Countries', dialCode: '' }
 ];
 
@@ -52,19 +58,6 @@ const CATEGORY_COLORS = {
   other: 'bg-gray-500/20 text-gray-600 border-gray-500/30'
 };
 
-const DEFAULT_CONTACTS: EmergencyContact[] = [
-  { id: 'default-1', name: 'Emergency Services', number: '112', country: 'ALL', category: 'emergency', isDefault: true },
-  { id: 'default-2', name: 'Red Cross Kenya', number: '0800-723-253', country: 'KE', category: 'humanitarian', isDefault: true },
-  { id: 'default-3', name: 'UNHCR Hotline', number: '0800-727-253', country: 'KE', category: 'humanitarian', isDefault: true },
-  { id: 'default-4', name: 'Police Emergency', number: '999', country: 'KE', category: 'police', isDefault: true },
-  { id: 'default-5', name: 'Ambulance Kenya', number: '114', country: 'KE', category: 'medical', isDefault: true },
-  { id: 'default-6', name: 'Nigeria Emergency', number: '112', country: 'NG', category: 'emergency', isDefault: true },
-  { id: 'default-7', name: 'NEMA Nigeria', number: '0800-2255-6362', country: 'NG', category: 'emergency', isDefault: true },
-  { id: 'default-8', name: 'Ethiopia Police', number: '991', country: 'ET', category: 'police', isDefault: true },
-  { id: 'default-9', name: 'South Africa Emergency', number: '10111', country: 'ZA', category: 'police', isDefault: true },
-  { id: 'default-10', name: 'Ghana Emergency', number: '999', country: 'GH', category: 'emergency', isDefault: true }
-];
-
 const STORAGE_KEY = 'peaceverse_emergency_contacts';
 
 const EmergencyContactsManager = () => {
@@ -79,17 +72,57 @@ const EmergencyContactsManager = () => {
     category: 'other' as EmergencyContact['category']
   });
 
-  // Load contacts from localStorage
+  // Fetch contacts from database
+  const { data: dbContacts, isLoading, refetch } = useQuery({
+    queryKey: ['emergency-contacts'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('emergency_contacts')
+        .select('*')
+        .eq('is_active', true)
+        .order('priority', { ascending: true });
+      
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
+  // Map database category to our category type
+  const mapCategory = (dbCategory: string | null): EmergencyContact['category'] => {
+    if (!dbCategory) return 'other';
+    const categoryMap: Record<string, EmergencyContact['category']> = {
+      'emergency': 'emergency',
+      'medical': 'medical',
+      'police': 'police',
+      'humanitarian': 'humanitarian',
+      'general': 'other'
+    };
+    return categoryMap[dbCategory] || 'other';
+  };
+
+  // Combine DB contacts with local contacts
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      setContacts(JSON.parse(saved));
-    } else {
-      // Initialize with default contacts
-      setContacts(DEFAULT_CONTACTS);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_CONTACTS));
-    }
-  }, []);
+    const localContacts: EmergencyContact[] = saved ? JSON.parse(saved) : [];
+    
+    // Convert DB contacts to our format
+    const formattedDbContacts: EmergencyContact[] = (dbContacts || []).map((c: any) => ({
+      id: c.id,
+      name: c.name,
+      number: c.phone_number,
+      country: c.country_code,
+      category: mapCategory(c.category),
+      isDefault: true,
+      isFromDB: true
+    }));
+
+    // Filter out local contacts that duplicate DB contacts
+    const uniqueLocalContacts = localContacts.filter(
+      local => !formattedDbContacts.some(db => db.number === local.number && db.country === local.country)
+    );
+
+    setContacts([...formattedDbContacts, ...uniqueLocalContacts]);
+  }, [dbContacts]);
 
   // Save contacts to localStorage
   const saveContacts = (newContacts: EmergencyContact[]) => {
@@ -168,19 +201,29 @@ const EmergencyContactsManager = () => {
               Emergency Contacts
             </CardTitle>
             <CardDescription>
-              Quick access to emergency services by country
+              Quick access to emergency services ({contacts.length} contacts)
             </CardDescription>
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button size="sm" onClick={() => {
-                setEditingContact(null);
-                setFormData({ name: '', number: '', country: 'ALL', category: 'other' });
-              }}>
-                <Plus className="w-4 h-4 mr-1" />
-                Add Contact
-              </Button>
-            </DialogTrigger>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => refetch()}
+              disabled={isLoading}
+            >
+              <RefreshCw className={`w-4 h-4 mr-1 ${isLoading ? 'animate-spin' : ''}`} />
+              Sync
+            </Button>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button size="sm" onClick={() => {
+                  setEditingContact(null);
+                  setFormData({ name: '', number: '', country: 'ALL', category: 'other' });
+                }}>
+                  <Plus className="w-4 h-4 mr-1" />
+                  Add
+                </Button>
+              </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>{editingContact ? 'Edit Contact' : 'Add Emergency Contact'}</DialogTitle>
@@ -252,7 +295,8 @@ const EmergencyContactsManager = () => {
                 </Button>
               </DialogFooter>
             </DialogContent>
-          </Dialog>
+            </Dialog>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -298,14 +342,20 @@ const EmergencyContactsManager = () => {
                         <p className="font-medium truncate">{contact.name}</p>
                         <div className="flex items-center gap-2">
                           <span className="text-sm text-primary font-mono">{contact.number}</span>
-                          {contact.isDefault && (
+                          {contact.isFromDB && (
+                            <Badge variant="outline" className="text-xs bg-blue-500/10 text-blue-600 border-blue-500/30">
+                              <Database className="w-3 h-3 mr-1" />
+                              Verified
+                            </Badge>
+                          )}
+                          {contact.isDefault && !contact.isFromDB && (
                             <Badge variant="outline" className="text-xs">Default</Badge>
                           )}
                         </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
-                      {!contact.isDefault && (
+                      {!contact.isDefault && !contact.isFromDB && (
                         <>
                           <Button
                             variant="ghost"
