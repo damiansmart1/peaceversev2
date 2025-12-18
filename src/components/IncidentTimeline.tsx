@@ -67,10 +67,10 @@ export const IncidentTimeline = () => {
   const { data: incidents, isLoading } = useQuery({
     queryKey: ['incident-timeline', filter, severityFilter],
     queryFn: async () => {
+      // Use secure view - masks sensitive data for unauthorized users
       let query = supabase
-        .from('citizen_reports')
+        .from('citizen_reports_safe' as any)
         .select('*')
-        .eq('visibility', 'public')
         .order('created_at', { ascending: false })
         .limit(20);
 
@@ -83,7 +83,7 @@ export const IncidentTimeline = () => {
 
       const { data, error } = await query;
       if (error) throw error;
-      return data as TimelineEvent[];
+      return (data || []) as unknown as TimelineEvent[];
     },
   });
 

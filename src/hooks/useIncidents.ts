@@ -40,8 +40,9 @@ export const useIncidents = (filters?: {
   return useQuery({
     queryKey: ['incidents', filters],
     queryFn: async () => {
+      // Use secure view - masks sensitive data for unauthorized users
       let query = supabase
-        .from('citizen_reports')
+        .from('citizen_reports_safe' as any)
         .select('*')
         .order('created_at', { ascending: false });
 

@@ -30,14 +30,14 @@ export const ThreatMonitorPanel = () => {
     // Fetch initial alerts
     const fetchAlerts = async () => {
       const { data } = await supabase
-        .from('citizen_reports')
+        .from('citizen_reports_safe' as any)
         .select('*')
         .in('ai_threat_level', ['critical', 'high', 'extreme'])
         .order('created_at', { ascending: false })
         .limit(10);
 
       if (data) {
-        setAlerts(data.map(report => ({
+        setAlerts((data as any[]).map((report: any) => ({
           id: report.id,
           type: report.ai_threat_level === 'extreme' ? 'critical' : 
                 report.ai_threat_level === 'high' ? 'high' : 'medium',

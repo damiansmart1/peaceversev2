@@ -46,8 +46,9 @@ const LiveActivityFeed = ({ selectedCountry = 'ALL' }: LiveActivityFeedProps) =>
         .order('triggered_at', { ascending: false })
         .limit(5);
 
+      // Use secure view - masks sensitive data for unauthorized users
       let incidentsQuery = supabase
-        .from('citizen_reports')
+        .from('citizen_reports_safe' as any)
         .select('id, title, category, severity_level, location_city, location_country, created_at')
         .order('created_at', { ascending: false })
         .limit(10);

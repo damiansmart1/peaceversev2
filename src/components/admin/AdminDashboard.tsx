@@ -20,7 +20,7 @@ export const AdminDashboard = () => {
         supabase.from('weekly_challenges').select('*'),
         supabase.from('moderation_flags').select('*'),
         supabase.from('incidents').select('*'),
-        supabase.from('citizen_reports').select('*'),
+        supabase.from('citizen_reports_safe' as any).select('*'),
       ]);
 
       const now = new Date();
@@ -75,7 +75,7 @@ export const AdminDashboard = () => {
         .limit(90);
 
       const { data: reportData } = await supabase
-        .from('citizen_reports')
+        .from('citizen_reports_safe' as any)
         .select('created_at')
         .order('created_at', { ascending: false })
         .limit(90);
@@ -117,7 +117,7 @@ export const AdminDashboard = () => {
   const { data: categoryData } = useQuery({
     queryKey: ['category-distribution'],
     queryFn: async () => {
-      const { data } = await supabase.from('citizen_reports').select('category');
+      const { data } = await supabase.from('citizen_reports_safe' as any).select('category');
       const distribution: Record<string, number> = {};
       data?.forEach((item: any) => {
         distribution[item.category] = (distribution[item.category] || 0) + 1;

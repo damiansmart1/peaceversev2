@@ -18,48 +18,47 @@ export const useIncidentStats = () => {
   return useQuery({
     queryKey: ['incident-stats'],
     queryFn: async (): Promise<IncidentStats> => {
-      // Fetch all public incidents
-      const { data: incidents, error } = await supabase
-        .from('citizen_reports')
+      // Fetch all public incidents using secure view (masks sensitive data for unauthorized users)
+      const { data, error } = await supabase
+        .from('citizen_reports_safe' as any)
         .select('*')
-        .eq('visibility', 'public')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      const data = incidents || [];
+      const incidents = (data || []) as any[];
 
       // Calculate stats
-      const totalIncidents = data.length;
-      const pendingReview = data.filter(i => i.status === 'pending' || i.status === 'under_review').length;
-      const verified = data.filter(i => i.verification_status === 'verified').length;
-      const resolved = data.filter(i => i.status === 'resolved').length;
-      const criticalCases = data.filter(i => i.severity_level === 'critical').length;
-      const escalated = data.filter(i => i.status === 'escalated').length;
+      const totalIncidents = incidents.length;
+      const pendingReview = incidents.filter((i: any) => i.status === 'pending' || i.status === 'under_review').length;
+      const verified = incidents.filter((i: any) => i.verification_status === 'verified').length;
+      const resolved = incidents.filter((i: any) => i.status === 'resolved').length;
+      const criticalCases = incidents.filter((i: any) => i.severity_level === 'critical').length;
+      const escalated = incidents.filter((i: any) => i.status === 'escalated').length;
 
       // Group by category
       const byCategory: Record<string, number> = {};
-      data.forEach(i => {
+      incidents.forEach((i: any) => {
         const cat = i.category || 'unknown';
         byCategory[cat] = (byCategory[cat] || 0) + 1;
       });
 
       // Group by country
       const byCountry: Record<string, number> = {};
-      data.forEach(i => {
+      incidents.forEach((i: any) => {
         const country = i.location_country || 'Unknown';
         byCountry[country] = (byCountry[country] || 0) + 1;
       });
 
       // Group by severity
       const bySeverity: Record<string, number> = {};
-      data.forEach(i => {
+      incidents.forEach((i: any) => {
         const severity = i.severity_level || 'unknown';
         bySeverity[severity] = (bySeverity[severity] || 0) + 1;
       });
 
       // Recent incidents (last 10)
-      const recentIncidents = data.slice(0, 10);
+      const recentIncidents = incidents.slice(0, 10);
 
       return {
         totalIncidents,

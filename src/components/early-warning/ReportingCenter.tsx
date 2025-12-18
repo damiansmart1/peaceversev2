@@ -76,8 +76,9 @@ const ReportingCenter = ({ selectedCountry = 'ALL' }: ReportingCenterProps) => {
       
       switch (filters.dataType) {
         case 'incidents': {
+          // Use secure view - masks sensitive data for unauthorized users
           let query = supabase
-            .from('citizen_reports')
+            .from('citizen_reports_safe' as any)
             .select('*')
             .order('created_at', { ascending: false });
           
@@ -135,7 +136,7 @@ const ReportingCenter = ({ selectedCountry = 'ALL' }: ReportingCenterProps) => {
             const incidentIds = alerts.flatMap(a => a.incident_ids || []);
             if (incidentIds.length > 0) {
               const { data: incidents } = await supabase
-                .from('citizen_reports')
+                .from('citizen_reports_safe' as any)
                 .select('id, location_country')
                 .in('id', incidentIds);
               

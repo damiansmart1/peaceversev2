@@ -30,8 +30,9 @@ export const useIncidentHeatmapData = (country?: string, severity?: string) => {
   return useQuery({
     queryKey: ['incident-heatmap', country, severity],
     queryFn: async () => {
+      // Use secure view - masks precise coordinates for unauthorized users
       let query = supabase
-        .from('citizen_reports')
+        .from('citizen_reports_safe' as any)
         .select('*')
         .not('location_latitude', 'is', null)
         .not('location_longitude', 'is', null)
