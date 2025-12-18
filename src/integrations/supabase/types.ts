@@ -4107,13 +4107,13 @@ export type Database = {
           language?: string | null
           last_activity_at?: string | null
           location_accuracy?: string | null
-          location_address?: string | null
+          location_address?: never
           location_city?: string | null
           location_country?: string | null
-          location_latitude?: number | null
-          location_longitude?: number | null
-          location_name?: string | null
-          location_postal_code?: string | null
+          location_latitude?: never
+          location_longitude?: never
+          location_name?: never
+          location_postal_code?: never
           location_region?: string | null
           location_type?: string | null
           media_types?: string[] | null
@@ -4148,7 +4148,7 @@ export type Database = {
           view_count?: number | null
           visibility?: string | null
           vulnerable_groups_affected?: string[] | null
-          witness_contact_info?: Json | null
+          witness_contact_info?: never
           witness_count?: number | null
         }
         Update: {
@@ -4192,13 +4192,13 @@ export type Database = {
           language?: string | null
           last_activity_at?: string | null
           location_accuracy?: string | null
-          location_address?: string | null
+          location_address?: never
           location_city?: string | null
           location_country?: string | null
-          location_latitude?: number | null
-          location_longitude?: number | null
-          location_name?: string | null
-          location_postal_code?: string | null
+          location_latitude?: never
+          location_longitude?: never
+          location_name?: never
+          location_postal_code?: never
           location_region?: string | null
           location_type?: string | null
           media_types?: string[] | null
@@ -4233,7 +4233,7 @@ export type Database = {
           view_count?: number | null
           visibility?: string | null
           vulnerable_groups_affected?: string[] | null
-          witness_contact_info?: Json | null
+          witness_contact_info?: never
           witness_count?: number | null
         }
         Relationships: []

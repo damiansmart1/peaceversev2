@@ -95,9 +95,10 @@ export const useCitizenReports = () => {
   const { data: reports, isLoading, error } = useQuery({
     queryKey: ['citizen-reports'],
     queryFn: async () => {
+      // Use secure view - masks sensitive data for unauthorized users
       const { data, error }: any = await supabase
-        .from('citizen_reports')
-        .select('*, profiles(username, display_name, avatar_url)')
+        .from('citizen_reports_safe' as any)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -156,13 +157,10 @@ export const useReportDetail = (reportId: string) => {
   return useQuery({
     queryKey: ['citizen-report', reportId],
     queryFn: async () => {
+      // Use secure view - masks sensitive data for unauthorized users
       const { data, error }: any = await supabase
-        .from('citizen_reports')
-        .select(`
-          *,
-          profiles(username, display_name, avatar_url),
-          verification_tasks(*, profiles(username, display_name))
-        `)
+        .from('citizen_reports_safe' as any)
+        .select('*')
         .eq('id', reportId)
         .single();
 

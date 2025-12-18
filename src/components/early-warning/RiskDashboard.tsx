@@ -14,9 +14,9 @@ const RiskDashboard = ({ selectedCountry = 'ALL' }: RiskDashboardProps) => {
   const { data: highRiskIncidents, isLoading } = useQuery({
     queryKey: ['high-risk-incidents', selectedCountry],
     queryFn: async () => {
-      // First get incident IDs filtered by country
+      // First get incident IDs filtered by country using secure view
       let incidentQuery = supabase
-        .from('citizen_reports')
+        .from('citizen_reports_safe' as any)
         .select('id');
       
       if (selectedCountry !== 'ALL') {
@@ -24,7 +24,7 @@ const RiskDashboard = ({ selectedCountry = 'ALL' }: RiskDashboardProps) => {
       }
       
       const { data: incidents } = await incidentQuery;
-      const incidentIds = incidents?.map(i => i.id) || [];
+      const incidentIds = ((incidents || []) as any[]).map((i: any) => i.id);
       
       if (incidentIds.length === 0 && selectedCountry !== 'ALL') {
         return [];
@@ -53,9 +53,9 @@ const RiskDashboard = ({ selectedCountry = 'ALL' }: RiskDashboardProps) => {
   const { data: statistics } = useQuery({
     queryKey: ['risk-statistics', selectedCountry],
     queryFn: async () => {
-      // First get incident IDs filtered by country
+      // First get incident IDs filtered by country using secure view
       let incidentQuery = supabase
-        .from('citizen_reports')
+        .from('citizen_reports_safe' as any)
         .select('id');
       
       if (selectedCountry !== 'ALL') {
@@ -63,7 +63,7 @@ const RiskDashboard = ({ selectedCountry = 'ALL' }: RiskDashboardProps) => {
       }
       
       const { data: incidents } = await incidentQuery;
-      const incidentIds = incidents?.map(i => i.id) || [];
+      const incidentIds = ((incidents || []) as any[]).map((i: any) => i.id);
 
       let query = supabase
         .from('incident_risk_scores')

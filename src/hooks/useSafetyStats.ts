@@ -21,8 +21,8 @@ export const useSafetyStats = () => {
         supabase.from('content_reports').select('*', { count: 'exact', head: true }).eq('status', 'resolved'),
         supabase.from('profiles').select('*', { count: 'exact', head: true }),
         supabase.from('user_roles').select('*', { count: 'exact', head: true }).eq('role', 'verifier'),
-        supabase.from('citizen_reports').select('*', { count: 'exact', head: true }).eq('verification_status', 'verified'),
-        supabase.from('citizen_reports').select('*', { count: 'exact', head: true }),
+        supabase.from('citizen_reports_safe' as any).select('*', { count: 'exact', head: true }).eq('verification_status', 'verified'),
+        supabase.from('citizen_reports_safe' as any).select('*', { count: 'exact', head: true }),
         supabase.from('ai_analytics_summary').select('*').order('date', { ascending: false }).limit(1).maybeSingle()
       ]);
 

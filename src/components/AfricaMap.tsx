@@ -49,13 +49,14 @@ const AfricaMap = memo(() => {
   const { data: incidentCounts } = useQuery({
     queryKey: ['incident-counts-by-country'],
     queryFn: async () => {
+      // Use secure view - masks sensitive data for unauthorized users
       const { data, error } = await supabase
-        .from('citizen_reports')
+        .from('citizen_reports_safe' as any)
         .select('location_country');
       
       if (error) throw error;
 
-      const counts = data.reduce((acc: Record<string, number>, report) => {
+      const counts = ((data || []) as any[]).reduce((acc: Record<string, number>, report: any) => {
         const country = report.location_country || 'Unknown';
         acc[country] = (acc[country] || 0) + 1;
         return acc;
