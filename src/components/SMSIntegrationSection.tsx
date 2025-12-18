@@ -59,18 +59,23 @@ const SMSIntegrationSection = () => {
   };
 
   const smsCommands = [
-    { command: 'HELP', description: 'Get list of available commands', example: 'HELP' },
-    { command: 'REPORT', description: 'Report an incident', example: 'REPORT Nairobi Market fire near gate' },
-    { command: 'ALERT', description: 'Get active alerts in your area', example: 'ALERT' },
-    { command: 'STATUS', description: 'Check your report status', example: 'STATUS RPT-123456' },
-    { command: 'SAFE', description: 'Find nearby safe spaces', example: 'SAFE' }
+    { command: 'HELP', description: 'Get list of all available commands with examples', example: 'HELP' },
+    { command: 'REPORT', description: 'Report an incident with location and details', example: 'REPORT Nairobi CBD protest near Kencom' },
+    { command: 'ALERT', description: 'Get active alerts for your country/region', example: 'ALERT' },
+    { command: 'STATUS', description: 'Check the status of your submitted report', example: 'STATUS RPT-ABC123' },
+    { command: 'SAFE', description: 'Find nearby safe spaces and shelters', example: 'SAFE' },
+    { command: 'SUB', description: 'Subscribe to receive location-based alerts', example: 'SUB Nairobi' },
+    { command: 'UNSUB', description: 'Unsubscribe from alert notifications', example: 'UNSUB' },
+    { command: 'LANG', description: 'Change your preferred language (en/sw/fr/ar/am)', example: 'LANG sw' },
+    { command: 'EMERGENCY', description: 'Quick emergency report (auto-detects keywords)', example: 'Fire at Westgate Mall, people trapped' }
   ];
 
   const ussdFlow = [
-    { step: 1, title: 'Dial *384*PEACE#', description: 'Access the Peaceverse USSD menu' },
-    { step: 2, title: 'Select Option', description: 'Choose from Report, Alerts, Status, or Safe Spaces' },
-    { step: 3, title: 'Follow Prompts', description: 'Enter required information step by step' },
-    { step: 4, title: 'Confirm & Submit', description: 'Review and submit your request' }
+    { step: 1, title: 'Dial *384*PEACE#', description: 'Access the Peaceverse USSD menu from any phone' },
+    { step: 2, title: 'Select Language', description: 'Choose from English, Swahili, French, Arabic, or Amharic' },
+    { step: 3, title: 'Choose Action', description: 'Report Incident, Emergency Quick Report, View Alerts, Check Status, Find Safe Spaces, or Subscribe to Alerts' },
+    { step: 4, title: 'Enter Details', description: 'Follow guided prompts for category, severity, location, description, and anonymity options' },
+    { step: 5, title: 'Confirm & Track', description: 'Receive confirmation with tracking ID for follow-up' }
   ];
 
   const features = [
@@ -373,20 +378,49 @@ const SMSIntegrationSection = () => {
               {/* USSD Menu Preview */}
               <div className="mt-6 p-4 bg-muted rounded-lg font-mono text-sm">
                 <div className="border-2 border-foreground/20 rounded-lg p-4 bg-background">
-                  <p className="text-center mb-3 font-bold">Peaceverse Early Warning</p>
+                  <p className="text-center mb-3 font-bold">🕊️ Peaceverse Early Warning</p>
                   <div className="space-y-1 text-muted-foreground">
-                    <p>1. Report Incident</p>
-                    <p>2. View Alerts</p>
-                    <p>3. Check Report Status</p>
-                    <p>4. Find Safe Spaces</p>
-                    <p>5. Change Language</p>
+                    <p>1. 📝 Report Incident</p>
+                    <p>2. 🚨 Quick Emergency Report</p>
+                    <p>3. ⚠️ View Active Alerts</p>
+                    <p>4. 📊 Check Report Status</p>
+                    <p>5. 🏠 Find Safe Spaces</p>
+                    <p>6. 📲 Subscribe to Alerts</p>
+                    <p>7. 🌐 Change Language</p>
+                    <p>8. 📞 Emergency Contacts</p>
                     <p>0. Exit</p>
                   </div>
-                  <div className="mt-3 pt-3 border-t border-dashed">
+                  <div className="mt-3 pt-3 border-t border-dashed space-y-2">
                     <p className="text-xs text-center text-muted-foreground">
                       Reply with option number
                     </p>
+                    <p className="text-xs text-center text-green-600">
+                      🇰🇪 🇳🇬 🇪🇹 🇬🇭 🇿🇦 🇹🇿 🇺🇬 🇷🇼 + 46 more countries
+                    </p>
                   </div>
+                </div>
+              </div>
+
+              {/* Incident Categories */}
+              <div className="mt-6">
+                <h4 className="font-semibold mb-3 text-foreground">Supported Incident Categories</h4>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                  {['Violence', 'Protest', 'Disaster', 'Displacement', 'Human Rights', 'Security', 'Health Crisis', 'Resource Conflict', 'Other'].map((cat) => (
+                    <Badge key={cat} variant="outline" className="justify-center py-1.5">
+                      {cat}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {/* Severity Levels */}
+              <div className="mt-4">
+                <h4 className="font-semibold mb-3 text-foreground">Severity Levels</h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                  <Badge className="bg-red-500/20 text-red-600 border-red-500/30 justify-center py-1.5">🔴 Critical</Badge>
+                  <Badge className="bg-orange-500/20 text-orange-600 border-orange-500/30 justify-center py-1.5">🟠 High</Badge>
+                  <Badge className="bg-yellow-500/20 text-yellow-600 border-yellow-500/30 justify-center py-1.5">🟡 Medium</Badge>
+                  <Badge className="bg-green-500/20 text-green-600 border-green-500/30 justify-center py-1.5">🟢 Low</Badge>
                 </div>
               </div>
 
