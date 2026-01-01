@@ -230,7 +230,7 @@ const HeroSection = () => {
                 y: 0
               }} transition={{
                 delay: 0.6
-              }} className="block text-gradient-gold text-glow-gold">
+              }} className="block text-gradient-gold text-glow-gold text-white">
                   Prevent.
                 </motion.span>
               </h1>
