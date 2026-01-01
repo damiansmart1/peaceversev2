@@ -222,11 +222,13 @@ serve(async (req) => {
         assistance_provider: submission.assistance_provider?.trim(),
         
         // Context
-        historical_context: submission.historical_context?.trim(),
+        historical_context: submission.related_incidents 
+          ? `${submission.historical_context?.trim() || ''}\n\nRelated incidents: ${submission.related_incidents.trim()}`.trim()
+          : submission.historical_context?.trim(),
         recurring_issue: submission.recurring_issue || false,
         first_occurrence: submission.first_occurrence !== undefined ? submission.first_occurrence : true,
         previous_reports_filed: submission.previous_reports_filed || false,
-        related_incidents: submission.related_incidents ? [submission.related_incidents] : [],
+        // related_incidents expects UUID array - user text is stored in historical_context instead
         
         // Authorities
         authorities_notified: submission.authorities_notified || false,
