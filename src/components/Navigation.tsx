@@ -180,28 +180,19 @@ const Navigation = () => {
             </div>
 
             {/* Right Side Actions */}
-            <div className="flex items-center gap-2 sm:gap-3">
-              {/* Search Button */}
-              <motion.div whileHover={{
-              scale: 1.05
-            }} whileTap={{
-              scale: 0.95
-            }}>
-                
-              </motion.div>
-
+            <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
               <NotificationCenter />
               
-              <Button variant="ghost" size="sm" onClick={() => navigate('/help')} className="hidden xl:flex h-9 w-9 p-0 rounded-lg text-foreground/70 hover:text-foreground hover:bg-muted/50">
+              <Button variant="ghost" size="sm" onClick={() => navigate('/help')} className="hidden xl:flex h-8 w-8 p-0 rounded-lg text-foreground/70 hover:text-foreground hover:bg-muted/50">
                 <HelpCircle className="w-4 h-4" />
               </Button>
               
-              <div className="hidden sm:block">
+              <div className="hidden md:block">
                 <LanguageToggle />
               </div>
               
               {/* Authentication Section */}
-              <div className="flex items-center gap-2 ml-2 pl-2 border-l border-border/30">
+              <div className="flex items-center gap-1 sm:gap-2 ml-1 sm:ml-2 pl-1 sm:pl-2 border-l border-border/30">
                 {isLoading ? <div className="flex items-center">
                     <div className="w-4 h-4 border-2 border-gold border-t-transparent rounded-full animate-spin" />
                   </div> : user ? <>
@@ -210,8 +201,8 @@ const Navigation = () => {
                 }} whileTap={{
                   scale: 0.95
                 }}>
-                        <Button variant="outline" size="sm" onClick={() => navigate('/admin')} className="hidden xl:flex items-center gap-2 h-9 px-4 rounded-lg bg-primary/10 border-primary/30 hover:bg-primary/20 hover:border-primary/50 text-primary transition-all">
-                          <Settings className="w-4 h-4" />
+                        <Button variant="outline" size="sm" onClick={() => navigate('/admin')} className="hidden xl:flex items-center gap-1.5 h-8 px-3 rounded-lg bg-primary/10 border-primary/30 hover:bg-primary/20 hover:border-primary/50 text-primary transition-all">
+                          <Settings className="w-3.5 h-3.5" />
                           <span className="font-semibold text-xs">Admin</span>
                         </Button>
                       </motion.div>}
@@ -221,9 +212,9 @@ const Navigation = () => {
                 }} whileTap={{
                   scale: 0.95
                 }}>
-                      <Button variant="ghost" size="sm" onClick={handleSignOut} className="flex items-center gap-2 h-9 px-3 rounded-lg bg-destructive/10 hover:bg-destructive text-destructive hover:text-destructive-foreground transition-all">
-                        <LogOut className="w-4 h-4" />
-                        <span className="hidden lg:inline text-xs font-medium">Sign Out</span>
+                      <Button variant="ghost" size="sm" onClick={handleSignOut} className="flex items-center gap-1 sm:gap-1.5 h-8 px-2 sm:px-3 rounded-lg bg-destructive/10 hover:bg-destructive text-destructive hover:text-destructive-foreground transition-all">
+                        <LogOut className="w-3.5 h-3.5 flex-shrink-0" />
+                        <span className="text-xs font-medium whitespace-nowrap">Sign Out</span>
                       </Button>
                     </motion.div>
                   </> : <motion.div whileHover={{
@@ -231,10 +222,10 @@ const Navigation = () => {
               }} whileTap={{
                 scale: 0.95
               }}>
-                    <Button size="sm" onClick={() => navigate('/auth')} className="relative flex items-center gap-2 h-9 px-4 rounded-lg overflow-hidden group bg-primary hover:bg-primary-dark text-primary-foreground shadow-peace">
+                    <Button size="sm" onClick={() => navigate('/auth')} className="relative flex items-center gap-1 sm:gap-1.5 h-8 px-2 sm:px-3 rounded-lg overflow-hidden group bg-primary hover:bg-primary-dark text-primary-foreground shadow-peace">
                       <div className="absolute inset-0 bg-gradient-to-r from-gold/20 to-secondary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                      <Sparkles className="w-4 h-4 relative z-10" />
-                      <span className="font-semibold text-xs relative z-10">Sign In</span>
+                      <Sparkles className="w-3.5 h-3.5 relative z-10 flex-shrink-0" />
+                      <span className="font-semibold text-xs relative z-10 whitespace-nowrap">Sign In</span>
                     </Button>
                   </motion.div>}
               </div>
