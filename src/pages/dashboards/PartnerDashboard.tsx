@@ -13,6 +13,12 @@ import { useNavigate } from 'react-router-dom';
 import { usePartnerAnalytics, usePartnerCountries } from '@/hooks/usePartnerAnalytics';
 import { PartnerReportExporter } from '@/components/partner/PartnerReportExporter';
 import { PartnerAnalyticsCharts } from '@/components/partner/PartnerAnalyticsCharts';
+import { PartnerLiveFeed } from '@/components/partner/PartnerLiveFeed';
+import { PartnerWatchlist } from '@/components/partner/PartnerWatchlist';
+import { PartnerAdvancedAnalytics } from '@/components/partner/PartnerAdvancedAnalytics';
+import { PartnerSavedFilters } from '@/components/partner/PartnerSavedFilters';
+import { PartnerAuditLog } from '@/components/partner/PartnerAuditLog';
+import { PartnerIncidentHeatmap } from '@/components/partner/PartnerIncidentHeatmap';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, subDays, subMonths } from 'date-fns';
@@ -42,7 +48,12 @@ import {
   Minus,
   Search,
   Bell,
-  Sparkles
+  Sparkles,
+  Radio,
+  Bookmark,
+  Map,
+  History,
+  TrendingUp as Analytics
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -351,30 +362,71 @@ const PartnerDashboard = () => {
             </motion.div>
           </div>
 
+          {/* Saved Filters */}
+          <PartnerSavedFilters 
+            onApplyFilter={(filter) => {
+              if (filter.datePreset) setDatePreset(filter.datePreset);
+              if (filter.countryFilter) setCountryFilter(filter.countryFilter);
+              if (filter.searchQuery !== undefined) setSearchQuery(filter.searchQuery);
+              toast.success('Filter applied');
+            }}
+            currentFilters={{
+              datePreset,
+              countryFilter,
+              searchQuery
+            }}
+          />
+
           {/* Main Content Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="w-full md:w-auto grid grid-cols-4 md:flex">
-              <TabsTrigger value="overview" className="gap-2">
+            <TabsList className="w-full overflow-x-auto flex flex-nowrap md:grid md:grid-cols-8">
+              <TabsTrigger value="overview" className="gap-2 shrink-0">
                 <Activity className="w-4 h-4" />
-                <span className="hidden sm:inline">Overview</span>
+                <span className="hidden lg:inline">Overview</span>
               </TabsTrigger>
-              <TabsTrigger value="analytics" className="gap-2">
+              <TabsTrigger value="live" className="gap-2 shrink-0">
+                <Radio className="w-4 h-4" />
+                <span className="hidden lg:inline">Live Feed</span>
+              </TabsTrigger>
+              <TabsTrigger value="heatmap" className="gap-2 shrink-0">
+                <Map className="w-4 h-4" />
+                <span className="hidden lg:inline">Heatmap</span>
+              </TabsTrigger>
+              <TabsTrigger value="analytics" className="gap-2 shrink-0">
                 <BarChart3 className="w-4 h-4" />
-                <span className="hidden sm:inline">Analytics</span>
+                <span className="hidden lg:inline">Analytics</span>
               </TabsTrigger>
-              <TabsTrigger value="incidents" className="gap-2">
+              <TabsTrigger value="advanced" className="gap-2 shrink-0">
+                <Analytics className="w-4 h-4" />
+                <span className="hidden lg:inline">Advanced</span>
+              </TabsTrigger>
+              <TabsTrigger value="watchlist" className="gap-2 shrink-0">
+                <Bookmark className="w-4 h-4" />
+                <span className="hidden lg:inline">Watchlist</span>
+              </TabsTrigger>
+              <TabsTrigger value="incidents" className="gap-2 shrink-0">
                 <FileText className="w-4 h-4" />
-                <span className="hidden sm:inline">Incidents</span>
+                <span className="hidden lg:inline">Incidents</span>
               </TabsTrigger>
-              <TabsTrigger value="reports" className="gap-2">
+              <TabsTrigger value="reports" className="gap-2 shrink-0">
                 <Sparkles className="w-4 h-4" />
-                <span className="hidden sm:inline">Reports</span>
+                <span className="hidden lg:inline">Reports</span>
               </TabsTrigger>
             </TabsList>
 
             {/* Overview Tab */}
             <TabsContent value="overview" className="mt-6">
               {analytics && <PartnerAnalyticsCharts data={analytics} />}
+            </TabsContent>
+
+            {/* Live Feed Tab */}
+            <TabsContent value="live" className="mt-6">
+              <PartnerLiveFeed />
+            </TabsContent>
+
+            {/* Heatmap Tab */}
+            <TabsContent value="heatmap" className="mt-6">
+              <PartnerIncidentHeatmap />
             </TabsContent>
 
             {/* Analytics Tab */}
@@ -497,6 +549,16 @@ const PartnerDashboard = () => {
               )}
             </TabsContent>
 
+            {/* Advanced Analytics Tab */}
+            <TabsContent value="advanced" className="mt-6">
+              <PartnerAdvancedAnalytics />
+            </TabsContent>
+
+            {/* Watchlist Tab */}
+            <TabsContent value="watchlist" className="mt-6">
+              <PartnerWatchlist />
+            </TabsContent>
+
             {/* Incidents Tab */}
             <TabsContent value="incidents" className="mt-6">
               <Card>
@@ -580,113 +642,118 @@ const PartnerDashboard = () => {
 
             {/* Reports Tab */}
             <TabsContent value="reports" className="mt-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Export Reports */}
-                {analytics && (
-                  <PartnerReportExporter 
-                    analyticsData={analytics}
-                    dateRange={dateRange}
-                    countryFilter={countryFilter}
-                  />
-                )}
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Export Reports */}
+                  {analytics && (
+                    <PartnerReportExporter 
+                      analyticsData={analytics}
+                      dateRange={dateRange}
+                      countryFilter={countryFilter}
+                    />
+                  )}
 
-                {/* Quick Actions */}
+                  {/* Quick Actions */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Quick Actions</CardTitle>
+                      <CardDescription>Navigate to key platform features</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <Button 
+                        variant="outline" 
+                        className="w-full justify-start h-auto py-3"
+                        onClick={() => navigate('/peace-pulse')}
+                      >
+                        <Globe className="w-5 h-5 mr-3 text-primary" />
+                        <div className="text-left">
+                          <p className="font-medium">Peace Pulse Metrics</p>
+                          <p className="text-xs text-muted-foreground">View continental peace indicators</p>
+                        </div>
+                      </Button>
+
+                      <Button 
+                        variant="outline" 
+                        className="w-full justify-start h-auto py-3"
+                        onClick={() => navigate('/incidents')}
+                      >
+                        <AlertTriangle className="w-5 h-5 mr-3 text-orange-500" />
+                        <div className="text-left">
+                          <p className="font-medium">Incident Reporting</p>
+                          <p className="text-xs text-muted-foreground">Submit or review incident reports</p>
+                        </div>
+                      </Button>
+
+                      <Button 
+                        variant="outline" 
+                        className="w-full justify-start h-auto py-3"
+                        onClick={() => navigate('/proposals')}
+                      >
+                        <MessageSquare className="w-5 h-5 mr-3 text-blue-500" />
+                        <div className="text-left">
+                          <p className="font-medium">Community Proposals</p>
+                          <p className="text-xs text-muted-foreground">View and vote on initiatives</p>
+                        </div>
+                      </Button>
+
+                      <Button 
+                        variant="outline" 
+                        className="w-full justify-start h-auto py-3"
+                        onClick={() => navigate('/community')}
+                      >
+                        <Users className="w-5 h-5 mr-3 text-green-500" />
+                        <div className="text-left">
+                          <p className="font-medium">Community Engagement</p>
+                          <p className="text-xs text-muted-foreground">Connect with peacebuilders</p>
+                        </div>
+                      </Button>
+
+                      <Separator />
+
+                      <Button 
+                        variant="outline" 
+                        className="w-full justify-start h-auto py-3"
+                        onClick={() => navigate('/dashboard/early-warning')}
+                      >
+                        <Bell className="w-5 h-5 mr-3 text-red-500" />
+                        <div className="text-left">
+                          <p className="font-medium">Early Warning System</p>
+                          <p className="text-xs text-muted-foreground">Monitor predictive hotspots</p>
+                        </div>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Audit Log */}
+                <PartnerAuditLog />
+
+                {/* Report Standards Info */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">Quick Actions</CardTitle>
-                    <CardDescription>Navigate to key platform features</CardDescription>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Shield className="w-5 h-5 text-primary" />
+                      Data Standards & Compliance
+                    </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-3">
-                    <Button 
-                      variant="outline" 
-                      className="w-full justify-start h-auto py-3"
-                      onClick={() => navigate('/peace-pulse')}
-                    >
-                      <Globe className="w-5 h-5 mr-3 text-primary" />
-                      <div className="text-left">
-                        <p className="font-medium">Peace Pulse Metrics</p>
-                        <p className="text-xs text-muted-foreground">View continental peace indicators</p>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="p-4 rounded-lg bg-muted/30">
+                        <h4 className="font-medium mb-1">ISO/IEC 27001</h4>
+                        <p className="text-sm text-muted-foreground">Information security management standards</p>
                       </div>
-                    </Button>
-
-                    <Button 
-                      variant="outline" 
-                      className="w-full justify-start h-auto py-3"
-                      onClick={() => navigate('/incidents')}
-                    >
-                      <AlertTriangle className="w-5 h-5 mr-3 text-orange-500" />
-                      <div className="text-left">
-                        <p className="font-medium">Incident Reporting</p>
-                        <p className="text-xs text-muted-foreground">Submit or review incident reports</p>
+                      <div className="p-4 rounded-lg bg-muted/30">
+                        <h4 className="font-medium mb-1">GDPR Compliant</h4>
+                        <p className="text-sm text-muted-foreground">Data protection and privacy regulations</p>
                       </div>
-                    </Button>
-
-                    <Button 
-                      variant="outline" 
-                      className="w-full justify-start h-auto py-3"
-                      onClick={() => navigate('/proposals')}
-                    >
-                      <MessageSquare className="w-5 h-5 mr-3 text-blue-500" />
-                      <div className="text-left">
-                        <p className="font-medium">Community Proposals</p>
-                        <p className="text-xs text-muted-foreground">View and vote on initiatives</p>
+                      <div className="p-4 rounded-lg bg-muted/30">
+                        <h4 className="font-medium mb-1">UN Data Standards</h4>
+                        <p className="text-sm text-muted-foreground">Humanitarian data exchange format</p>
                       </div>
-                    </Button>
-
-                    <Button 
-                      variant="outline" 
-                      className="w-full justify-start h-auto py-3"
-                      onClick={() => navigate('/community')}
-                    >
-                      <Users className="w-5 h-5 mr-3 text-green-500" />
-                      <div className="text-left">
-                        <p className="font-medium">Community Engagement</p>
-                        <p className="text-xs text-muted-foreground">Connect with peacebuilders</p>
-                      </div>
-                    </Button>
-
-                    <Separator />
-
-                    <Button 
-                      variant="outline" 
-                      className="w-full justify-start h-auto py-3"
-                      onClick={() => navigate('/dashboard/early-warning')}
-                    >
-                      <Bell className="w-5 h-5 mr-3 text-red-500" />
-                      <div className="text-left">
-                        <p className="font-medium">Early Warning System</p>
-                        <p className="text-xs text-muted-foreground">Monitor predictive hotspots</p>
-                      </div>
-                    </Button>
+                    </div>
                   </CardContent>
                 </Card>
               </div>
-
-              {/* Report Standards Info */}
-              <Card className="mt-6">
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Shield className="w-5 h-5 text-primary" />
-                    Data Standards & Compliance
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="p-4 rounded-lg bg-muted/30">
-                      <h4 className="font-medium mb-1">ISO/IEC 27001</h4>
-                      <p className="text-sm text-muted-foreground">Information security management standards</p>
-                    </div>
-                    <div className="p-4 rounded-lg bg-muted/30">
-                      <h4 className="font-medium mb-1">GDPR Compliant</h4>
-                      <p className="text-sm text-muted-foreground">Data protection and privacy regulations</p>
-                    </div>
-                    <div className="p-4 rounded-lg bg-muted/30">
-                      <h4 className="font-medium mb-1">UN Data Standards</h4>
-                      <p className="text-sm text-muted-foreground">Humanitarian data exchange format</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
             </TabsContent>
           </Tabs>
         </div>

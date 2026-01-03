@@ -13,7 +13,6 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  Sankey,
   FunnelChart,
   Funnel,
   LabelList,
@@ -21,7 +20,7 @@ import {
   AreaChart,
   Area,
 } from 'recharts';
-import { format, subDays, differenceInDays } from 'date-fns';
+import { format, subDays } from 'date-fns';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -33,21 +32,26 @@ import {
   Layers,
   ArrowRight
 } from 'lucide-react';
-import type { PartnerAnalyticsData, TimeSeriesData } from '@/hooks/usePartnerAnalytics';
+import { usePartnerAnalytics } from '@/hooks/usePartnerAnalytics';
+import type { PartnerAnalyticsData } from '@/hooks/usePartnerAnalytics';
 
 interface PartnerAdvancedAnalyticsProps {
-  currentData: PartnerAnalyticsData;
+  currentData?: PartnerAnalyticsData;
   previousData?: PartnerAnalyticsData;
-  correlations: any[];
+  correlations?: any[];
 }
 
 const FUNNEL_COLORS = ['#3b82f6', '#8b5cf6', '#22c55e', '#06b6d4'];
 
 export const PartnerAdvancedAnalytics = ({ 
-  currentData, 
+  currentData: propCurrentData, 
   previousData,
-  correlations 
+  correlations: propCorrelations = []
 }: PartnerAdvancedAnalyticsProps) => {
+  const { data: analytics } = usePartnerAnalytics();
+  
+  const currentData = propCurrentData || analytics;
+  const correlations = propCorrelations;
   
   // Period comparison calculations
   const periodComparison = useMemo(() => {
