@@ -1,14 +1,17 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   MapPin, AlertTriangle, TrendingUp, Eye, Flame, 
-  ChevronRight, RefreshCw
+  ChevronRight, RefreshCw, Loader2
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
+import { preloadGoogleMaps, getGoogleMaps } from '@/hooks/useGoogleMapsPreloader';
+
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
 
 interface Hotspot {
   id: string;
@@ -22,10 +25,18 @@ interface Hotspot {
   lastUpdate: string;
 }
 
-export const ActiveHotspotsMap = () => {
+export const ActiveHotspotsMap = memo(() => {
   const [hotspots, setHotspots] = useState<Hotspot[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedHotspot, setSelectedHotspot] = useState<string | null>(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
+  const [mapError, setMapError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+
+  const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<google.maps.Map | null>(null);
+  const markersRef = useRef<google.maps.Marker[]>([]);
+  const circlesRef = useRef<google.maps.Circle[]>([]);
 
   useEffect(() => {
     const fetchHotspots = async () => {
@@ -220,4 +231,4 @@ export const ActiveHotspotsMap = () => {
       </CardContent>
     </Card>
   );
-};
+});

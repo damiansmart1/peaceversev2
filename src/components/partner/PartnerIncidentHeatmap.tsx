@@ -1,8 +1,7 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
@@ -13,10 +12,15 @@ import {
   Target,
   AlertTriangle,
   TrendingUp,
-  Globe
+  Globe,
+  Loader2,
+  RefreshCw
 } from 'lucide-react';
 import { usePartnerAnalytics } from '@/hooks/usePartnerAnalytics';
+import { preloadGoogleMaps, getGoogleMaps } from '@/hooks/useGoogleMapsPreloader';
 import type { GeographicDistribution, HotspotData } from '@/hooks/usePartnerAnalytics';
+
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
 
 interface PartnerIncidentHeatmapProps {
   geographicData?: GeographicDistribution[];
@@ -43,18 +47,26 @@ const COUNTRY_COORDS: Record<string, { lat: number; lng: number }> = {
   'Senegal': { lat: 14.4974, lng: -14.4524 },
 };
 
-export const PartnerIncidentHeatmap = ({ 
+export const PartnerIncidentHeatmap = memo(({ 
   geographicData: propGeoData, 
   hotspots: propHotspots,
   onRegionClick 
 }: PartnerIncidentHeatmapProps) => {
-  const { data: analytics } = usePartnerAnalytics();
+  const { data: analytics, refetch } = usePartnerAnalytics();
   
   const geographicData = propGeoData || analytics?.geographicDistribution || [];
   const hotspots = propHotspots || analytics?.hotspots || [];
-  const [viewMode, setViewMode] = useState<'heatmap' | 'hotspots' | 'list'>('heatmap');
-  const [zoomLevel, setZoomLevel] = useState(1);
+  const [viewMode, setViewMode] = useState<'map' | 'hotspots' | 'list'>('map');
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
+  const [mapError, setMapError] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<google.maps.Map | null>(null);
+  const markersRef = useRef<google.maps.Marker[]>([]);
+  const circlesRef = useRef<google.maps.Circle[]>([]);
+  const infoWindowRef = useRef<google.maps.InfoWindow | null>(null);
 
   // Aggregate data by country
   const countryData = useMemo(() => {
@@ -99,6 +111,192 @@ export const PartnerIncidentHeatmap = ({
     return Object.values(aggregated).sort((a, b) => b.totalIncidents - a.totalIncidents);
   }, [geographicData]);
 
+  // Initialize Google Maps
+  useEffect(() => {
+    if (!mapRef.current || mapInstanceRef.current) return;
+
+    if (!GOOGLE_MAPS_API_KEY) {
+      setMapError('Google Maps API key is not configured');
+      return;
+    }
+
+    let isMounted = true;
+
+    const mapStyles = [
+      { elementType: 'geometry', stylers: [{ color: '#1a1a2e' }] },
+      { elementType: 'labels.text.stroke', stylers: [{ color: '#1a1a2e' }] },
+      { elementType: 'labels.text.fill', stylers: [{ color: '#8892b0' }] },
+      { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0a192f' }] },
+      { featureType: 'landscape', elementType: 'geometry', stylers: [{ color: '#112240' }] },
+      { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#1d3461' }] },
+      { featureType: 'poi', elementType: 'geometry', stylers: [{ color: '#1a1a2e' }] },
+    ];
+
+    const initMap = (google: typeof window.google) => {
+      if (!isMounted || !mapRef.current || mapInstanceRef.current) return;
+      
+      const map = new google.maps.Map(mapRef.current, {
+        center: { lat: 5, lng: 20 },
+        zoom: 3,
+        minZoom: 2,
+        maxZoom: 12,
+        mapTypeId: 'roadmap',
+        gestureHandling: 'greedy',
+        styles: mapStyles,
+        streetViewControl: false,
+        mapTypeControl: false,
+        fullscreenControl: true,
+        zoomControl: true,
+      });
+      
+      mapInstanceRef.current = map;
+      infoWindowRef.current = new google.maps.InfoWindow({ maxWidth: 320 });
+      setMapLoaded(true);
+      setMapError(null);
+    };
+
+    // Check if already loaded (from preload)
+    const existingGoogle = getGoogleMaps();
+    if (existingGoogle) {
+      initMap(existingGoogle);
+      return;
+    }
+
+    // Load if not already loaded
+    preloadGoogleMaps().then((google) => {
+      if (!isMounted || !google) {
+        if (isMounted && !google) {
+          setMapError('Failed to load Google Maps');
+        }
+        return;
+      }
+      initMap(google);
+    }).catch(error => {
+      if (!isMounted) return;
+      console.error('Error loading Google Maps:', error);
+      setMapError('Failed to load map');
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Update markers when data changes
+  useEffect(() => {
+    if (!mapLoaded || !mapInstanceRef.current) return;
+
+    // Clear existing markers and circles
+    markersRef.current.forEach(marker => marker.setMap(null));
+    markersRef.current = [];
+    circlesRef.current.forEach(circle => circle.setMap(null));
+    circlesRef.current = [];
+
+    const riskColors: Record<string, string> = {
+      critical: '#dc2626',
+      high: '#f97316',
+      moderate: '#eab308',
+      low: '#22c55e',
+    };
+
+    const bounds = new google.maps.LatLngBounds();
+    let hasValidLocations = false;
+
+    countryData.forEach((country) => {
+      const coords = COUNTRY_COORDS[country.country];
+      if (!coords) return;
+
+      hasValidLocations = true;
+      const position = { lat: coords.lat, lng: coords.lng };
+      bounds.extend(position);
+
+      const color = riskColors[country.riskLevel] || '#22c55e';
+      const scale = Math.min(30, 10 + (country.totalIncidents / 5));
+
+      // Create circle to show impact area
+      const circle = new google.maps.Circle({
+        map: mapInstanceRef.current,
+        center: position,
+        radius: Math.min(500000, 100000 + (country.totalIncidents * 10000)),
+        fillColor: color,
+        fillOpacity: 0.15,
+        strokeColor: color,
+        strokeOpacity: 0.4,
+        strokeWeight: 2,
+      });
+      circlesRef.current.push(circle);
+
+      // Create marker
+      const marker = new google.maps.Marker({
+        map: mapInstanceRef.current,
+        position,
+        title: `${country.country}: ${country.totalIncidents} incidents`,
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: scale,
+          fillColor: color,
+          fillOpacity: 0.9,
+          strokeColor: '#ffffff',
+          strokeWeight: 2,
+        },
+        label: {
+          text: String(country.totalIncidents),
+          color: '#ffffff',
+          fontSize: '11px',
+          fontWeight: 'bold',
+        },
+      });
+
+      marker.addListener('click', () => {
+        setSelectedCountry(country.country);
+        if (infoWindowRef.current) {
+          infoWindowRef.current.setContent(`
+            <div style="padding: 12px; min-width: 220px; font-family: system-ui, sans-serif;">
+              <div style="font-weight: 700; font-size: 16px; margin-bottom: 12px; color: #1a1a1a;">
+                ${country.country}
+              </div>
+              <div style="display: grid; gap: 8px; font-size: 13px;">
+                <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #e5e5e5;">
+                  <span style="color: #666;">Total Incidents</span>
+                  <strong style="color: #1a1a1a;">${country.totalIncidents}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #e5e5e5;">
+                  <span style="color: #666;">Critical</span>
+                  <strong style="color: #dc2626;">${country.criticalCount}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #e5e5e5;">
+                  <span style="color: #666;">Verified</span>
+                  <strong style="color: #22c55e;">${country.verifiedCount}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 6px 0;">
+                  <span style="color: #666;">Risk Level</span>
+                  <strong style="color: ${color}; text-transform: uppercase;">${country.riskLevel}</strong>
+                </div>
+              </div>
+              <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #e5e5e5; font-size: 12px; color: #666;">
+                ${country.regions.length} region${country.regions.length !== 1 ? 's' : ''} affected
+              </div>
+            </div>
+          `);
+          infoWindowRef.current.open(mapInstanceRef.current, marker);
+        }
+        onRegionClick?.(country.regions[0]?.region || '', country.country);
+      });
+
+      markersRef.current.push(marker);
+    });
+
+    if (hasValidLocations && markersRef.current.length > 0) {
+      mapInstanceRef.current.fitBounds(bounds, 50);
+    }
+  }, [countryData, mapLoaded, onRegionClick]);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await refetch();
+    setIsRefreshing(false);
+  };
+
   const getRiskColor = (riskLevel: string) => {
     switch (riskLevel) {
       case 'critical': return 'bg-red-500';
@@ -117,8 +315,6 @@ export const PartnerIncidentHeatmap = ({
     }
   };
 
-  const maxIncidents = Math.max(...countryData.map(c => c.totalIncidents), 1);
-
   return (
     <Card className="border-primary/10">
       <CardHeader className="pb-3">
@@ -133,33 +329,24 @@ export const PartnerIncidentHeatmap = ({
             </div>
           </div>
           
-          <div className="flex items-center gap-2">
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-8 w-8 p-0"
-              onClick={() => setZoomLevel(Math.max(0.5, zoomLevel - 0.25))}
-            >
-              <ZoomOut className="w-4 h-4" />
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-8 w-8 p-0"
-              onClick={() => setZoomLevel(Math.min(2, zoomLevel + 0.25))}
-            >
-              <ZoomIn className="w-4 h-4" />
-            </Button>
-          </div>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="h-8 w-8 p-0"
+          >
+            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+          </Button>
         </div>
       </CardHeader>
       
       <CardContent>
         <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as any)}>
           <TabsList className="w-full grid grid-cols-3 mb-4">
-            <TabsTrigger value="heatmap" className="text-xs">
+            <TabsTrigger value="map" className="text-xs">
               <Layers className="w-3.5 h-3.5 mr-1" />
-              Heatmap
+              Map
             </TabsTrigger>
             <TabsTrigger value="hotspots" className="text-xs">
               <Target className="w-3.5 h-3.5 mr-1" />
@@ -171,73 +358,59 @@ export const PartnerIncidentHeatmap = ({
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="heatmap" className="mt-0">
-            {/* Visual Heatmap Grid */}
-            <div 
-              className="relative bg-muted/30 rounded-lg p-4 overflow-hidden"
-              style={{ height: '400px', transform: `scale(${zoomLevel})`, transformOrigin: 'top center' }}
-            >
-              <div className="grid grid-cols-4 md:grid-cols-5 gap-3">
-                {countryData.slice(0, 15).map((country) => {
-                  const intensity = country.totalIncidents / maxIncidents;
-                  const coords = COUNTRY_COORDS[country.country];
-                  
-                  return (
-                    <div
-                      key={country.country}
-                      className={`relative p-3 rounded-lg border cursor-pointer transition-all hover:scale-105 ${
-                        selectedCountry === country.country ? 'ring-2 ring-primary' : ''
-                      }`}
-                      style={{
-                        backgroundColor: `rgba(${
-                          country.riskLevel === 'critical' ? '239,68,68' :
-                          country.riskLevel === 'high' ? '234,88,12' :
-                          country.riskLevel === 'moderate' ? '202,138,4' : '34,197,94'
-                        }, ${0.1 + intensity * 0.5})`,
-                      }}
-                      onClick={() => {
-                        setSelectedCountry(country.country === selectedCountry ? null : country.country);
-                        onRegionClick?.(country.regions[0]?.region || '', country.country);
-                      }}
-                    >
-                      <p className="text-xs font-medium truncate">{country.country}</p>
-                      <p className="text-lg font-bold">{country.totalIncidents}</p>
-                      <div className="flex items-center gap-1 mt-1">
-                        <div className={`w-2 h-2 rounded-full ${getRiskColor(country.riskLevel)}`} />
-                        <span className="text-[10px] text-muted-foreground capitalize">
-                          {country.riskLevel}
-                        </span>
-                      </div>
-                      {country.criticalCount > 0 && (
-                        <Badge variant="destructive" className="absolute -top-1 -right-1 text-[10px] px-1">
-                          {country.criticalCount}
-                        </Badge>
-                      )}
+          <TabsContent value="map" className="mt-0">
+            {mapError || !GOOGLE_MAPS_API_KEY ? (
+              <div className="h-[400px] flex items-center justify-center bg-muted/30 rounded-lg">
+                <div className="text-center space-y-2 p-4">
+                  <AlertTriangle className="w-12 h-12 mx-auto text-destructive" />
+                  <p className="text-sm font-medium text-destructive">
+                    {mapError || 'Google Maps API key not configured'}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Please configure VITE_GOOGLE_MAPS_API_KEY
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="relative">
+                <div 
+                  ref={mapRef} 
+                  className="w-full h-[400px] rounded-lg overflow-hidden bg-muted"
+                />
+                {!mapLoaded && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-muted rounded-lg">
+                    <div className="text-center space-y-2">
+                      <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
+                      <p className="text-sm text-muted-foreground">Loading map...</p>
                     </div>
-                  );
-                })}
+                  </div>
+                )}
+                {/* Legend */}
+                {mapLoaded && (
+                  <div className="absolute bottom-4 left-4 bg-background/90 backdrop-blur-sm p-3 rounded-lg border">
+                    <p className="font-semibold text-xs mb-2">Risk Level</p>
+                    <div className="space-y-1 text-xs">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-red-500" />
+                        <span>Critical</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-orange-500" />
+                        <span>High</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                        <span>Moderate</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-green-500" />
+                        <span>Low</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
-
-              {/* Legend */}
-              <div className="absolute bottom-2 left-2 flex items-center gap-4 p-2 rounded bg-background/80 text-[10px]">
-                <div className="flex items-center gap-1">
-                  <div className="w-3 h-3 rounded bg-green-500/30" />
-                  <span>Low</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-3 h-3 rounded bg-yellow-500/40" />
-                  <span>Moderate</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-3 h-3 rounded bg-orange-500/50" />
-                  <span>High</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-3 h-3 rounded bg-red-500/60" />
-                  <span>Critical</span>
-                </div>
-              </div>
-            </div>
+            )}
           </TabsContent>
 
           <TabsContent value="hotspots" className="mt-0">
@@ -349,4 +522,4 @@ export const PartnerIncidentHeatmap = ({
       </CardContent>
     </Card>
   );
-};
+});
