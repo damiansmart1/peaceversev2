@@ -15,11 +15,12 @@ import {
   TrendingUp,
   Globe
 } from 'lucide-react';
+import { usePartnerAnalytics } from '@/hooks/usePartnerAnalytics';
 import type { GeographicDistribution, HotspotData } from '@/hooks/usePartnerAnalytics';
 
 interface PartnerIncidentHeatmapProps {
-  geographicData: GeographicDistribution[];
-  hotspots: HotspotData[];
+  geographicData?: GeographicDistribution[];
+  hotspots?: HotspotData[];
   onRegionClick?: (region: string, country: string) => void;
 }
 
@@ -43,10 +44,14 @@ const COUNTRY_COORDS: Record<string, { lat: number; lng: number }> = {
 };
 
 export const PartnerIncidentHeatmap = ({ 
-  geographicData, 
-  hotspots,
+  geographicData: propGeoData, 
+  hotspots: propHotspots,
   onRegionClick 
 }: PartnerIncidentHeatmapProps) => {
+  const { data: analytics } = usePartnerAnalytics();
+  
+  const geographicData = propGeoData || analytics?.geographicDistribution || [];
+  const hotspots = propHotspots || analytics?.hotspots || [];
   const [viewMode, setViewMode] = useState<'heatmap' | 'hotspots' | 'list'>('heatmap');
   const [zoomLevel, setZoomLevel] = useState(1);
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
