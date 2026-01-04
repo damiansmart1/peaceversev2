@@ -9,9 +9,16 @@ import { useAdminSafeSpaces, AdminSafeSpace } from "@/hooks/useAdminSafeSpaces";
 import { useAdminCheck } from "@/hooks/useAdminCheck";
 import { useJurisdiction } from "@/contexts/JurisdictionContext";
 import { toast } from "sonner";
-import { preloadGoogleMaps, getGoogleMaps } from '@/hooks/useGoogleMapsPreloader';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
-const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
+// Fix Leaflet default marker icon issue
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+});
 
 const CommunityMap = memo(() => {
   const [selectedHub, setSelectedHub] = useState<string | null>(null);
@@ -20,12 +27,11 @@ const CommunityMap = memo(() => {
   const [selectedType, setSelectedType] = useState<string>('all');
   const [showVerifiedOnly, setShowVerifiedOnly] = useState(false);
   const [mapLoaded, setMapLoaded] = useState(false);
-  const [mapError, setMapError] = useState<string | null>(null);
   
   const mapRef = useRef<HTMLDivElement>(null);
-  const googleMapRef = useRef<google.maps.Map | null>(null);
-  const markersRef = useRef<google.maps.Marker[]>([]);
-  const userMarkerRef = useRef<google.maps.Marker | null>(null);
+  const leafletMapRef = useRef<L.Map | null>(null);
+  const markersRef = useRef<L.CircleMarker[]>([]);
+  const userMarkerRef = useRef<L.CircleMarker | null>(null);
   
   const { data: safeSpaces, isLoading } = useAdminSafeSpaces();
   const { data: isAdmin } = useAdminCheck();
@@ -33,7 +39,7 @@ const CommunityMap = memo(() => {
 
   // Get user's current location - only once
   useEffect(() => {
-    if (userLocation) return; // Already have location
+    if (userLocation) return;
     
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -45,104 +51,65 @@ const CommunityMap = memo(() => {
         },
         (error) => {
           console.error('Error getting location:', error);
-          // Default to Nairobi, Kenya
           setUserLocation({ lat: -1.286389, lng: 36.817223 });
         }
       );
     } else {
-      // Default to Nairobi, Kenya
       setUserLocation({ lat: -1.286389, lng: 36.817223 });
     }
   }, [userLocation]);
 
-  // Initialize Google Maps - use preloaded instance if available
+  // Initialize Leaflet map
   useEffect(() => {
-    if (!mapRef.current || googleMapRef.current) return;
+    if (!mapRef.current || leafletMapRef.current) return;
 
-    if (!GOOGLE_MAPS_API_KEY) {
-      setMapError('Google Maps API key is not configured');
-      return;
-    }
+    const defaultCenter: [number, number] = [-1.286389, 36.817223];
 
-    const defaultCenter = { lat: -1.286389, lng: 36.817223 };
-    let isMounted = true;
-
-    const initMap = (google: typeof window.google) => {
-      if (!isMounted || !mapRef.current || googleMapRef.current) return;
-      
-      const map = new google.maps.Map(mapRef.current, {
-        center: userLocation || defaultCenter,
-        zoom: 12,
-        gestureHandling: 'greedy',
-        styles: [{ featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] }],
-      });
-      googleMapRef.current = map;
-      setMapLoaded(true);
-      setMapError(null);
-    };
-
-    // Check if already loaded (from preload)
-    const existingGoogle = getGoogleMaps();
-    if (existingGoogle) {
-      initMap(existingGoogle);
-      return;
-    }
-
-    // Load if not already loaded
-    preloadGoogleMaps().then((google) => {
-      if (!isMounted || !google) {
-        if (isMounted && !google) {
-          setMapError('Failed to load Google Maps');
-        }
-        return;
-      }
-      initMap(google);
-    }).catch(error => {
-      if (!isMounted) return;
-      console.error('Error loading Google Maps:', error);
-      setMapError('Failed to load map');
+    const map = L.map(mapRef.current, {
+      center: userLocation ? [userLocation.lat, userLocation.lng] : defaultCenter,
+      zoom: 12,
+      scrollWheelZoom: true,
+      zoomControl: true,
     });
 
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    leafletMapRef.current = map;
+    setMapLoaded(true);
+
     return () => {
-      isMounted = false;
+      // Don't destroy map on cleanup
     };
   }, []);
 
   // Update map center and add user marker when location becomes available
   useEffect(() => {
-    if (!googleMapRef.current || !userLocation || !mapLoaded) return;
+    if (!leafletMapRef.current || !userLocation || !mapLoaded) return;
     
-    // Center map on user location
-    googleMapRef.current.setCenter(userLocation);
+    leafletMapRef.current.setView([userLocation.lat, userLocation.lng], 12);
     
-    // Add user location marker if not already added
     if (!userMarkerRef.current) {
-      userMarkerRef.current = new google.maps.Marker({
-        position: userLocation,
-        map: googleMapRef.current,
-        icon: {
-          path: google.maps.SymbolPath.CIRCLE,
-          scale: 8,
-          fillColor: '#074F98',
-          fillOpacity: 1,
-          strokeColor: '#fff',
-          strokeWeight: 2,
-        },
-        title: 'Your Location',
-        zIndex: 1000,
-      });
+      userMarkerRef.current = L.circleMarker([userLocation.lat, userLocation.lng], {
+        radius: 10,
+        fillColor: '#074F98',
+        fillOpacity: 1,
+        color: '#fff',
+        weight: 2,
+      }).addTo(leafletMapRef.current);
+
+      userMarkerRef.current.bindPopup('<strong>Your Location</strong>');
     }
   }, [userLocation, mapLoaded]);
 
   // Update markers when safe spaces or filters change
   useEffect(() => {
-    if (!googleMapRef.current || !safeSpaces || !mapLoaded) return;
+    if (!leafletMapRef.current || !safeSpaces || !mapLoaded) return;
 
-    // Clear existing markers (except user marker)
-    markersRef.current.forEach(marker => marker.setMap(null));
+    markersRef.current.forEach(marker => marker.remove());
     markersRef.current = [];
 
-    // Filter safe spaces
     const filtered = safeSpaces.filter(space => {
       if (space.is_archived) return false;
       if (showVerifiedOnly && !space.verified) return false;
@@ -152,34 +119,34 @@ const CommunityMap = memo(() => {
       return true;
     });
 
-    // Add markers for filtered spaces
     filtered.forEach(space => {
       if (!space.latitude || !space.longitude) return;
 
-      const marker = new google.maps.Marker({
-        position: { lat: space.latitude, lng: space.longitude },
-        map: googleMapRef.current!,
-        title: space.name,
-        icon: {
-          path: google.maps.SymbolPath.CIRCLE,
-          scale: 10,
-          fillColor: space.verified ? '#275432' : '#E1AD40',
-          fillOpacity: 1,
-          strokeColor: '#fff',
-          strokeWeight: 2,
-        },
-      });
+      const marker = L.circleMarker([space.latitude, space.longitude], {
+        radius: 12,
+        fillColor: space.verified ? '#275432' : '#E1AD40',
+        fillOpacity: 1,
+        color: '#fff',
+        weight: 2,
+      }).addTo(leafletMapRef.current!);
 
-      marker.addListener('click', () => {
+      marker.bindPopup(`
+        <div style="padding: 8px; min-width: 180px;">
+          <strong style="font-size: 14px;">${space.name}</strong>
+          <p style="margin: 4px 0; font-size: 12px; color: #666;">${space.location_name}</p>
+          ${space.verified ? '<span style="color: #275432; font-size: 11px;">✓ Verified</span>' : ''}
+        </div>
+      `);
+
+      marker.on('click', () => {
         setSelectedHub(space.id);
-        googleMapRef.current?.panTo({ lat: space.latitude!, lng: space.longitude! });
+        leafletMapRef.current?.setView([space.latitude!, space.longitude!], 15);
       });
 
       markersRef.current.push(marker);
     });
   }, [safeSpaces, selectedType, showVerifiedOnly, searchQuery, mapLoaded]);
 
-  // Calculate distance between two coordinates
   const calculateDistance = useCallback((lat1: number, lon1: number, lat2: number, lon2: number): string => {
     const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -193,7 +160,6 @@ const CommunityMap = memo(() => {
     return distance < 1 ? `${Math.round(distance * 1000)}m` : `${distance.toFixed(1)}km`;
   }, []);
 
-  // Get filtered and sorted safe spaces
   const getFilteredSpaces = useCallback((): AdminSafeSpace[] => {
     if (!safeSpaces) return [];
     
@@ -239,9 +205,8 @@ const CommunityMap = memo(() => {
   };
 
   const handleGoToLocation = useCallback(() => {
-    if (userLocation && googleMapRef.current) {
-      googleMapRef.current.panTo(userLocation);
-      googleMapRef.current.setZoom(14);
+    if (userLocation && leafletMapRef.current) {
+      leafletMapRef.current.setView([userLocation.lat, userLocation.lng], 14);
       toast.success('Centered on your location');
     }
   }, [userLocation]);
@@ -254,26 +219,6 @@ const CommunityMap = memo(() => {
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
             <p className="mt-4 text-muted-foreground">Loading safe spaces...</p>
           </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (mapError || !GOOGLE_MAPS_API_KEY) {
-    return (
-      <section className="py-16 bg-muted/30">
-        <div className="container mx-auto px-6">
-          <Card className="max-w-2xl mx-auto p-8">
-            <div className="text-center">
-              <AlertTriangle className="w-12 h-12 mx-auto mb-4 text-destructive" />
-              <h3 className="text-xl font-semibold text-foreground mb-2">Map Loading Failed</h3>
-              <p className="text-muted-foreground mb-4">
-                {GOOGLE_MAPS_API_KEY 
-                  ? 'The Google Maps API failed to load. Please check that the Maps JavaScript API is enabled and billing is configured.'
-                  : 'Google Maps API key is not configured.'}
-              </p>
-            </div>
-          </Card>
         </div>
       </section>
     );
@@ -293,7 +238,6 @@ const CommunityMap = memo(() => {
         <div className="max-w-6xl mx-auto mb-6">
           <Card className="p-6 bg-card border-accent/20">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* Search */}
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
@@ -304,7 +248,6 @@ const CommunityMap = memo(() => {
                 />
               </div>
 
-              {/* Type Filter */}
               <Select value={selectedType} onValueChange={setSelectedType}>
                 <SelectTrigger>
                   <Filter className="w-4 h-4 mr-2" />
@@ -321,7 +264,6 @@ const CommunityMap = memo(() => {
                 </SelectContent>
               </Select>
 
-              {/* Location Button */}
               <Button 
                 variant="outline" 
                 onClick={handleGoToLocation}
@@ -331,7 +273,6 @@ const CommunityMap = memo(() => {
                 My Location
               </Button>
 
-              {/* Verified Filter */}
               <Button
                 variant={showVerifiedOnly ? "default" : "outline"}
                 onClick={() => setShowVerifiedOnly(!showVerifiedOnly)}
@@ -350,8 +291,9 @@ const CommunityMap = memo(() => {
             <div 
               ref={mapRef} 
               className="w-full h-[500px]"
+              style={{ zIndex: 1 }}
             />
-            {!mapLoaded && !mapError && (
+            {!mapLoaded && (
               <div className="absolute inset-0 flex items-center justify-center bg-muted/50">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
               </div>
@@ -387,9 +329,8 @@ const CommunityMap = memo(() => {
                   }`}
                   onClick={() => {
                     setSelectedHub(selectedHub === space.id ? null : space.id);
-                    if (space.latitude && space.longitude && googleMapRef.current) {
-                      googleMapRef.current.panTo({ lat: space.latitude, lng: space.longitude });
-                      googleMapRef.current.setZoom(15);
+                    if (space.latitude && space.longitude && leafletMapRef.current) {
+                      leafletMapRef.current.setView([space.latitude, space.longitude], 15);
                     }
                   }}
                 >
@@ -458,22 +399,6 @@ const CommunityMap = memo(() => {
             </div>
           )}
         </div>
-
-        {/* Admin Add Button */}
-        {isAdmin && (
-          <div className="text-center">
-            <Button 
-              size="lg"
-              className="bg-primary hover:bg-primary/90"
-              onClick={() => {
-                toast.info('Safe space creation dialog coming soon!');
-              }}
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              Add New Safe Space
-            </Button>
-          </div>
-        )}
       </div>
     </section>
   );

@@ -6,8 +6,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   Map as MapIcon, 
-  ZoomIn, 
-  ZoomOut, 
   Layers,
   Target,
   AlertTriangle,
@@ -17,10 +15,17 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { usePartnerAnalytics } from '@/hooks/usePartnerAnalytics';
-import { preloadGoogleMaps, getGoogleMaps } from '@/hooks/useGoogleMapsPreloader';
 import type { GeographicDistribution, HotspotData } from '@/hooks/usePartnerAnalytics';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
-const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
+// Fix Leaflet default marker icon issue
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+});
 
 interface PartnerIncidentHeatmapProps {
   geographicData?: GeographicDistribution[];
@@ -59,14 +64,12 @@ export const PartnerIncidentHeatmap = memo(({
   const [viewMode, setViewMode] = useState<'map' | 'hotspots' | 'list'>('map');
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
-  const [mapError, setMapError] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<google.maps.Map | null>(null);
-  const markersRef = useRef<google.maps.Marker[]>([]);
-  const circlesRef = useRef<google.maps.Circle[]>([]);
-  const infoWindowRef = useRef<google.maps.InfoWindow | null>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
+  const markersRef = useRef<L.CircleMarker[]>([]);
+  const circlesRef = useRef<L.Circle[]>([]);
 
   // Aggregate data by country
   const countryData = useMemo(() => {
@@ -111,74 +114,29 @@ export const PartnerIncidentHeatmap = memo(({
     return Object.values(aggregated).sort((a, b) => b.totalIncidents - a.totalIncidents);
   }, [geographicData]);
 
-  // Initialize Google Maps
+  // Initialize Leaflet map
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return;
 
-    if (!GOOGLE_MAPS_API_KEY) {
-      setMapError('Google Maps API key is not configured');
-      return;
-    }
-
-    let isMounted = true;
-
-    const mapStyles = [
-      { elementType: 'geometry', stylers: [{ color: '#1a1a2e' }] },
-      { elementType: 'labels.text.stroke', stylers: [{ color: '#1a1a2e' }] },
-      { elementType: 'labels.text.fill', stylers: [{ color: '#8892b0' }] },
-      { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0a192f' }] },
-      { featureType: 'landscape', elementType: 'geometry', stylers: [{ color: '#112240' }] },
-      { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#1d3461' }] },
-      { featureType: 'poi', elementType: 'geometry', stylers: [{ color: '#1a1a2e' }] },
-    ];
-
-    const initMap = (google: typeof window.google) => {
-      if (!isMounted || !mapRef.current || mapInstanceRef.current) return;
-      
-      const map = new google.maps.Map(mapRef.current, {
-        center: { lat: 5, lng: 20 },
-        zoom: 3,
-        minZoom: 2,
-        maxZoom: 12,
-        mapTypeId: 'roadmap',
-        gestureHandling: 'greedy',
-        styles: mapStyles,
-        streetViewControl: false,
-        mapTypeControl: false,
-        fullscreenControl: true,
-        zoomControl: true,
-      });
-      
-      mapInstanceRef.current = map;
-      infoWindowRef.current = new google.maps.InfoWindow({ maxWidth: 320 });
-      setMapLoaded(true);
-      setMapError(null);
-    };
-
-    // Check if already loaded (from preload)
-    const existingGoogle = getGoogleMaps();
-    if (existingGoogle) {
-      initMap(existingGoogle);
-      return;
-    }
-
-    // Load if not already loaded
-    preloadGoogleMaps().then((google) => {
-      if (!isMounted || !google) {
-        if (isMounted && !google) {
-          setMapError('Failed to load Google Maps');
-        }
-        return;
-      }
-      initMap(google);
-    }).catch(error => {
-      if (!isMounted) return;
-      console.error('Error loading Google Maps:', error);
-      setMapError('Failed to load map');
+    const map = L.map(mapRef.current, {
+      center: [5, 20],
+      zoom: 3,
+      minZoom: 2,
+      maxZoom: 12,
+      scrollWheelZoom: true,
+      zoomControl: true,
     });
 
+    // Dark theme tiles
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+    }).addTo(map);
+
+    mapInstanceRef.current = map;
+    setMapLoaded(true);
+
     return () => {
-      isMounted = false;
+      // Don't destroy on cleanup
     };
   }, []);
 
@@ -187,9 +145,9 @@ export const PartnerIncidentHeatmap = memo(({
     if (!mapLoaded || !mapInstanceRef.current) return;
 
     // Clear existing markers and circles
-    markersRef.current.forEach(marker => marker.setMap(null));
+    markersRef.current.forEach(marker => marker.remove());
     markersRef.current = [];
-    circlesRef.current.forEach(circle => circle.setMap(null));
+    circlesRef.current.forEach(circle => circle.remove());
     circlesRef.current = [];
 
     const riskColors: Record<string, string> = {
@@ -199,95 +157,84 @@ export const PartnerIncidentHeatmap = memo(({
       low: '#22c55e',
     };
 
-    const bounds = new google.maps.LatLngBounds();
-    let hasValidLocations = false;
+    const validLocations: [number, number][] = [];
 
     countryData.forEach((country) => {
       const coords = COUNTRY_COORDS[country.country];
       if (!coords) return;
 
-      hasValidLocations = true;
-      const position = { lat: coords.lat, lng: coords.lng };
-      bounds.extend(position);
-
+      validLocations.push([coords.lat, coords.lng]);
       const color = riskColors[country.riskLevel] || '#22c55e';
       const scale = Math.min(30, 10 + (country.totalIncidents / 5));
 
       // Create circle to show impact area
-      const circle = new google.maps.Circle({
-        map: mapInstanceRef.current,
-        center: position,
+      const circle = L.circle([coords.lat, coords.lng], {
         radius: Math.min(500000, 100000 + (country.totalIncidents * 10000)),
         fillColor: color,
         fillOpacity: 0.15,
-        strokeColor: color,
-        strokeOpacity: 0.4,
-        strokeWeight: 2,
-      });
+        color: color,
+        weight: 2,
+      }).addTo(mapInstanceRef.current!);
       circlesRef.current.push(circle);
 
       // Create marker
-      const marker = new google.maps.Marker({
-        map: mapInstanceRef.current,
-        position,
-        title: `${country.country}: ${country.totalIncidents} incidents`,
-        icon: {
-          path: google.maps.SymbolPath.CIRCLE,
-          scale: scale,
-          fillColor: color,
-          fillOpacity: 0.9,
-          strokeColor: '#ffffff',
-          strokeWeight: 2,
-        },
-        label: {
-          text: String(country.totalIncidents),
-          color: '#ffffff',
-          fontSize: '11px',
-          fontWeight: 'bold',
-        },
-      });
+      const marker = L.circleMarker([coords.lat, coords.lng], {
+        radius: scale,
+        fillColor: color,
+        fillOpacity: 0.9,
+        color: '#ffffff',
+        weight: 2,
+      }).addTo(mapInstanceRef.current!);
 
-      marker.addListener('click', () => {
-        setSelectedCountry(country.country);
-        if (infoWindowRef.current) {
-          infoWindowRef.current.setContent(`
-            <div style="padding: 12px; min-width: 220px; font-family: system-ui, sans-serif;">
-              <div style="font-weight: 700; font-size: 16px; margin-bottom: 12px; color: #1a1a1a;">
-                ${country.country}
-              </div>
-              <div style="display: grid; gap: 8px; font-size: 13px;">
-                <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #e5e5e5;">
-                  <span style="color: #666;">Total Incidents</span>
-                  <strong style="color: #1a1a1a;">${country.totalIncidents}</strong>
-                </div>
-                <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #e5e5e5;">
-                  <span style="color: #666;">Critical</span>
-                  <strong style="color: #dc2626;">${country.criticalCount}</strong>
-                </div>
-                <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #e5e5e5;">
-                  <span style="color: #666;">Verified</span>
-                  <strong style="color: #22c55e;">${country.verifiedCount}</strong>
-                </div>
-                <div style="display: flex; justify-content: space-between; padding: 6px 0;">
-                  <span style="color: #666;">Risk Level</span>
-                  <strong style="color: ${color}; text-transform: uppercase;">${country.riskLevel}</strong>
-                </div>
-              </div>
-              <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #e5e5e5; font-size: 12px; color: #666;">
-                ${country.regions.length} region${country.regions.length !== 1 ? 's' : ''} affected
-              </div>
+      marker.bindPopup(`
+        <div style="padding: 12px; min-width: 220px; font-family: system-ui, sans-serif;">
+          <div style="font-weight: 700; font-size: 16px; margin-bottom: 12px; color: #1a1a1a;">
+            ${country.country}
+          </div>
+          <div style="display: grid; gap: 8px; font-size: 13px;">
+            <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #e5e5e5;">
+              <span style="color: #666;">Total Incidents</span>
+              <strong style="color: #1a1a1a;">${country.totalIncidents}</strong>
             </div>
-          `);
-          infoWindowRef.current.open(mapInstanceRef.current, marker);
-        }
+            <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #e5e5e5;">
+              <span style="color: #666;">Critical</span>
+              <strong style="color: #dc2626;">${country.criticalCount}</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #e5e5e5;">
+              <span style="color: #666;">Verified</span>
+              <strong style="color: #22c55e;">${country.verifiedCount}</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 6px 0;">
+              <span style="color: #666;">Risk Level</span>
+              <strong style="color: ${color}; text-transform: uppercase;">${country.riskLevel}</strong>
+            </div>
+          </div>
+          <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid #e5e5e5; font-size: 12px; color: #666;">
+            ${country.regions.length} region${country.regions.length !== 1 ? 's' : ''} affected
+          </div>
+        </div>
+      `, { maxWidth: 320 });
+
+      marker.on('click', () => {
+        setSelectedCountry(country.country);
         onRegionClick?.(country.regions[0]?.region || '', country.country);
       });
+
+      // Add label
+      const labelIcon = L.divIcon({
+        className: 'custom-label',
+        html: `<div style="color: white; font-size: 11px; font-weight: bold; text-align: center;">${country.totalIncidents}</div>`,
+        iconSize: [scale * 2, scale],
+        iconAnchor: [scale, scale / 2],
+      });
+      L.marker([coords.lat, coords.lng], { icon: labelIcon, interactive: false }).addTo(mapInstanceRef.current!);
 
       markersRef.current.push(marker);
     });
 
-    if (hasValidLocations && markersRef.current.length > 0) {
-      mapInstanceRef.current.fitBounds(bounds, 50);
+    if (validLocations.length > 0) {
+      const bounds = L.latLngBounds(validLocations);
+      mapInstanceRef.current.fitBounds(bounds, { padding: [50, 50] });
     }
   }, [countryData, mapLoaded, onRegionClick]);
 
@@ -359,58 +306,45 @@ export const PartnerIncidentHeatmap = memo(({
           </TabsList>
 
           <TabsContent value="map" className="mt-0">
-            {mapError || !GOOGLE_MAPS_API_KEY ? (
-              <div className="h-[400px] flex items-center justify-center bg-muted/30 rounded-lg">
-                <div className="text-center space-y-2 p-4">
-                  <AlertTriangle className="w-12 h-12 mx-auto text-destructive" />
-                  <p className="text-sm font-medium text-destructive">
-                    {mapError || 'Google Maps API key not configured'}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Please configure VITE_GOOGLE_MAPS_API_KEY
-                  </p>
+            <div className="relative">
+              <div 
+                ref={mapRef} 
+                className="w-full h-[400px] rounded-lg overflow-hidden bg-muted"
+                style={{ zIndex: 1 }}
+              />
+              {!mapLoaded && (
+                <div className="absolute inset-0 flex items-center justify-center bg-muted rounded-lg">
+                  <div className="text-center space-y-2">
+                    <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
+                    <p className="text-sm text-muted-foreground">Loading map...</p>
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div className="relative">
-                <div 
-                  ref={mapRef} 
-                  className="w-full h-[400px] rounded-lg overflow-hidden bg-muted"
-                />
-                {!mapLoaded && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-muted rounded-lg">
-                    <div className="text-center space-y-2">
-                      <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
-                      <p className="text-sm text-muted-foreground">Loading map...</p>
+              )}
+              {/* Legend */}
+              {mapLoaded && (
+                <div className="absolute bottom-4 left-4 bg-background/90 backdrop-blur-sm p-3 rounded-lg border z-[1000]">
+                  <p className="font-semibold text-xs mb-2">Risk Level</p>
+                  <div className="space-y-1 text-xs">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-red-500" />
+                      <span>Critical</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-orange-500" />
+                      <span>High</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                      <span>Moderate</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-green-500" />
+                      <span>Low</span>
                     </div>
                   </div>
-                )}
-                {/* Legend */}
-                {mapLoaded && (
-                  <div className="absolute bottom-4 left-4 bg-background/90 backdrop-blur-sm p-3 rounded-lg border">
-                    <p className="font-semibold text-xs mb-2">Risk Level</p>
-                    <div className="space-y-1 text-xs">
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-red-500" />
-                        <span>Critical</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-orange-500" />
-                        <span>High</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-yellow-500" />
-                        <span>Moderate</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-green-500" />
-                        <span>Low</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
+                </div>
+              )}
+            </div>
           </TabsContent>
 
           <TabsContent value="hotspots" className="mt-0">
@@ -450,11 +384,10 @@ export const PartnerIncidentHeatmap = memo(({
                     </div>
                   </div>
                 ))}
-                
                 {hotspots.length === 0 && (
-                  <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                    <Target className="w-8 h-8 mb-2 opacity-50" />
-                    <p className="text-sm">No active hotspots</p>
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Target className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No active hotspots detected</p>
                   </div>
                 )}
               </div>
@@ -468,13 +401,11 @@ export const PartnerIncidentHeatmap = memo(({
                   <div
                     key={country.country}
                     className="p-3 rounded-lg border bg-card hover:bg-muted/30 transition-colors cursor-pointer"
-                    onClick={() => setSelectedCountry(country.country === selectedCountry ? null : country.country)}
+                    onClick={() => onRegionClick?.(country.regions[0]?.region || '', country.country)}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${getRiskBadge(country.riskLevel)}`}>
-                          <Globe className="w-5 h-5" />
-                        </div>
+                        <div className={`w-2 h-8 rounded-full ${getRiskColor(country.riskLevel)}`} />
                         <div>
                           <p className="text-sm font-medium">{country.country}</p>
                           <p className="text-xs text-muted-foreground">
@@ -485,36 +416,19 @@ export const PartnerIncidentHeatmap = memo(({
                       
                       <div className="text-right">
                         <p className="text-lg font-bold">{country.totalIncidents}</p>
-                        <div className="flex items-center gap-2">
-                          {country.criticalCount > 0 && (
-                            <Badge variant="destructive" className="text-[10px]">
-                              {country.criticalCount} critical
-                            </Badge>
-                          )}
-                          <Badge variant="outline" className={`text-[10px] ${getRiskBadge(country.riskLevel)}`}>
-                            {country.riskLevel}
-                          </Badge>
-                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {country.criticalCount} critical
+                        </p>
                       </div>
                     </div>
-                    
-                    {selectedCountry === country.country && (
-                      <div className="mt-3 pt-3 border-t space-y-1">
-                        {country.regions.map((region, i) => (
-                          <div key={i} className="flex items-center justify-between text-xs p-2 rounded bg-muted/50">
-                            <span>{region.region || 'Unknown Region'}</span>
-                            <div className="flex items-center gap-2">
-                              <span>{region.incidentCount} incidents</span>
-                              <Badge variant="outline" className={`text-[10px] ${getRiskBadge(region.riskLevel)}`}>
-                                {region.riskLevel}
-                              </Badge>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
                   </div>
                 ))}
+                {countryData.length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Globe className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No geographic data available</p>
+                  </div>
+                )}
               </div>
             </ScrollArea>
           </TabsContent>
@@ -523,3 +437,7 @@ export const PartnerIncidentHeatmap = memo(({
     </Card>
   );
 });
+
+PartnerIncidentHeatmap.displayName = 'PartnerIncidentHeatmap';
+
+export default PartnerIncidentHeatmap;
