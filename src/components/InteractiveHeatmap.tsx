@@ -58,12 +58,21 @@ const InteractiveHeatmap = memo(() => {
     }
 
     if (!GOOGLE_MAPS_API_KEY) {
-      setMapError('Google Maps API key is not configured');
+      setMapError('API_KEY_MISSING');
       return;
     }
 
     let isMounted = true;
     let initAttempted = false;
+
+    // Listen for Google Maps API errors
+    const handleGoogleMapsError = (event: ErrorEvent) => {
+      if (event.message?.includes('BillingNotEnabledMapError') || 
+          event.error?.message?.includes('BillingNotEnabledMapError')) {
+        setMapError('BILLING_NOT_ENABLED');
+      }
+    };
+    window.addEventListener('error', handleGoogleMapsError);
 
     const initMap = (google: typeof window.google) => {
       if (!isMounted || !mapRef.current || initAttempted) return;
@@ -86,56 +95,69 @@ const InteractiveHeatmap = memo(() => {
             { featureType: 'transit', stylers: [{ visibility: 'simplified' }] },
           ],
         });
+        
+        // Listen for authentication errors on the map
+        map.addListener('tilesloaded', () => {
+          if (isMounted) {
+            setMapLoaded(true);
+            setMapError(null);
+          }
+        });
+        
         mapInstanceRef.current = map;
         infoWindowRef.current = new google.maps.InfoWindow({ maxWidth: 320 });
-        setMapLoaded(true);
-        setMapError(null);
+        
+        // Set loaded after a short delay to catch any billing errors
+        setTimeout(() => {
+          if (isMounted && !mapError) {
+            setMapLoaded(true);
+          }
+        }, 1000);
       } catch (error) {
         console.error('Error initializing map:', error);
-        setMapError('Failed to initialize map');
+        setMapError('INIT_FAILED');
       }
     };
 
     // Check if Google Maps is already loaded globally
     if (window.google?.maps) {
       initMap(window.google);
-      return;
-    }
+    } else {
+      // Check preloaded instance
+      const existingGoogle = getGoogleMaps();
+      if (existingGoogle) {
+        initMap(existingGoogle);
+      } else {
+        // Load via preloader with timeout fallback
+        const loadPromise = preloadGoogleMaps();
+        const timeoutId = setTimeout(() => {
+          if (isMounted && !mapInstanceRef.current) {
+            setMapError('TIMEOUT');
+          }
+        }, 15000);
 
-    // Check preloaded instance
-    const existingGoogle = getGoogleMaps();
-    if (existingGoogle) {
-      initMap(existingGoogle);
-      return;
-    }
-
-    // Load via preloader with timeout fallback
-    const loadPromise = preloadGoogleMaps();
-    const timeoutId = setTimeout(() => {
-      if (isMounted && !mapInstanceRef.current) {
-        setMapError('Map loading timed out. Please refresh the page.');
+        loadPromise.then((google) => {
+          clearTimeout(timeoutId);
+          if (!isMounted) return;
+          if (!google) {
+            setMapError('LOAD_FAILED');
+            return;
+          }
+          initMap(google);
+        }).catch(error => {
+          clearTimeout(timeoutId);
+          if (!isMounted) return;
+          console.error('Error loading Google Maps:', error);
+          setMapError('LOAD_FAILED');
+        });
       }
-    }, 15000);
-
-    loadPromise.then((google) => {
-      clearTimeout(timeoutId);
-      if (!isMounted) return;
-      if (!google) {
-        setMapError('Failed to load Google Maps');
-        return;
-      }
-      initMap(google);
-    }).catch(error => {
-      clearTimeout(timeoutId);
-      if (!isMounted) return;
-      console.error('Error loading Google Maps:', error);
-      setMapError('Failed to load map');
-    });
+    }
 
     return () => {
       isMounted = false;
+      window.removeEventListener('error', handleGoogleMapsError);
     };
-  }, []);
+  }, [mapError]);
   
   // Update user location marker when location changes
   useEffect(() => {
@@ -381,17 +403,37 @@ const InteractiveHeatmap = memo(() => {
   const showLoadingOverlay = !mapLoaded && !mapError && GOOGLE_MAPS_API_KEY;
 
   if (mapError || !GOOGLE_MAPS_API_KEY) {
+    const isBillingError = mapError === 'BILLING_NOT_ENABLED';
     const hasKey = !!GOOGLE_MAPS_API_KEY;
+    
     return (
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-destructive">
             <AlertTriangle className="w-5 h-5" />
-            {hasKey ? 'Map Loading Failed' : 'Google Maps API Key Required'}
+            {isBillingError ? 'Google Cloud Billing Required' : hasKey ? 'Map Loading Failed' : 'Google Maps API Key Required'}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {hasKey ? (
+          {isBillingError ? (
+            <>
+              <p className="text-muted-foreground">
+                <strong>Billing is not enabled</strong> on the Google Cloud project associated with this API key.
+                Google Maps requires billing to be enabled, even for free tier usage.
+              </p>
+              <div className="bg-amber-500/10 border border-amber-500/30 p-4 rounded-lg">
+                <p className="text-sm font-medium text-amber-600 dark:text-amber-400 mb-3">⚠️ Action Required:</p>
+                <ol className="list-decimal list-inside space-y-2 text-sm">
+                  <li>Go to <a href="https://console.cloud.google.com/billing" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">Google Cloud Billing</a></li>
+                  <li>Link a billing account to your project</li>
+                  <li>Return here and refresh the page</li>
+                </ol>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                💡 Google provides $200 free monthly credit which covers most use cases.
+              </p>
+            </>
+          ) : hasKey ? (
             <>
               <p className="text-muted-foreground">
                 The Google Maps API key is configured but failed to load. This usually happens when:
@@ -405,10 +447,9 @@ const InteractiveHeatmap = memo(() => {
               <div className="bg-primary/10 p-4 rounded-lg">
                 <p className="text-sm font-medium text-primary mb-2">Quick Fix Steps:</p>
                 <ol className="list-decimal list-inside space-y-1 text-sm">
-                  <li>Go to <a href="https://console.cloud.google.com/apis/library/maps-backend.googleapis.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">Google Cloud Console</a></li>
-                  <li>Enable "Maps JavaScript API"</li>
+                  <li>Go to <a href="https://console.cloud.google.com/billing" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">Enable Billing</a></li>
+                  <li>Enable "Maps JavaScript API" in <a href="https://console.cloud.google.com/apis/library/maps-backend.googleapis.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">API Library</a></li>
                   <li>Check API key restrictions match your domain</li>
-                  <li>Ensure billing is enabled on the project</li>
                 </ol>
               </div>
             </>
