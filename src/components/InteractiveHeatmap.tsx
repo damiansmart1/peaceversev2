@@ -49,7 +49,13 @@ const InteractiveHeatmap = memo(() => {
 
   // Initialize Google Maps - use preloaded instance if available
   useEffect(() => {
-    if (!mapRef.current || mapInstanceRef.current) return;
+    if (!mapRef.current) return;
+    
+    // Already initialized
+    if (mapInstanceRef.current) {
+      setMapLoaded(true);
+      return;
+    }
 
     if (!GOOGLE_MAPS_API_KEY) {
       setMapError('Google Maps API key is not configured');
@@ -57,49 +63,70 @@ const InteractiveHeatmap = memo(() => {
     }
 
     let isMounted = true;
+    let initAttempted = false;
 
     const initMap = (google: typeof window.google) => {
-      if (!isMounted || !mapRef.current || mapInstanceRef.current) return;
+      if (!isMounted || !mapRef.current || initAttempted) return;
+      initAttempted = true;
       
-      const map = new google.maps.Map(mapRef.current, {
-        center: { lat: 0, lng: 20 },
-        zoom: 4,
-        minZoom: 3,
-        maxZoom: 18,
-        mapTypeId: 'roadmap',
-        streetViewControl: false,
-        mapTypeControl: true,
-        fullscreenControl: true,
-        zoomControl: true,
-        gestureHandling: 'greedy',
-        styles: [
-          { featureType: 'poi', stylers: [{ visibility: 'off' }] },
-          { featureType: 'transit', stylers: [{ visibility: 'simplified' }] },
-        ],
-      });
-      mapInstanceRef.current = map;
-      infoWindowRef.current = new google.maps.InfoWindow({ maxWidth: 320 });
-      setMapLoaded(true);
-      setMapError(null);
+      try {
+        const map = new google.maps.Map(mapRef.current, {
+          center: { lat: 0, lng: 20 },
+          zoom: 4,
+          minZoom: 3,
+          maxZoom: 18,
+          mapTypeId: 'roadmap',
+          streetViewControl: false,
+          mapTypeControl: true,
+          fullscreenControl: true,
+          zoomControl: true,
+          gestureHandling: 'greedy',
+          styles: [
+            { featureType: 'poi', stylers: [{ visibility: 'off' }] },
+            { featureType: 'transit', stylers: [{ visibility: 'simplified' }] },
+          ],
+        });
+        mapInstanceRef.current = map;
+        infoWindowRef.current = new google.maps.InfoWindow({ maxWidth: 320 });
+        setMapLoaded(true);
+        setMapError(null);
+      } catch (error) {
+        console.error('Error initializing map:', error);
+        setMapError('Failed to initialize map');
+      }
     };
 
-    // Check if already loaded (from preload)
+    // Check if Google Maps is already loaded globally
+    if (window.google?.maps) {
+      initMap(window.google);
+      return;
+    }
+
+    // Check preloaded instance
     const existingGoogle = getGoogleMaps();
     if (existingGoogle) {
       initMap(existingGoogle);
       return;
     }
 
-    // Load if not already loaded
-    preloadGoogleMaps().then((google) => {
-      if (!isMounted || !google) {
-        if (isMounted && !google) {
-          setMapError('Failed to load Google Maps');
-        }
+    // Load via preloader with timeout fallback
+    const loadPromise = preloadGoogleMaps();
+    const timeoutId = setTimeout(() => {
+      if (isMounted && !mapInstanceRef.current) {
+        setMapError('Map loading timed out. Please refresh the page.');
+      }
+    }, 15000);
+
+    loadPromise.then((google) => {
+      clearTimeout(timeoutId);
+      if (!isMounted) return;
+      if (!google) {
+        setMapError('Failed to load Google Maps');
         return;
       }
       initMap(google);
     }).catch(error => {
+      clearTimeout(timeoutId);
       if (!isMounted) return;
       console.error('Error loading Google Maps:', error);
       setMapError('Failed to load map');
@@ -350,10 +377,8 @@ const InteractiveHeatmap = memo(() => {
 
   const totalAffected = incidents?.reduce((sum, incident) => sum + (incident.affected_population || 0), 0) || 0;
 
-  // Show loading until map is ready (not just when data is loading)
-  if (!mapLoaded && !mapError && GOOGLE_MAPS_API_KEY) {
-    return <LoadingSpinner />;
-  }
+  // Render map container always (hidden when loading) so ref is available for initialization
+  const showLoadingOverlay = !mapLoaded && !mapError && GOOGLE_MAPS_API_KEY;
 
   if (mapError || !GOOGLE_MAPS_API_KEY) {
     const hasKey = !!GOOGLE_MAPS_API_KEY;
@@ -588,11 +613,16 @@ const InteractiveHeatmap = memo(() => {
               : 'Heat intensity represents incident concentration and severity. Red areas require immediate attention.'}
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="relative">
           <div ref={mapRef} className="w-full h-[600px] rounded-lg border border-border" />
-          {isLoading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm rounded-lg">
-              <LoadingSpinner />
+          {(showLoadingOverlay || isLoading) && (
+            <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-lg">
+              <div className="flex flex-col items-center gap-3">
+                <LoadingSpinner />
+                <p className="text-sm text-muted-foreground">
+                  {showLoadingOverlay ? 'Loading map...' : 'Loading incidents...'}
+                </p>
+              </div>
             </div>
           )}
         </CardContent>
