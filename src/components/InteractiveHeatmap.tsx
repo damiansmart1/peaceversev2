@@ -1,4 +1,3 @@
-/// <reference types="google.maps" />
 import { useEffect, useRef, useState, memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,9 +10,8 @@ import { exportToJSON, exportToCSV, exportToPDF, exportToWord } from '@/lib/expo
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { preloadGoogleMaps, isGoogleMapsReady, getGoogleMaps } from '@/hooks/useGoogleMapsPreloader';
-
-const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
 const SEVERITY_LEVELS = [
   { value: 'all', label: 'All Severities' },
@@ -23,19 +21,24 @@ const SEVERITY_LEVELS = [
   { value: 'low', label: 'Low' },
 ];
 
+// Fix Leaflet default marker icon issue
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+});
+
 const InteractiveHeatmap = memo(() => {
   const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<google.maps.Map | null>(null);
-  const markersRef = useRef<google.maps.Marker[]>([]);
-  const heatmapLayerRef = useRef<google.maps.visualization.HeatmapLayer | null>(null);
-  const infoWindowRef = useRef<google.maps.InfoWindow | null>(null);
-  const userMarkerRef = useRef<google.maps.Marker | null>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
+  const markersRef = useRef<L.CircleMarker[]>([]);
+  const userMarkerRef = useRef<L.CircleMarker | null>(null);
 
   const [selectedCountry, setSelectedCountry] = useState('all');
   const [selectedSeverity, setSelectedSeverity] = useState('all');
   const [selectedIncident, setSelectedIncident] = useState<HeatmapIncident | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
-  const [mapError, setMapError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'markers' | 'heatmap'>('markers');
 
   const { data: countriesByBlock, isLoading: countriesLoading } = useCountriesByBlock();
@@ -47,289 +50,135 @@ const InteractiveHeatmap = memo(() => {
   
   const { userLocation, locationPermission } = useIncidentNotifications(50);
 
-  // Initialize Google Maps - use preloaded instance if available
+  // Initialize Leaflet map
   useEffect(() => {
-    if (!mapRef.current) return;
-    
-    // Already initialized
-    if (mapInstanceRef.current) {
-      setMapLoaded(true);
-      return;
-    }
+    if (!mapRef.current || mapInstanceRef.current) return;
 
-    if (!GOOGLE_MAPS_API_KEY) {
-      setMapError('API_KEY_MISSING');
-      return;
-    }
+    const map = L.map(mapRef.current, {
+      center: [0, 20],
+      zoom: 4,
+      minZoom: 2,
+      maxZoom: 18,
+      scrollWheelZoom: true,
+      zoomControl: true,
+    });
 
-    let isMounted = true;
-    let initAttempted = false;
+    // Add OpenStreetMap tiles (free, no billing required)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
 
-    // Listen for Google Maps API errors
-    const handleGoogleMapsError = (event: ErrorEvent) => {
-      if (event.message?.includes('BillingNotEnabledMapError') || 
-          event.error?.message?.includes('BillingNotEnabledMapError')) {
-        setMapError('BILLING_NOT_ENABLED');
-      }
-    };
-    window.addEventListener('error', handleGoogleMapsError);
-
-    const initMap = (google: typeof window.google) => {
-      if (!isMounted || !mapRef.current || initAttempted) return;
-      initAttempted = true;
-      
-      try {
-        const map = new google.maps.Map(mapRef.current, {
-          center: { lat: 0, lng: 20 },
-          zoom: 4,
-          minZoom: 3,
-          maxZoom: 18,
-          mapTypeId: 'roadmap',
-          streetViewControl: false,
-          mapTypeControl: true,
-          fullscreenControl: true,
-          zoomControl: true,
-          gestureHandling: 'greedy',
-          styles: [
-            { featureType: 'poi', stylers: [{ visibility: 'off' }] },
-            { featureType: 'transit', stylers: [{ visibility: 'simplified' }] },
-          ],
-        });
-        
-        // Listen for authentication errors on the map
-        map.addListener('tilesloaded', () => {
-          if (isMounted) {
-            setMapLoaded(true);
-            setMapError(null);
-          }
-        });
-        
-        mapInstanceRef.current = map;
-        infoWindowRef.current = new google.maps.InfoWindow({ maxWidth: 320 });
-        
-        // Set loaded after a short delay to catch any billing errors
-        setTimeout(() => {
-          if (isMounted && !mapError) {
-            setMapLoaded(true);
-          }
-        }, 1000);
-      } catch (error) {
-        console.error('Error initializing map:', error);
-        setMapError('INIT_FAILED');
-      }
-    };
-
-    // Check if Google Maps is already loaded globally
-    if (window.google?.maps) {
-      initMap(window.google);
-    } else {
-      // Check preloaded instance
-      const existingGoogle = getGoogleMaps();
-      if (existingGoogle) {
-        initMap(existingGoogle);
-      } else {
-        // Load via preloader with timeout fallback
-        const loadPromise = preloadGoogleMaps();
-        const timeoutId = setTimeout(() => {
-          if (isMounted && !mapInstanceRef.current) {
-            setMapError('TIMEOUT');
-          }
-        }, 15000);
-
-        loadPromise.then((google) => {
-          clearTimeout(timeoutId);
-          if (!isMounted) return;
-          if (!google) {
-            setMapError('LOAD_FAILED');
-            return;
-          }
-          initMap(google);
-        }).catch(error => {
-          clearTimeout(timeoutId);
-          if (!isMounted) return;
-          console.error('Error loading Google Maps:', error);
-          setMapError('LOAD_FAILED');
-        });
-      }
-    }
+    mapInstanceRef.current = map;
+    setMapLoaded(true);
 
     return () => {
-      isMounted = false;
-      window.removeEventListener('error', handleGoogleMapsError);
+      // Don't destroy map on cleanup to prevent flickering
     };
-  }, [mapError]);
+  }, []);
   
   // Update user location marker when location changes
   useEffect(() => {
     if (userLocation && mapInstanceRef.current && mapLoaded && !userMarkerRef.current) {
-      userMarkerRef.current = new google.maps.Marker({
-        position: { lat: userLocation.latitude, lng: userLocation.longitude },
-        map: mapInstanceRef.current,
-        title: 'Your Location',
-        icon: {
-          path: google.maps.SymbolPath.CIRCLE,
-          scale: 8,
-          fillColor: '#4F46E5',
-          fillOpacity: 1,
-          strokeColor: '#ffffff',
-          strokeWeight: 2,
-        },
-        zIndex: 1000,
-      });
+      userMarkerRef.current = L.circleMarker([userLocation.latitude, userLocation.longitude], {
+        radius: 10,
+        fillColor: '#4F46E5',
+        fillOpacity: 1,
+        color: '#ffffff',
+        weight: 2,
+      }).addTo(mapInstanceRef.current);
 
-      const userInfoWindow = new google.maps.InfoWindow({
-        content: `
-          <div style="padding: 12px;">
-            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-              <span style="font-size: 18px;">📍</span>
-              <strong style="color: #4F46E5;">Your Location</strong>
-            </div>
-            <p style="color: #666; font-size: 14px; margin: 0;">
-              Monitoring critical incidents within 50km radius
-            </p>
+      userMarkerRef.current.bindPopup(`
+        <div style="padding: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+            <span style="font-size: 18px;">📍</span>
+            <strong style="color: #4F46E5;">Your Location</strong>
           </div>
-        `,
-      });
-
-      userMarkerRef.current.addListener('click', () => {
-        userInfoWindow.open(mapInstanceRef.current, userMarkerRef.current);
-      });
+          <p style="color: #666; font-size: 14px; margin: 0;">
+            Monitoring critical incidents within 50km radius
+          </p>
+        </div>
+      `);
     }
   }, [userLocation, mapLoaded]);
 
-  // Update markers and heatmap when data changes
+  // Update markers when data changes
   useEffect(() => {
     if (!mapInstanceRef.current || !incidents || !mapLoaded) return;
 
     // Clear existing markers
-    markersRef.current.forEach(marker => marker.setMap(null));
+    markersRef.current.forEach(marker => marker.remove());
     markersRef.current = [];
 
-    // Clear existing heatmap
-    if (heatmapLayerRef.current) {
-      heatmapLayerRef.current.setMap(null);
-    }
+    // Create markers
+    incidents.forEach(incident => {
+      if (!incident.geo_location?.latitude || !incident.geo_location?.longitude) return;
 
-    if (viewMode === 'markers') {
-      // Create markers
-      incidents.forEach(incident => {
-        if (!incident.geo_location?.latitude || !incident.geo_location?.longitude) return;
+      const marker = L.circleMarker(
+        [incident.geo_location.latitude, incident.geo_location.longitude],
+        {
+          radius: getSeverityScale(incident.severity),
+          fillColor: getSeverityColor(incident.severity),
+          fillOpacity: 0.8,
+          color: '#ffffff',
+          weight: 2,
+        }
+      ).addTo(mapInstanceRef.current!);
 
-        const marker = new google.maps.Marker({
-          position: {
-            lat: incident.geo_location.latitude,
-            lng: incident.geo_location.longitude,
-          },
-          map: mapInstanceRef.current,
-          title: incident.title,
-          icon: {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: getSeverityScale(incident.severity),
-            fillColor: getSeverityColor(incident.severity),
-            fillOpacity: 0.8,
-            strokeColor: '#ffffff',
-            strokeWeight: 2,
-          },
-        });
+      const popupContent = `
+        <div style="padding: 12px; max-width: 320px; font-family: system-ui, -apple-system, sans-serif;">
+          <h3 style="font-weight: 700; margin-bottom: 12px; color: #1a1a1a; font-size: 16px; line-height: 1.4;">${incident.title}</h3>
+          <div style="display: grid; gap: 8px;">
+            <div style="display: flex; gap: 8px;">
+              <span style="font-weight: 600; color: #666; min-width: 80px;">Type:</span>
+              <span style="color: #1a1a1a;">${incident.incident_type}</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <span style="font-weight: 600; color: #666; min-width: 80px;">Severity:</span>
+              <span style="color: ${getSeverityColor(incident.severity)}; font-weight: 700; text-transform: uppercase;">${incident.severity}</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <span style="font-weight: 600; color: #666; min-width: 80px;">Status:</span>
+              <span style="color: #1a1a1a; text-transform: capitalize;">${incident.status.replace('_', ' ')}</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <span style="font-weight: 600; color: #666; min-width: 80px;">Location:</span>
+              <span style="color: #1a1a1a;">${incident.geo_location?.location_name || 'Unknown'}</span>
+            </div>
+            ${incident.affected_population ? `
+            <div style="display: flex; gap: 8px;">
+              <span style="font-weight: 600; color: #666; min-width: 80px;">Affected:</span>
+              <span style="color: #1a1a1a;">${incident.affected_population.toLocaleString()} people</span>
+            </div>` : ''}
+            <div style="display: flex; gap: 8px;">
+              <span style="font-weight: 600; color: #666; min-width: 80px;">Reported:</span>
+              <span style="color: #1a1a1a;">${new Date(incident.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+            </div>
+          </div>
+          ${incident.description ? `<p style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e5e5; color: #666; font-size: 14px; line-height: 1.5;">${incident.description.substring(0, 150)}${incident.description.length > 150 ? '...' : ''}</p>` : ''}
+        </div>
+      `;
 
-        marker.addListener('click', () => {
-          setSelectedIncident(incident);
-          showInfoWindow(marker, incident);
-        });
-
-        markersRef.current.push(marker);
+      marker.bindPopup(popupContent, { maxWidth: 320 });
+      marker.on('click', () => {
+        setSelectedIncident(incident);
       });
-    } else {
-      // Create heatmap
-      const heatmapData = incidents
-        .filter(incident => incident.geo_location?.latitude && incident.geo_location?.longitude)
-        .map(incident => ({
-          location: new google.maps.LatLng(
-            incident.geo_location.latitude,
-            incident.geo_location.longitude
-          ),
-          weight: getSeverityWeight(incident.severity),
-        }));
 
-      heatmapLayerRef.current = new google.maps.visualization.HeatmapLayer({
-        data: heatmapData,
-        map: mapInstanceRef.current,
-        radius: 35,
-        opacity: 0.75,
-        gradient: [
-          'rgba(0, 255, 255, 0)',
-          'rgba(0, 255, 255, 1)',
-          'rgba(0, 191, 255, 1)',
-          'rgba(0, 127, 255, 1)',
-          'rgba(0, 63, 255, 1)',
-          'rgba(0, 0, 255, 1)',
-          'rgba(0, 0, 223, 1)',
-          'rgba(0, 0, 191, 1)',
-          'rgba(0, 0, 159, 1)',
-          'rgba(0, 0, 127, 1)',
-          'rgba(63, 0, 91, 1)',
-          'rgba(127, 0, 63, 1)',
-          'rgba(191, 0, 31, 1)',
-          'rgba(255, 0, 0, 1)'
-        ]
-      });
-    }
+      markersRef.current.push(marker);
+    });
 
     // Fit bounds to show all incidents
     if (incidents.length > 0) {
-      const bounds = new google.maps.LatLngBounds();
-      incidents.forEach(incident => {
-        if (incident.geo_location?.latitude && incident.geo_location?.longitude) {
-          bounds.extend({
-            lat: incident.geo_location.latitude,
-            lng: incident.geo_location.longitude,
-          });
-        }
-      });
-      mapInstanceRef.current.fitBounds(bounds);
+      const validIncidents = incidents.filter(
+        i => i.geo_location?.latitude && i.geo_location?.longitude
+      );
+      if (validIncidents.length > 0) {
+        const bounds = L.latLngBounds(
+          validIncidents.map(i => [i.geo_location.latitude, i.geo_location.longitude] as [number, number])
+        );
+        mapInstanceRef.current.fitBounds(bounds, { padding: [50, 50] });
+      }
     }
   }, [incidents, mapLoaded, viewMode]);
-
-  const showInfoWindow = (marker: google.maps.Marker, incident: HeatmapIncident) => {
-    if (!infoWindowRef.current) return;
-
-    const content = `
-      <div style="padding: 12px; max-width: 320px; font-family: system-ui, -apple-system, sans-serif;">
-        <h3 style="font-weight: 700; margin-bottom: 12px; color: #1a1a1a; font-size: 16px; line-height: 1.4;">${incident.title}</h3>
-        <div style="display: grid; gap: 8px;">
-          <div style="display: flex; gap: 8px;">
-            <span style="font-weight: 600; color: #666; min-width: 80px;">Type:</span>
-            <span style="color: #1a1a1a;">${incident.incident_type}</span>
-          </div>
-          <div style="display: flex; gap: 8px;">
-            <span style="font-weight: 600; color: #666; min-width: 80px;">Severity:</span>
-            <span style="color: ${getSeverityColor(incident.severity)}; font-weight: 700; text-transform: uppercase;">${incident.severity}</span>
-          </div>
-          <div style="display: flex; gap: 8px;">
-            <span style="font-weight: 600; color: #666; min-width: 80px;">Status:</span>
-            <span style="color: #1a1a1a; text-transform: capitalize;">${incident.status.replace('_', ' ')}</span>
-          </div>
-          <div style="display: flex; gap: 8px;">
-            <span style="font-weight: 600; color: #666; min-width: 80px;">Location:</span>
-            <span style="color: #1a1a1a;">${incident.geo_location?.location_name || 'Unknown'}</span>
-          </div>
-          ${incident.affected_population ? `
-          <div style="display: flex; gap: 8px;">
-            <span style="font-weight: 600; color: #666; min-width: 80px;">Affected:</span>
-            <span style="color: #1a1a1a;">${incident.affected_population.toLocaleString()} people</span>
-          </div>` : ''}
-          <div style="display: flex; gap: 8px;">
-            <span style="font-weight: 600; color: #666; min-width: 80px;">Reported:</span>
-            <span style="color: #1a1a1a;">${new Date(incident.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
-          </div>
-        </div>
-        ${incident.description ? `<p style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e5e5; color: #666; font-size: 14px; line-height: 1.5;">${incident.description.substring(0, 150)}${incident.description.length > 150 ? '...' : ''}</p>` : ''}
-      </div>
-    `;
-
-    infoWindowRef.current.setContent(content);
-    infoWindowRef.current.open(mapInstanceRef.current, marker);
-  };
 
   const getSeverityColor = (severity: string): string => {
     switch (severity) {
@@ -348,16 +197,6 @@ const InteractiveHeatmap = memo(() => {
       case 'medium': return 8;
       case 'low': return 6;
       default: return 5;
-    }
-  };
-
-  const getSeverityWeight = (severity: string): number => {
-    switch (severity) {
-      case 'critical': return 4;
-      case 'high': return 3;
-      case 'medium': return 2;
-      case 'low': return 1;
-      default: return 1;
     }
   };
 
@@ -399,146 +238,50 @@ const InteractiveHeatmap = memo(() => {
 
   const totalAffected = incidents?.reduce((sum, incident) => sum + (incident.affected_population || 0), 0) || 0;
 
-  // Render map container always (hidden when loading) so ref is available for initialization
-  const showLoadingOverlay = !mapLoaded && !mapError && GOOGLE_MAPS_API_KEY;
-
-  if (mapError || !GOOGLE_MAPS_API_KEY) {
-    const isBillingError = mapError === 'BILLING_NOT_ENABLED';
-    const hasKey = !!GOOGLE_MAPS_API_KEY;
-    
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-destructive">
-            <AlertTriangle className="w-5 h-5" />
-            {isBillingError ? 'Google Cloud Billing Required' : hasKey ? 'Map Loading Failed' : 'Google Maps API Key Required'}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {isBillingError ? (
-            <>
-              <p className="text-muted-foreground">
-                <strong>Billing is not enabled</strong> on the Google Cloud project associated with this API key.
-                Google Maps requires billing to be enabled, even for free tier usage.
-              </p>
-              <div className="bg-amber-500/10 border border-amber-500/30 p-4 rounded-lg">
-                <p className="text-sm font-medium text-amber-600 dark:text-amber-400 mb-3">⚠️ Action Required:</p>
-                <ol className="list-decimal list-inside space-y-2 text-sm">
-                  <li>Go to <a href="https://console.cloud.google.com/billing" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">Google Cloud Billing</a></li>
-                  <li>Link a billing account to your project</li>
-                  <li>Return here and refresh the page</li>
-                </ol>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                💡 Google provides $200 free monthly credit which covers most use cases.
-              </p>
-            </>
-          ) : hasKey ? (
-            <>
-              <p className="text-muted-foreground">
-                The Google Maps API key is configured but failed to load. This usually happens when:
-              </p>
-              <ul className="list-disc list-inside space-y-2 text-sm text-muted-foreground">
-                <li><strong>Maps JavaScript API not enabled</strong> - Enable it in Google Cloud Console</li>
-                <li><strong>API key restrictions</strong> - Check HTTP referrer or IP restrictions</li>
-                <li><strong>Billing not enabled</strong> - Google Maps requires billing to be enabled</li>
-                <li><strong>Quota exceeded</strong> - Check your API usage limits</li>
-              </ul>
-              <div className="bg-primary/10 p-4 rounded-lg">
-                <p className="text-sm font-medium text-primary mb-2">Quick Fix Steps:</p>
-                <ol className="list-decimal list-inside space-y-1 text-sm">
-                  <li>Go to <a href="https://console.cloud.google.com/billing" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">Enable Billing</a></li>
-                  <li>Enable "Maps JavaScript API" in <a href="https://console.cloud.google.com/apis/library/maps-backend.googleapis.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">API Library</a></li>
-                  <li>Check API key restrictions match your domain</li>
-                </ol>
-              </div>
-            </>
-          ) : (
-            <>
-              <p className="text-muted-foreground">
-                The interactive map requires a Google Maps API key to function. Please follow these steps:
-              </p>
-              <ol className="list-decimal list-inside space-y-2 text-sm">
-                <li>Visit the <a href="https://console.cloud.google.com/google/maps-apis" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Google Cloud Console</a></li>
-                <li>Create or select a project</li>
-                <li>Enable the Maps JavaScript API and Places API</li>
-                <li>Create an API key with appropriate restrictions</li>
-                <li>Add the API key to your <code className="bg-muted px-2 py-1 rounded">VITE_GOOGLE_MAPS_API_KEY</code> environment variable</li>
-              </ol>
-              <div className="bg-muted p-4 rounded-lg">
-                <p className="text-xs font-mono">
-                  # Add to your .env file:<br />
-                  VITE_GOOGLE_MAPS_API_KEY=your_api_key_here
-                </p>
-              </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
     <div className="space-y-6">
-      {/* Controls */}
+      {/* Filters and Controls */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <MapPin className="w-5 h-5" />
-                Interactive Heatmap Controls
-              </CardTitle>
-              <CardDescription>Filter and export incident data for early response planning</CardDescription>
-            </div>
-            {locationPermission === 'granted' && (
-              <Badge variant="secondary" className="flex items-center gap-1.5">
-                <MapPinned className="h-3 w-3" />
-                <span>Live Alerts Active</span>
-              </Badge>
-            )}
-          </div>
+          <CardTitle className="flex items-center gap-2">
+            <MapPinned className="w-5 h-5" />
+            Interactive Incident Map
+          </CardTitle>
+          <CardDescription>
+            Real-time visualization of reported incidents across Africa
+          </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <CardContent>
+          <div className="flex flex-wrap items-center gap-4 mb-4">
+            {/* Country Filter */}
             <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-              <SelectTrigger className="bg-card border-border">
-                <Globe className="w-4 h-4 mr-2 text-primary" />
-                <SelectValue placeholder="Select Country">
-                  {selectedCountry === 'all' ? 'All African Countries' : 
-                    countriesByBlock?.flatMap(g => g.countries).find(c => c.code === selectedCountry)?.name || selectedCountry}
-                </SelectValue>
+              <SelectTrigger className="w-[200px]">
+                <Globe className="w-4 h-4 mr-2" />
+                <SelectValue placeholder="Select Country" />
               </SelectTrigger>
-              <SelectContent className="bg-popover border-border max-h-[400px]">
-                <SelectItem value="all" className="font-semibold">
-                  All African Countries
-                </SelectItem>
-                
-                {countriesLoading ? (
-                  <SelectItem value="loading" disabled>Loading...</SelectItem>
-                ) : (
-                  countriesByBlock?.map(({ block, countries }) => (
-                    <SelectGroup key={block.id}>
-                      <SelectLabel className="text-xs font-bold text-primary uppercase tracking-wider py-2 px-2 bg-muted/50">
-                        {block.name} - {block.full_name}
-                      </SelectLabel>
-                      {countries.map(country => (
-                        <SelectItem key={country.code} value={country.code} className="pl-4">
-                          {country.name}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  ))
-                )}
+            <SelectContent>
+                <SelectItem value="all">All Countries</SelectItem>
+                {countriesByBlock && Object.entries(countriesByBlock).map(([block, blockData]) => (
+                  <SelectGroup key={block}>
+                    <SelectLabel>{block}</SelectLabel>
+                    {((blockData as any)?.countries || []).map((country: any) => (
+                      <SelectItem key={country.code} value={country.code}>
+                        {country.name}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                ))}
               </SelectContent>
             </Select>
 
+            {/* Severity Filter */}
             <Select value={selectedSeverity} onValueChange={setSelectedSeverity}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select Severity" />
+              <SelectTrigger className="w-[180px]">
+                <AlertTriangle className="w-4 h-4 mr-2" />
+                <SelectValue placeholder="Severity Level" />
               </SelectTrigger>
               <SelectContent>
-                {SEVERITY_LEVELS.map(level => (
+                {SEVERITY_LEVELS.map((level) => (
                   <SelectItem key={level.value} value={level.value}>
                     {level.label}
                   </SelectItem>
@@ -546,123 +289,117 @@ const InteractiveHeatmap = memo(() => {
               </SelectContent>
             </Select>
 
-            <Select value={viewMode} onValueChange={(value: 'markers' | 'heatmap') => setViewMode(value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="View Mode" />
+            {/* View Mode Toggle */}
+            <div className="flex gap-2">
+              <Button
+                variant={viewMode === 'markers' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('markers')}
+              >
+                <MapPin className="w-4 h-4 mr-1" />
+                Markers
+              </Button>
+            </div>
+
+            {/* Export Dropdown */}
+            <Select onValueChange={(value) => handleExport(value as any)}>
+              <SelectTrigger className="w-[140px]">
+                <Download className="w-4 h-4 mr-2" />
+                <SelectValue placeholder="Export" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="markers">Markers</SelectItem>
-                <SelectItem value="heatmap">Heatmap</SelectItem>
+                <SelectItem value="json">JSON</SelectItem>
+                <SelectItem value="csv">CSV</SelectItem>
+                <SelectItem value="pdf">PDF Report</SelectItem>
+                <SelectItem value="word">Word Document</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-            <Button onClick={() => handleExport('json')} variant="outline" size="sm">
-              <Download className="w-4 h-4 mr-1" /> JSON
-            </Button>
-            <Button onClick={() => handleExport('csv')} variant="outline" size="sm">
-              <Download className="w-4 h-4 mr-1" /> CSV
-            </Button>
-            <Button onClick={() => handleExport('pdf')} variant="outline" size="sm">
-              <Download className="w-4 h-4 mr-1" /> PDF
-            </Button>
-            <Button onClick={() => handleExport('word')} variant="outline" size="sm">
-              <Download className="w-4 h-4 mr-1" /> Word
-            </Button>
+          {/* Stats Summary */}
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
+            <Card className="p-3 bg-muted/50">
+              <div className="flex items-center gap-2">
+                <Activity className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium">Total Incidents</span>
+              </div>
+              <p className="text-2xl font-bold">{incidents?.length || 0}</p>
+            </Card>
+            <Card className="p-3 bg-red-500/10 border-red-500/20">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-red-500" />
+                <span className="text-sm font-medium text-red-600">Critical</span>
+              </div>
+              <p className="text-2xl font-bold text-red-600">{severityStats.critical || 0}</p>
+            </Card>
+            <Card className="p-3 bg-orange-500/10 border-orange-500/20">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-orange-500" />
+                <span className="text-sm font-medium text-orange-600">High</span>
+              </div>
+              <p className="text-2xl font-bold text-orange-600">{severityStats.high || 0}</p>
+            </Card>
+            <Card className="p-3 bg-yellow-500/10 border-yellow-500/20">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-yellow-500" />
+                <span className="text-sm font-medium text-yellow-600">Medium</span>
+              </div>
+              <p className="text-2xl font-bold text-yellow-600">{severityStats.medium || 0}</p>
+            </Card>
+            <Card className="p-3 bg-green-500/10 border-green-500/20">
+              <div className="flex items-center gap-2">
+                <Users className="w-4 h-4 text-green-500" />
+                <span className="text-sm font-medium text-green-600">Affected</span>
+              </div>
+              <p className="text-2xl font-bold text-green-600">{totalAffected.toLocaleString()}</p>
+            </Card>
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Statistics Dashboard */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Activity className="w-4 h-4" />
-              Total Incidents
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{incidents?.length || 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">Active hotspots</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-destructive" />
-              Critical
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-destructive">{severityStats.critical || 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">Immediate attention</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-orange-500" />
-              High Priority
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-orange-500">{severityStats.high || 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">Urgent response</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Users className="w-4 h-4" />
-              People Affected
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{totalAffected.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground mt-1">Estimated impact</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
-              Last Updated
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-lg font-bold">
-              {incidents?.[0] ? new Date(incidents[0].created_at).toLocaleDateString() : 'N/A'}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">Real-time sync</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Map Container */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Live Incident Map</CardTitle>
-          <CardDescription>
-            {viewMode === 'markers' 
-              ? 'Click on markers for detailed information. Larger circles indicate higher severity incidents.'
-              : 'Heat intensity represents incident concentration and severity. Red areas require immediate attention.'}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="relative">
-          <div ref={mapRef} className="w-full h-[600px] rounded-lg border border-border" />
-          {(showLoadingOverlay || isLoading) && (
-            <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-lg">
-              <div className="flex flex-col items-center gap-3">
+          {/* Map Container */}
+          <div className="relative rounded-lg overflow-hidden border bg-muted">
+            <div 
+              ref={mapRef} 
+              className="w-full h-[500px]"
+              style={{ zIndex: 1 }}
+            />
+            {!mapLoaded && (
+              <div className="absolute inset-0 flex items-center justify-center bg-muted">
                 <LoadingSpinner />
-                <p className="text-sm text-muted-foreground">
-                  {showLoadingOverlay ? 'Loading map...' : 'Loading incidents...'}
-                </p>
+                <span className="ml-2">Loading map...</span>
+              </div>
+            )}
+            {/* Legend */}
+            {mapLoaded && (
+              <div className="absolute bottom-4 left-4 bg-background/95 backdrop-blur-sm p-3 rounded-lg border shadow-lg z-[1000]">
+                <p className="font-semibold text-xs mb-2">Severity Level</p>
+                <div className="space-y-1 text-xs">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-red-600" />
+                    <span>Critical</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-orange-500" />
+                    <span>High</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                    <span>Medium</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-lime-500" />
+                    <span>Low</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Location Permission Notice */}
+          {locationPermission === 'prompt' && (
+            <div className="mt-4 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-blue-500" />
+                <span className="text-sm">Enable location to receive alerts for nearby incidents</span>
               </div>
             </div>
           )}
@@ -671,95 +408,50 @@ const InteractiveHeatmap = memo(() => {
 
       {/* Selected Incident Details */}
       {selectedIncident && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="w-5 h-5" />
-              Incident Details
-            </CardTitle>
+        <Card className="border-primary">
+          <CardHeader className="pb-2">
+            <div className="flex items-start justify-between">
+              <div>
+                <Badge 
+                  className="mb-2"
+                  variant={selectedIncident.severity === 'critical' ? 'destructive' : 'secondary'}
+                >
+                  {selectedIncident.severity.toUpperCase()}
+                </Badge>
+                <CardTitle>{selectedIncident.title}</CardTitle>
+              </div>
+              <Button variant="ghost" size="sm" onClick={() => setSelectedIncident(null)}>
+                ✕
+              </Button>
+            </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <h3 className="font-bold text-lg mb-2">{selectedIncident.title}</h3>
-              <Badge className={`${getSeverityColor(selectedIncident.severity)}`}>
-                {selectedIncident.severity.toUpperCase()}
-              </Badge>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-muted-foreground">Type</p>
-                <p className="font-medium">{selectedIncident.incident_type}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Status</p>
-                <p className="font-medium capitalize">{selectedIncident.status}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Location</p>
-                <p className="font-medium">{selectedIncident.geo_location?.location_name || 'Unknown'}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Country</p>
-                <p className="font-medium">{selectedIncident.country_code || 'N/A'}</p>
-              </div>
-              {selectedIncident.affected_population && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Affected Population</p>
-                  <p className="font-medium">{selectedIncident.affected_population.toLocaleString()} people</p>
+          <CardContent>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm">
+                  <MapPin className="w-4 h-4 text-muted-foreground" />
+                  <span>{selectedIncident.geo_location?.location_name || 'Unknown location'}</span>
                 </div>
-              )}
-              <div>
-                <p className="text-sm text-muted-foreground">Reported</p>
-                <p className="font-medium">{new Date(selectedIncident.created_at).toLocaleString()}</p>
-              </div>
-            </div>
-
-            <div>
-              <p className="text-sm text-muted-foreground mb-2">Description</p>
-              <p className="text-sm">{selectedIncident.description}</p>
-            </div>
-
-            {selectedIncident.response_actions && (
-              <div>
-                <p className="text-sm text-muted-foreground mb-2">Response Actions</p>
-                <div className="bg-muted p-3 rounded-lg">
-                  <pre className="text-xs whitespace-pre-wrap">
-                    {JSON.stringify(selectedIncident.response_actions, null, 2)}
-                  </pre>
+                <div className="flex items-center gap-2 text-sm">
+                  <Calendar className="w-4 h-4 text-muted-foreground" />
+                  <span>{new Date(selectedIncident.created_at).toLocaleDateString()}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <FileText className="w-4 h-4 text-muted-foreground" />
+                  <span>Type: {selectedIncident.incident_type}</span>
                 </div>
               </div>
-            )}
+              <div>
+                <p className="text-sm text-muted-foreground">{selectedIncident.description}</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       )}
-
-      {/* Legend */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Severity Legend</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-4">
-            {[
-              { severity: 'critical', label: 'Critical - Immediate Action Required' },
-              { severity: 'high', label: 'High - Urgent Response Needed' },
-              { severity: 'medium', label: 'Medium - Monitor Closely' },
-              { severity: 'low', label: 'Low - Routine Follow-up' },
-            ].map(item => (
-              <div key={item.severity} className="flex items-center gap-2">
-                <div
-                  className="w-4 h-4 rounded-full border-2 border-white"
-                  style={{ backgroundColor: getSeverityColor(item.severity) }}
-                />
-                <span className="text-sm">{item.label}</span>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 });
+
+InteractiveHeatmap.displayName = 'InteractiveHeatmap';
 
 export default InteractiveHeatmap;

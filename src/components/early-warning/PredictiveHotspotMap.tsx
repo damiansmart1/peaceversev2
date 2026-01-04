@@ -7,9 +7,16 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import RecommendedActionsPanel from './RecommendedActionsPanel';
 import { useEffect, useRef, useState, memo } from 'react';
-import { preloadGoogleMaps, getGoogleMaps } from '@/hooks/useGoogleMapsPreloader';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
-const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
+// Fix Leaflet default marker icon issue
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+});
 
 interface PredictiveHotspotMapProps {
   selectedCountry?: string;
@@ -18,12 +25,10 @@ interface PredictiveHotspotMapProps {
 const PredictiveHotspotMap = memo(({ selectedCountry = 'ALL' }: PredictiveHotspotMapProps) => {
   const { toast } = useToast();
   const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<google.maps.Map | null>(null);
-  const markersRef = useRef<google.maps.Marker[]>([]);
-  const circlesRef = useRef<google.maps.Circle[]>([]);
-  const infoWindowRef = useRef<google.maps.InfoWindow | null>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
+  const markersRef = useRef<L.CircleMarker[]>([]);
+  const circlesRef = useRef<L.Circle[]>([]);
   const [mapLoaded, setMapLoaded] = useState(false);
-  const [mapError, setMapError] = useState<string | null>(null);
   const [selectedHotspot, setSelectedHotspot] = useState<any>(null);
 
   const { data: hotspots, isLoading, refetch } = useQuery({
@@ -46,67 +51,27 @@ const PredictiveHotspotMap = memo(({ selectedCountry = 'ALL' }: PredictiveHotspo
     },
   });
 
-  // Initialize map using shared preloader
+  // Initialize Leaflet map
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return;
 
-    if (!GOOGLE_MAPS_API_KEY) {
-      setMapError('Google Maps API key is not configured. Please add VITE_GOOGLE_MAPS_API_KEY to your environment secrets.');
-      return;
-    }
-
-    let isMounted = true;
-
-    const mapStyles = [
-      { elementType: 'geometry', stylers: [{ color: '#1a1a2e' }] },
-      { elementType: 'labels.text.stroke', stylers: [{ color: '#1a1a2e' }] },
-      { elementType: 'labels.text.fill', stylers: [{ color: '#8892b0' }] },
-      { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0a192f' }] },
-      { featureType: 'landscape', elementType: 'geometry', stylers: [{ color: '#112240' }] },
-      { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#1d3461' }] },
-      { featureType: 'poi', elementType: 'geometry', stylers: [{ color: '#1a1a2e' }] },
-    ];
-
-    const initMap = (google: typeof window.google) => {
-      if (!isMounted || !mapRef.current || mapInstanceRef.current) return;
-      
-      const map = new google.maps.Map(mapRef.current, {
-        center: { lat: 0, lng: 20 },
-        zoom: 3,
-        mapTypeId: 'terrain',
-        gestureHandling: 'greedy',
-        styles: mapStyles,
-      });
-      mapInstanceRef.current = map;
-      infoWindowRef.current = new google.maps.InfoWindow();
-      setMapLoaded(true);
-      setMapError(null);
-    };
-
-    // Check if already loaded (from preload)
-    const existingGoogle = getGoogleMaps();
-    if (existingGoogle) {
-      initMap(existingGoogle);
-      return;
-    }
-
-    // Load if not already loaded
-    preloadGoogleMaps().then((google) => {
-      if (!isMounted || !google) {
-        if (isMounted && !google) {
-          setMapError('Failed to load Google Maps. Please check your API configuration.');
-        }
-        return;
-      }
-      initMap(google);
-    }).catch(error => {
-      if (!isMounted) return;
-      console.error('Map initialization error:', error);
-      setMapError('Failed to initialize the map. Please check your Google Maps API configuration.');
+    const map = L.map(mapRef.current, {
+      center: [0, 20],
+      zoom: 3,
+      scrollWheelZoom: true,
+      zoomControl: true,
     });
 
+    // Dark theme tiles
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+    }).addTo(map);
+
+    mapInstanceRef.current = map;
+    setMapLoaded(true);
+
     return () => {
-      isMounted = false;
+      // Don't destroy map on cleanup
     };
   }, []);
 
@@ -115,13 +80,10 @@ const PredictiveHotspotMap = memo(({ selectedCountry = 'ALL' }: PredictiveHotspo
     if (!mapLoaded || !mapInstanceRef.current || !hotspots) return;
 
     // Clear existing markers and circles
-    markersRef.current.forEach(marker => marker.setMap(null));
+    markersRef.current.forEach(marker => marker.remove());
     markersRef.current = [];
-    circlesRef.current.forEach(circle => circle.setMap(null));
+    circlesRef.current.forEach(circle => circle.remove());
     circlesRef.current = [];
-
-    const bounds = new google.maps.LatLngBounds();
-    let hasValidLocations = false;
 
     const riskColors: Record<string, string> = {
       critical: '#dc2626',
@@ -131,72 +93,67 @@ const PredictiveHotspotMap = memo(({ selectedCountry = 'ALL' }: PredictiveHotspo
       low: '#22c55e',
     };
 
+    const validLocations: [number, number][] = [];
+
     hotspots.forEach((hotspot: any) => {
       if (!hotspot.latitude || !hotspot.longitude) return;
       
-      const position = { lat: Number(hotspot.latitude), lng: Number(hotspot.longitude) };
-      bounds.extend(position);
-      hasValidLocations = true;
+      const lat = Number(hotspot.latitude);
+      const lng = Number(hotspot.longitude);
+      validLocations.push([lat, lng]);
 
       const color = riskColors[hotspot.risk_level] || '#22c55e';
 
       // Create circle to show radius
-      const circle = new google.maps.Circle({
-        map: mapInstanceRef.current,
-        center: position,
+      const circle = L.circle([lat, lng], {
         radius: (hotspot.radius_km || 10) * 1000,
         fillColor: color,
         fillOpacity: 0.2,
-        strokeColor: color,
-        strokeOpacity: 0.6,
-        strokeWeight: 2,
-      });
+        color: color,
+        weight: 2,
+      }).addTo(mapInstanceRef.current!);
       circlesRef.current.push(circle);
 
-      // Create standard marker with custom icon
-      const marker = new google.maps.Marker({
-        map: mapInstanceRef.current,
-        position,
-        title: `${hotspot.region_name}, ${hotspot.country}`,
-        icon: {
-          path: google.maps.SymbolPath.CIRCLE,
-          scale: 15,
-          fillColor: color,
-          fillOpacity: 1,
-          strokeColor: '#ffffff',
-          strokeWeight: 3,
-        },
-        label: {
-          text: `${hotspot.hotspot_score}%`,
-          color: '#ffffff',
-          fontSize: '10px',
-          fontWeight: 'bold',
-        },
+      // Create marker
+      const marker = L.circleMarker([lat, lng], {
+        radius: 18,
+        fillColor: color,
+        fillOpacity: 1,
+        color: '#ffffff',
+        weight: 3,
+      }).addTo(mapInstanceRef.current!);
+
+      marker.bindPopup(`
+        <div style="padding: 8px; min-width: 200px;">
+          <strong style="font-size: 14px;">${hotspot.region_name}, ${hotspot.country}</strong>
+          <div style="margin-top: 8px; font-size: 12px;">
+            <div>Risk Level: <strong style="color: ${color};">${hotspot.risk_level?.toUpperCase()}</strong></div>
+            <div>Score: <strong>${hotspot.hotspot_score}%</strong></div>
+            <div>Incidents (30d): <strong>${hotspot.incident_count_30d}</strong></div>
+          </div>
+        </div>
+      `);
+
+      marker.on('click', () => {
+        setSelectedHotspot(hotspot);
       });
 
-      marker.addListener('click', () => {
-        setSelectedHotspot(hotspot);
-        if (infoWindowRef.current) {
-          infoWindowRef.current.setContent(`
-            <div style="padding: 8px; min-width: 200px;">
-              <strong style="font-size: 14px;">${hotspot.region_name}, ${hotspot.country}</strong>
-              <div style="margin-top: 8px; font-size: 12px;">
-                <div>Risk Level: <strong style="color: ${color};">${hotspot.risk_level?.toUpperCase()}</strong></div>
-                <div>Score: <strong>${hotspot.hotspot_score}%</strong></div>
-                <div>Incidents (30d): <strong>${hotspot.incident_count_30d}</strong></div>
-              </div>
-            </div>
-          `);
-          infoWindowRef.current.open(mapInstanceRef.current, marker);
-        }
+      // Add label using DivIcon
+      const labelIcon = L.divIcon({
+        className: 'custom-label',
+        html: `<div style="color: white; font-size: 10px; font-weight: bold; text-align: center; line-height: 18px;">${hotspot.hotspot_score}%</div>`,
+        iconSize: [36, 18],
+        iconAnchor: [18, 9],
       });
+      L.marker([lat, lng], { icon: labelIcon, interactive: false }).addTo(mapInstanceRef.current!);
 
       markersRef.current.push(marker);
     });
 
-    if (hasValidLocations && markersRef.current.length > 0) {
-      mapInstanceRef.current.fitBounds(bounds, 50);
-      if (markersRef.current.length === 1) {
+    if (validLocations.length > 0) {
+      const bounds = L.latLngBounds(validLocations);
+      mapInstanceRef.current.fitBounds(bounds, { padding: [50, 50] });
+      if (validLocations.length === 1) {
         mapInstanceRef.current.setZoom(8);
       }
     }
@@ -273,53 +230,45 @@ const PredictiveHotspotMap = memo(({ selectedCountry = 'ALL' }: PredictiveHotspo
           </div>
         </CardHeader>
         <CardContent>
-          {mapError ? (
-            <div className="h-[400px] flex items-center justify-center bg-muted rounded-lg">
-              <div className="text-center space-y-2 p-4">
-                <AlertCircle className="w-12 h-12 mx-auto text-destructive" />
-                <p className="text-destructive font-medium">{mapError}</p>
+          <div className="relative">
+            <div 
+              ref={mapRef} 
+              className="w-full h-[400px] rounded-lg overflow-hidden bg-muted"
+              style={{ zIndex: 1 }}
+            />
+            {!mapLoaded && (
+              <div className="absolute inset-0 flex items-center justify-center bg-muted rounded-lg">
+                <div className="text-center space-y-2">
+                  <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
+                  <p className="text-sm text-muted-foreground">Loading map...</p>
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="relative">
-              <div 
-                ref={mapRef} 
-                className="w-full h-[400px] rounded-lg overflow-hidden bg-muted"
-              />
-              {!mapLoaded && (
-                <div className="absolute inset-0 flex items-center justify-center bg-muted rounded-lg">
-                  <div className="text-center space-y-2">
-                    <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
-                    <p className="text-sm text-muted-foreground">Loading map...</p>
+            )}
+            {/* Legend */}
+            {mapLoaded && (
+              <div className="absolute bottom-4 left-4 bg-background/90 backdrop-blur-sm p-3 rounded-lg border z-[1000]">
+                <p className="font-semibold text-xs mb-2">Risk Level</p>
+                <div className="space-y-1 text-xs">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-red-600" />
+                    <span>Critical</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-orange-500" />
+                    <span>High</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                    <span>Moderate</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-green-500" />
+                    <span>Low</span>
                   </div>
                 </div>
-              )}
-              {/* Legend */}
-              {mapLoaded && (
-                <div className="absolute bottom-4 left-4 bg-background/90 backdrop-blur-sm p-3 rounded-lg border">
-                  <p className="font-semibold text-xs mb-2">Risk Level</p>
-                  <div className="space-y-1 text-xs">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-red-600" />
-                      <span>Critical</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-orange-500" />
-                      <span>High</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-yellow-500" />
-                      <span>Moderate</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-green-500" />
-                      <span>Low</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
 
@@ -451,10 +400,15 @@ const PredictiveHotspotMap = memo(({ selectedCountry = 'ALL' }: PredictiveHotspo
               <AlertCircle className="w-16 h-16 mx-auto text-muted-foreground" />
               <div>
                 <h3 className="font-semibold text-lg">No Active Hotspots Detected</h3>
-                <p className="text-muted-foreground">
-                  Click "Run Analysis" to generate new predictions based on recent incident data
+                <p className="text-muted-foreground max-w-md mx-auto">
+                  No elevated risk areas have been identified in the current analysis period.
+                  Run a new analysis to update predictions.
                 </p>
               </div>
+              <Button onClick={handleRunPrediction} variant="outline">
+                <TrendingUp className="w-4 h-4 mr-2" />
+                Run Analysis
+              </Button>
             </div>
           </CardContent>
         </Card>
