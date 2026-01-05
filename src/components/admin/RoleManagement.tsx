@@ -98,7 +98,7 @@ export const RoleManagement = () => {
         .insert({
           user_id: userId,
           role: role as any,
-          assigned_by: user.id,
+          is_active: true,
           expires_at: expiresAt || null,
         } as any)
         .select()
