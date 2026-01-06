@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
-import { Menu, X, Users, Map, Award, Shield, Globe, Heart, User, LogOut, Settings, Search, HelpCircle, AlertTriangle, Plug, Sparkles } from "lucide-react";
+import { Menu, X, Users, Map, Award, Shield, Globe, Heart, User, LogOut, Settings, Search, HelpCircle, AlertTriangle, Plug, Sparkles, Radio, Gamepad2, Volume2 } from "lucide-react";
 import peaceverselogo from "@/assets/peaceverse-logo.png";
 import GlobalSearch from '@/components/GlobalSearch';
 import KeyboardShortcuts from '@/components/KeyboardShortcuts';
@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAdminCheck } from "@/hooks/useAdminCheck";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useUserRoles } from "@/hooks/useRoleCheck";
+import { useAccessibleFeatures, PLATFORM_FEATURES } from "@/hooks/useRoleFeatureAccess";
 import { motion, AnimatePresence } from "framer-motion";
 const Navigation = () => {
   const {
@@ -58,59 +59,56 @@ const Navigation = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-  const publicNavItems = [{
-    path: '/about',
-    label: t('nav.about'),
-    icon: Heart
-  }, {
-    path: '/community',
-    label: t('nav.community'),
-    icon: Users
-  }, {
-    path: '/incidents',
-    label: t('nav.incidents'),
-    icon: Shield
-  }, {
-    path: '/peace-pulse',
-    label: t('nav.peacePulse'),
-    icon: Globe
-  }, {
-    path: '/proposals',
-    label: t('nav.pollsProposals'),
-    icon: Map
-  }, {
-    path: '/safety',
-    label: t('nav.safetyPortal'),
-    icon: Shield
-  }];
-  const roleBasedItems = [];
-  if (user && !isAnonymous) {
-    roleBasedItems.push({
-      path: '/dashboard',
-      label: t('nav.dashboard'),
-      icon: User
+  // Get accessible features based on user role
+  const { features: accessibleFeatures, isLoading: featuresLoading } = useAccessibleFeatures();
+
+  // Map feature keys to navigation items
+  const featureNavMap: Record<string, { path: string; label: string; icon: React.ElementType }> = {
+    'incidents': { path: '/incidents', label: t('nav.incidents'), icon: Shield },
+    'community': { path: '/community', label: t('nav.community'), icon: Users },
+    'peace-pulse': { path: '/peace-pulse', label: t('nav.peacePulse'), icon: Globe },
+    'proposals': { path: '/proposals', label: t('nav.pollsProposals'), icon: Map },
+    'safety': { path: '/safety', label: t('nav.safetyPortal'), icon: Shield },
+    'radio': { path: '/radio', label: 'Peace Radio', icon: Radio },
+    'challenges': { path: '/challenges', label: t('nav.challenges'), icon: Gamepad2 },
+    'voice': { path: '/voice', label: 'Voice Stories', icon: Volume2 },
+    'verification': { path: '/verification', label: t('nav.verification'), icon: Award },
+    'integrations': { path: '/integrations', label: 'Integrations', icon: Plug },
+    'early-warning': { path: '/dashboard/early-warning', label: t('nav.earlyWarning'), icon: AlertTriangle },
+  };
+
+  // Build navigation items based on accessible features
+  const navItems = useMemo(() => {
+    const items: { path: string; label: string; icon: React.ElementType }[] = [
+      { path: '/about', label: t('nav.about'), icon: Heart },
+    ];
+
+    // Add dashboard if logged in
+    if (user && !isAnonymous) {
+      items.push({ path: '/dashboard', label: t('nav.dashboard'), icon: User });
+    }
+
+    // Add feature-based items only if accessible
+    accessibleFeatures.forEach(featureKey => {
+      const navItem = featureNavMap[featureKey];
+      if (navItem) {
+        // Special handling for role-restricted features
+        if (featureKey === 'verification') {
+          if (roleStrings.includes('verifier') || roleStrings.includes('admin') || roleStrings.includes('government')) {
+            items.push(navItem);
+          }
+        } else if (featureKey === 'early-warning' || featureKey === 'integrations') {
+          if (roleStrings.includes('admin') || roleStrings.includes('government') || roleStrings.includes('partner')) {
+            items.push(navItem);
+          }
+        } else {
+          items.push(navItem);
+        }
+      }
     });
-  }
-  if (roleStrings.includes('verifier') || roleStrings.includes('admin') || roleStrings.includes('government')) {
-    roleBasedItems.push({
-      path: '/verification',
-      label: t('nav.verification'),
-      icon: Award
-    });
-  }
-  if (roleStrings.includes('admin') || roleStrings.includes('government') || roleStrings.includes('partner')) {
-    roleBasedItems.push({
-      path: '/early-warning',
-      label: t('nav.earlyWarning'),
-      icon: AlertTriangle
-    });
-    roleBasedItems.push({
-      path: '/integrations',
-      label: 'Integrations',
-      icon: Plug
-    });
-  }
-  const navItems = [...publicNavItems, ...roleBasedItems].sort((a, b) => a.label.localeCompare(b.label));
+
+    return items.sort((a, b) => a.label.localeCompare(b.label));
+  }, [accessibleFeatures, user, isAnonymous, roleStrings, t]);
   return <>
       <KeyboardShortcuts onSearchOpen={() => setSearchOpen(true)} />
       <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />

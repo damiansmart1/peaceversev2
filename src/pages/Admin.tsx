@@ -20,7 +20,7 @@ import { AdminIntegrationsManager } from '@/components/admin/AdminIntegrationsMa
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { RoleManagement } from '@/components/admin/RoleManagement';
 import AdminPeaceMetricsManager from '@/components/admin/AdminPeaceMetricsManager';
-import { AdminFeatureAccessManager } from '@/components/admin/AdminFeatureAccessManager';
+import { AdminRoleFeatureManager } from '@/components/admin/AdminRoleFeatureManager';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { Loader2, Shield } from 'lucide-react';
 
@@ -56,7 +56,7 @@ const Admin = () => {
       case 'roles':
         return <RoleManagement />;
       case 'feature-access':
-        return <AdminFeatureAccessManager />;
+        return <AdminRoleFeatureManager />;
       case 'content':
         return <AdminContentManager />;
       case 'proposals':
