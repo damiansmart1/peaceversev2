@@ -2999,6 +2999,36 @@ export type Database = {
         }
         Relationships: []
       }
+      role_feature_access: {
+        Row: {
+          created_at: string
+          feature_key: string
+          id: string
+          is_enabled: boolean
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          feature_key: string
+          id?: string
+          is_enabled?: boolean
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          feature_key?: string
+          id?: string
+          is_enabled?: boolean
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       safe_spaces: {
         Row: {
           capacity: number | null
