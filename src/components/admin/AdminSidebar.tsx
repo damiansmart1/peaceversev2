@@ -62,6 +62,7 @@ const menuItems = [
     label: 'Content',
     icon: FileText,
     children: [
+      { id: 'cms', label: 'Website Content (CMS)' },
       { id: 'content', label: 'Stories & Posts' },
       { id: 'moderation', label: 'Moderation Queue' },
     ],

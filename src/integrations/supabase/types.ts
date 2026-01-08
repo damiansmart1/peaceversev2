@@ -962,6 +962,57 @@ export type Database = {
         }
         Relationships: []
       }
+      cms_content: {
+        Row: {
+          content: string | null
+          content_key: string
+          content_type: string
+          created_at: string
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          media_alt: string | null
+          media_url: string | null
+          metadata: Json | null
+          section: string
+          title: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          content?: string | null
+          content_key: string
+          content_type: string
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          media_alt?: string | null
+          media_url?: string | null
+          metadata?: Json | null
+          section: string
+          title?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          content?: string | null
+          content_key?: string
+          content_type?: string
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          media_alt?: string | null
+          media_url?: string | null
+          metadata?: Json | null
+          section?: string
+          title?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       comment_likes: {
         Row: {
           comment_id: string
