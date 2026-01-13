@@ -2,17 +2,17 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   Users,
-  FileText,
-  MapPin,
-  Shield,
-  Trophy,
-  MessageSquare,
+  FileStack,
+  MapPinned,
+  ShieldCheck,
+  Medal,
+  MessagesSquare,
   Gamepad2,
-  Heart,
-  Settings,
-  AlertTriangle,
+  HeartHandshake,
+  SlidersHorizontal,
+  Siren,
   ChevronDown,
-  Brain,
+  BrainCircuit,
   Home,
   Plug,
 } from 'lucide-react';
@@ -60,7 +60,7 @@ const menuItems = [
   {
     id: 'content',
     label: 'Content',
-    icon: FileText,
+    icon: FileStack,
     children: [
       { id: 'cms', label: 'Website Content (CMS)' },
       { id: 'content', label: 'Stories & Posts' },
@@ -70,7 +70,7 @@ const menuItems = [
   {
     id: 'peace-intelligence',
     label: 'Peace Intelligence',
-    icon: AlertTriangle,
+    icon: Siren,
     children: [
       { id: 'incidents', label: 'Incident Reports' },
       { id: 'incident-timeline', label: 'Timeline Tracker' },
@@ -81,7 +81,7 @@ const menuItems = [
   {
     id: 'engagement',
     label: 'Engagement',
-    icon: MessageSquare,
+    icon: MessagesSquare,
     children: [
       { id: 'proposals', label: 'Proposals' },
       { id: 'challenges', label: 'Challenges' },
@@ -91,7 +91,7 @@ const menuItems = [
   {
     id: 'configuration',
     label: 'Configuration',
-    icon: Settings,
+    icon: SlidersHorizontal,
     children: [
       { id: 'ai-analytics', label: 'AI Analytics' },
       { id: 'api-analytics', label: 'API Usage' },

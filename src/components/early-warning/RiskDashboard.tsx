@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, TrendingUp, Users, MapPin, Brain, Sparkles } from 'lucide-react';
+import { Siren, TrendingUp, UsersRound, Radar, BrainCircuit, Sparkles } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import RecommendedActionsPanel from './RecommendedActionsPanel';
 
@@ -117,7 +117,7 @@ const RiskDashboard = ({ selectedCountry = 'ALL' }: RiskDashboardProps) => {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <AlertTriangle className="w-8 h-8 text-red-500" />
+              <Siren className="w-8 h-8 text-red-500" />
               <span className="text-3xl font-bold">{statistics?.critical || 0}</span>
             </div>
           </CardContent>
@@ -141,7 +141,7 @@ const RiskDashboard = ({ selectedCountry = 'ALL' }: RiskDashboardProps) => {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Users className="w-8 h-8 text-yellow-500" />
+              <UsersRound className="w-8 h-8 text-yellow-500" />
               <span className="text-3xl font-bold">{statistics?.medium || 0}</span>
             </div>
           </CardContent>
@@ -153,7 +153,7 @@ const RiskDashboard = ({ selectedCountry = 'ALL' }: RiskDashboardProps) => {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <MapPin className="w-8 h-8 text-primary" />
+              <Radar className="w-8 h-8 text-primary" />
               <span className="text-3xl font-bold">{statistics?.avgRisk || '0'}</span>
             </div>
           </CardContent>
