@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Shield, Globe, Activity, Play, Radio, Users, Handshake, HeartHandshake, RefreshCw } from "lucide-react";
+import { ArrowRight, ShieldCheck, Globe, Activity, Play, Radio, Users, Handshake, HeartHandshake, RefreshCw, Shield } from "lucide-react";
 import heroImage from "@/assets/hero-image.jpg";
 import { useNavigate } from "react-router-dom";
 import { motion, useScroll, useTransform } from "framer-motion";

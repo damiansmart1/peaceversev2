@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { X, ChevronRight, ChevronLeft, Sparkles, Mic, Users, Trophy, Shield, Globe, Zap } from 'lucide-react';
+import { X, ChevronRight, ChevronLeft, Sparkles, Mic2, UsersRound, Trophy, ShieldCheck, Globe2, Bolt } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { Progress } from '@/components/ui/progress';
@@ -19,7 +19,7 @@ const steps: OnboardingStep[] = [
   {
     title: 'Welcome to PeaceVerse! 🎉',
     description: 'Your gateway to building peace, sharing stories, and making a real impact across Africa. Ready to be part of something amazing?',
-    icon: <Globe className="w-12 h-12" />,
+    icon: <Globe2 className="w-12 h-12" />,
     color: 'from-primary to-primary/60',
     features: ['Connect with peacebuilders', 'Share your voice', 'Make a difference'],
     action: "Let's explore!"
@@ -27,7 +27,7 @@ const steps: OnboardingStep[] = [
   {
     title: 'Your Voice Matters 🎙️',
     description: 'Record voice stories, write posts, share videos - your perspective is unique and valuable. Be heard by thousands!',
-    icon: <Mic className="w-12 h-12" />,
+    icon: <Mic2 className="w-12 h-12" />,
     color: 'from-gold to-gold/60',
     features: ['Voice recordings', 'Photo & video posts', 'Written stories'],
     action: 'Express yourself'
@@ -35,7 +35,7 @@ const steps: OnboardingStep[] = [
   {
     title: 'Join the Community 🤝',
     description: 'Connect with like-minded people in chatrooms, follow inspiring creators, and find safe spaces near you.',
-    icon: <Users className="w-12 h-12" />,
+    icon: <UsersRound className="w-12 h-12" />,
     color: 'from-forest to-forest/60',
     features: ['Topic-based chatrooms', 'Direct messaging', 'Safe spaces map'],
     action: 'Find your tribe'
@@ -43,7 +43,7 @@ const steps: OnboardingStep[] = [
   {
     title: 'Earn While You Impact 💰',
     description: 'Create content, receive tips from fans, and grow your earnings. Turn your passion into rewards!',
-    icon: <Zap className="w-12 h-12" />,
+    icon: <Bolt className="w-12 h-12" />,
     color: 'from-earth to-earth/60',
     features: ['Receive tips in your currency', 'Withdraw to Paystack/M-Pesa', 'Track your earnings'],
     action: 'Start earning'
@@ -59,7 +59,7 @@ const steps: OnboardingStep[] = [
   {
     title: 'Stay Safe & Protected 🛡️',
     description: 'AI-powered moderation, anonymous reporting, and community guidelines ensure everyone feels welcome and secure.',
-    icon: <Shield className="w-12 h-12" />,
+    icon: <ShieldCheck className="w-12 h-12" />,
     color: 'from-primary to-secondary',
     features: ['Anonymous reporting', '24/7 AI moderation', 'Safe spaces network'],
     action: "I'm ready!"

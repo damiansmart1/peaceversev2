@@ -2,7 +2,7 @@ import { useState } from 'react';
 import Navigation from '@/components/Navigation';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AlertTriangle, TrendingUp, Bell, Network, Users, Shield, Activity, Download, MapPin } from 'lucide-react';
+import { Siren, TrendingUp, BellRing, Network, UsersRound, ShieldCheck, Activity, FileDown, MapPinned } from 'lucide-react';
 import RiskDashboard from '@/components/early-warning/RiskDashboard';
 import PredictiveHotspotMap from '@/components/early-warning/PredictiveHotspotMap';
 import AlertSystem from '@/components/early-warning/AlertSystem';
@@ -28,7 +28,7 @@ const EarlyWarningDashboard = () => {
         <div className="relative container mx-auto px-4 pt-24 pb-12">
           <div className="max-w-4xl mx-auto text-center space-y-4">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 mb-4">
-              <Shield className="w-4 h-4 text-accent" />
+              <ShieldCheck className="w-4 h-4 text-accent" />
               <span className="text-sm font-medium text-primary-foreground">AI-Powered Intelligence</span>
             </div>
             
@@ -43,7 +43,7 @@ const EarlyWarningDashboard = () => {
             {/* Country Selector in Hero */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
               <div className="flex items-center gap-2 bg-primary-foreground/10 backdrop-blur-sm rounded-lg p-2 border border-primary-foreground/20">
-                <MapPin className="w-5 h-5 text-accent" />
+                <MapPinned className="w-5 h-5 text-accent" />
                 <span className="text-sm font-medium text-primary-foreground">Viewing:</span>
                 <CountrySelector
                   value={selectedCountry}
@@ -74,7 +74,7 @@ const EarlyWarningDashboard = () => {
                 value="risk" 
                 className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md rounded-lg transition-all duration-300 font-medium"
               >
-                <AlertTriangle className="w-4 h-4 mr-2" />
+                <Siren className="w-4 h-4 mr-2" />
                 Risk Analysis
               </TabsTrigger>
               <TabsTrigger 
@@ -88,14 +88,14 @@ const EarlyWarningDashboard = () => {
                 value="alerts"
                 className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md rounded-lg transition-all duration-300 font-medium"
               >
-                <Bell className="w-4 h-4 mr-2" />
+                <BellRing className="w-4 h-4 mr-2" />
                 Alerts
               </TabsTrigger>
               <TabsTrigger 
                 value="reports"
                 className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md rounded-lg transition-all duration-300 font-medium"
               >
-                <Download className="w-4 h-4 mr-2" />
+                <FileDown className="w-4 h-4 mr-2" />
                 Reports
               </TabsTrigger>
             </TabsList>
@@ -146,13 +146,13 @@ const EarlyWarningDashboard = () => {
                     color="success"
                   />
                   <StatusItem
-                    icon={Bell}
+                    icon={BellRing}
                     title="Alerts"
                     status={`${activeAlerts.length} Active`}
                     color={activeAlerts.length > 0 ? "warning" : "success"}
                   />
                   <StatusItem
-                    icon={Users}
+                    icon={UsersRound}
                     title="Response"
                     status="Ready"
                     color="success"
@@ -162,7 +162,7 @@ const EarlyWarningDashboard = () => {
                 {/* Current Filter Info */}
                 <div className="mt-6 pt-4 border-t border-border">
                   <div className="flex items-center gap-2 text-sm">
-                    <MapPin className="w-4 h-4 text-muted-foreground" />
+                    <MapPinned className="w-4 h-4 text-muted-foreground" />
                     <span className="text-muted-foreground">Current View:</span>
                     <span className="font-medium text-foreground">
                       {getCountryName(selectedCountry)}

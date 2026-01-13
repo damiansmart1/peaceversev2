@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
-import { Menu, X, Users, Map, Award, Shield, Globe, Heart, User, LogOut, Settings, Search, HelpCircle, AlertTriangle, Plug, Sparkles, Radio, Gamepad2, Volume2 } from "lucide-react";
+import { Menu, X, Users, Vote, BadgeCheck, ShieldCheck, Globe, HeartHandshake, User, LogOut, Settings, Compass, HelpCircle, Siren, Cable, Wand2, Radio, Gamepad2, AudioWaveform, Award, AlertTriangle, Plug, Sparkles, Shield, Heart, MapPin as MapIcon, Volume2 } from "lucide-react";
 import peaceverselogo from "@/assets/peaceverse-logo.png";
 import GlobalSearch from '@/components/GlobalSearch';
 import KeyboardShortcuts from '@/components/KeyboardShortcuts';
@@ -64,23 +64,23 @@ const Navigation = () => {
 
   // Map feature keys to navigation items
   const featureNavMap: Record<string, { path: string; label: string; icon: React.ElementType }> = {
-    'incidents': { path: '/incidents', label: t('nav.incidents'), icon: Shield },
+    'incidents': { path: '/incidents', label: t('nav.incidents'), icon: Siren },
     'community': { path: '/community', label: t('nav.community'), icon: Users },
     'peace-pulse': { path: '/peace-pulse', label: t('nav.peacePulse'), icon: Globe },
-    'proposals': { path: '/proposals', label: t('nav.pollsProposals'), icon: Map },
-    'safety': { path: '/safety', label: t('nav.safetyPortal'), icon: Shield },
+    'proposals': { path: '/proposals', label: t('nav.pollsProposals'), icon: Vote },
+    'safety': { path: '/safety', label: t('nav.safetyPortal'), icon: ShieldCheck },
     'radio': { path: '/radio', label: 'Peace Radio', icon: Radio },
     'challenges': { path: '/challenges', label: t('nav.challenges'), icon: Gamepad2 },
-    'voice': { path: '/voice', label: 'Voice Stories', icon: Volume2 },
-    'verification': { path: '/verification', label: t('nav.verification'), icon: Award },
-    'integrations': { path: '/integrations', label: 'Integrations', icon: Plug },
+    'voice': { path: '/voice', label: 'Voice Stories', icon: AudioWaveform },
+    'verification': { path: '/verification', label: t('nav.verification'), icon: BadgeCheck },
+    'integrations': { path: '/integrations', label: 'Integrations', icon: Cable },
     'early-warning': { path: '/dashboard/early-warning', label: t('nav.earlyWarning'), icon: AlertTriangle },
   };
 
   // Build navigation items based on accessible features
   const navItems = useMemo(() => {
     const items: { path: string; label: string; icon: React.ElementType }[] = [
-      { path: '/about', label: t('nav.about'), icon: Heart },
+      { path: '/about', label: t('nav.about'), icon: HeartHandshake },
     ];
 
     // Add dashboard if logged in

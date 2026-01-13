@@ -4,9 +4,9 @@ import SponsorsCarousel from "@/components/SponsorsCarousel";
 import AfricaMap from "@/components/AfricaMap";
 import { useNavigate } from "react-router-dom";
 import { 
-  Mic, Users, Radio, Award, Shield, Vote, Activity, AlertCircle,
-  ArrowRight, Globe, Eye, CheckCircle, Zap, BarChart3, MapPin, Bell, Heart, Leaf,
-  Scale, Target, Handshake, BookOpen
+  Mic2, Users, Radio, Medal, ShieldCheck, Vote, Activity, Siren,
+  ArrowRight, Globe, ScanEye, BadgeCheck, Zap, TrendingUp, MapPinned, BellRing, HeartHandshake, Sprout,
+  Scale, Crosshair, Handshake, BookOpenText, Target, Leaf, MapPin, BarChart3, CheckCircle, AlertCircle, Eye, Bell, Heart, BookOpen, Shield
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -15,12 +15,12 @@ const Index = () => {
   const navigate = useNavigate();
 
   const features = [
-    { icon: AlertCircle, color: "bg-destructive", path: "/incidents", label: "Report", desc: "Submit incidents securely" },
+    { icon: Siren, color: "bg-destructive", path: "/incidents", label: "Report", desc: "Submit incidents securely" },
     { icon: Activity, color: "bg-primary", path: "/peace-pulse", label: "Analytics", desc: "Real-time intelligence" },
     { icon: Users, color: "bg-secondary", path: "/community", label: "Community", desc: "Connect & collaborate" },
-    { icon: Shield, color: "bg-earth", path: "/safety", label: "Safety", desc: "Find safe spaces" },
+    { icon: ShieldCheck, color: "bg-earth", path: "/safety", label: "Safety", desc: "Find safe spaces" },
     { icon: Vote, color: "bg-gold", path: "/proposals", label: "Vote", desc: "Shape policies" },
-    { icon: Mic, color: "bg-accent", path: "/community", label: "Voice", desc: "Share your story" },
+    { icon: Mic2, color: "bg-accent", path: "/community", label: "Voice", desc: "Share your story" },
   ];
 
   const processSteps = [

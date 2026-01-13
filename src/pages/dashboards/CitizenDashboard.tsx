@@ -7,7 +7,7 @@ import GamificationDashboard from '@/components/GamificationDashboard';
 import { ProfileActivityTimeline } from '@/components/ProfileActivityTimeline';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Trophy, ShoppingBag, Target, Activity, Heart, Mic, Flag, Radio, Globe, Map, Shield } from 'lucide-react';
+import { Trophy, ShoppingBag, Target, Activity, HeartHandshake, Mic, Flag, Radio, Globe, Vote, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useAccessibleFeatures } from '@/hooks/useRoleFeatureAccess';
@@ -61,7 +61,7 @@ const CitizenDashboard = () => {
               <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/challenges')}>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Heart className="w-5 h-5 text-primary" />
+                    <HeartHandshake className="w-5 h-5 text-primary" />
                     Join Challenges
                   </CardTitle>
                   <CardDescription>Participate in peace-building activities</CardDescription>
@@ -72,7 +72,7 @@ const CitizenDashboard = () => {
               <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/proposals')}>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Map className="w-5 h-5 text-primary" />
+                    <Vote className="w-5 h-5 text-primary" />
                     Polls & Proposals
                   </CardTitle>
                   <CardDescription>Vote on community decisions</CardDescription>
@@ -105,7 +105,7 @@ const CitizenDashboard = () => {
               <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/safety')}>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Shield className="w-5 h-5 text-primary" />
+                    <ShieldCheck className="w-5 h-5 text-primary" />
                     Safety Portal
                   </CardTitle>
                   <CardDescription>Access safety resources</CardDescription>
