@@ -1,159 +1,152 @@
+import { useState } from 'react';
 import Navigation from '@/components/Navigation';
-import UserProgressCard from '@/components/UserProgressCard';
 import LeaderboardSection from '@/components/LeaderboardSection';
 import RewardStoreSection from '@/components/RewardStoreSection';
 import WeeklyChallengesSection from '@/components/WeeklyChallengesSection';
 import GamificationDashboard from '@/components/GamificationDashboard';
 import { ProfileActivityTimeline } from '@/components/ProfileActivityTimeline';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Trophy, ShoppingBag, Target, Activity, HeartHandshake, Mic, Flag, Radio, Globe, Vote, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
+import { 
+  Medal, 
+  ShoppingBag, 
+  Crosshair, 
+  Activity, 
+  RefreshCw,
+  Users2,
+  LayoutGrid,
+  History
+} from 'lucide-react';
+import { motion } from 'framer-motion';
 import { useAccessibleFeatures } from '@/hooks/useRoleFeatureAccess';
+import { useLevels, useUserGamificationProfile, useUserChallengeSubmissions } from '@/hooks/useGamification';
+import { useMyReports } from '@/hooks/useMyReports';
+import CitizenStatsCards from '@/components/citizen/CitizenStatsCards';
+import CitizenQuickActions from '@/components/citizen/CitizenQuickActions';
+import CitizenProgressOverview from '@/components/citizen/CitizenProgressOverview';
+import { toast } from 'sonner';
 
 const CitizenDashboard = () => {
-  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('overview');
   const { features: accessibleFeatures } = useAccessibleFeatures();
-
-  // Helper to check if a feature is accessible
+  
+  // Fetch dashboard data
+  const { data: profile, isLoading: profileLoading, refetch: refetchProfile } = useUserGamificationProfile();
+  const { data: levels, isLoading: levelsLoading } = useLevels();
+  const { data: submissions } = useUserChallengeSubmissions();
+  const { reports: myReports } = useMyReports();
+  
+  const currentLevel = levels?.find(l => l.level_number === profile?.current_level);
   const hasFeature = (featureKey: string) => accessibleFeatures.includes(featureKey);
 
+  const handleRefresh = () => {
+    refetchProfile();
+    toast.success('Dashboard refreshed');
+  };
+
+  // Calculate stats
+  const challengesCompleted = submissions?.filter(s => s.status === 'approved').length || 0;
+  const reportsSubmitted = myReports?.length || 0;
+  const proposalsVoted = 0; // Would need to implement voting tracking
+
   return (
-    <div className="min-h-screen bg-hero-gradient">
+    <div className="min-h-screen bg-background">
       <Navigation />
-      <div className="container mx-auto px-4 py-20">
-        <div className="max-w-6xl mx-auto space-y-8">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl md:text-5xl font-bold mb-3 text-[#e1ad40]">
-              Citizen Dashboard
-            </h1>
-            <p className="text-lg text-white">
-              Track your impact and continue building peace
-            </p>
-          </div>
+      
+      <div className="container mx-auto px-4 py-8 pt-24">
+        <div className="max-w-7xl mx-auto space-y-6">
+          
+          {/* Header Section */}
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
+          >
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-primary/10 rounded-xl">
+                <Users2 className="h-8 w-8 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-2xl md:text-3xl font-bold text-foreground">
+                  Citizen Dashboard
+                </h1>
+                <p className="text-muted-foreground mt-1">
+                  Track your impact and continue building peace
+                </p>
+              </div>
+            </div>
+            <Button onClick={handleRefresh} variant="outline" className="gap-2">
+              <RefreshCw className="h-4 w-4" />
+              Refresh Data
+            </Button>
+          </motion.div>
 
-          {/* Quick Actions - Only show accessible features */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            {hasFeature('community') && (
-              <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/community')}>
-                <CardHeader className="border-none">
-                  <CardTitle className="flex items-center gap-2">
-                    <Mic className="w-5 h-5 text-primary" />
-                    Share Your Voice
-                  </CardTitle>
-                  <CardDescription>Submit stories through Community Hub</CardDescription>
-                </CardHeader>
-              </Card>
-            )}
-            {hasFeature('incidents') && (
-              <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/incidents')}>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Flag className="w-5 h-5 text-primary" />
-                    Report Incidents
-                  </CardTitle>
-                  <CardDescription>Help keep the community safe</CardDescription>
-                </CardHeader>
-              </Card>
-            )}
-            {hasFeature('challenges') && (
-              <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/challenges')}>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <HeartHandshake className="w-5 h-5 text-primary" />
-                    Join Challenges
-                  </CardTitle>
-                  <CardDescription>Participate in peace-building activities</CardDescription>
-                </CardHeader>
-              </Card>
-            )}
-            {hasFeature('proposals') && (
-              <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/proposals')}>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Vote className="w-5 h-5 text-primary" />
-                    Polls & Proposals
-                  </CardTitle>
-                  <CardDescription>Vote on community decisions</CardDescription>
-                </CardHeader>
-              </Card>
-            )}
-            {hasFeature('peace-pulse') && (
-              <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/peace-pulse')}>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Globe className="w-5 h-5 text-primary" />
-                    Peace Pulse
-                  </CardTitle>
-                  <CardDescription>View peace metrics and trends</CardDescription>
-                </CardHeader>
-              </Card>
-            )}
-            {hasFeature('radio') && (
-              <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/radio')}>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Radio className="w-5 h-5 text-primary" />
-                    Peace Radio
-                  </CardTitle>
-                  <CardDescription>Listen to community broadcasts</CardDescription>
-                </CardHeader>
-              </Card>
-            )}
-            {hasFeature('safety') && (
-              <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/safety')}>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <ShieldCheck className="w-5 h-5 text-primary" />
-                    Safety Portal
-                  </CardTitle>
-                  <CardDescription>Access safety resources</CardDescription>
-                </CardHeader>
-              </Card>
-            )}
-          </div>
+          {/* Stats Cards */}
+          <CitizenStatsCards
+            profile={profile}
+            currentLevel={currentLevel}
+            challengesCompleted={challengesCompleted}
+            reportsSubmitted={reportsSubmitted}
+            proposalsVoted={proposalsVoted}
+            isLoading={profileLoading || levelsLoading}
+          />
 
-          <UserProgressCard />
+          {/* Quick Actions */}
+          <CitizenQuickActions accessibleFeatures={accessibleFeatures} />
 
-          <Tabs defaultValue="progress" className="w-full">
-            <TabsList className="grid w-full grid-cols-4 mb-8">
-              <TabsTrigger value="progress">
-                <Trophy className="w-4 h-4 mr-2" />
-                Progress & Rankings
+          {/* Main Tabs */}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <TabsList className="grid w-full md:w-auto md:inline-grid grid-cols-4 gap-2">
+              <TabsTrigger value="overview" className="gap-2">
+                <LayoutGrid className="h-4 w-4" />
+                <span className="hidden sm:inline">Overview</span>
               </TabsTrigger>
               {hasFeature('challenges') && (
-                <TabsTrigger value="challenges">
-                  <Target className="w-4 h-4 mr-2" />
-                  Challenges
+                <TabsTrigger value="challenges" className="gap-2">
+                  <Crosshair className="h-4 w-4" />
+                  <span className="hidden sm:inline">Challenges</span>
                 </TabsTrigger>
               )}
-              <TabsTrigger value="activity">
-                <Activity className="w-4 h-4 mr-2" />
-                Activity
+              <TabsTrigger value="activity" className="gap-2">
+                <History className="h-4 w-4" />
+                <span className="hidden sm:inline">Activity</span>
               </TabsTrigger>
-              <TabsTrigger value="store">
-                <ShoppingBag className="w-4 h-4 mr-2" />
-                Store
+              <TabsTrigger value="store" className="gap-2">
+                <ShoppingBag className="h-4 w-4" />
+                <span className="hidden sm:inline">Rewards</span>
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="progress" className="space-y-8">
-              <GamificationDashboard />
-              <LeaderboardSection />
+            {/* Overview Tab */}
+            <TabsContent value="overview" className="space-y-6">
+              {/* Progress Overview */}
+              <CitizenProgressOverview 
+                profile={profile}
+                levels={levels}
+                isLoading={profileLoading || levelsLoading}
+              />
+              
+              {/* Gamification & Leaderboard Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <GamificationDashboard />
+                <LeaderboardSection />
+              </div>
             </TabsContent>
 
+            {/* Challenges Tab */}
             {hasFeature('challenges') && (
-              <TabsContent value="challenges">
+              <TabsContent value="challenges" className="space-y-6">
                 <WeeklyChallengesSection />
               </TabsContent>
             )}
 
-            <TabsContent value="activity">
+            {/* Activity Tab */}
+            <TabsContent value="activity" className="space-y-6">
               <ProfileActivityTimeline />
             </TabsContent>
 
-            <TabsContent value="store">
+            {/* Store Tab */}
+            <TabsContent value="store" className="space-y-6">
               <RewardStoreSection />
             </TabsContent>
           </Tabs>
