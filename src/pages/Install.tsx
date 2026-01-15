@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Download, Smartphone, Share, Plus, Check, ArrowRight, Shield, Wifi, Bell } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useTranslationContext } from '@/components/TranslationProvider';
 import peaceverselogo from '@/assets/peaceverse-logo.png';
 
 interface BeforeInstallPromptEvent extends Event {
@@ -11,6 +12,7 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 const Install = () => {
+  const { t } = useTranslationContext();
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
@@ -60,9 +62,9 @@ const Install = () => {
   };
 
   const features = [
-    { icon: Wifi, title: 'Works Offline', description: 'Access critical features even without internet' },
-    { icon: Bell, title: 'Push Notifications', description: 'Get instant alerts for incidents near you' },
-    { icon: Shield, title: 'Secure & Private', description: 'Your data stays protected on your device' },
+    { icon: Wifi, title: t('install.worksOffline'), description: t('install.worksOfflineDesc') },
+    { icon: Bell, title: t('install.pushNotifications'), description: t('install.pushNotificationsDesc') },
+    { icon: Shield, title: t('install.securePrivate'), description: t('install.securePrivateDesc') },
   ];
 
   if (isInstalled) {
@@ -76,10 +78,10 @@ const Install = () => {
           <div className="w-20 h-20 bg-accent/20 rounded-full flex items-center justify-center mx-auto mb-6">
             <Check className="w-10 h-10 text-accent" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground mb-2">App Installed!</h1>
-          <p className="text-muted-foreground mb-6">Peaceverse is ready to use on your device</p>
+          <h1 className="text-2xl font-bold text-foreground mb-2">{t('install.appInstalled')}</h1>
+          <p className="text-muted-foreground mb-6">{t('install.readyToUse')}</p>
           <Button asChild>
-            <a href="/">Open App <ArrowRight className="ml-2 w-4 h-4" /></a>
+            <a href="/">{t('install.openApp')} <ArrowRight className="ml-2 w-4 h-4" /></a>
           </Button>
         </motion.div>
       </div>
@@ -100,8 +102,8 @@ const Install = () => {
             alt="Peaceverse" 
             className="h-16 mx-auto mb-4"
           />
-          <h1 className="text-3xl font-bold text-foreground mb-2">Install Peaceverse</h1>
-          <p className="text-muted-foreground">Get the full app experience on your device</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">{t('install.title')}</h1>
+          <p className="text-muted-foreground">{t('install.subtitle')}</p>
         </motion.div>
 
         {/* Features */}
@@ -137,9 +139,9 @@ const Install = () => {
               <CardHeader className="text-center">
                 <CardTitle className="flex items-center justify-center gap-2">
                   <Download className="w-5 h-5 text-accent" />
-                  Ready to Install
+                  {t('install.readyToInstall')}
                 </CardTitle>
-                <CardDescription>Tap the button below to add Peaceverse to your home screen</CardDescription>
+                <CardDescription>{t('install.tapToAdd')}</CardDescription>
               </CardHeader>
               <CardContent>
                 <Button 
@@ -148,7 +150,7 @@ const Install = () => {
                   size="lg"
                 >
                   <Download className="mr-2 w-5 h-5" />
-                  Install Peaceverse
+                  {t('install.installButton')}
                 </Button>
               </CardContent>
             </Card>
@@ -157,34 +159,34 @@ const Install = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Smartphone className="w-5 h-5 text-accent" />
-                  Install on iPhone/iPad
+                  {t('install.iosTitle')}
                 </CardTitle>
-                <CardDescription>Follow these steps to install</CardDescription>
+                <CardDescription>{t('install.followSteps')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-start gap-3">
                   <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center flex-shrink-0 text-sm font-bold">1</div>
                   <div>
-                    <p className="font-medium text-foreground">Tap the Share button</p>
+                    <p className="font-medium text-foreground">{t('install.ios.step1')}</p>
                     <p className="text-sm text-muted-foreground flex items-center gap-1">
-                      Look for <Share className="w-4 h-4" /> at the bottom of Safari
+                      {t('install.ios.step1Desc')} <Share className="w-4 h-4" />
                     </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center flex-shrink-0 text-sm font-bold">2</div>
                   <div>
-                    <p className="font-medium text-foreground">Scroll and tap "Add to Home Screen"</p>
+                    <p className="font-medium text-foreground">{t('install.ios.step2')}</p>
                     <p className="text-sm text-muted-foreground flex items-center gap-1">
-                      Look for <Plus className="w-4 h-4" /> Add to Home Screen
+                      {t('install.ios.step2Desc')} <Plus className="w-4 h-4" />
                     </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center flex-shrink-0 text-sm font-bold">3</div>
                   <div>
-                    <p className="font-medium text-foreground">Tap "Add" to confirm</p>
-                    <p className="text-sm text-muted-foreground">The app will appear on your home screen</p>
+                    <p className="font-medium text-foreground">{t('install.ios.step3')}</p>
+                    <p className="text-sm text-muted-foreground">{t('install.ios.step3Desc')}</p>
                   </div>
                 </div>
               </CardContent>
@@ -194,30 +196,30 @@ const Install = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Smartphone className="w-5 h-5 text-accent" />
-                  Install on Android
+                  {t('install.androidTitle')}
                 </CardTitle>
-                <CardDescription>Follow these steps to install</CardDescription>
+                <CardDescription>{t('install.followSteps')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-start gap-3">
                   <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center flex-shrink-0 text-sm font-bold">1</div>
                   <div>
-                    <p className="font-medium text-foreground">Tap the menu button</p>
-                    <p className="text-sm text-muted-foreground">Look for ⋮ in Chrome's top right corner</p>
+                    <p className="font-medium text-foreground">{t('install.android.step1')}</p>
+                    <p className="text-sm text-muted-foreground">{t('install.android.step1Desc')}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center flex-shrink-0 text-sm font-bold">2</div>
                   <div>
-                    <p className="font-medium text-foreground">Tap "Add to Home screen"</p>
-                    <p className="text-sm text-muted-foreground">Or "Install app" if shown</p>
+                    <p className="font-medium text-foreground">{t('install.android.step2')}</p>
+                    <p className="text-sm text-muted-foreground">{t('install.android.step2Desc')}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center flex-shrink-0 text-sm font-bold">3</div>
                   <div>
-                    <p className="font-medium text-foreground">Tap "Add" to confirm</p>
-                    <p className="text-sm text-muted-foreground">The app will be added to your home screen</p>
+                    <p className="font-medium text-foreground">{t('install.android.step3')}</p>
+                    <p className="text-sm text-muted-foreground">{t('install.android.step3Desc')}</p>
                   </div>
                 </div>
               </CardContent>
@@ -227,23 +229,23 @@ const Install = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Download className="w-5 h-5 text-accent" />
-                  Install on Desktop
+                  {t('install.desktopTitle')}
                 </CardTitle>
-                <CardDescription>Add Peaceverse to your computer</CardDescription>
+                <CardDescription>{t('install.addToComputer')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-start gap-3">
                   <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center flex-shrink-0 text-sm font-bold">1</div>
                   <div>
-                    <p className="font-medium text-foreground">Look for the install icon</p>
-                    <p className="text-sm text-muted-foreground">In Chrome, look for ⊕ in the address bar</p>
+                    <p className="font-medium text-foreground">{t('install.desktop.step1')}</p>
+                    <p className="text-sm text-muted-foreground">{t('install.desktop.step1Desc')}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center flex-shrink-0 text-sm font-bold">2</div>
                   <div>
-                    <p className="font-medium text-foreground">Click "Install"</p>
-                    <p className="text-sm text-muted-foreground">Confirm the installation when prompted</p>
+                    <p className="font-medium text-foreground">{t('install.desktop.step2')}</p>
+                    <p className="text-sm text-muted-foreground">{t('install.desktop.step2Desc')}</p>
                   </div>
                 </div>
               </CardContent>
@@ -259,7 +261,7 @@ const Install = () => {
           className="text-center mt-8"
         >
           <Button variant="ghost" asChild>
-            <a href="/">← Back to Peaceverse</a>
+            <a href="/">← {t('install.backToPeaceverse')}</a>
           </Button>
         </motion.div>
       </div>
