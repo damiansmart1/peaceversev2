@@ -127,7 +127,7 @@ const GamificationDashboard = () => {
       <div className="container px-[16px] py-0 mx-0 rounded-full shadow-md">
         <div className="text-center mb-10">
           <h2 className="text-3xl md:text-4xl font-bold mb-3 text-[#e1ad40]">Your Peace Journey</h2>
-          <p className="text-lg max-w-2xl mx-auto text-white">
+          <p className="text-lg max-w-2xl mx-auto text-black">
             Track your progress and celebrate your contributions to building a more peaceful world
           </p>
         </div>
