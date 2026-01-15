@@ -34,7 +34,7 @@ const Proposals = () => {
             <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 mb-6">
               <TabsTrigger value="polls" className="gap-2">
                 <Vote className="w-4 h-4" />
-                <span className="hidden sm:inline">Polls</span>
+                <span className="hidden sm:inline">{t('proposals.tabs.polls')}</span>
               </TabsTrigger>
               <TabsTrigger value="all" className="gap-2">
                 <FileText className="w-4 h-4" />

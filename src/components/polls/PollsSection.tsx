@@ -21,19 +21,21 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useTranslationContext } from '@/components/TranslationProvider';
 
 const CATEGORIES = [
-  { value: 'all', label: 'All Categories' },
-  { value: 'governance', label: 'Governance' },
-  { value: 'community', label: 'Community' },
-  { value: 'safety', label: 'Safety' },
-  { value: 'environment', label: 'Environment' },
-  { value: 'education', label: 'Education' },
-  { value: 'health', label: 'Health' },
-  { value: 'general', label: 'General' },
+  { value: 'all', labelKey: 'polls.categories.all' },
+  { value: 'governance', labelKey: 'polls.categories.governance' },
+  { value: 'community', labelKey: 'polls.categories.community' },
+  { value: 'safety', labelKey: 'polls.categories.safety' },
+  { value: 'environment', labelKey: 'polls.categories.environment' },
+  { value: 'education', labelKey: 'polls.categories.education' },
+  { value: 'health', labelKey: 'polls.categories.health' },
+  { value: 'general', labelKey: 'polls.categories.general' },
 ];
 
 export const PollsSection = () => {
+  const { t } = useTranslationContext();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'recent' | 'popular' | 'ending'>('recent');
@@ -76,10 +78,10 @@ export const PollsSection = () => {
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
             <Vote className="w-6 h-6 text-primary" />
-            Community Polls
+            {t('polls.title')}
           </h2>
           <p className="text-muted-foreground mt-1">
-            Voice your opinion and see what the community thinks
+            {t('polls.subtitle')}
           </p>
         </div>
         <CreatePollDialog />
@@ -90,7 +92,7 @@ export const PollsSection = () => {
         <section className="space-y-4">
           <div className="flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-amber-500" />
-            <h3 className="font-semibold">Featured Polls</h3>
+            <h3 className="font-semibold">{t('polls.featured')}</h3>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {featuredPolls.map((poll) => (
@@ -116,7 +118,7 @@ export const PollsSection = () => {
               </div>
               <div>
                 <p className="text-2xl font-bold">{polls?.length || 0}</p>
-                <p className="text-xs text-muted-foreground">Total Polls</p>
+                <p className="text-xs text-muted-foreground">{t('polls.stats.total')}</p>
               </div>
             </div>
           </CardContent>
@@ -129,7 +131,7 @@ export const PollsSection = () => {
               </div>
               <div>
                 <p className="text-2xl font-bold">{activePolls.length}</p>
-                <p className="text-xs text-muted-foreground">Active</p>
+                <p className="text-xs text-muted-foreground">{t('status.active')}</p>
               </div>
             </div>
           </CardContent>
@@ -144,7 +146,7 @@ export const PollsSection = () => {
                 <p className="text-2xl font-bold">
                   {polls?.reduce((sum, p) => sum + p.total_participants, 0) || 0}
                 </p>
-                <p className="text-xs text-muted-foreground">Total Votes</p>
+                <p className="text-xs text-muted-foreground">{t('polls.stats.totalVotes')}</p>
               </div>
             </div>
           </CardContent>
@@ -159,7 +161,7 @@ export const PollsSection = () => {
                 <p className="text-2xl font-bold">
                   {polls?.reduce((sum, p) => sum + p.total_votes, 0) || 0}
                 </p>
-                <p className="text-xs text-muted-foreground">Responses</p>
+                <p className="text-xs text-muted-foreground">{t('polls.stats.responses')}</p>
               </div>
             </div>
           </CardContent>
@@ -171,7 +173,7 @@ export const PollsSection = () => {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Search polls..."
+            placeholder={t('polls.searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9"
@@ -180,24 +182,24 @@ export const PollsSection = () => {
         <Select value={selectedCategory} onValueChange={setSelectedCategory}>
           <SelectTrigger className="w-full sm:w-48">
             <Filter className="w-4 h-4 mr-2" />
-            <SelectValue placeholder="Category" />
+            <SelectValue placeholder={t('common.filter')} />
           </SelectTrigger>
           <SelectContent>
             {CATEGORIES.map((cat) => (
               <SelectItem key={cat.value} value={cat.value}>
-                {cat.label}
+                {t(cat.labelKey)}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
         <Select value={sortBy} onValueChange={(v) => setSortBy(v as any)}>
           <SelectTrigger className="w-full sm:w-40">
-            <SelectValue placeholder="Sort by" />
+            <SelectValue placeholder={t('polls.sortBy')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="recent">Most Recent</SelectItem>
-            <SelectItem value="popular">Most Popular</SelectItem>
-            <SelectItem value="ending">Ending Soon</SelectItem>
+            <SelectItem value="recent">{t('polls.sort.recent')}</SelectItem>
+            <SelectItem value="popular">{t('polls.sort.popular')}</SelectItem>
+            <SelectItem value="ending">{t('polls.sort.ending')}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -207,11 +209,11 @@ export const PollsSection = () => {
         <TabsList className="grid w-full max-w-md grid-cols-2">
           <TabsTrigger value="active" className="gap-2">
             <TrendingUp className="w-4 h-4" />
-            Active ({activePolls.length})
+            {t('status.active')} ({activePolls.length})
           </TabsTrigger>
           <TabsTrigger value="closed" className="gap-2">
             <Clock className="w-4 h-4" />
-            Closed ({closedPolls.length})
+            {t('polls.closed')} ({closedPolls.length})
           </TabsTrigger>
         </TabsList>
 
@@ -236,8 +238,8 @@ export const PollsSection = () => {
             </div>
           ) : (
             <EmptyState 
-              title="No active polls"
-              description="Be the first to create a poll and engage the community!"
+              title={t('polls.empty.activeTitle')}
+              description={t('polls.empty.activeDescription')}
             />
           )}
         </TabsContent>
@@ -258,8 +260,8 @@ export const PollsSection = () => {
             </div>
           ) : (
             <EmptyState 
-              title="No closed polls"
-              description="Completed polls will appear here"
+              title={t('polls.empty.closedTitle')}
+              description={t('polls.empty.closedDescription')}
             />
           )}
         </TabsContent>

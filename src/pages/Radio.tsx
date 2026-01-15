@@ -32,15 +32,15 @@ const Radio = () => {
             </TabsTrigger>
             <TabsTrigger value="chat" className="gap-2">
               <MessageCircle className="w-4 h-4" />
-              <span className="hidden sm:inline">Chat</span>
+              <span className="hidden sm:inline">{t('radio.tabs.chat')}</span>
             </TabsTrigger>
             <TabsTrigger value="podcasts" className="gap-2">
               <Podcast className="w-4 h-4" />
-              <span className="hidden sm:inline">Podcasts</span>
+              <span className="hidden sm:inline">{t('radio.tabs.podcasts')}</span>
             </TabsTrigger>
             <TabsTrigger value="callin" className="gap-2">
               <Phone className="w-4 h-4" />
-              <span className="hidden sm:inline">Call-In</span>
+              <span className="hidden sm:inline">{t('radio.tabs.callIn')}</span>
             </TabsTrigger>
             <TabsTrigger value="schedule" className="gap-2">
               <Calendar className="w-4 h-4" />

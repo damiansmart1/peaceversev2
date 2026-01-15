@@ -39,7 +39,7 @@ const PeacePulse = () => {
   };
 
   const getSelectedCountryName = () => {
-    if (selectedCountry === 'all') return 'All African Countries';
+    if (selectedCountry === 'all') return t('peacePulse.allCountries');
     for (const group of countriesByBlock || []) {
       const country = group.countries.find(c => c.code === selectedCountry);
       if (country) return country.name;
@@ -67,11 +67,11 @@ const PeacePulse = () => {
               </SelectTrigger>
               <SelectContent className="bg-popover border-border max-h-[400px]">
                 <SelectItem value="all" className="font-semibold">
-                  All African Countries
+                  {t('peacePulse.allCountries')}
                 </SelectItem>
                 
                 {countriesLoading ? (
-                  <SelectItem value="loading" disabled>Loading...</SelectItem>
+                  <SelectItem value="loading" disabled>{t('common.loading')}</SelectItem>
                 ) : (
                   countriesByBlock?.map(({ block, countries }) => (
                     <SelectGroup key={block.id}>

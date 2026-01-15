@@ -477,15 +477,15 @@ const FunctionalRadio = () => {
           <div className="flex items-center justify-center gap-2">
             <Button variant="ghost" size="sm">
               <Heart className="h-4 w-4 mr-1" />
-              Like
+              {t('common.like')}
             </Button>
             <Button variant="ghost" size="sm">
               <MessageCircle className="h-4 w-4 mr-1" />
-              Comment
+              {t('common.comment')}
             </Button>
             <Button variant="ghost" size="sm">
               <Share2 className="h-4 w-4 mr-1" />
-              Share
+              {t('common.share')}
             </Button>
           </div>
         </CardContent>
@@ -496,7 +496,7 @@ const FunctionalRadio = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Settings className="h-5 w-5" />
-            Available Stations
+            {t('radio.stations.title')}
           </CardTitle>
         </CardHeader>
         <CardContent>

@@ -172,7 +172,7 @@ const OfflineAccessSection = () => {
               </div>
               <div className="min-w-0">
                 <h3 className="font-semibold flex items-center gap-2 text-sm sm:text-base">
-                  {isOnline ? 'Connected' : 'Offline Mode'}
+                  {isOnline ? t('safety.offline.connected') : t('safety.offline.offlineMode')}
                   {isOnline ? (
                     <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500" />
                   ) : (
@@ -181,8 +181,8 @@ const OfflineAccessSection = () => {
                 </h3>
                 <p className="text-xs sm:text-sm text-muted-foreground truncate">
                   {lastSyncTime 
-                    ? `Last synced: ${lastSyncTime.toLocaleTimeString()}`
-                    : 'Not synced yet'}
+                    ? `${t('safety.offline.lastSynced')}: ${lastSyncTime.toLocaleTimeString()}`
+                    : t('safety.offline.notSynced')}
                 </p>
               </div>
             </div>
@@ -191,7 +191,7 @@ const OfflineAccessSection = () => {
               {pendingReports > 0 && (
                 <Badge variant="secondary" className="flex items-center gap-1 text-xs">
                   <HardDrive className="w-3 h-3" />
-                  {pendingReports} pending
+                  {pendingReports} {t('safety.offline.pending')}
                 </Badge>
               )}
               
@@ -203,7 +203,7 @@ const OfflineAccessSection = () => {
                 size="sm"
               >
                 <RefreshCw className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isSyncing ? 'animate-spin' : ''}`} />
-                {isSyncing ? 'Syncing...' : 'Sync'}
+                {isSyncing ? t('safety.offline.syncing') : t('safety.offline.sync')}
               </Button>
             </div>
           </div>
@@ -213,15 +213,15 @@ const OfflineAccessSection = () => {
             <div className="mt-4 pt-4 border-t grid grid-cols-3 gap-2 sm:gap-4">
               <div className="text-center">
                 <div className="text-xl sm:text-2xl font-bold text-primary">{cachedData.alerts?.length || 0}</div>
-                <div className="text-[10px] sm:text-xs text-muted-foreground">Cached Alerts</div>
+                <div className="text-[10px] sm:text-xs text-muted-foreground">{t('safety.offline.cachedAlerts')}</div>
               </div>
               <div className="text-center">
                 <div className="text-xl sm:text-2xl font-bold text-primary">{cachedData.safeSpaces?.length || 0}</div>
-                <div className="text-[10px] sm:text-xs text-muted-foreground">Safe Spaces</div>
+                <div className="text-[10px] sm:text-xs text-muted-foreground">{t('safety.offline.safeSpaces')}</div>
               </div>
               <div className="text-center">
                 <div className="text-xl sm:text-2xl font-bold text-primary">{cachedData.emergencyContacts?.length || 0}</div>
-                <div className="text-[10px] sm:text-xs text-muted-foreground">Contacts</div>
+                <div className="text-[10px] sm:text-xs text-muted-foreground">{t('safety.offline.contacts')}</div>
               </div>
             </div>
           )}
@@ -234,14 +234,14 @@ const OfflineAccessSection = () => {
               <Smartphone className="w-8 h-8 text-primary" />
             </div>
             <div className="flex-1 min-w-[200px]">
-              <h3 className="font-semibold text-lg mb-1">Install Peaceverse App</h3>
+              <h3 className="font-semibold text-lg mb-1">{t('safety.offline.installApp')}</h3>
               <p className="text-sm text-muted-foreground">
-                Add to your home screen for instant access, offline support, and faster loading.
+                {t('safety.offline.installAppDescription')}
               </p>
             </div>
             <Button className="shrink-0 gap-2">
               <Download className="w-4 h-4" />
-              Install App
+              {t('safety.offline.installButton')}
             </Button>
           </div>
         </Card>
