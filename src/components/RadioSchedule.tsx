@@ -3,19 +3,20 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Clock, Radio, Mic, Music, Calendar } from 'lucide-react';
+import { useTranslationContext } from './TranslationProvider';
 
 const schedule = {
   monday: [
-    { time: '06:00', title: 'Morning Peace', host: 'Sarah K.', duration: '2h', type: 'Music' },
-    { time: '08:00', title: 'Youth Voices', host: 'John M.', duration: '1h', type: 'Talk' },
-    { time: '12:00', title: 'Midday Stories', host: 'Amina S.', duration: '1h', type: 'Stories' },
-    { time: '18:00', title: 'Evening Reflection', host: 'David O.', duration: '2h', type: 'Mixed' },
+    { time: '06:00', titleKey: 'radio.schedule.morningPeace', host: 'Sarah K.', duration: '2h', type: 'Music' },
+    { time: '08:00', titleKey: 'radio.schedule.youthVoices', host: 'John M.', duration: '1h', type: 'Talk' },
+    { time: '12:00', titleKey: 'radio.schedule.middayStories', host: 'Amina S.', duration: '1h', type: 'Stories' },
+    { time: '18:00', titleKey: 'radio.schedule.eveningReflection', host: 'David O.', duration: '2h', type: 'Mixed' },
   ],
   tuesday: [
-    { time: '06:00', title: 'Rise & Shine', host: 'Grace N.', duration: '2h', type: 'Music' },
-    { time: '10:00', title: 'Community Chat', host: 'Peter L.', duration: '1h', type: 'Talk' },
-    { time: '15:00', title: 'Cultural Hour', host: 'Fatima H.', duration: '1h', type: 'Culture' },
-    { time: '20:00', title: 'Night Beats', host: 'Alex R.', duration: '2h', type: 'Music' },
+    { time: '06:00', titleKey: 'radio.schedule.riseAndShine', host: 'Grace N.', duration: '2h', type: 'Music' },
+    { time: '10:00', titleKey: 'radio.schedule.communityChat', host: 'Peter L.', duration: '1h', type: 'Talk' },
+    { time: '15:00', titleKey: 'radio.schedule.culturalHour', host: 'Fatima H.', duration: '1h', type: 'Culture' },
+    { time: '20:00', titleKey: 'radio.schedule.nightBeats', host: 'Alex R.', duration: '2h', type: 'Music' },
   ],
 };
 
@@ -28,23 +29,35 @@ const typeColors: Record<string, string> = {
 };
 
 export const RadioSchedule = () => {
+  const { t } = useTranslationContext();
+  
+  const days = [
+    { key: 'mon', label: t('time.days.mon') },
+    { key: 'tue', label: t('time.days.tue') },
+    { key: 'wed', label: t('time.days.wed') },
+    { key: 'thu', label: t('time.days.thu') },
+    { key: 'fri', label: t('time.days.fri') },
+    { key: 'sat', label: t('time.days.sat') },
+    { key: 'sun', label: t('time.days.sun') },
+  ];
+
   return (
     <Card className="p-6">
       <div className="flex items-center gap-2 mb-6">
         <Calendar className="w-5 h-5 text-primary" />
-        <h2 className="text-2xl font-bold text-foreground">Program Schedule</h2>
+        <h2 className="text-2xl font-bold text-foreground">{t('radio.schedule.title')}</h2>
       </div>
 
-      <Tabs defaultValue="monday" className="w-full">
+      <Tabs defaultValue="mon" className="w-full">
         <TabsList className="grid w-full grid-cols-7 mb-6">
-          {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
-            <TabsTrigger key={day} value={day.toLowerCase()}>
-              {day}
+          {days.map((day) => (
+            <TabsTrigger key={day.key} value={day.key}>
+              {day.label}
             </TabsTrigger>
           ))}
         </TabsList>
 
-        <TabsContent value="monday" className="space-y-3">
+        <TabsContent value="mon" className="space-y-3">
           {schedule.monday.map((program, index) => (
             <div
               key={index}
@@ -56,7 +69,7 @@ export const RadioSchedule = () => {
                   {program.time}
                 </div>
                 <div>
-                  <h4 className="font-semibold text-foreground">{program.title}</h4>
+                  <h4 className="font-semibold text-foreground">{t(program.titleKey)}</h4>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
                     <Mic className="w-3 h-3" />
                     <span>{program.host}</span>
@@ -65,12 +78,12 @@ export const RadioSchedule = () => {
                   </div>
                 </div>
               </div>
-              <Badge className={typeColors[program.type]}>{program.type}</Badge>
+              <Badge className={typeColors[program.type]}>{t(`radio.schedule.types.${program.type.toLowerCase()}`)}</Badge>
             </div>
           ))}
         </TabsContent>
 
-        <TabsContent value="tuesday" className="space-y-3">
+        <TabsContent value="tue" className="space-y-3">
           {schedule.tuesday.map((program, index) => (
             <div
               key={index}
@@ -82,7 +95,7 @@ export const RadioSchedule = () => {
                   {program.time}
                 </div>
                 <div>
-                  <h4 className="font-semibold text-foreground">{program.title}</h4>
+                  <h4 className="font-semibold text-foreground">{t(program.titleKey)}</h4>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
                     <Mic className="w-3 h-3" />
                     <span>{program.host}</span>
@@ -91,14 +104,14 @@ export const RadioSchedule = () => {
                   </div>
                 </div>
               </div>
-              <Badge className={typeColors[program.type]}>{program.type}</Badge>
+              <Badge className={typeColors[program.type]}>{t(`radio.schedule.types.${program.type.toLowerCase()}`)}</Badge>
             </div>
           ))}
         </TabsContent>
 
-        {['wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map((day) => (
+        {['wed', 'thu', 'fri', 'sat', 'sun'].map((day) => (
           <TabsContent key={day} value={day} className="text-center py-8 text-muted-foreground">
-            Schedule coming soon for {day.charAt(0).toUpperCase() + day.slice(1)}
+            {t('radio.schedule.comingSoon')}
           </TabsContent>
         ))}
       </Tabs>

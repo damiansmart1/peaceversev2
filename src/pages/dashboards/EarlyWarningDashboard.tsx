@@ -11,10 +11,12 @@ import CountrySelector, { getCountryName } from '@/components/early-warning/Coun
 import ReportingCenter from '@/components/early-warning/ReportingCenter';
 import { useRealtimeAlerts } from '@/hooks/useRealtimeAlerts';
 import { Badge } from '@/components/ui/badge';
+import { useTranslationContext } from '@/components/TranslationProvider';
 
 const EarlyWarningDashboard = () => {
   const [selectedCountry, setSelectedCountry] = useState('ALL');
   const { activeAlerts } = useRealtimeAlerts();
+  const { t } = useTranslationContext();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background">
@@ -29,22 +31,22 @@ const EarlyWarningDashboard = () => {
           <div className="max-w-4xl mx-auto text-center space-y-4">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 mb-4">
               <ShieldCheck className="w-4 h-4 text-accent" />
-              <span className="text-sm font-medium text-primary-foreground">AI-Powered Intelligence</span>
+              <span className="text-sm font-medium text-primary-foreground">{t('earlyWarning.badge')}</span>
             </div>
             
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-primary-foreground tracking-tight">
-              Early Warning System
+              {t('earlyWarning.title')}
             </h1>
             
             <p className="text-lg md:text-xl text-primary-foreground/90 max-w-2xl mx-auto">
-              AI-Powered Conflict Prevention & Risk Analysis for proactive peacekeeping
+              {t('earlyWarning.subtitle')}
             </p>
 
             {/* Country Selector in Hero */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
               <div className="flex items-center gap-2 bg-primary-foreground/10 backdrop-blur-sm rounded-lg p-2 border border-primary-foreground/20">
                 <MapPinned className="w-5 h-5 text-accent" />
-                <span className="text-sm font-medium text-primary-foreground">Viewing:</span>
+                <span className="text-sm font-medium text-primary-foreground">{t('earlyWarning.viewing')}:</span>
                 <CountrySelector
                   value={selectedCountry}
                   onValueChange={setSelectedCountry}
@@ -53,7 +55,7 @@ const EarlyWarningDashboard = () => {
               </div>
               {selectedCountry !== 'ALL' && (
                 <Badge variant="secondary" className="bg-accent/20 text-accent border-accent/30">
-                  Filtered: {getCountryName(selectedCountry)}
+                  {t('earlyWarning.filtered')}: {getCountryName(selectedCountry)}
                 </Badge>
               )}
             </div>
@@ -75,28 +77,28 @@ const EarlyWarningDashboard = () => {
                 className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md rounded-lg transition-all duration-300 font-medium"
               >
                 <Siren className="w-4 h-4 mr-2" />
-                Risk Analysis
+                {t('earlyWarning.tabs.riskAnalysis')}
               </TabsTrigger>
               <TabsTrigger 
                 value="hotspots"
                 className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md rounded-lg transition-all duration-300 font-medium"
               >
                 <TrendingUp className="w-4 h-4 mr-2" />
-                Hotspots
+                {t('earlyWarning.tabs.hotspots')}
               </TabsTrigger>
               <TabsTrigger 
                 value="alerts"
                 className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md rounded-lg transition-all duration-300 font-medium"
               >
                 <BellRing className="w-4 h-4 mr-2" />
-                Alerts
+                {t('earlyWarning.tabs.alerts')}
               </TabsTrigger>
               <TabsTrigger 
                 value="reports"
                 className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md rounded-lg transition-all duration-300 font-medium"
               >
                 <FileDown className="w-4 h-4 mr-2" />
-                Reports
+                {t('earlyWarning.tabs.reports')}
               </TabsTrigger>
             </TabsList>
 
@@ -129,32 +131,32 @@ const EarlyWarningDashboard = () => {
               <div className="relative">
                 <div className="flex items-center gap-2 mb-6">
                   <Activity className="w-5 h-5 text-primary" />
-                  <h3 className="text-lg font-semibold text-foreground">System Status</h3>
+                  <h3 className="text-lg font-semibold text-foreground">{t('earlyWarning.systemStatus')}</h3>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
                   <StatusItem
                     icon={Network}
-                    title="AI Analysis"
-                    status="Operational"
+                    title={t('earlyWarning.status.aiAnalysis')}
+                    status={t('earlyWarning.status.operational')}
                     color="success"
                   />
                   <StatusItem
                     icon={TrendingUp}
-                    title="Prediction"
-                    status="Active"
+                    title={t('earlyWarning.status.prediction')}
+                    status={t('status.active')}
                     color="success"
                   />
                   <StatusItem
                     icon={BellRing}
-                    title="Alerts"
-                    status={`${activeAlerts.length} Active`}
+                    title={t('earlyWarning.tabs.alerts')}
+                    status={`${activeAlerts.length} ${t('status.active')}`}
                     color={activeAlerts.length > 0 ? "warning" : "success"}
                   />
                   <StatusItem
                     icon={UsersRound}
-                    title="Response"
-                    status="Ready"
+                    title={t('earlyWarning.status.response')}
+                    status={t('earlyWarning.status.ready')}
                     color="success"
                   />
                 </div>
@@ -163,7 +165,7 @@ const EarlyWarningDashboard = () => {
                 <div className="mt-6 pt-4 border-t border-border">
                   <div className="flex items-center gap-2 text-sm">
                     <MapPinned className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-muted-foreground">Current View:</span>
+                    <span className="text-muted-foreground">{t('earlyWarning.currentView')}:</span>
                     <span className="font-medium text-foreground">
                       {getCountryName(selectedCountry)}
                     </span>
