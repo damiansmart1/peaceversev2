@@ -4,12 +4,17 @@ import SectionHeader from '@/components/SectionHeader';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Activity, TrendingUp, AlertTriangle, BarChart3, Globe, MapPin } from 'lucide-react';
+import { Activity, TrendingUp, AlertTriangle, BarChart3, Globe, MapPin, Shield, FileText, Bell, ArrowRightLeft } from 'lucide-react';
 import { usePeacePulseMetrics, useAccountabilityMetrics, useCountriesByBlock } from '@/hooks/usePeaceMetrics';
 import { useTranslationContext } from '@/components/TranslationProvider';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { PeacePulseCharts } from '@/components/PeacePulseCharts';
 import InteractiveHeatmap from '@/components/InteractiveHeatmap';
+import ConflictIndicatorsPanel from '@/components/peacepulse/ConflictIndicatorsPanel';
+import CrossBorderAnalysis from '@/components/peacepulse/CrossBorderAnalysis';
+import RealTimeAlertsFeed from '@/components/peacepulse/RealTimeAlertsFeed';
+import AdvancedReportingPanel from '@/components/peacepulse/AdvancedReportingPanel';
+import RegionalComparisonChart from '@/components/peacepulse/RegionalComparisonChart';
 
 const PeacePulse = () => {
   const { t } = useTranslationContext();
@@ -94,12 +99,15 @@ const PeacePulse = () => {
             <LoadingSpinner />
           ) : (
             <Tabs defaultValue="overview" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-5">
-                <TabsTrigger value="overview">{t('peacePulse.tabs.overview')}</TabsTrigger>
-                <TabsTrigger value="heatmap">{t('peacePulse.tabs.heatmap')}</TabsTrigger>
-                <TabsTrigger value="sentiment">{t('peacePulse.tabs.sentiment')}</TabsTrigger>
-                <TabsTrigger value="accountability">{t('peacePulse.tabs.accountability')}</TabsTrigger>
-                <TabsTrigger value="trends">{t('peacePulse.tabs.trends')}</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8">
+                <TabsTrigger value="overview" className="gap-1"><Activity className="w-3 h-3 hidden sm:inline" />{t('peacePulse.tabs.overview')}</TabsTrigger>
+                <TabsTrigger value="indicators" className="gap-1"><Shield className="w-3 h-3 hidden sm:inline" />Indicators</TabsTrigger>
+                <TabsTrigger value="crossborder" className="gap-1"><ArrowRightLeft className="w-3 h-3 hidden sm:inline" />Cross-Border</TabsTrigger>
+                <TabsTrigger value="alerts" className="gap-1"><Bell className="w-3 h-3 hidden sm:inline" />Alerts</TabsTrigger>
+                <TabsTrigger value="heatmap" className="gap-1"><MapPin className="w-3 h-3 hidden sm:inline" />{t('peacePulse.tabs.heatmap')}</TabsTrigger>
+                <TabsTrigger value="regional" className="gap-1"><Globe className="w-3 h-3 hidden sm:inline" />Regional</TabsTrigger>
+                <TabsTrigger value="accountability" className="gap-1"><BarChart3 className="w-3 h-3 hidden sm:inline" />{t('peacePulse.tabs.accountability')}</TabsTrigger>
+                <TabsTrigger value="reports" className="gap-1"><FileText className="w-3 h-3 hidden sm:inline" />Reports</TabsTrigger>
               </TabsList>
 
               <TabsContent value="overview" className="space-y-6">
@@ -212,8 +220,27 @@ const PeacePulse = () => {
                 </Card>
               </TabsContent>
 
+              <TabsContent value="indicators" className="space-y-6">
+                <ConflictIndicatorsPanel 
+                  countryCode={selectedCountry} 
+                  countryName={getSelectedCountryName()} 
+                />
+              </TabsContent>
+
+              <TabsContent value="crossborder" className="space-y-6">
+                <CrossBorderAnalysis selectedCountry={selectedCountry} />
+              </TabsContent>
+
+              <TabsContent value="alerts" className="space-y-6">
+                <RealTimeAlertsFeed countryFilter={selectedCountry} />
+              </TabsContent>
+
               <TabsContent value="heatmap" className="space-y-6">
                 <InteractiveHeatmap />
+              </TabsContent>
+
+              <TabsContent value="regional" className="space-y-6">
+                <RegionalComparisonChart selectedCountry={selectedCountry} />
               </TabsContent>
 
               <TabsContent value="accountability" className="space-y-6">
@@ -257,19 +284,16 @@ const PeacePulse = () => {
                     </div>
                   </CardContent>
                 </Card>
-              </TabsContent>
-
-              <TabsContent value="sentiment" className="space-y-6">
                 <PeacePulseCharts 
                   pulseMetrics={pulseMetrics} 
                   accountabilityMetrics={accountabilityMetrics}
                 />
               </TabsContent>
 
-              <TabsContent value="trends" className="space-y-6">
-                <PeacePulseCharts 
-                  pulseMetrics={pulseMetrics} 
-                  accountabilityMetrics={accountabilityMetrics}
+              <TabsContent value="reports" className="space-y-6">
+                <AdvancedReportingPanel 
+                  selectedCountry={selectedCountry} 
+                  countryName={getSelectedCountryName()} 
                 />
               </TabsContent>
             </Tabs>
