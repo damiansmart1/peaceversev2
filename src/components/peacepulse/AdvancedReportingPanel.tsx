@@ -116,7 +116,12 @@ const AdvancedReportingPanel = ({ selectedCountry = 'all', countryName = 'All Co
         title: template?.name || 'Report',
         subtitle: `Generated for ${countryName}`,
         dateRange: { from: dateFrom, to: dateTo },
-        columns: ['Field', 'Value', 'Status', 'Date'],
+        columns: [
+          { key: 'field', header: 'Field', format: 'text' as const },
+          { key: 'value', header: 'Value', format: 'text' as const },
+          { key: 'status', header: 'Status', format: 'text' as const },
+          { key: 'date', header: 'Date', format: 'date' as const }
+        ],
         metadata: {
           title: template?.name || 'Report',
           reportType: selectedTemplate,
