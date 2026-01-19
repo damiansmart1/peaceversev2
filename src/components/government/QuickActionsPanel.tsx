@@ -57,7 +57,7 @@ export const QuickActionsPanel = () => {
       description: 'Predictive risk analysis',
       color: 'text-red-500',
       bgColor: 'hover:bg-red-500/10',
-      onClick: () => navigate('/dashboard/early-warning'),
+      onClick: () => navigate('/early-warning'),
     },
     {
       icon: Users,
