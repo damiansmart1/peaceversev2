@@ -545,6 +545,104 @@ export type Database = {
           },
         ]
       }
+      broadcast_acknowledgments: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledgment_note: string | null
+          broadcast_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledgment_note?: string | null
+          broadcast_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledgment_note?: string | null
+          broadcast_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "broadcast_acknowledgments_broadcast_id_fkey"
+            columns: ["broadcast_id"]
+            isOneToOne: false
+            referencedRelation: "broadcast_alerts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      broadcast_alerts: {
+        Row: {
+          acknowledgment_deadline: string | null
+          alert_type: string | null
+          approved_by: string | null
+          created_at: string | null
+          created_by: string | null
+          delivery_stats: Json | null
+          expires_at: string | null
+          id: string
+          message: string
+          metadata: Json | null
+          requires_acknowledgment: boolean | null
+          sent_at: string | null
+          severity: Database["public"]["Enums"]["alert_severity_level"]
+          status: string | null
+          target_countries: string[] | null
+          target_regions: string[] | null
+          target_roles: string[] | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          acknowledgment_deadline?: string | null
+          alert_type?: string | null
+          approved_by?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          delivery_stats?: Json | null
+          expires_at?: string | null
+          id?: string
+          message: string
+          metadata?: Json | null
+          requires_acknowledgment?: boolean | null
+          sent_at?: string | null
+          severity?: Database["public"]["Enums"]["alert_severity_level"]
+          status?: string | null
+          target_countries?: string[] | null
+          target_regions?: string[] | null
+          target_roles?: string[] | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          acknowledgment_deadline?: string | null
+          alert_type?: string | null
+          approved_by?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          delivery_stats?: Json | null
+          expires_at?: string | null
+          id?: string
+          message?: string
+          metadata?: Json | null
+          requires_acknowledgment?: boolean | null
+          sent_at?: string | null
+          severity?: Database["public"]["Enums"]["alert_severity_level"]
+          status?: string | null
+          target_countries?: string[] | null
+          target_regions?: string[] | null
+          target_roles?: string[] | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       challenge_submissions: {
         Row: {
           challenge_id: string
@@ -591,6 +689,110 @@ export type Database = {
             columns: ["challenge_id"]
             isOneToOne: false
             referencedRelation: "weekly_challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      channel_members: {
+        Row: {
+          channel_id: string
+          id: string
+          joined_at: string | null
+          last_read_at: string | null
+          notification_enabled: boolean | null
+          role: string | null
+          user_id: string
+        }
+        Insert: {
+          channel_id: string
+          id?: string
+          joined_at?: string | null
+          last_read_at?: string | null
+          notification_enabled?: boolean | null
+          role?: string | null
+          user_id: string
+        }
+        Update: {
+          channel_id?: string
+          id?: string
+          joined_at?: string | null
+          last_read_at?: string | null
+          notification_enabled?: boolean | null
+          role?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "channel_members_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "communication_channels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      channel_messages: {
+        Row: {
+          attachments: Json | null
+          channel_id: string
+          content: string
+          created_at: string | null
+          id: string
+          is_pinned: boolean | null
+          mentions: string[] | null
+          message_type: string | null
+          metadata: Json | null
+          priority: Database["public"]["Enums"]["alert_severity_level"] | null
+          reply_to: string | null
+          sender_id: string | null
+          status: Database["public"]["Enums"]["comm_message_status"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          attachments?: Json | null
+          channel_id: string
+          content: string
+          created_at?: string | null
+          id?: string
+          is_pinned?: boolean | null
+          mentions?: string[] | null
+          message_type?: string | null
+          metadata?: Json | null
+          priority?: Database["public"]["Enums"]["alert_severity_level"] | null
+          reply_to?: string | null
+          sender_id?: string | null
+          status?: Database["public"]["Enums"]["comm_message_status"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          attachments?: Json | null
+          channel_id?: string
+          content?: string
+          created_at?: string | null
+          id?: string
+          is_pinned?: boolean | null
+          mentions?: string[] | null
+          message_type?: string | null
+          metadata?: Json | null
+          priority?: Database["public"]["Enums"]["alert_severity_level"] | null
+          reply_to?: string | null
+          sender_id?: string | null
+          status?: Database["public"]["Enums"]["comm_message_status"] | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "channel_messages_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "communication_channels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "channel_messages_reply_to_fkey"
+            columns: ["reply_to"]
+            isOneToOne: false
+            referencedRelation: "channel_messages"
             referencedColumns: ["id"]
           },
         ]
@@ -1121,6 +1323,51 @@ export type Database = {
           },
         ]
       }
+      communication_channels: {
+        Row: {
+          allowed_roles: string[] | null
+          channel_type: Database["public"]["Enums"]["comm_channel_type"]
+          country_scope: string[] | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          is_emergency: boolean | null
+          metadata: Json | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          allowed_roles?: string[] | null
+          channel_type?: Database["public"]["Enums"]["comm_channel_type"]
+          country_scope?: string[] | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_emergency?: boolean | null
+          metadata?: Json | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          allowed_roles?: string[] | null
+          channel_type?: Database["public"]["Enums"]["comm_channel_type"]
+          country_scope?: string[] | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_emergency?: boolean | null
+          metadata?: Json | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       content: {
         Row: {
           approval_status: string
@@ -1504,6 +1751,145 @@ export type Database = {
         }
         Relationships: []
       }
+      escalation_logs: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          created_at: string | null
+          document_id: string | null
+          escalated_roles: string[] | null
+          escalated_to: string[]
+          escalation_level: number | null
+          id: string
+          incident_id: string | null
+          message_id: string | null
+          metadata: Json | null
+          reason: string | null
+          resolved_at: string | null
+          rule_id: string | null
+          sla_deadline: string | null
+          status: string | null
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          created_at?: string | null
+          document_id?: string | null
+          escalated_roles?: string[] | null
+          escalated_to: string[]
+          escalation_level?: number | null
+          id?: string
+          incident_id?: string | null
+          message_id?: string | null
+          metadata?: Json | null
+          reason?: string | null
+          resolved_at?: string | null
+          rule_id?: string | null
+          sla_deadline?: string | null
+          status?: string | null
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          created_at?: string | null
+          document_id?: string | null
+          escalated_roles?: string[] | null
+          escalated_to?: string[]
+          escalation_level?: number | null
+          id?: string
+          incident_id?: string | null
+          message_id?: string | null
+          metadata?: Json | null
+          reason?: string | null
+          resolved_at?: string | null
+          rule_id?: string | null
+          sla_deadline?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "escalation_logs_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "ocha_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "escalation_logs_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "channel_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "escalation_logs_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "escalation_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      escalation_rules: {
+        Row: {
+          country_scope: string[] | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          escalation_time_minutes: number | null
+          id: string
+          is_active: boolean | null
+          max_escalations: number | null
+          name: string
+          notification_channels: string[] | null
+          severity_threshold:
+            | Database["public"]["Enums"]["alert_severity_level"]
+            | null
+          target_roles: string[]
+          target_users: string[] | null
+          trigger_conditions: Json
+          updated_at: string | null
+        }
+        Insert: {
+          country_scope?: string[] | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          escalation_time_minutes?: number | null
+          id?: string
+          is_active?: boolean | null
+          max_escalations?: number | null
+          name: string
+          notification_channels?: string[] | null
+          severity_threshold?:
+            | Database["public"]["Enums"]["alert_severity_level"]
+            | null
+          target_roles?: string[]
+          target_users?: string[] | null
+          trigger_conditions?: Json
+          updated_at?: string | null
+        }
+        Update: {
+          country_scope?: string[] | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          escalation_time_minutes?: number | null
+          id?: string
+          is_active?: boolean | null
+          max_escalations?: number | null
+          name?: string
+          notification_channels?: string[] | null
+          severity_threshold?:
+            | Database["public"]["Enums"]["alert_severity_level"]
+            | null
+          target_roles?: string[]
+          target_users?: string[] | null
+          trigger_conditions?: Json
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       external_data_records: {
         Row: {
           ai_extracted_entities: Json | null
@@ -1604,6 +1990,78 @@ export type Database = {
           source_name?: string
           source_type?: string
           total_records_fetched?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      field_reports: {
+        Row: {
+          assigned_to: string | null
+          attachments: Json | null
+          content: string
+          created_at: string | null
+          id: string
+          incident_ids: string[] | null
+          location_coordinates: Json | null
+          location_country: string | null
+          location_region: string | null
+          metadata: Json | null
+          priority: number | null
+          report_type: string | null
+          reporter_id: string | null
+          responded_at: string | null
+          responded_by: string | null
+          response_deadline: string | null
+          response_notes: string | null
+          severity: Database["public"]["Enums"]["alert_severity_level"] | null
+          status: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          attachments?: Json | null
+          content: string
+          created_at?: string | null
+          id?: string
+          incident_ids?: string[] | null
+          location_coordinates?: Json | null
+          location_country?: string | null
+          location_region?: string | null
+          metadata?: Json | null
+          priority?: number | null
+          report_type?: string | null
+          reporter_id?: string | null
+          responded_at?: string | null
+          responded_by?: string | null
+          response_deadline?: string | null
+          response_notes?: string | null
+          severity?: Database["public"]["Enums"]["alert_severity_level"] | null
+          status?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          attachments?: Json | null
+          content?: string
+          created_at?: string | null
+          id?: string
+          incident_ids?: string[] | null
+          location_coordinates?: Json | null
+          location_country?: string | null
+          location_region?: string | null
+          metadata?: Json | null
+          priority?: number | null
+          report_type?: string | null
+          reporter_id?: string | null
+          responded_at?: string | null
+          responded_by?: string | null
+          response_deadline?: string | null
+          response_notes?: string | null
+          severity?: Database["public"]["Enums"]["alert_severity_level"] | null
+          status?: string | null
+          title?: string
           updated_at?: string | null
         }
         Relationships: []
@@ -2080,6 +2538,38 @@ export type Database = {
           },
         ]
       }
+      message_acknowledgments: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledgment_note: string | null
+          id: string
+          message_id: string
+          user_id: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledgment_note?: string | null
+          id?: string
+          message_id: string
+          user_id: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledgment_note?: string | null
+          id?: string
+          message_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_acknowledgments_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "channel_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string
@@ -2113,6 +2603,81 @@ export type Database = {
           title?: string
           type?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      ocha_documents: {
+        Row: {
+          approved_by: string | null
+          attachments: Json | null
+          content: Json
+          country: string | null
+          created_at: string | null
+          created_by: string | null
+          distribution_list: string[] | null
+          document_type: Database["public"]["Enums"]["ocha_document_type"]
+          id: string
+          incident_ids: string[] | null
+          metadata: Json | null
+          published_at: string | null
+          region: string | null
+          severity_level:
+            | Database["public"]["Enums"]["alert_severity_level"]
+            | null
+          status: string | null
+          summary: string | null
+          title: string
+          updated_at: string | null
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          approved_by?: string | null
+          attachments?: Json | null
+          content?: Json
+          country?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          distribution_list?: string[] | null
+          document_type: Database["public"]["Enums"]["ocha_document_type"]
+          id?: string
+          incident_ids?: string[] | null
+          metadata?: Json | null
+          published_at?: string | null
+          region?: string | null
+          severity_level?:
+            | Database["public"]["Enums"]["alert_severity_level"]
+            | null
+          status?: string | null
+          summary?: string | null
+          title: string
+          updated_at?: string | null
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          approved_by?: string | null
+          attachments?: Json | null
+          content?: Json
+          country?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          distribution_list?: string[] | null
+          document_type?: Database["public"]["Enums"]["ocha_document_type"]
+          id?: string
+          incident_ids?: string[] | null
+          metadata?: Json | null
+          published_at?: string | null
+          region?: string | null
+          severity_level?:
+            | Database["public"]["Enums"]["alert_severity_level"]
+            | null
+          status?: string | null
+          summary?: string | null
+          title?: string
+          updated_at?: string | null
+          valid_from?: string | null
+          valid_until?: string | null
         }
         Relationships: []
       }
@@ -5341,7 +5906,29 @@ export type Database = {
         | "tone_classification"
         | "anomaly_detection"
         | "sentiment_and_threat"
+      alert_severity_level: "green" | "yellow" | "orange" | "red"
       app_role: "citizen" | "verifier" | "partner" | "government" | "admin"
+      comm_channel_type:
+        | "coordination"
+        | "broadcast"
+        | "field_report"
+        | "direct"
+        | "emergency"
+      comm_message_status:
+        | "draft"
+        | "sent"
+        | "delivered"
+        | "read"
+        | "acknowledged"
+        | "escalated"
+        | "archived"
+      ocha_document_type:
+        | "sitrep"
+        | "flash_update"
+        | "bulletin"
+        | "3w_report"
+        | "meeting_notes"
+        | "action_tracker"
     }
     CompositeTypes: {
       geometry_dump: {
@@ -5486,7 +6073,32 @@ export const Constants = {
         "anomaly_detection",
         "sentiment_and_threat",
       ],
+      alert_severity_level: ["green", "yellow", "orange", "red"],
       app_role: ["citizen", "verifier", "partner", "government", "admin"],
+      comm_channel_type: [
+        "coordination",
+        "broadcast",
+        "field_report",
+        "direct",
+        "emergency",
+      ],
+      comm_message_status: [
+        "draft",
+        "sent",
+        "delivered",
+        "read",
+        "acknowledged",
+        "escalated",
+        "archived",
+      ],
+      ocha_document_type: [
+        "sitrep",
+        "flash_update",
+        "bulletin",
+        "3w_report",
+        "meeting_notes",
+        "action_tracker",
+      ],
     },
   },
 } as const
