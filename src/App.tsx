@@ -127,11 +127,7 @@ const App = () => (
                         <GovernmentDashboard />
                       </ProtectedRoute>
                     } />
-                    <Route path="/early-warning" element={
-                      <ProtectedRoute requiredRole={["admin", "government", "partner"]}>
-                        <EarlyWarningDashboard />
-                      </ProtectedRoute>
-                    } />
+                    <Route path="/early-warning" element={<EarlyWarningDashboard />} />
                     <Route path="/help" element={<Help />} />
                     <Route path="/accessibility" element={<AccessibilityPage />} />
                     <Route path="/peace-pulse" element={<PeacePulse />} />
