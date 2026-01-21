@@ -47,6 +47,7 @@ import GovernmentDashboard from "./pages/dashboards/GovernmentDashboard";
 import EarlyWarningDashboard from "./pages/dashboards/EarlyWarningDashboard";
 import Integrations from "./pages/Integrations";
 import Install from "./pages/Install";
+import Communication from "./pages/Communication";
 
 // Preload Google Maps API on app startup for faster map loading
 import '@/hooks/useGoogleMapsPreloader';
@@ -134,6 +135,11 @@ const App = () => (
                     <Route path="/incidents" element={<Incidents />} />
                     <Route path="/integrations" element={<Integrations />} />
                     <Route path="/install" element={<Install />} />
+                    <Route path="/communication" element={
+                      <ProtectedRoute requiredRole={["admin", "government", "partner", "verifier"]}>
+                        <Communication />
+                      </ProtectedRoute>
+                    } />
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>

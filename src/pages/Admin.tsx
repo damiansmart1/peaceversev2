@@ -17,6 +17,7 @@ import { AdminIncidentTimelineTracker } from '@/components/admin/AdminIncidentTi
 import { AdminAIAnalytics } from '@/components/admin/AdminAIAnalytics';
 import { AdminAPIUsageAnalytics } from '@/components/admin/AdminAPIUsageAnalytics';
 import { AdminIntegrationsManager } from '@/components/admin/AdminIntegrationsManager';
+import { AdminCommunicationManager } from '@/components/admin/AdminCommunicationManager';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { RoleManagement } from '@/components/admin/RoleManagement';
 import AdminPeaceMetricsManager from '@/components/admin/AdminPeaceMetricsManager';
@@ -84,6 +85,11 @@ const Admin = () => {
         return <AdminAPIUsageAnalytics />;
       case 'integrations':
         return <AdminIntegrationsManager />;
+      case 'comm-hub':
+      case 'broadcasts':
+      case 'ocha-docs':
+      case 'field-reports':
+        return <AdminCommunicationManager />;
       case 'peace-metrics':
         return <AdminPeaceMetricsManager />;
       case 'settings':
