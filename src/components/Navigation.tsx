@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
-import { Menu, X, Users, Vote, BadgeCheck, ShieldCheck, Globe, HeartHandshake, User, LogOut, Settings, Compass, HelpCircle, Siren, Cable, Wand2, Radio, Gamepad2, AudioWaveform, Award, AlertTriangle, Plug, Sparkles, Shield, Heart, MapPin as MapIcon, Volume2 } from "lucide-react";
+import { Menu, X, Users, Vote, BadgeCheck, ShieldCheck, Globe, HeartHandshake, User, LogOut, Settings, Compass, HelpCircle, Siren, Cable, Wand2, Radio, Gamepad2, AudioWaveform, Award, AlertTriangle, Plug, Sparkles, Shield, Heart, MapPin as MapIcon, Volume2, MessageSquare } from "lucide-react";
 import peaceverselogo from "@/assets/peaceverse-logo.png";
 import GlobalSearch from '@/components/GlobalSearch';
 import KeyboardShortcuts from '@/components/KeyboardShortcuts';
@@ -75,6 +75,7 @@ const Navigation = () => {
     'verification': { path: '/verification', label: t('nav.verification'), icon: BadgeCheck },
     'integrations': { path: '/integrations', label: 'Integrations', icon: Cable },
     'early-warning': { path: '/dashboard/early-warning', label: t('nav.earlyWarning'), icon: AlertTriangle },
+    'communication': { path: '/communication', label: 'Communication Hub', icon: MessageSquare },
   };
 
   // Build navigation items based on accessible features
@@ -99,6 +100,10 @@ const Navigation = () => {
           }
         } else if (featureKey === 'early-warning' || featureKey === 'integrations') {
           if (roleStrings.includes('admin') || roleStrings.includes('government') || roleStrings.includes('partner')) {
+            items.push(navItem);
+          }
+        } else if (featureKey === 'communication') {
+          if (roleStrings.includes('admin') || roleStrings.includes('government') || roleStrings.includes('partner') || roleStrings.includes('verifier')) {
             items.push(navItem);
           }
         } else {

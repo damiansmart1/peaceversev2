@@ -15,6 +15,7 @@ import {
   BrainCircuit,
   Home,
   Plug,
+  Radio,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -76,6 +77,17 @@ const menuItems = [
       { id: 'incident-timeline', label: 'Timeline Tracker' },
       { id: 'safe-spaces', label: 'Safe Spaces' },
       { id: 'peace-metrics', label: 'Peace Metrics' },
+    ],
+  },
+  {
+    id: 'communication',
+    label: 'Communication',
+    icon: Radio,
+    children: [
+      { id: 'comm-hub', label: 'Communication Hub' },
+      { id: 'broadcasts', label: 'Broadcasts' },
+      { id: 'ocha-docs', label: 'OCHA Documents' },
+      { id: 'field-reports', label: 'Field Reports' },
     ],
   },
   {
