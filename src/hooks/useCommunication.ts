@@ -159,10 +159,17 @@ export const useCreateChannel = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (channel: Partial<CommunicationChannel>) => {
+    mutationFn: async (channel: { name: string; channel_type?: ChannelType; description?: string; is_emergency?: boolean; allowed_roles?: string[]; country_scope?: string[] }) => {
       const { data, error } = await supabase
         .from('communication_channels')
-        .insert([channel])
+        .insert([{
+          name: channel.name,
+          channel_type: channel.channel_type || 'coordination',
+          description: channel.description || null,
+          is_emergency: channel.is_emergency || false,
+          allowed_roles: channel.allowed_roles || null,
+          country_scope: channel.country_scope || null,
+        }])
         .select()
         .single();
       
@@ -289,11 +296,19 @@ export const useCreateOCHADocument = () => {
   const { user } = useAuth();
   
   return useMutation({
-    mutationFn: async (doc: Partial<OCHADocument>) => {
+    mutationFn: async (doc: { document_type: DocumentType; title: string; content?: Record<string, any>; summary?: string; severity_level?: AlertSeverityLevel; country?: string; region?: string; status?: string; distribution_list?: string[] }) => {
       const { data, error } = await supabase
         .from('ocha_documents')
         .insert([{
-          ...doc,
+          document_type: doc.document_type,
+          title: doc.title,
+          content: doc.content || {},
+          summary: doc.summary || null,
+          severity_level: doc.severity_level || 'green',
+          country: doc.country || null,
+          region: doc.region || null,
+          status: doc.status || 'draft',
+          distribution_list: doc.distribution_list || null,
           created_by: user?.id,
         }])
         .select()
@@ -361,12 +376,22 @@ export const useCreateBroadcast = () => {
   const { user } = useAuth();
   
   return useMutation({
-    mutationFn: async (broadcast: Partial<BroadcastAlert>) => {
+    mutationFn: async (broadcast: { title: string; message: string; severity?: AlertSeverityLevel; alert_type?: string; target_roles?: string[]; target_countries?: string[]; target_regions?: string[]; requires_acknowledgment?: boolean; acknowledgment_deadline?: string; expires_at?: string }) => {
       const { data, error } = await supabase
         .from('broadcast_alerts')
         .insert([{
-          ...broadcast,
+          title: broadcast.title,
+          message: broadcast.message,
+          severity: broadcast.severity || 'green',
+          alert_type: broadcast.alert_type || 'general',
+          target_roles: broadcast.target_roles || null,
+          target_countries: broadcast.target_countries || null,
+          target_regions: broadcast.target_regions || null,
+          requires_acknowledgment: broadcast.requires_acknowledgment || false,
+          acknowledgment_deadline: broadcast.acknowledgment_deadline || null,
+          expires_at: broadcast.expires_at || null,
           created_by: user?.id,
+          status: 'draft',
         }])
         .select()
         .single();
@@ -464,11 +489,20 @@ export const useCreateFieldReport = () => {
   const { user } = useAuth();
   
   return useMutation({
-    mutationFn: async (report: Partial<FieldReport>) => {
+    mutationFn: async (report: { report_type: string; title: string; content: string; location_country?: string; location_region?: string; location_coordinates?: { lat: number; lng: number }; severity?: AlertSeverityLevel; status?: string; incident_ids?: string[]; priority?: number }) => {
       const { data, error } = await supabase
         .from('field_reports')
         .insert([{
-          ...report,
+          report_type: report.report_type,
+          title: report.title,
+          content: report.content,
+          location_country: report.location_country || null,
+          location_region: report.location_region || null,
+          location_coordinates: report.location_coordinates || null,
+          severity: report.severity || 'green',
+          status: report.status || 'submitted',
+          incident_ids: report.incident_ids || null,
+          priority: report.priority || 5,
           reporter_id: user?.id,
         }])
         .select()
