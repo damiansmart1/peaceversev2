@@ -78,15 +78,32 @@ serve(async (req) => {
     const mode = body?.mode || "reset";
 
     // Idempotent: wipe previous DEMO content so re-seeding is safe.
-    if (mode === "reset") {
-      await supabase.from("message_acknowledgments").delete().ilike("acknowledgment_note", "[DEMO]%");
-      await supabase.from("broadcast_acknowledgments").delete().ilike("acknowledgment_note", "[DEMO]%");
+    // mode = "clear" will only delete; mode = "reset" deletes then re-inserts.
+    if (mode === "reset" || mode === "clear") {
+      await supabase
+        .from("message_acknowledgments")
+        .delete()
+        .ilike("acknowledgment_note", "[DEMO]%");
+      await supabase
+        .from("broadcast_acknowledgments")
+        .delete()
+        .ilike("acknowledgment_note", "[DEMO]%");
       await supabase.from("channel_messages").delete().ilike("content", "[DEMO]%");
       await supabase.from("escalation_logs").delete().ilike("reason", "[DEMO]%");
       await supabase.from("field_reports").delete().ilike("title", "[DEMO]%");
       await supabase.from("broadcast_alerts").delete().ilike("title", "[DEMO]%");
       await supabase.from("ocha_documents").delete().ilike("title", "[DEMO]%");
       await supabase.from("communication_channels").delete().ilike("name", "[DEMO]%");
+    }
+
+    if (mode === "clear") {
+      return new Response(
+        JSON.stringify({
+          success: true,
+          cleared: true,
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     const countries = [

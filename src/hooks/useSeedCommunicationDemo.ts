@@ -6,11 +6,11 @@ export function useSeedCommunicationDemo() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async () => {
+    mutationFn: async (mode: "reset" | "clear" = "reset") => {
       const { data, error } = await supabase.functions.invoke(
         "seed-communication-demo",
         {
-          body: { mode: "reset" },
+          body: { mode },
         }
       );
 
@@ -32,3 +32,4 @@ export function useSeedCommunicationDemo() {
     },
   });
 }
+

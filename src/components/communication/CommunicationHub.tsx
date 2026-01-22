@@ -12,16 +12,23 @@ import {
   Globe
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
 import CoordinationChannels from './CoordinationChannels';
 import BroadcastCenter from './BroadcastCenter';
 import OCHADocumentCenter from './OCHADocumentCenter';
 import FieldReportingCenter from './FieldReportingCenter';
 import EscalationManager from './EscalationManager';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAdminCheck } from '@/hooks/useAdminCheck';
+import { useSeedCommunicationDemo } from '@/hooks/useSeedCommunicationDemo';
+import { useChannels } from '@/hooks/useCommunication';
 
 const CommunicationHub: React.FC = () => {
   const [activeTab, setActiveTab] = useState('coordination');
   const { user } = useAuth();
+  const { data: isAdmin } = useAdminCheck();
+  const seedDemo = useSeedCommunicationDemo();
+  const { data: channels, isLoading: channelsLoading } = useChannels();
 
   const tabs = [
     {
@@ -83,8 +90,24 @@ const CommunicationHub: React.FC = () => {
             <span className="w-2 h-2 rounded-full bg-green-500 mr-2 animate-pulse" />
             System Operational
           </Badge>
+          {isAdmin && (
+            <Button
+              variant="outline"
+              onClick={() => seedDemo.mutate('reset')}
+              disabled={seedDemo.isPending}
+              title="Populate the communication hub with demo data"
+            >
+              {seedDemo.isPending ? 'Seeding…' : 'Seed Demo Data'}
+            </Button>
+          )}
         </div>
       </motion.div>
+
+      {isAdmin && !channelsLoading && (channels?.length || 0) === 0 && (
+        <div className="rounded-lg border bg-card p-4 text-sm text-muted-foreground">
+          No communication data found yet. Click <span className="font-medium text-foreground">Seed Demo Data</span> to populate channels, messages, broadcasts, documents, and reports.
+        </div>
+      )}
 
       {/* Stats Overview */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">

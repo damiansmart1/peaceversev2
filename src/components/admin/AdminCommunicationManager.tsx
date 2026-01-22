@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,7 @@ import { useSeedCommunicationDemo } from '@/hooks/useSeedCommunicationDemo';
 import { Radio, Send, FileText, AlertTriangle, Users, MessageSquare, Clock, CheckCircle, XCircle, Plus, Eye, Edit, Trash2, Bell, Globe, Shield, Zap, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import AdminCommunicationReports from '@/components/admin/AdminCommunicationReports';
 
 export function AdminCommunicationManager() {
   const { data: channels, isLoading: channelsLoading } = useChannels();
@@ -27,6 +28,30 @@ export function AdminCommunicationManager() {
   const activateBroadcast = useActivateBroadcast();
   const createDocument = useCreateOCHADocument();
   const seedDemo = useSeedCommunicationDemo();
+  const [demoMode, setDemoMode] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('pv_comm_demo_mode') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('pv_comm_demo_mode', String(demoMode));
+    } catch {
+      // ignore
+    }
+  }, [demoMode]);
+
+  useEffect(() => {
+    if (!demoMode) return;
+    if (channelsLoading) return;
+    if ((channels?.length || 0) > 0) return;
+    if (seedDemo.isPending) return;
+    seedDemo.mutate('reset');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [demoMode, channelsLoading, channels?.length]);
 
   const [showChannelDialog, setShowChannelDialog] = useState(false);
   const [showBroadcastDialog, setShowBroadcastDialog] = useState(false);
@@ -161,14 +186,32 @@ export function AdminCommunicationManager() {
           <h2 className="text-2xl font-bold">Communication Hub Management</h2>
           <p className="text-muted-foreground">OCHA-aligned inter-agency coordination system</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
           <Button
             variant="outline"
-            onClick={() => seedDemo.mutate()}
+            onClick={() => seedDemo.mutate('reset')}
             disabled={seedDemo.isPending}
           >
             {seedDemo.isPending ? 'Seeding…' : 'Seed Demo Data'}
           </Button>
+          <Button
+            variant="outline"
+            onClick={async () => {
+              try {
+                await seedDemo.mutateAsync('clear');
+                toast.success('Demo data cleared');
+              } catch {
+                // handled in hook
+              }
+            }}
+            disabled={seedDemo.isPending}
+          >
+            Clear Demo Data
+          </Button>
+          <div className="flex items-center gap-2 pl-2">
+            <Switch checked={demoMode} onCheckedChange={setDemoMode} />
+            <span className="text-sm text-muted-foreground">Demo mode</span>
+          </div>
           <Badge variant="outline" className="gap-1">
             <Globe className="h-3 w-3" />
             UN Standards Compliant
@@ -244,13 +287,18 @@ export function AdminCommunicationManager() {
       </div>
 
       <Tabs defaultValue="channels" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="channels">Channels</TabsTrigger>
           <TabsTrigger value="broadcasts">Broadcasts</TabsTrigger>
           <TabsTrigger value="documents">Documents</TabsTrigger>
           <TabsTrigger value="field-reports">Field Reports</TabsTrigger>
           <TabsTrigger value="escalation">Escalation Rules</TabsTrigger>
+          <TabsTrigger value="reports">Reports</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="reports" className="space-y-4">
+          <AdminCommunicationReports />
+        </TabsContent>
 
         {/* Channels Tab */}
         <TabsContent value="channels" className="space-y-4">
