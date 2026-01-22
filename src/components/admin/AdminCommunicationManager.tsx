@@ -11,6 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useChannels, useBroadcastAlerts, useOCHADocuments, useFieldReports, useCreateChannel, useCreateBroadcast, useActivateBroadcast, useCreateOCHADocument, AlertSeverityLevel, ChannelType, DocumentType } from '@/hooks/useCommunication';
+import { useSeedCommunicationDemo } from '@/hooks/useSeedCommunicationDemo';
 import { Radio, Send, FileText, AlertTriangle, Users, MessageSquare, Clock, CheckCircle, XCircle, Plus, Eye, Edit, Trash2, Bell, Globe, Shield, Zap, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -25,6 +26,7 @@ export function AdminCommunicationManager() {
   const createBroadcast = useCreateBroadcast();
   const activateBroadcast = useActivateBroadcast();
   const createDocument = useCreateOCHADocument();
+  const seedDemo = useSeedCommunicationDemo();
 
   const [showChannelDialog, setShowChannelDialog] = useState(false);
   const [showBroadcastDialog, setShowBroadcastDialog] = useState(false);
@@ -160,6 +162,13 @@ export function AdminCommunicationManager() {
           <p className="text-muted-foreground">OCHA-aligned inter-agency coordination system</p>
         </div>
         <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => seedDemo.mutate()}
+            disabled={seedDemo.isPending}
+          >
+            {seedDemo.isPending ? 'Seeding…' : 'Seed Demo Data'}
+          </Button>
           <Badge variant="outline" className="gap-1">
             <Globe className="h-3 w-3" />
             UN Standards Compliant
