@@ -48,6 +48,7 @@ import EarlyWarningDashboard from "./pages/dashboards/EarlyWarningDashboard";
 import Integrations from "./pages/Integrations";
 import Install from "./pages/Install";
 import Communication from "./pages/Communication";
+import Elections from "./pages/Elections";
 
 // Preload Google Maps API on app startup for faster map loading
 import '@/hooks/useGoogleMapsPreloader';
@@ -133,6 +134,7 @@ const App = () => (
                     <Route path="/accessibility" element={<AccessibilityPage />} />
                     <Route path="/peace-pulse" element={<PeacePulse />} />
                     <Route path="/incidents" element={<Incidents />} />
+                    <Route path="/elections" element={<Elections />} />
                     <Route path="/integrations" element={<Integrations />} />
                     <Route path="/install" element={<Install />} />
                     <Route path="/communication" element={
