@@ -1709,6 +1709,520 @@ export type Database = {
         }
         Relationships: []
       }
+      election_audit_log: {
+        Row: {
+          action_details: Json
+          action_type: string
+          election_id: string | null
+          entity_id: string | null
+          entity_type: string
+          id: string
+          ip_address: unknown
+          log_hash: string | null
+          performed_at: string | null
+          performed_by: string | null
+          previous_log_hash: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          action_details: Json
+          action_type: string
+          election_id?: string | null
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          ip_address?: unknown
+          log_hash?: string | null
+          performed_at?: string | null
+          performed_by?: string | null
+          previous_log_hash?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          action_details?: Json
+          action_type?: string
+          election_id?: string | null
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          ip_address?: unknown
+          log_hash?: string | null
+          performed_at?: string | null
+          performed_by?: string | null
+          previous_log_hash?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "election_audit_log_election_id_fkey"
+            columns: ["election_id"]
+            isOneToOne: false
+            referencedRelation: "elections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      election_incident_categories: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          name: string
+          severity_default:
+            | Database["public"]["Enums"]["election_incident_severity"]
+            | null
+          sub_categories: string[] | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          severity_default?:
+            | Database["public"]["Enums"]["election_incident_severity"]
+            | null
+          sub_categories?: string[] | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          severity_default?:
+            | Database["public"]["Enums"]["election_incident_severity"]
+            | null
+          sub_categories?: string[] | null
+        }
+        Relationships: []
+      }
+      election_incidents: {
+        Row: {
+          category: string
+          country_code: string
+          created_at: string | null
+          credibility_score: number | null
+          description: string
+          disruption_duration_minutes: number | null
+          district: string | null
+          duration_minutes: number | null
+          election_id: string
+          escalated: boolean | null
+          escalated_to: string[] | null
+          evidence_description: string | null
+          has_witnesses: boolean | null
+          id: string
+          incident_code: string | null
+          incident_datetime: string
+          is_anonymous: boolean | null
+          latitude: number | null
+          location_address: string | null
+          longitude: number | null
+          media_urls: string[] | null
+          people_affected: number | null
+          polling_station_id: string | null
+          region: string | null
+          reported_by: string | null
+          reporter_role: Database["public"]["Enums"]["observer_role"] | null
+          requires_immediate_action: boolean | null
+          resolution_notes: string | null
+          resolution_status: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: Database["public"]["Enums"]["election_incident_severity"]
+          status: string | null
+          sub_category: string | null
+          title: string
+          updated_at: string | null
+          verification_notes: string | null
+          verification_status: string | null
+          verified_at: string | null
+          verified_by: string | null
+          voting_disrupted: boolean | null
+          witness_count: number | null
+        }
+        Insert: {
+          category: string
+          country_code: string
+          created_at?: string | null
+          credibility_score?: number | null
+          description: string
+          disruption_duration_minutes?: number | null
+          district?: string | null
+          duration_minutes?: number | null
+          election_id: string
+          escalated?: boolean | null
+          escalated_to?: string[] | null
+          evidence_description?: string | null
+          has_witnesses?: boolean | null
+          id?: string
+          incident_code?: string | null
+          incident_datetime: string
+          is_anonymous?: boolean | null
+          latitude?: number | null
+          location_address?: string | null
+          longitude?: number | null
+          media_urls?: string[] | null
+          people_affected?: number | null
+          polling_station_id?: string | null
+          region?: string | null
+          reported_by?: string | null
+          reporter_role?: Database["public"]["Enums"]["observer_role"] | null
+          requires_immediate_action?: boolean | null
+          resolution_notes?: string | null
+          resolution_status?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity: Database["public"]["Enums"]["election_incident_severity"]
+          status?: string | null
+          sub_category?: string | null
+          title: string
+          updated_at?: string | null
+          verification_notes?: string | null
+          verification_status?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+          voting_disrupted?: boolean | null
+          witness_count?: number | null
+        }
+        Update: {
+          category?: string
+          country_code?: string
+          created_at?: string | null
+          credibility_score?: number | null
+          description?: string
+          disruption_duration_minutes?: number | null
+          district?: string | null
+          duration_minutes?: number | null
+          election_id?: string
+          escalated?: boolean | null
+          escalated_to?: string[] | null
+          evidence_description?: string | null
+          has_witnesses?: boolean | null
+          id?: string
+          incident_code?: string | null
+          incident_datetime?: string
+          is_anonymous?: boolean | null
+          latitude?: number | null
+          location_address?: string | null
+          longitude?: number | null
+          media_urls?: string[] | null
+          people_affected?: number | null
+          polling_station_id?: string | null
+          region?: string | null
+          reported_by?: string | null
+          reporter_role?: Database["public"]["Enums"]["observer_role"] | null
+          requires_immediate_action?: boolean | null
+          resolution_notes?: string | null
+          resolution_status?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: Database["public"]["Enums"]["election_incident_severity"]
+          status?: string | null
+          sub_category?: string | null
+          title?: string
+          updated_at?: string | null
+          verification_notes?: string | null
+          verification_status?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+          voting_disrupted?: boolean | null
+          witness_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "election_incidents_election_id_fkey"
+            columns: ["election_id"]
+            isOneToOne: false
+            referencedRelation: "elections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "election_incidents_polling_station_id_fkey"
+            columns: ["polling_station_id"]
+            isOneToOne: false
+            referencedRelation: "polling_stations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      election_observers: {
+        Row: {
+          accreditation_number: string | null
+          accreditation_status: string | null
+          accredited_at: string | null
+          accredited_by: string | null
+          assigned_regions: string[] | null
+          assigned_stations: string[] | null
+          created_at: string | null
+          current_location: Json | null
+          deployment_status: string | null
+          election_id: string
+          email: string | null
+          full_name: string
+          id: string
+          id_verified: boolean | null
+          is_active: boolean | null
+          last_check_in: string | null
+          oath_signed: boolean | null
+          observer_role: Database["public"]["Enums"]["observer_role"]
+          organization: string | null
+          phone: string | null
+          training_completed: boolean | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          accreditation_number?: string | null
+          accreditation_status?: string | null
+          accredited_at?: string | null
+          accredited_by?: string | null
+          assigned_regions?: string[] | null
+          assigned_stations?: string[] | null
+          created_at?: string | null
+          current_location?: Json | null
+          deployment_status?: string | null
+          election_id: string
+          email?: string | null
+          full_name: string
+          id?: string
+          id_verified?: boolean | null
+          is_active?: boolean | null
+          last_check_in?: string | null
+          oath_signed?: boolean | null
+          observer_role: Database["public"]["Enums"]["observer_role"]
+          organization?: string | null
+          phone?: string | null
+          training_completed?: boolean | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          accreditation_number?: string | null
+          accreditation_status?: string | null
+          accredited_at?: string | null
+          accredited_by?: string | null
+          assigned_regions?: string[] | null
+          assigned_stations?: string[] | null
+          created_at?: string | null
+          current_location?: Json | null
+          deployment_status?: string | null
+          election_id?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          id_verified?: boolean | null
+          is_active?: boolean | null
+          last_check_in?: string | null
+          oath_signed?: boolean | null
+          observer_role?: Database["public"]["Enums"]["observer_role"]
+          organization?: string | null
+          phone?: string | null
+          training_completed?: boolean | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "election_observers_election_id_fkey"
+            columns: ["election_id"]
+            isOneToOne: false
+            referencedRelation: "elections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      election_results: {
+        Row: {
+          contest_reason: string | null
+          contested: boolean | null
+          created_at: string | null
+          election_id: string
+          form_image_urls: string[] | null
+          fully_verified: boolean | null
+          hash_value: string | null
+          id: string
+          polling_station_id: string
+          previous_hash: string | null
+          rejected_votes: number
+          result_form_url: string | null
+          results_data: Json
+          signature_count: number | null
+          signatures: Json | null
+          status: string | null
+          submitted_at: string | null
+          submitted_by: string
+          total_registered: number
+          total_votes_cast: number
+          turnout_percentage: number | null
+          updated_at: string | null
+          valid_votes: number
+        }
+        Insert: {
+          contest_reason?: string | null
+          contested?: boolean | null
+          created_at?: string | null
+          election_id: string
+          form_image_urls?: string[] | null
+          fully_verified?: boolean | null
+          hash_value?: string | null
+          id?: string
+          polling_station_id: string
+          previous_hash?: string | null
+          rejected_votes: number
+          result_form_url?: string | null
+          results_data?: Json
+          signature_count?: number | null
+          signatures?: Json | null
+          status?: string | null
+          submitted_at?: string | null
+          submitted_by: string
+          total_registered: number
+          total_votes_cast: number
+          turnout_percentage?: number | null
+          updated_at?: string | null
+          valid_votes: number
+        }
+        Update: {
+          contest_reason?: string | null
+          contested?: boolean | null
+          created_at?: string | null
+          election_id?: string
+          form_image_urls?: string[] | null
+          fully_verified?: boolean | null
+          hash_value?: string | null
+          id?: string
+          polling_station_id?: string
+          previous_hash?: string | null
+          rejected_votes?: number
+          result_form_url?: string | null
+          results_data?: Json
+          signature_count?: number | null
+          signatures?: Json | null
+          status?: string | null
+          submitted_at?: string | null
+          submitted_by?: string
+          total_registered?: number
+          total_votes_cast?: number
+          turnout_percentage?: number | null
+          updated_at?: string | null
+          valid_votes?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "election_results_election_id_fkey"
+            columns: ["election_id"]
+            isOneToOne: false
+            referencedRelation: "elections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "election_results_polling_station_id_fkey"
+            columns: ["polling_station_id"]
+            isOneToOne: false
+            referencedRelation: "polling_stations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      elections: {
+        Row: {
+          campaign_end: string | null
+          campaign_start: string | null
+          candidates: Json | null
+          certified_at: string | null
+          certified_by: string | null
+          config: Json | null
+          country_code: string
+          country_name: string
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          election_type: Database["public"]["Enums"]["election_type"]
+          id: string
+          is_active: boolean | null
+          min_signatures_required: number | null
+          multi_signature_required: boolean | null
+          name: string
+          political_parties: Json | null
+          regions: string[] | null
+          registration_end: string | null
+          registration_start: string | null
+          status: Database["public"]["Enums"]["election_status"] | null
+          total_polling_stations: number | null
+          total_registered_voters: number | null
+          updated_at: string | null
+          verification_required: boolean | null
+          voting_date: string
+          voting_end_date: string | null
+        }
+        Insert: {
+          campaign_end?: string | null
+          campaign_start?: string | null
+          candidates?: Json | null
+          certified_at?: string | null
+          certified_by?: string | null
+          config?: Json | null
+          country_code: string
+          country_name: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          election_type: Database["public"]["Enums"]["election_type"]
+          id?: string
+          is_active?: boolean | null
+          min_signatures_required?: number | null
+          multi_signature_required?: boolean | null
+          name: string
+          political_parties?: Json | null
+          regions?: string[] | null
+          registration_end?: string | null
+          registration_start?: string | null
+          status?: Database["public"]["Enums"]["election_status"] | null
+          total_polling_stations?: number | null
+          total_registered_voters?: number | null
+          updated_at?: string | null
+          verification_required?: boolean | null
+          voting_date: string
+          voting_end_date?: string | null
+        }
+        Update: {
+          campaign_end?: string | null
+          campaign_start?: string | null
+          candidates?: Json | null
+          certified_at?: string | null
+          certified_by?: string | null
+          config?: Json | null
+          country_code?: string
+          country_name?: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          election_type?: Database["public"]["Enums"]["election_type"]
+          id?: string
+          is_active?: boolean | null
+          min_signatures_required?: number | null
+          multi_signature_required?: boolean | null
+          name?: string
+          political_parties?: Json | null
+          regions?: string[] | null
+          registration_end?: string | null
+          registration_start?: string | null
+          status?: Database["public"]["Enums"]["election_status"] | null
+          total_polling_stations?: number | null
+          total_registered_voters?: number | null
+          updated_at?: string | null
+          verification_required?: boolean | null
+          voting_date?: string
+          voting_end_date?: string | null
+        }
+        Relationships: []
+      }
       emergency_contacts: {
         Row: {
           category: string | null
@@ -2976,6 +3490,95 @@ export type Database = {
           },
         ]
       }
+      polling_stations: {
+        Row: {
+          accessibility_notes: string | null
+          address: string | null
+          closed_at: string | null
+          constituency: string | null
+          country_code: string
+          created_at: string | null
+          district: string | null
+          election_id: string
+          equipment_status: Json | null
+          id: string
+          is_accessible: boolean | null
+          is_active: boolean | null
+          latitude: number | null
+          longitude: number | null
+          opened_at: string | null
+          region: string | null
+          registered_voters: number | null
+          setup_verified: boolean | null
+          setup_verified_at: string | null
+          setup_verified_by: string | null
+          station_code: string
+          station_name: string
+          updated_at: string | null
+          ward: string | null
+        }
+        Insert: {
+          accessibility_notes?: string | null
+          address?: string | null
+          closed_at?: string | null
+          constituency?: string | null
+          country_code: string
+          created_at?: string | null
+          district?: string | null
+          election_id: string
+          equipment_status?: Json | null
+          id?: string
+          is_accessible?: boolean | null
+          is_active?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
+          opened_at?: string | null
+          region?: string | null
+          registered_voters?: number | null
+          setup_verified?: boolean | null
+          setup_verified_at?: string | null
+          setup_verified_by?: string | null
+          station_code: string
+          station_name: string
+          updated_at?: string | null
+          ward?: string | null
+        }
+        Update: {
+          accessibility_notes?: string | null
+          address?: string | null
+          closed_at?: string | null
+          constituency?: string | null
+          country_code?: string
+          created_at?: string | null
+          district?: string | null
+          election_id?: string
+          equipment_status?: Json | null
+          id?: string
+          is_accessible?: boolean | null
+          is_active?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
+          opened_at?: string | null
+          region?: string | null
+          registered_voters?: number | null
+          setup_verified?: boolean | null
+          setup_verified_at?: string | null
+          setup_verified_by?: string | null
+          station_code?: string
+          station_name?: string
+          updated_at?: string | null
+          ward?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "polling_stations_election_id_fkey"
+            columns: ["election_id"]
+            isOneToOne: false
+            referencedRelation: "elections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       polls: {
         Row: {
           category: string
@@ -3578,6 +4181,62 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      result_signatures: {
+        Row: {
+          agrees_with_result: boolean | null
+          comments: string | null
+          device_info: Json | null
+          id: string
+          ip_address: unknown
+          objection_reason: string | null
+          result_id: string
+          signature_hash: string | null
+          signature_type: string
+          signed_at: string | null
+          signer_id: string
+          signer_organization: string | null
+          signer_role: Database["public"]["Enums"]["observer_role"]
+        }
+        Insert: {
+          agrees_with_result?: boolean | null
+          comments?: string | null
+          device_info?: Json | null
+          id?: string
+          ip_address?: unknown
+          objection_reason?: string | null
+          result_id: string
+          signature_hash?: string | null
+          signature_type: string
+          signed_at?: string | null
+          signer_id: string
+          signer_organization?: string | null
+          signer_role: Database["public"]["Enums"]["observer_role"]
+        }
+        Update: {
+          agrees_with_result?: boolean | null
+          comments?: string | null
+          device_info?: Json | null
+          id?: string
+          ip_address?: unknown
+          objection_reason?: string | null
+          result_id?: string
+          signature_hash?: string | null
+          signature_type?: string
+          signed_at?: string | null
+          signer_id?: string
+          signer_organization?: string | null
+          signer_role?: Database["public"]["Enums"]["observer_role"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "result_signatures_result_id_fkey"
+            columns: ["result_id"]
+            isOneToOne: false
+            referencedRelation: "election_results"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reward_store_items: {
         Row: {
@@ -5262,6 +5921,11 @@ export type Database = {
         Args: { content_id: string }
         Returns: undefined
       }
+      is_election_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_election_observer: {
+        Args: { _election_id: string; _user_id: string }
+        Returns: boolean
+      }
       longtransactionsenabled: { Args: never; Returns: boolean }
       populate_geometry_columns:
         | { Args: { tbl_oid: unknown; use_typmod?: boolean }; Returns: number }
@@ -5922,6 +6586,38 @@ export type Database = {
         | "acknowledged"
         | "escalated"
         | "archived"
+      election_incident_severity:
+        | "minor"
+        | "moderate"
+        | "serious"
+        | "critical"
+        | "emergency"
+      election_status:
+        | "draft"
+        | "scheduled"
+        | "registration"
+        | "campaigning"
+        | "voting"
+        | "counting"
+        | "verification"
+        | "certified"
+        | "disputed"
+        | "completed"
+      election_type:
+        | "presidential"
+        | "parliamentary"
+        | "gubernatorial"
+        | "local"
+        | "referendum"
+        | "by_election"
+        | "primary"
+      observer_role:
+        | "domestic_observer"
+        | "international_observer"
+        | "party_agent"
+        | "media"
+        | "election_official"
+        | "security_personnel"
       ocha_document_type:
         | "sitrep"
         | "flash_update"
@@ -6090,6 +6786,42 @@ export const Constants = {
         "acknowledged",
         "escalated",
         "archived",
+      ],
+      election_incident_severity: [
+        "minor",
+        "moderate",
+        "serious",
+        "critical",
+        "emergency",
+      ],
+      election_status: [
+        "draft",
+        "scheduled",
+        "registration",
+        "campaigning",
+        "voting",
+        "counting",
+        "verification",
+        "certified",
+        "disputed",
+        "completed",
+      ],
+      election_type: [
+        "presidential",
+        "parliamentary",
+        "gubernatorial",
+        "local",
+        "referendum",
+        "by_election",
+        "primary",
+      ],
+      observer_role: [
+        "domestic_observer",
+        "international_observer",
+        "party_agent",
+        "media",
+        "election_official",
+        "security_personnel",
       ],
       ocha_document_type: [
         "sitrep",

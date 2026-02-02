@@ -16,6 +16,7 @@ import {
   Home,
   Plug,
   Radio,
+  Vote,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -75,6 +76,7 @@ const menuItems = [
     children: [
       { id: 'incidents', label: 'Incident Reports' },
       { id: 'incident-timeline', label: 'Timeline Tracker' },
+      { id: 'elections', label: 'Election Monitoring' },
       { id: 'safe-spaces', label: 'Safe Spaces' },
       { id: 'peace-metrics', label: 'Peace Metrics' },
     ],

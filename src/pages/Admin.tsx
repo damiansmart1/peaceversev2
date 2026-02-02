@@ -23,6 +23,7 @@ import { RoleManagement } from '@/components/admin/RoleManagement';
 import AdminPeaceMetricsManager from '@/components/admin/AdminPeaceMetricsManager';
 import { AdminRoleFeatureManager } from '@/components/admin/AdminRoleFeatureManager';
 import AdminCMSManager from '@/components/admin/AdminCMSManager';
+import AdminElectionsManager from '@/components/admin/AdminElectionsManager';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { Loader2, Shield } from 'lucide-react';
 
@@ -92,6 +93,8 @@ const Admin = () => {
         return <AdminCommunicationManager />;
       case 'peace-metrics':
         return <AdminPeaceMetricsManager />;
+      case 'elections':
+        return <AdminElectionsManager />;
       case 'settings':
         return <AdminSettingsManager />;
       default:
