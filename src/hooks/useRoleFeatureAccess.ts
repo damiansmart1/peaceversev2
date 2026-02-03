@@ -16,6 +16,7 @@ export const PLATFORM_FEATURES = [
   { key: 'integrations', label: 'Integrations', description: 'API and system integrations', path: '/integrations' },
   { key: 'early-warning', label: 'Early Warning', description: 'Early warning system dashboard', path: '/dashboard/early-warning' },
   { key: 'communication', label: 'Communication Hub', description: 'OCHA-aligned coordination and broadcast system', path: '/communication' },
+  { key: 'elections', label: 'Election Monitoring', description: 'International-standard election monitoring and reporting', path: '/elections' },
 ] as const;
 
 export type FeatureKey = typeof PLATFORM_FEATURES[number]['key'];

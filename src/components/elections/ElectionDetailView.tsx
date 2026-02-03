@@ -16,7 +16,10 @@ import {
   Shield,
   FileText,
   Plus,
-  RefreshCw
+  RefreshCw,
+  Download,
+  Activity,
+  Eye,
 } from 'lucide-react';
 import { 
   type Election,
@@ -31,6 +34,9 @@ import ElectionPollingStations from './ElectionPollingStations';
 import ElectionObserversPanel from './ElectionObserversPanel';
 import ElectionIncidentsList from './ElectionIncidentsList';
 import ElectionResultsPanel from './ElectionResultsPanel';
+import ElectionRealTimeDashboard from './ElectionRealTimeDashboard';
+import ElectionVerificationQueue from './ElectionVerificationQueue';
+import ElectionAdvancedExport from './ElectionAdvancedExport';
 
 interface ElectionDetailViewProps {
   election: Election;
@@ -171,26 +177,38 @@ export default function ElectionDetailView({ election, onBack }: ElectionDetailV
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full max-w-3xl grid-cols-5">
-          <TabsTrigger value="overview" className="gap-2">
+        <TabsList className="grid w-full max-w-4xl grid-cols-4 md:grid-cols-8">
+          <TabsTrigger value="overview" className="gap-1">
             <BarChart3 className="h-4 w-4" />
             <span className="hidden sm:inline">Overview</span>
           </TabsTrigger>
-          <TabsTrigger value="stations" className="gap-2">
+          <TabsTrigger value="realtime" className="gap-1">
+            <Activity className="h-4 w-4" />
+            <span className="hidden sm:inline">Live</span>
+          </TabsTrigger>
+          <TabsTrigger value="stations" className="gap-1">
             <MapPin className="h-4 w-4" />
             <span className="hidden sm:inline">Stations</span>
           </TabsTrigger>
-          <TabsTrigger value="observers" className="gap-2">
+          <TabsTrigger value="observers" className="gap-1">
             <Users className="h-4 w-4" />
             <span className="hidden sm:inline">Observers</span>
           </TabsTrigger>
-          <TabsTrigger value="incidents" className="gap-2">
+          <TabsTrigger value="incidents" className="gap-1">
             <AlertTriangle className="h-4 w-4" />
             <span className="hidden sm:inline">Incidents</span>
           </TabsTrigger>
-          <TabsTrigger value="results" className="gap-2">
+          <TabsTrigger value="verification" className="gap-1">
+            <Shield className="h-4 w-4" />
+            <span className="hidden sm:inline">Verify</span>
+          </TabsTrigger>
+          <TabsTrigger value="results" className="gap-1">
             <FileText className="h-4 w-4" />
             <span className="hidden sm:inline">Results</span>
+          </TabsTrigger>
+          <TabsTrigger value="export" className="gap-1">
+            <Download className="h-4 w-4" />
+            <span className="hidden sm:inline">Export</span>
           </TabsTrigger>
         </TabsList>
 
@@ -320,6 +338,10 @@ export default function ElectionDetailView({ election, onBack }: ElectionDetailV
           </Card>
         </TabsContent>
 
+        <TabsContent value="realtime">
+          <ElectionRealTimeDashboard election={election} />
+        </TabsContent>
+
         <TabsContent value="stations">
           <ElectionPollingStations electionId={election.id} countryCode={election.country_code} />
         </TabsContent>
@@ -332,8 +354,16 @@ export default function ElectionDetailView({ election, onBack }: ElectionDetailV
           <ElectionIncidentsList electionId={election.id} />
         </TabsContent>
 
+        <TabsContent value="verification">
+          <ElectionVerificationQueue election={election} />
+        </TabsContent>
+
         <TabsContent value="results">
           <ElectionResultsPanel electionId={election.id} election={election} />
+        </TabsContent>
+
+        <TabsContent value="export">
+          <ElectionAdvancedExport election={election} />
         </TabsContent>
       </Tabs>
     </div>

@@ -76,6 +76,7 @@ const Navigation = () => {
     'integrations': { path: '/integrations', label: 'Integrations', icon: Cable },
     'early-warning': { path: '/dashboard/early-warning', label: t('nav.earlyWarning'), icon: AlertTriangle },
     'communication': { path: '/communication', label: 'Communication Hub', icon: MessageSquare },
+    'elections': { path: '/elections', label: 'Election Monitoring', icon: Vote },
   };
 
   // Build navigation items based on accessible features
@@ -106,6 +107,9 @@ const Navigation = () => {
           if (roleStrings.includes('admin') || roleStrings.includes('government') || roleStrings.includes('partner') || roleStrings.includes('verifier')) {
             items.push(navItem);
           }
+        } else if (featureKey === 'elections') {
+          // Elections is available to all users for public reporting
+          items.push(navItem);
         } else {
           items.push(navItem);
         }
