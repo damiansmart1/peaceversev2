@@ -45,6 +45,7 @@ import { format } from 'date-fns';
 import ElectionDetailView from '@/components/elections/ElectionDetailView';
 import ElectionIncidentsManager from '@/components/elections/ElectionIncidentsManager';
 import ElectionReportsExport from '@/components/elections/ElectionReportsExport';
+import { useElectionDemo } from '@/hooks/useElectionDemo';
 
 const ELECTION_TYPES: { value: ElectionType; label: string }[] = [
   { value: 'presidential', label: 'Presidential' },
@@ -120,6 +121,7 @@ export default function AdminElectionsManager() {
   const { data: allIncidents } = useAllElectionIncidents();
   const createElection = useCreateElection();
   const updateElection = useUpdateElection();
+  const { seedDemoData, clearDemoData, isLoading: isDemoLoading } = useElectionDemo();
 
   const handleCreateElection = async () => {
     const country = AFRICAN_COUNTRIES.find(c => c.code === newElection.country_code);
@@ -170,17 +172,28 @@ export default function AdminElectionsManager() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
             <Vote className="h-6 w-6 text-primary" />
             Election Management
           </h2>
           <p className="text-muted-foreground">
-            Comprehensive election reporting and monitoring system
+            Comprehensive election reporting and monitoring system (International Standards)
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" size="sm" onClick={clearDemoData} disabled={isDemoLoading}>
+            Clear Demo
+          </Button>
+          <Button variant="outline" size="sm" onClick={seedDemoData} disabled={isDemoLoading}>
+            {isDemoLoading ? (
+              <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Plus className="h-4 w-4 mr-2" />
+            )}
+            Seed Demo Data
+          </Button>
           <Button variant="outline" size="sm" onClick={() => refetch()}>
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
