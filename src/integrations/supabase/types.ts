@@ -2056,7 +2056,7 @@ export type Database = {
           signatures: Json | null
           status: string | null
           submitted_at: string | null
-          submitted_by: string
+          submitted_by: string | null
           total_registered: number
           total_votes_cast: number
           turnout_percentage: number | null
@@ -2081,7 +2081,7 @@ export type Database = {
           signatures?: Json | null
           status?: string | null
           submitted_at?: string | null
-          submitted_by: string
+          submitted_by?: string | null
           total_registered: number
           total_votes_cast: number
           turnout_percentage?: number | null
@@ -2106,7 +2106,7 @@ export type Database = {
           signatures?: Json | null
           status?: string | null
           submitted_at?: string | null
-          submitted_by?: string
+          submitted_by?: string | null
           total_registered?: number
           total_votes_cast?: number
           turnout_percentage?: number | null
