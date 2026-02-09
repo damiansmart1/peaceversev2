@@ -28,7 +28,10 @@ import {
   Download,
   RefreshCw,
   Calendar,
-  Globe
+  Globe,
+  Lock,
+  Tag,
+  UserCheck,
 } from 'lucide-react';
 import { 
   useElections, 
@@ -45,6 +48,8 @@ import { format } from 'date-fns';
 import ElectionDetailView from '@/components/elections/ElectionDetailView';
 import ElectionIncidentsManager from '@/components/elections/ElectionIncidentsManager';
 import ElectionReportsExport from '@/components/elections/ElectionReportsExport';
+import ElectionAuditLog from '@/components/elections/ElectionAuditLog';
+import ElectionCategoriesManager from '@/components/elections/ElectionCategoriesManager';
 import { useElectionDemo } from '@/hooks/useElectionDemo';
 
 const ELECTION_TYPES: { value: ElectionType; label: string }[] = [
@@ -425,7 +430,7 @@ export default function AdminElectionsManager() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full max-w-2xl grid-cols-4">
+        <TabsList className="flex flex-wrap gap-1 h-auto p-1 w-full max-w-3xl">
           <TabsTrigger value="overview" className="gap-2">
             <BarChart3 className="h-4 w-4" />
             <span className="hidden sm:inline">Overview</span>
@@ -433,6 +438,14 @@ export default function AdminElectionsManager() {
           <TabsTrigger value="incidents" className="gap-2">
             <AlertTriangle className="h-4 w-4" />
             <span className="hidden sm:inline">Incidents</span>
+          </TabsTrigger>
+          <TabsTrigger value="categories" className="gap-2">
+            <Tag className="h-4 w-4" />
+            <span className="hidden sm:inline">Categories</span>
+          </TabsTrigger>
+          <TabsTrigger value="audit" className="gap-2">
+            <Lock className="h-4 w-4" />
+            <span className="hidden sm:inline">Audit Log</span>
           </TabsTrigger>
           <TabsTrigger value="reports" className="gap-2">
             <FileText className="h-4 w-4" />
@@ -548,6 +561,14 @@ export default function AdminElectionsManager() {
 
         <TabsContent value="incidents">
           <ElectionIncidentsManager />
+        </TabsContent>
+
+        <TabsContent value="categories">
+          <ElectionCategoriesManager />
+        </TabsContent>
+
+        <TabsContent value="audit">
+          <ElectionAuditLog />
         </TabsContent>
 
         <TabsContent value="reports">
