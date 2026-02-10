@@ -12,12 +12,21 @@ import {
   File,
   Calendar,
   Filter,
-  BarChart3
+  BarChart3,
+  Loader2,
 } from 'lucide-react';
 import { type Election } from '@/hooks/useElections';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import {
+  generateIncidentsPdf,
+  generateResultsPdf,
+  generateObserversPdf,
+  generateStationsPdf,
+  generateAuditPdf,
+  downloadPdf,
+} from '@/lib/electionPdfExport';
 
 interface ElectionReportsExportProps {
   elections: Election[];
@@ -74,6 +83,37 @@ export default function ElectionReportsExport({ elections }: ElectionReportsExpo
     );
   };
 
+  const getElectionInfo = () => {
+    const election = elections.find(e => e.id === selectedElection);
+    return {
+      electionName: selectedElection === 'all' ? 'All Elections' : (election?.name || 'Election'),
+      countryName: selectedElection === 'all' ? 'Multi-Country' : (election?.country_name || ''),
+      votingDate: election?.voting_date || new Date().toISOString(),
+    };
+  };
+
+  const fetchReportData = async (reportType: ReportType) => {
+    const tableName = getTableName(reportType);
+    let query = supabase.from(tableName as any).select(
+      reportType === 'results' ? '*, polling_stations(station_name, region, district)' : '*'
+    );
+    
+    if (selectedElection !== 'all') {
+      query = query.eq('election_id', selectedElection);
+    }
+    
+    if (startDate) {
+      query = query.gte('created_at', startDate);
+    }
+    if (endDate) {
+      query = query.lte('created_at', endDate + 'T23:59:59');
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+    return data || [];
+  };
+
   const handleExport = async (exportFormat: 'csv' | 'json' | 'pdf') => {
     if (selectedReports.length === 0) {
       toast({ title: 'Select at least one report type', variant: 'destructive' });
@@ -82,52 +122,61 @@ export default function ElectionReportsExport({ elections }: ElectionReportsExpo
 
     setIsExporting(true);
     try {
-      const exportData: Record<string, any> = {};
+      const exportData: Record<string, any[]> = {};
 
       for (const reportType of selectedReports) {
-        const tableName = getTableName(reportType);
-        let query = supabase.from(tableName as any).select('*');
-        
-        if (selectedElection !== 'all') {
-          query = query.eq('election_id', selectedElection);
-        }
-        
-        if (startDate) {
-          query = query.gte('created_at', startDate);
-        }
-        if (endDate) {
-          query = query.lte('created_at', endDate + 'T23:59:59');
-        }
-
-        const { data, error } = await query;
-        if (error) throw error;
-        
-        exportData[reportType] = data;
+        exportData[reportType] = await fetchReportData(reportType);
       }
 
-      // Generate export file
       const timestamp = format(new Date(), 'yyyy-MM-dd_HHmmss');
-      const electionName = selectedElection === 'all' 
-        ? 'all-elections' 
-        : elections.find(e => e.id === selectedElection)?.name.replace(/\s+/g, '-') || 'election';
+      const info = getElectionInfo();
+      const safeName = info.electionName.replace(/\s+/g, '-').substring(0, 30);
       
-      if (exportFormat === 'json') {
+      if (exportFormat === 'pdf') {
+        // Generate separate PDFs for each report type
+        for (const reportType of selectedReports) {
+          const data = exportData[reportType];
+          if (!data || data.length === 0) continue;
+
+          let doc;
+          switch (reportType) {
+            case 'incidents':
+              doc = generateIncidentsPdf(data, info);
+              break;
+            case 'results':
+              doc = generateResultsPdf(data, info);
+              break;
+            case 'observers':
+              doc = generateObserversPdf(data, info);
+              break;
+            case 'stations':
+              doc = generateStationsPdf(data, info);
+              break;
+            case 'audit':
+              doc = generateAuditPdf(data, info);
+              break;
+          }
+
+          if (doc) {
+            downloadPdf(doc, `${reportType}_${safeName}_${timestamp}.pdf`);
+          }
+        }
+      } else if (exportFormat === 'json') {
         const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-        downloadFile(blob, `election-report_${electionName}_${timestamp}.json`);
+        downloadFile(blob, `election-report_${safeName}_${timestamp}.json`);
       } else if (exportFormat === 'csv') {
-        // Export each report type as separate CSV
         for (const [reportType, data] of Object.entries(exportData)) {
           if (Array.isArray(data) && data.length > 0) {
             const csv = convertToCSV(data);
             const blob = new Blob([csv], { type: 'text/csv' });
-            downloadFile(blob, `${reportType}_${electionName}_${timestamp}.csv`);
+            downloadFile(blob, `${reportType}_${safeName}_${timestamp}.csv`);
           }
         }
       }
 
       toast({ 
         title: 'Export Complete', 
-        description: `Exported ${selectedReports.length} report(s) successfully` 
+        description: `Exported ${selectedReports.length} report(s) as ${exportFormat.toUpperCase()}` 
       });
     } catch (error: any) {
       toast({ title: 'Export Failed', description: error.message, variant: 'destructive' });
@@ -154,8 +203,11 @@ export default function ElectionReportsExport({ elections }: ElectionReportsExpo
       headers.map(header => {
         const value = row[header];
         if (value === null || value === undefined) return '';
-        if (typeof value === 'object') return JSON.stringify(value);
-        return String(value).includes(',') ? `"${value}"` : value;
+        if (typeof value === 'object') return `"${JSON.stringify(value).replace(/"/g, '""')}"`;
+        const str = String(value);
+        return str.includes(',') || str.includes('"') || str.includes('\n')
+          ? `"${str.replace(/"/g, '""')}"` 
+          : str;
       }).join(',')
     );
     return [headers.join(','), ...rows].join('\n');
@@ -275,12 +327,21 @@ export default function ElectionReportsExport({ elections }: ElectionReportsExpo
         <CardHeader>
           <CardTitle>Export Format</CardTitle>
           <CardDescription>
-            Choose your preferred export format
+            Choose your preferred export format — PDF generates branded, print-ready reports
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-4">
             <Button 
+              onClick={() => handleExport('pdf')}
+              disabled={isExporting || selectedReports.length === 0}
+              className="gap-2"
+            >
+              {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+              Export as PDF
+            </Button>
+            <Button 
+              variant="outline"
               onClick={() => handleExport('csv')}
               disabled={isExporting || selectedReports.length === 0}
               className="gap-2"
@@ -296,15 +357,6 @@ export default function ElectionReportsExport({ elections }: ElectionReportsExpo
             >
               <FileText className="h-4 w-4" />
               Export as JSON
-            </Button>
-            <Button 
-              variant="outline"
-              onClick={() => toast({ title: 'PDF Export', description: 'PDF export coming soon' })}
-              disabled={true}
-              className="gap-2"
-            >
-              <Download className="h-4 w-4" />
-              Export as PDF (Coming Soon)
             </Button>
           </div>
           

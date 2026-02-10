@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import ElectionBulkActions from '@/components/elections/ElectionBulkActions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -447,6 +448,10 @@ export default function AdminElectionsManager() {
             <Lock className="h-4 w-4" />
             <span className="hidden sm:inline">Audit Log</span>
           </TabsTrigger>
+          <TabsTrigger value="bulk" className="gap-2">
+            <UserCheck className="h-4 w-4" />
+            <span className="hidden sm:inline">Bulk Actions</span>
+          </TabsTrigger>
           <TabsTrigger value="reports" className="gap-2">
             <FileText className="h-4 w-4" />
             <span className="hidden sm:inline">Reports</span>
@@ -569,6 +574,33 @@ export default function AdminElectionsManager() {
 
         <TabsContent value="audit">
           <ElectionAuditLog />
+        </TabsContent>
+
+        <TabsContent value="bulk">
+          {elections && elections.length > 0 ? (
+            <div className="space-y-4">
+              <Select
+                onValueChange={(id) => {
+                  const el = elections.find(e => e.id === id);
+                  if (el) setSelectedElection(el);
+                }}
+              >
+                <SelectTrigger className="w-[300px]">
+                  <SelectValue placeholder="Select election for bulk actions" />
+                </SelectTrigger>
+                <SelectContent>
+                  {elections.map(e => (
+                    <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {selectedElection && (
+                <ElectionBulkActions electionId={selectedElection.id} />
+              )}
+            </div>
+          ) : (
+            <p className="text-muted-foreground py-8 text-center">No elections available</p>
+          )}
         </TabsContent>
 
         <TabsContent value="reports">
