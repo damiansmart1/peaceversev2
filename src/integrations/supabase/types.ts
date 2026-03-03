@@ -1709,6 +1709,66 @@ export type Database = {
         }
         Relationships: []
       }
+      election_anomalies: {
+        Row: {
+          anomaly_type: string
+          confidence_score: number | null
+          created_at: string | null
+          description: string | null
+          election_id: string
+          id: string
+          polling_station_id: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          severity: string
+          statistical_data: Json | null
+          status: string | null
+        }
+        Insert: {
+          anomaly_type: string
+          confidence_score?: number | null
+          created_at?: string | null
+          description?: string | null
+          election_id: string
+          id?: string
+          polling_station_id?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          severity?: string
+          statistical_data?: Json | null
+          status?: string | null
+        }
+        Update: {
+          anomaly_type?: string
+          confidence_score?: number | null
+          created_at?: string | null
+          description?: string | null
+          election_id?: string
+          id?: string
+          polling_station_id?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          severity?: string
+          statistical_data?: Json | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "election_anomalies_election_id_fkey"
+            columns: ["election_id"]
+            isOneToOne: false
+            referencedRelation: "elections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "election_anomalies_polling_station_id_fkey"
+            columns: ["polling_station_id"]
+            isOneToOne: false
+            referencedRelation: "polling_stations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       election_audit_log: {
         Row: {
           action_details: Json
@@ -1965,6 +2025,7 @@ export type Database = {
           election_id: string
           email: string | null
           full_name: string
+          gender: string | null
           id: string
           id_verified: boolean | null
           is_active: boolean | null
@@ -1990,6 +2051,7 @@ export type Database = {
           election_id: string
           email?: string | null
           full_name: string
+          gender?: string | null
           id?: string
           id_verified?: boolean | null
           is_active?: boolean | null
@@ -2015,6 +2077,7 @@ export type Database = {
           election_id?: string
           email?: string | null
           full_name?: string
+          gender?: string | null
           id?: string
           id_verified?: boolean | null
           is_active?: boolean | null
@@ -3120,6 +3183,134 @@ export type Database = {
         }
         Relationships: []
       }
+      observation_checklists: {
+        Row: {
+          checklist_data: Json
+          created_at: string | null
+          election_id: string
+          id: string
+          latitude: number | null
+          longitude: number | null
+          notes: string | null
+          observer_id: string | null
+          overall_rating: string | null
+          phase: string
+          polling_station_id: string | null
+          submitted_at: string | null
+        }
+        Insert: {
+          checklist_data?: Json
+          created_at?: string | null
+          election_id: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          notes?: string | null
+          observer_id?: string | null
+          overall_rating?: string | null
+          phase?: string
+          polling_station_id?: string | null
+          submitted_at?: string | null
+        }
+        Update: {
+          checklist_data?: Json
+          created_at?: string | null
+          election_id?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          notes?: string | null
+          observer_id?: string | null
+          overall_rating?: string | null
+          phase?: string
+          polling_station_id?: string | null
+          submitted_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "observation_checklists_election_id_fkey"
+            columns: ["election_id"]
+            isOneToOne: false
+            referencedRelation: "elections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "observation_checklists_observer_id_fkey"
+            columns: ["observer_id"]
+            isOneToOne: false
+            referencedRelation: "election_observers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "observation_checklists_polling_station_id_fkey"
+            columns: ["polling_station_id"]
+            isOneToOne: false
+            referencedRelation: "polling_stations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      observer_check_ins: {
+        Row: {
+          accuracy_meters: number | null
+          check_type: string
+          checked_at: string | null
+          device_info: Json | null
+          election_id: string
+          id: string
+          latitude: number
+          longitude: number
+          observer_id: string
+          polling_station_id: string | null
+        }
+        Insert: {
+          accuracy_meters?: number | null
+          check_type?: string
+          checked_at?: string | null
+          device_info?: Json | null
+          election_id: string
+          id?: string
+          latitude: number
+          longitude: number
+          observer_id: string
+          polling_station_id?: string | null
+        }
+        Update: {
+          accuracy_meters?: number | null
+          check_type?: string
+          checked_at?: string | null
+          device_info?: Json | null
+          election_id?: string
+          id?: string
+          latitude?: number
+          longitude?: number
+          observer_id?: string
+          polling_station_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "observer_check_ins_election_id_fkey"
+            columns: ["election_id"]
+            isOneToOne: false
+            referencedRelation: "elections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "observer_check_ins_observer_id_fkey"
+            columns: ["observer_id"]
+            isOneToOne: false
+            referencedRelation: "election_observers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "observer_check_ins_polling_station_id_fkey"
+            columns: ["polling_station_id"]
+            isOneToOne: false
+            referencedRelation: "polling_stations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ocha_documents: {
         Row: {
           approved_by: string | null
@@ -3501,6 +3692,7 @@ export type Database = {
           district: string | null
           election_id: string
           equipment_status: Json | null
+          geofence_radius_meters: number | null
           id: string
           is_accessible: boolean | null
           is_active: boolean | null
@@ -3527,6 +3719,7 @@ export type Database = {
           district?: string | null
           election_id: string
           equipment_status?: Json | null
+          geofence_radius_meters?: number | null
           id?: string
           is_accessible?: boolean | null
           is_active?: boolean | null
@@ -3553,6 +3746,7 @@ export type Database = {
           district?: string | null
           election_id?: string
           equipment_status?: Json | null
+          geofence_radius_meters?: number | null
           id?: string
           is_accessible?: boolean | null
           is_active?: boolean | null
@@ -3934,6 +4128,63 @@ export type Database = {
           votes_for?: number
         }
         Relationships: []
+      }
+      pvt_samples: {
+        Row: {
+          confidence_level: number | null
+          election_id: string
+          id: string
+          margin_of_error: number | null
+          polling_station_id: string | null
+          projected_results: Json | null
+          results_data: Json
+          sample_group: string | null
+          submitted_at: string | null
+          submitted_by: string | null
+          turnout_data: Json | null
+        }
+        Insert: {
+          confidence_level?: number | null
+          election_id: string
+          id?: string
+          margin_of_error?: number | null
+          polling_station_id?: string | null
+          projected_results?: Json | null
+          results_data?: Json
+          sample_group?: string | null
+          submitted_at?: string | null
+          submitted_by?: string | null
+          turnout_data?: Json | null
+        }
+        Update: {
+          confidence_level?: number | null
+          election_id?: string
+          id?: string
+          margin_of_error?: number | null
+          polling_station_id?: string | null
+          projected_results?: Json | null
+          results_data?: Json
+          sample_group?: string | null
+          submitted_at?: string | null
+          submitted_by?: string | null
+          turnout_data?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pvt_samples_election_id_fkey"
+            columns: ["election_id"]
+            isOneToOne: false
+            referencedRelation: "elections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pvt_samples_polling_station_id_fkey"
+            columns: ["polling_station_id"]
+            isOneToOne: false
+            referencedRelation: "polling_stations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       regional_blocks: {
         Row: {
