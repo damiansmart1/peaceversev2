@@ -5,23 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { 
-  ArrowLeft, 
-  MapPin, 
-  Users, 
-  AlertTriangle, 
-  BarChart3, 
-  CheckCircle2,
-  Clock,
-  Vote,
-  Shield,
-  FileText,
-  Plus,
-  RefreshCw,
-  Download,
-  Activity,
-  Eye,
-  Lock,
-  PieChart,
+  ArrowLeft, MapPin, Users, AlertTriangle, BarChart3, CheckCircle2,
+  Clock, Vote, Shield, FileText, Plus, RefreshCw, Download, Activity,
+  Eye, Lock, PieChart, Zap, ClipboardCheck, Target, Navigation,
 } from 'lucide-react';
 import { 
   type Election,
@@ -43,6 +29,10 @@ import ElectionAuditLog from './ElectionAuditLog';
 import ElectionResultCollation from './ElectionResultCollation';
 import ElectionDayTimeline from './ElectionDayTimeline';
 import ElectionObserverAccreditation from './ElectionObserverAccreditation';
+import StatisticalAnomalyDetector from './StatisticalAnomalyDetector';
+import ObservationChecklist from './ObservationChecklist';
+import PVTDashboard from './PVTDashboard';
+import ObserverGPSTracker from './ObserverGPSTracker';
 
 interface ElectionDetailViewProps {
   election: Election;
@@ -228,6 +218,22 @@ export default function ElectionDetailView({ election, onBack }: ElectionDetailV
             <Download className="h-4 w-4" />
             <span className="hidden sm:inline">Export</span>
           </TabsTrigger>
+          <TabsTrigger value="anomalies" className="gap-1">
+            <Zap className="h-4 w-4" />
+            <span className="hidden sm:inline">Anomalies</span>
+          </TabsTrigger>
+          <TabsTrigger value="checklists" className="gap-1">
+            <ClipboardCheck className="h-4 w-4" />
+            <span className="hidden sm:inline">Checklists</span>
+          </TabsTrigger>
+          <TabsTrigger value="pvt" className="gap-1">
+            <Target className="h-4 w-4" />
+            <span className="hidden sm:inline">PVT</span>
+          </TabsTrigger>
+          <TabsTrigger value="gps" className="gap-1">
+            <Navigation className="h-4 w-4" />
+            <span className="hidden sm:inline">GPS</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
@@ -394,6 +400,22 @@ export default function ElectionDetailView({ election, onBack }: ElectionDetailV
 
         <TabsContent value="export">
           <ElectionAdvancedExport election={election} />
+        </TabsContent>
+
+        <TabsContent value="anomalies">
+          <StatisticalAnomalyDetector election={election} />
+        </TabsContent>
+
+        <TabsContent value="checklists">
+          <ObservationChecklist election={election} />
+        </TabsContent>
+
+        <TabsContent value="pvt">
+          <PVTDashboard election={election} />
+        </TabsContent>
+
+        <TabsContent value="gps">
+          <ObserverGPSTracker election={election} />
         </TabsContent>
       </Tabs>
     </div>

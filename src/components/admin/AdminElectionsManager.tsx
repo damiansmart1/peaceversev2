@@ -51,6 +51,7 @@ import ElectionIncidentsManager from '@/components/elections/ElectionIncidentsMa
 import ElectionReportsExport from '@/components/elections/ElectionReportsExport';
 import ElectionAuditLog from '@/components/elections/ElectionAuditLog';
 import ElectionCategoriesManager from '@/components/elections/ElectionCategoriesManager';
+import AdminElectionIntegrity from '@/components/elections/AdminElectionIntegrity';
 import { useElectionDemo } from '@/hooks/useElectionDemo';
 
 const ELECTION_TYPES: { value: ElectionType; label: string }[] = [
@@ -456,6 +457,10 @@ export default function AdminElectionsManager() {
             <FileText className="h-4 w-4" />
             <span className="hidden sm:inline">Reports</span>
           </TabsTrigger>
+          <TabsTrigger value="integrity" className="gap-2">
+            <Shield className="h-4 w-4" />
+            <span className="hidden sm:inline">Integrity</span>
+          </TabsTrigger>
           <TabsTrigger value="settings" className="gap-2">
             <Settings className="h-4 w-4" />
             <span className="hidden sm:inline">Settings</span>
@@ -605,6 +610,10 @@ export default function AdminElectionsManager() {
 
         <TabsContent value="reports">
           <ElectionReportsExport elections={elections || []} />
+        </TabsContent>
+
+        <TabsContent value="integrity">
+          <AdminElectionIntegrity />
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-4">
