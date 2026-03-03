@@ -130,6 +130,7 @@ const App = () => (
                       </ProtectedRoute>
                     } />
                     <Route path="/early-warning" element={<EarlyWarningDashboard />} />
+                    <Route path="/dashboard/early-warning" element={<EarlyWarningDashboard />} />
                     <Route path="/help" element={<Help />} />
                     <Route path="/accessibility" element={<AccessibilityPage />} />
                     <Route path="/peace-pulse" element={<PeacePulse />} />
