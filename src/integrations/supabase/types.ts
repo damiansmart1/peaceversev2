@@ -5967,6 +5967,15 @@ export type Database = {
       }
       postgis_version: { Args: never; Returns: string }
       postgis_wagyu_version: { Args: never; Returns: string }
+      process_content_tip: {
+        Args: {
+          p_amount: number
+          p_content_id: string
+          p_creator_id: string
+          p_message?: string
+        }
+        Returns: Json
+      }
       st_3dclosestpoint: {
         Args: { geom1: unknown; geom2: unknown }
         Returns: unknown

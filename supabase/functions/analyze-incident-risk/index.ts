@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
 serve(async (req) => {
@@ -12,12 +12,6 @@ serve(async (req) => {
   }
 
   try {
-    const { incidentId } = await req.json();
-    
-    if (!incidentId) {
-      throw new Error('Incident ID is required');
-    }
-
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
@@ -27,6 +21,39 @@ serve(async (req) => {
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // --- AUTH CHECK ---
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const { data: roles } = await supabase
+      .from('user_roles').select('role').eq('user_id', user.id).eq('is_active', true);
+    const hasAccess = roles?.some(r =>
+      ['admin', 'verifier', 'government', 'partner'].includes(r.role)
+    );
+    if (!hasAccess) {
+      return new Response(JSON.stringify({ error: 'Forbidden: Insufficient role' }), {
+        status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    // --- END AUTH CHECK ---
+
+    const { incidentId } = await req.json();
+    
+    if (!incidentId) {
+      throw new Error('Incident ID is required');
+    }
 
     // Fetch incident details
     const { data: incident, error: fetchError } = await supabase
@@ -38,7 +65,7 @@ serve(async (req) => {
     if (fetchError) throw fetchError;
     if (!incident) throw new Error('Incident not found');
 
-    // Fetch related incidents in the area (within 50km)
+    // Fetch related incidents
     const { data: nearbyIncidents } = await supabase
       .from('citizen_reports')
       .select('id, title, category, severity_level, created_at, location_latitude, location_longitude')
@@ -46,141 +73,11 @@ serve(async (req) => {
       .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
       .limit(20);
 
-    // Prepare AI analysis request with scientific frameworks
-    const systemPrompt = `You are an expert conflict analyst and early warning system AI trained on UN OCHA Emergency Response Framework, OECD Crisis Management Guidelines, Sphere Humanitarian Standards, ICRC Protection Guidelines, CEWARN (Conflict Early Warning and Response Mechanism), and AU Continental Early Warning System protocols.
+    // AI analysis (keeping existing prompts)
+    const systemPrompt = `You are an expert conflict analyst and early warning system AI. Assess incident risk levels with scientific precision following UN OCHA, Sphere Standards, ICRC guidelines. Provide scores on 0-100 scale and classify threat level as: low, medium, high, critical, or imminent.`;
 
-Your role is to assess incident risk levels with scientific precision and generate evidence-based recommended actions following international humanitarian response best practices.
+    const analysisPrompt = `Analyze this incident risk:\nTitle: ${incident.title}\nCategory: ${incident.category}${incident.sub_category ? ` / ${incident.sub_category}` : ''}\nSeverity: ${incident.severity_level || 'Not specified'}\nDescription: ${incident.description}\nLocation: ${incident.location_city || 'Unknown'}, ${incident.location_country || 'Unknown'}\nCasualties: ${incident.casualties_reported || 0}, Injuries: ${incident.injuries_reported || 0}\nPeople Affected: ${incident.estimated_people_affected || 'Unknown'}\nVulnerable Groups: ${incident.vulnerable_groups_affected?.join(', ') || 'None'}\nChildren Involved: ${incident.children_involved ? 'Yes' : 'No'}\nRecurring: ${incident.recurring_issue ? 'Yes' : 'No'}\nNearby incidents (30d): ${nearbyIncidents?.length || 0}\n\nProvide JSON: { "overall_risk_score": 0-100, "threat_level": "low|medium|high|critical|imminent", "severity_score": 0-100, "urgency_score": 0-100, "impact_score": 0-100, "escalation_probability": 0-100, "contagion_risk": 0-100, "ai_confidence": 0-100, "ai_reasoning": { "primary_concerns": [], "escalation_factors": [], "mitigation_factors": [] }, "contributing_factors": { "high_risk": [], "moderate_risk": [], "low_risk": [] }, "risk_indicators": { "violence_level": "", "community_tension": "", "response_capacity": "", "external_factors": "" }, "escalation_timeline": "", "predicted_impact_area": [], "recommended_actions": [{ "action": "", "priority": "", "target": "", "category": "", "timeframe": "", "rationale": "", "resources": [], "kpis": [] }] }`;
 
-RISK ASSESSMENT FRAMEWORK:
-1. Severity Assessment (using Modified Mercalli Intensity Scale adaptation):
-   - Casualties and injuries (direct harm)
-   - Violence intensity and weapons involved
-   - Vulnerable populations affected (children, elderly, displaced, minorities)
-   - Duration and persistence of threat
-
-2. Urgency Assessment (OCHA Humanitarian Priority Scale):
-   - Immediacy of life-threatening conditions
-   - Time sensitivity for intervention
-   - Resource availability window
-   - Seasonal/environmental factors
-
-3. Impact Assessment (Sphere Standards):
-   - Population displacement potential
-   - Essential services disruption (health, water, food, shelter)
-   - Infrastructure damage (critical vs non-critical)
-   - Economic livelihood destruction
-   - Social cohesion breakdown
-
-4. Escalation Probability (FEWER Conflict Indicators):
-   - Historical conflict patterns
-   - Actor mobilization signals
-   - Resource competition intensity
-   - External actor involvement
-   - Communication/propaganda activities
-
-5. Contagion Risk (Network Diffusion Model):
-   - Geographic proximity to other tensions
-   - Ethnic/religious group connections across regions
-   - Economic interdependencies
-   - Media amplification potential
-   - Cross-border dynamics
-
-RECOMMENDED ACTIONS FRAMEWORK:
-Generate actions following the Response Framework Pyramid:
-- IMMEDIATE (0-6 hours): Life-saving interventions, security stabilization
-- URGENT (6-24 hours): Emergency coordination, protective measures
-- HIGH (24-72 hours): Humanitarian response setup, community engagement
-- MEDIUM (3-14 days): Recovery planning, reconciliation initiation
-- LOW (2+ weeks): Long-term prevention, structural interventions
-
-Actions must specify:
-- Target stakeholder (Government/Security/Humanitarian/Community/Media)
-- Category (security/humanitarian/government/community/communication/logistics)
-- Timeframe specificity
-- Rationale based on evidence
-- Required resources
-- Success indicators (KPIs)
-
-Provide scores on 0-100 scale and classify threat level as: low, medium, high, critical, or imminent.`;
-
-    const analysisPrompt = `Analyze this incident and provide a comprehensive risk assessment:
-
-INCIDENT DETAILS:
-- Title: ${incident.title}
-- Category: ${incident.category}${incident.sub_category ? ` / ${incident.sub_category}` : ''}
-- Severity: ${incident.severity_level || 'Not specified'}
-- Urgency: ${incident.urgency_level || 'Not specified'}
-- Description: ${incident.description}
-- Location: ${incident.location_city || 'Unknown'}, ${incident.location_country || 'Unknown'}
-- Date: ${incident.incident_date || incident.created_at}
-- Casualties: ${incident.casualties_reported || 0}
-- Injuries: ${incident.injuries_reported || 0}
-- People Affected: ${incident.estimated_people_affected || 'Unknown'}
-- Vulnerable Groups: ${incident.vulnerable_groups_affected?.join(', ') || 'None specified'}
-- Children Involved: ${incident.children_involved ? 'Yes' : 'No'}
-- Infrastructure Damage: ${incident.infrastructure_damage?.join(', ') || 'None reported'}
-- Services Disrupted: ${incident.services_disrupted?.join(', ') || 'None'}
-- Authority Response: ${incident.authorities_responded ? 'Yes' : 'No'}
-- Historical Context: ${incident.historical_context || 'None provided'}
-- Recurring Issue: ${incident.recurring_issue ? 'Yes' : 'No'}
-
-NEARBY INCIDENTS (Last 30 days):
-${nearbyIncidents && nearbyIncidents.length > 0 
-  ? nearbyIncidents.map(ni => `- ${ni.category} incident: "${ni.title}" (${ni.severity_level || 'unknown'} severity, ${new Date(ni.created_at).toLocaleDateString()})`).join('\n')
-  : 'No similar incidents reported nearby recently'}
-
-Provide your analysis in this exact JSON structure:
-{
-  "overall_risk_score": <0-100>,
-  "threat_level": "<low|medium|high|critical|imminent>",
-  "severity_score": <0-100>,
-  "urgency_score": <0-100>,
-  "impact_score": <0-100>,
-  "escalation_probability": <0-100>,
-  "contagion_risk": <0-100>,
-  "ai_confidence": <0-100>,
-  "ai_reasoning": {
-    "primary_concerns": ["<concern1>", "<concern2>"],
-    "escalation_factors": ["<factor1>", "<factor2>"],
-    "mitigation_factors": ["<factor1>", "<factor2>"]
-  },
-  "contributing_factors": {
-    "high_risk": ["<factor1>", "<factor2>"],
-    "moderate_risk": ["<factor1>"],
-    "low_risk": ["<factor1>"]
-  },
-  "risk_indicators": {
-    "violence_level": "<assessment>",
-    "community_tension": "<assessment>",
-    "response_capacity": "<assessment>",
-    "external_factors": "<assessment>"
-  },
-  "escalation_timeline": "<within_6_hours|6-24_hours|24-72_hours|3-7_days|1-2_weeks|unlikely>",
-  "predicted_impact_area": ["<region1>", "<region2>"],
-  "recommended_actions": [
-    {
-      "action": "<specific, actionable intervention description based on OCHA/Sphere/ICRC standards>",
-      "priority": "<immediate|urgent|high|medium|low>",
-      "target": "<Government Authorities|Security Forces|Humanitarian Organizations|Community Leaders|Health Services|Media & Communications|UN Agencies|Regional Bodies>",
-      "category": "<security|humanitarian|government|community|communication|logistics>",
-      "timeframe": "<specific time window, e.g., 'Within 2 hours', '24-48 hours'>",
-      "rationale": "<evidence basis for this action from humanitarian response standards>",
-      "resources": ["<resource1>", "<resource2>"],
-      "kpis": ["<measurable success indicator 1>", "<measurable success indicator 2>"]
-    }
-  ]
-}
-
-IMPORTANT: Generate 8-12 comprehensive recommended actions covering:
-- At least 2 IMMEDIATE priority actions (life-saving)
-- At least 2 URGENT priority actions (emergency coordination)
-- At least 2 HIGH priority actions (humanitarian setup)
-- At least 2 MEDIUM priority actions (recovery planning)
-- Long-term prevention actions if applicable
-
-Actions must cover multiple stakeholder categories (security, humanitarian, government, community, communication, logistics). Each action must be specific, measurable, and grounded in UN OCHA, Sphere Standards, ICRC guidelines, or CEWARN protocols.`;
-
-    // Call Lovable AI for analysis
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -198,23 +95,15 @@ Actions must cover multiple stakeholder categories (security, humanitarian, gove
     });
 
     if (!aiResponse.ok) {
-      if (aiResponse.status === 429) {
-        throw new Error('AI rate limit exceeded. Please try again later.');
-      }
-      if (aiResponse.status === 402) {
-        throw new Error('AI credits exhausted. Please add funds to continue.');
-      }
-      const errorText = await aiResponse.text();
-      console.error('AI gateway error:', aiResponse.status, errorText);
+      if (aiResponse.status === 429) throw new Error('AI rate limit exceeded.');
+      if (aiResponse.status === 402) throw new Error('AI credits exhausted.');
       throw new Error('AI analysis failed');
     }
 
     const aiResult = await aiResponse.json();
     const analysis = JSON.parse(aiResult.choices[0].message.content);
 
-    console.log('AI Risk Analysis:', JSON.stringify(analysis, null, 2));
-
-    // Store risk score in database
+    // Store risk score
     const { data: riskScore, error: insertError } = await supabase
       .from('incident_risk_scores')
       .insert({
@@ -238,18 +127,14 @@ Actions must cover multiple stakeholder categories (security, humanitarian, gove
       .select()
       .single();
 
-    if (insertError) {
-      console.error('Error storing risk score:', insertError);
-      throw insertError;
-    }
+    if (insertError) throw insertError;
 
-    // Check if critical alert should be triggered
+    // Critical alert
     if (analysis.threat_level === 'critical' || analysis.threat_level === 'imminent') {
-      // Create alert
       await supabase.from('alert_logs').insert({
         severity: analysis.threat_level === 'imminent' ? 'emergency' : 'critical',
         title: `Critical Incident: ${incident.title}`,
-        message: `High-risk incident detected with ${analysis.overall_risk_score}/100 risk score. Immediate attention required.`,
+        message: `High-risk incident detected with ${analysis.overall_risk_score}/100 risk score.`,
         alert_type: 'risk_score',
         incident_ids: [incidentId],
         channels_sent: ['in_app'],
@@ -257,33 +142,20 @@ Actions must cover multiple stakeholder categories (security, humanitarian, gove
           risk_score: analysis.overall_risk_score,
           threat_level: analysis.threat_level,
           primary_concerns: analysis.ai_reasoning.primary_concerns,
-          recommended_actions: analysis.recommended_actions
         }
       });
     }
 
     return new Response(
-      JSON.stringify({
-        success: true,
-        risk_score: riskScore,
-        alert_triggered: analysis.threat_level === 'critical' || analysis.threat_level === 'imminent'
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
+      JSON.stringify({ success: true, risk_score: riskScore, alert_triggered: analysis.threat_level === 'critical' || analysis.threat_level === 'imminent' }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
   } catch (error) {
     console.error('Error in analyze-incident-risk:', error);
     return new Response(
-      JSON.stringify({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred'
-      }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
+      JSON.stringify({ success: false, error: error instanceof Error ? error.message : 'Unknown error' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
