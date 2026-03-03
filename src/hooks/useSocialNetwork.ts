@@ -391,20 +391,20 @@ export const useTipContent = () => {
     mutationFn: async ({ contentId, creatorId, amount, message }: { contentId: string; creatorId: string; amount: number; message?: string }) => {
       if (!user?.id) throw new Error('Not authenticated');
 
-      // Create tip record
-      const { error: tipError } = await supabase
-        .from('content_tips')
-        .insert({ content_id: contentId, tipper_id: user.id, creator_id: creatorId, amount, message });
+      // Use secure server-side function for atomic tip processing
+      const { data, error } = await supabase.rpc('process_content_tip', {
+        p_content_id: contentId,
+        p_creator_id: creatorId,
+        p_amount: amount,
+        p_message: message || null,
+      });
 
-      if (tipError) throw tipError;
-
-      // Add to creator earnings
-      await supabase
-        .from('creator_earnings')
-        .insert({ user_id: creatorId, amount, source: 'tip', source_id: contentId, description: `Tip from supporter` });
-
-      // Update creator wallet
-      await supabase.rpc('increment_wallet_balance', { p_user_id: creatorId, p_amount: amount });
+      if (error) throw error;
+      
+      const result = data as any;
+      if (result && !result.success) {
+        throw new Error(result.error || 'Tip processing failed');
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['content-tips'] });
