@@ -39,6 +39,14 @@ import {
   type Election,
 } from '@/hooks/useElections';
 import { useToast } from '@/hooks/use-toast';
+import {
+  generateIncidentsPdf,
+  generateResultsPdf,
+  generateObserversPdf,
+  generateStationsPdf,
+  generateAuditPdf,
+  downloadPdf,
+} from '@/lib/electionPdfExport';
 
 interface ElectionAdvancedExportProps {
   election: Election;
@@ -244,14 +252,54 @@ export default function ElectionAdvancedExport({ election }: ElectionAdvancedExp
         content = `${headers}\n${rows}`;
         filename = `${election.name.replace(/\s+/g, '_')}_incidents_${format(new Date(), 'yyyy-MM-dd')}.csv`;
         mimeType = 'text/csv';
+      } else if (exportConfig.format === 'pdf') {
+        // Generate real PDF using jsPDF
+        const pdfOptions = {
+          electionName: election.name,
+          countryName: election.country_name || '',
+          votingDate: election.voting_date,
+        };
+        const timestamp = format(new Date(), 'yyyy-MM-dd');
+        const safeName = election.name.replace(/\s+/g, '_').substring(0, 30);
+
+        // Generate PDF for each selected data type
+        if (exportConfig.dataTypes.includes('incidents') && exportData.incidents?.length > 0) {
+          const doc = generateIncidentsPdf(exportData.incidents, pdfOptions);
+          downloadPdf(doc, `incidents_${safeName}_${timestamp}.pdf`);
+        }
+        if (exportConfig.dataTypes.includes('results') && results?.length) {
+          const filteredResults = exportConfig.verifiedOnly ? results.filter((r: any) => r.fully_verified) : results;
+          const doc = generateResultsPdf(filteredResults, pdfOptions);
+          downloadPdf(doc, `results_${safeName}_${timestamp}.pdf`);
+        }
+        if (exportConfig.dataTypes.includes('observers') && observers?.length) {
+          const doc = generateObserversPdf(observers, pdfOptions);
+          downloadPdf(doc, `observers_${safeName}_${timestamp}.pdf`);
+        }
+        if (exportConfig.dataTypes.includes('stations') && stations?.length) {
+          const doc = generateStationsPdf(stations, pdfOptions);
+          downloadPdf(doc, `stations_${safeName}_${timestamp}.pdf`);
+        }
+        if (exportConfig.dataTypes.includes('audit')) {
+          // Audit data would need to be fetched; generate summary PDF for now
+          const doc = generateAuditPdf([], pdfOptions);
+          downloadPdf(doc, `audit_${safeName}_${timestamp}.pdf`);
+        }
+
+        // Skip the blob download below for PDF
+        toast({
+          title: 'Export Successful',
+          description: `PDF report(s) exported for ${election.name}`,
+        });
+        return;
       } else {
-        // For PDF/XLSX, generate JSON for now (would need proper library in production)
+        // XLSX fallback to JSON
         content = JSON.stringify(exportData, null, 2);
         filename = `${election.name.replace(/\s+/g, '_')}_report_${format(new Date(), 'yyyy-MM-dd')}.json`;
         mimeType = 'application/json';
       }
 
-      // Download file
+      // Download file (for JSON/CSV)
       const blob = new Blob([content], { type: mimeType });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
