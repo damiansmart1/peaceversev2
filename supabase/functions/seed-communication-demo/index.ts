@@ -477,7 +477,7 @@ serve(async (req) => {
     // 6) Escalations
     const escalationToInsert = Array.from({ length: 8 }).map((_, i) => ({
       escalation_level: pick([1, 2, 3]),
-      escalated_to: ["security_cell@demo", "duty_officer@demo"],
+      escalated_to: [user.id],
       escalated_roles: ["admin", "government"],
       reason: `[DEMO] Escalation triggered by pending acknowledgment / SLA breach simulation (#${i + 1}).`,
       status: pick(["pending", "acknowledged", "resolved"]),
