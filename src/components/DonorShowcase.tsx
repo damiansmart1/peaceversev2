@@ -1,9 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Building2, Globe, Users, Heart, Handshake, Shield, Award, ExternalLink, Mail } from "lucide-react";
+import BecomePartnerDialog from '@/components/about/BecomePartnerDialog';
+import ContactUsDialog from '@/components/about/ContactUsDialog';
 const DonorShowcase = () => {
+  const [partnerOpen, setPartnerOpen] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
   const partnerCategories = [{
     title: "International Organizations",
     icon: Globe,
