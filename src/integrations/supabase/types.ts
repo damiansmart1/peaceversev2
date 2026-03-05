@@ -1368,6 +1368,39 @@ export type Database = {
         }
         Relationships: []
       }
+      contact_messages: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          message: string
+          organization: string | null
+          status: string
+          subject: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          message: string
+          organization?: string | null
+          status?: string
+          subject: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          message?: string
+          organization?: string | null
+          status?: string
+          subject?: string
+        }
+        Relationships: []
+      }
       content: {
         Row: {
           approval_status: string
@@ -3442,6 +3475,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      partnership_inquiries: {
+        Row: {
+          contact_email: string
+          contact_name: string
+          contact_phone: string | null
+          country: string | null
+          created_at: string
+          id: string
+          message: string
+          organization_name: string
+          organization_type: string
+          partnership_tier: string
+          status: string
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          contact_email: string
+          contact_name: string
+          contact_phone?: string | null
+          country?: string | null
+          created_at?: string
+          id?: string
+          message: string
+          organization_name: string
+          organization_type: string
+          partnership_tier: string
+          status?: string
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          contact_email?: string
+          contact_name?: string
+          contact_phone?: string | null
+          country?: string | null
+          created_at?: string
+          id?: string
+          message?: string
+          organization_name?: string
+          organization_type?: string
+          partnership_tier?: string
+          status?: string
+          updated_at?: string
+          website_url?: string | null
+        }
+        Relationships: []
       }
       peace_accountability_metrics: {
         Row: {
