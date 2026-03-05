@@ -166,7 +166,7 @@ const DonorShowcase = () => {
                     {benefit}
                   </li>)}
               </ul>
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" className="w-full" onClick={() => setPartnerOpen(true)}>
                 Learn More
                 <ExternalLink className="w-4 h-4 ml-2" />
               </Button>
@@ -186,11 +186,11 @@ const DonorShowcase = () => {
             Your partnership directly contributes to preventing conflicts and protecting communities.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button variant="peace" size="lg">
+            <Button variant="peace" size="lg" onClick={() => setPartnerOpen(true)}>
               <Handshake className="w-5 h-5 mr-2" />
               Become a Partner
             </Button>
-            <Button variant="outline" size="lg">
+            <Button variant="outline" size="lg" onClick={() => setContactOpen(true)}>
               <Mail className="w-5 h-5 mr-2" />
               Contact Us
             </Button>
@@ -213,6 +213,9 @@ const DonorShowcase = () => {
           </div>
         </div>
       </Card>
+
+      <BecomePartnerDialog open={partnerOpen} onOpenChange={setPartnerOpen} />
+      <ContactUsDialog open={contactOpen} onOpenChange={setContactOpen} />
     </section>;
 };
 export default DonorShowcase;
