@@ -1,41 +1,19 @@
-import { NavLink, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard,
-  Users,
-  FileStack,
-  MapPinned,
-  ShieldCheck,
-  Medal,
-  MessagesSquare,
-  Gamepad2,
-  HeartHandshake,
-  SlidersHorizontal,
-  Siren,
-  ChevronDown,
-  BrainCircuit,
-  Home,
-  Plug,
-  Radio,
-  Vote,
+  LayoutDashboard, Users, FileStack, MapPinned, ShieldCheck, Medal,
+  MessagesSquare, Gamepad2, HeartHandshake, SlidersHorizontal, Siren,
+  ChevronDown, BrainCircuit, Home, Plug, Radio, Vote,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  useSidebar,
+  Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
+  SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar,
 } from '@/components/ui/sidebar';
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
+  Collapsible, CollapsibleContent, CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { useState } from 'react';
+import peaceverselogo from '@/assets/peaceverse-logo.png';
 
 interface AdminSidebarProps {
   activeSection: string;
@@ -43,16 +21,9 @@ interface AdminSidebarProps {
 }
 
 const menuItems = [
+  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, singleItem: true },
   {
-    id: 'dashboard',
-    label: 'Dashboard',
-    icon: LayoutDashboard,
-    singleItem: true,
-  },
-  {
-    id: 'users-management',
-    label: 'Users & Roles',
-    icon: Users,
+    id: 'users-management', label: 'Users & Roles', icon: Users,
     children: [
       { id: 'users', label: 'Users' },
       { id: 'roles', label: 'Role Management' },
@@ -60,9 +31,7 @@ const menuItems = [
     ],
   },
   {
-    id: 'content',
-    label: 'Content',
-    icon: FileStack,
+    id: 'content', label: 'Content', icon: FileStack,
     children: [
       { id: 'cms', label: 'Website Content (CMS)' },
       { id: 'content', label: 'Stories & Posts' },
@@ -70,9 +39,7 @@ const menuItems = [
     ],
   },
   {
-    id: 'peace-intelligence',
-    label: 'Peace Intelligence',
-    icon: Siren,
+    id: 'peace-intelligence', label: 'Peace Intelligence', icon: Siren,
     children: [
       { id: 'incidents', label: 'Incident Reports' },
       { id: 'incident-timeline', label: 'Timeline Tracker' },
@@ -82,9 +49,7 @@ const menuItems = [
     ],
   },
   {
-    id: 'communication',
-    label: 'Communication',
-    icon: Radio,
+    id: 'communication', label: 'Communication', icon: Radio,
     children: [
       { id: 'comm-hub', label: 'Communication Hub' },
       { id: 'broadcasts', label: 'Broadcasts' },
@@ -93,9 +58,7 @@ const menuItems = [
     ],
   },
   {
-    id: 'engagement',
-    label: 'Engagement',
-    icon: MessagesSquare,
+    id: 'engagement', label: 'Engagement', icon: MessagesSquare,
     children: [
       { id: 'proposals', label: 'Proposals' },
       { id: 'challenges', label: 'Challenges' },
@@ -103,9 +66,7 @@ const menuItems = [
     ],
   },
   {
-    id: 'configuration',
-    label: 'Configuration',
-    icon: SlidersHorizontal,
+    id: 'configuration', label: 'Configuration', icon: SlidersHorizontal,
     children: [
       { id: 'ai-analytics', label: 'AI Analytics' },
       { id: 'api-analytics', label: 'API Usage' },
@@ -120,39 +81,47 @@ export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarPro
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
   const [openGroups, setOpenGroups] = useState<string[]>(['engagement', 'configuration', 'peace-intelligence']);
+  const navigate = useNavigate();
 
   const toggleGroup = (groupId: string) => {
     setOpenGroups((prev) =>
-      prev.includes(groupId)
-        ? prev.filter((id) => id !== groupId)
-        : [...prev, groupId]
+      prev.includes(groupId) ? prev.filter((id) => id !== groupId) : [...prev, groupId]
     );
   };
 
-  const navigate = useNavigate();
-
   return (
-    <Sidebar className="border-r border-border">
+    <Sidebar className="border-r border-border/50 bg-card">
       <SidebarContent>
-        <div className="px-6 py-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate('/')}
-              className="h-8 w-8 text-muted-foreground hover:text-foreground"
-              title="Back to Homepage"
-            >
-              <Home className="h-4 w-4" />
-            </Button>
+        {/* Brand Header */}
+        <div className="px-4 py-5 border-b border-border/50">
+          <div className="flex items-center gap-3 mb-3">
+            <img src={peaceverselogo} alt="PeaceVerse" className="h-8 w-auto" />
             {!collapsed && (
-              <span className="text-xs text-muted-foreground">Home</span>
+              <div>
+                <span className="text-sm font-bold text-primary">Peace</span>
+                <span className="text-sm font-bold text-gold">Verse</span>
+              </div>
             )}
           </div>
-          <h2 className={`font-bold text-lg ${collapsed ? 'text-center' : ''}`}>
-            {collapsed ? 'AP' : 'Admin Portal'}
-          </h2>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('/')}
+            className="w-full justify-start gap-2 h-8 text-xs text-muted-foreground hover:text-foreground"
+          >
+            <Home className="h-3.5 w-3.5" />
+            {!collapsed && <span>Back to Homepage</span>}
+          </Button>
         </div>
+
+        {/* Navigation Label */}
+        {!collapsed && (
+          <div className="px-4 pt-4 pb-2">
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">
+              Admin Portal
+            </span>
+          </div>
+        )}
 
         <SidebarGroup>
           <SidebarMenu>
@@ -163,7 +132,11 @@ export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarPro
                     <SidebarMenuButton
                       onClick={() => onSectionChange(item.id)}
                       isActive={activeSection === item.id}
-                      className="w-full"
+                      className={`w-full transition-all duration-200 ${
+                        activeSection === item.id 
+                          ? 'bg-primary/10 text-primary font-semibold border-l-2 border-primary' 
+                          : 'hover:bg-muted/50'
+                      }`}
                     >
                       <item.icon className="h-4 w-4" />
                       {!collapsed && <span>{item.label}</span>}
@@ -171,6 +144,8 @@ export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarPro
                   </SidebarMenuItem>
                 );
               }
+
+              const isGroupActive = item.children?.some(c => c.id === activeSection);
 
               return (
                 <Collapsible
@@ -180,13 +155,15 @@ export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarPro
                 >
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>
-                      <SidebarMenuButton className="w-full">
-                        <item.icon className="h-4 w-4" />
+                      <SidebarMenuButton className={`w-full transition-all duration-200 ${
+                        isGroupActive ? 'text-primary font-medium' : ''
+                      }`}>
+                        <item.icon className={`h-4 w-4 ${isGroupActive ? 'text-primary' : ''}`} />
                         {!collapsed && (
                           <>
                             <span className="flex-1 text-left">{item.label}</span>
                             <ChevronDown
-                              className={`h-4 w-4 transition-transform ${
+                              className={`h-3.5 w-3.5 transition-transform duration-200 ${
                                 openGroups.includes(item.id) ? 'rotate-180' : ''
                               }`}
                             />
@@ -196,15 +173,19 @@ export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarPro
                     </CollapsibleTrigger>
                   </SidebarMenuItem>
                   {!collapsed && (
-                    <CollapsibleContent>
+                    <CollapsibleContent className="animate-accordion-down">
                       <SidebarGroupContent>
                         <SidebarMenu>
                           {item.children?.map((child) => (
-                            <SidebarMenuItem key={child.id} className="ml-4">
+                            <SidebarMenuItem key={child.id} className="ml-2">
                               <SidebarMenuButton
                                 onClick={() => onSectionChange(child.id)}
                                 isActive={activeSection === child.id}
-                                className="w-full"
+                                className={`w-full pl-6 transition-all duration-200 text-sm ${
+                                  activeSection === child.id
+                                    ? 'bg-primary/10 text-primary font-medium border-l-2 border-gold'
+                                    : 'hover:bg-muted/50 text-muted-foreground hover:text-foreground'
+                                }`}
                               >
                                 <span>{child.label}</span>
                               </SidebarMenuButton>
