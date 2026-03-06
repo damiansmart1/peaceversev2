@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
+import DashboardHeroBanner from '@/components/DashboardHeroBanner';
 import { useNavigate } from 'react-router-dom';
 import { usePartnerAnalytics, usePartnerCountries } from '@/hooks/usePartnerAnalytics';
 import { PartnerReportExporter } from '@/components/partner/PartnerReportExporter';
@@ -166,48 +167,25 @@ const PartnerDashboard = () => {
       <div className="container mx-auto px-4 py-8 pt-24">
         <div className="max-w-7xl mx-auto space-y-6">
           
-          {/* Header Section */}
-          <motion.div 
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4"
-          >
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 rounded-lg bg-primary/10">
-                  <Shield className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <h1 className="text-2xl md:text-3xl font-bold text-foreground">
-                    Partner Analytics Dashboard
-                  </h1>
-                  <p className="text-sm text-muted-foreground">
-                    Comprehensive incident monitoring and analysis platform
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleRefresh}
-                disabled={isRefetching}
-              >
-                <RefreshCw className={`w-4 h-4 mr-2 ${isRefetching ? 'animate-spin' : ''}`} />
-                Refresh
-              </Button>
+          {/* Hero Banner */}
+          <DashboardHeroBanner
+            icon={<Shield className="h-8 w-8 text-primary" />}
+            title="Partner Analytics Dashboard"
+            subtitle="Comprehensive incident monitoring and analysis platform"
+            onRefresh={handleRefresh}
+            isRefreshing={isRefetching}
+            actions={
               <Button 
                 variant="outline" 
                 size="sm"
                 onClick={() => navigate('/dashboard/early-warning')}
+                className="gap-2 bg-card/50 backdrop-blur-sm border-border/50"
               >
-                <Bell className="w-4 h-4 mr-2" />
+                <Bell className="w-4 h-4" />
                 Early Warning
               </Button>
-            </div>
-          </motion.div>
+            }
+          />
 
           {/* Filters Bar */}
           <Card className="border-primary/10">
@@ -379,36 +357,36 @@ const PartnerDashboard = () => {
 
           {/* Main Content Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="w-full overflow-x-auto flex flex-nowrap md:grid md:grid-cols-8">
-              <TabsTrigger value="overview" className="gap-2 shrink-0">
+            <TabsList className="bg-card/80 backdrop-blur-sm border border-border/50 p-1 rounded-xl w-full overflow-x-auto flex flex-nowrap md:grid md:grid-cols-8 gap-1">
+              <TabsTrigger value="overview" className="gap-2 shrink-0 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all">
                 <Activity className="w-4 h-4" />
                 <span className="hidden lg:inline">Overview</span>
               </TabsTrigger>
-              <TabsTrigger value="live" className="gap-2 shrink-0">
+              <TabsTrigger value="live" className="gap-2 shrink-0 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all">
                 <Radio className="w-4 h-4" />
                 <span className="hidden lg:inline">Live Feed</span>
               </TabsTrigger>
-              <TabsTrigger value="heatmap" className="gap-2 shrink-0">
+              <TabsTrigger value="heatmap" className="gap-2 shrink-0 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all">
                 <Map className="w-4 h-4" />
                 <span className="hidden lg:inline">Heatmap</span>
               </TabsTrigger>
-              <TabsTrigger value="analytics" className="gap-2 shrink-0">
+              <TabsTrigger value="analytics" className="gap-2 shrink-0 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all">
                 <BarChart3 className="w-4 h-4" />
                 <span className="hidden lg:inline">Analytics</span>
               </TabsTrigger>
-              <TabsTrigger value="advanced" className="gap-2 shrink-0">
+              <TabsTrigger value="advanced" className="gap-2 shrink-0 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all">
                 <Analytics className="w-4 h-4" />
                 <span className="hidden lg:inline">Advanced</span>
               </TabsTrigger>
-              <TabsTrigger value="watchlist" className="gap-2 shrink-0">
+              <TabsTrigger value="watchlist" className="gap-2 shrink-0 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all">
                 <Bookmark className="w-4 h-4" />
                 <span className="hidden lg:inline">Watchlist</span>
               </TabsTrigger>
-              <TabsTrigger value="incidents" className="gap-2 shrink-0">
+              <TabsTrigger value="incidents" className="gap-2 shrink-0 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all">
                 <FileText className="w-4 h-4" />
                 <span className="hidden lg:inline">Incidents</span>
               </TabsTrigger>
-              <TabsTrigger value="reports" className="gap-2 shrink-0">
+              <TabsTrigger value="reports" className="gap-2 shrink-0 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all">
                 <Sparkles className="w-4 h-4" />
                 <span className="hidden lg:inline">Reports</span>
               </TabsTrigger>
