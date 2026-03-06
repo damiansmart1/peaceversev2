@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Menu, X, Users, Vote, BadgeCheck, ShieldCheck, Globe, HeartHandshake, User, LogOut, Settings, Compass, HelpCircle, Siren, Cable, Wand2, Radio, Gamepad2, AudioWaveform, Award, AlertTriangle, Plug, Sparkles, Shield, Heart, MapPin as MapIcon, Volume2, MessageSquare } from "lucide-react";
 import peaceverselogo from "@/assets/peaceverse-logo.png";
 import GlobalSearch from '@/components/GlobalSearch';
