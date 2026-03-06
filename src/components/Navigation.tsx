@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Menu, X, Users, Vote, BadgeCheck, ShieldCheck, Globe, HeartHandshake, User, LogOut, Settings, Compass, HelpCircle, Siren, Cable, Wand2, Radio, Gamepad2, AudioWaveform, Award, AlertTriangle, Plug, Sparkles, Shield, Heart, MapPin as MapIcon, Volume2, MessageSquare } from "lucide-react";
 import peaceverselogo from "@/assets/peaceverse-logo.png";
 import GlobalSearch from '@/components/GlobalSearch';
@@ -151,39 +152,41 @@ const Navigation = () => {
               </div>
             </Link>
 
-            {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center flex-1 justify-center">
-              <div className="flex items-center gap-1">
-                {navItems.map((item, index) => {
-                const Icon = item.icon;
-                const isActive = location.pathname === item.path;
-                return <motion.div key={item.path} initial={{
-                  opacity: 0,
-                  y: -20
-                }} animate={{
-                  opacity: 1,
-                  y: 0
-                }} transition={{
-                  delay: index * 0.05
-                }}>
-                      <Link to={item.path}>
-                        <Button variant="ghost" size="sm" className={`relative flex items-center gap-1.5 px-3 py-2 h-9 rounded-lg transition-all duration-300 group overflow-hidden ${isActive ? 'text-primary bg-primary/10' : 'text-foreground/70 hover:text-foreground hover:bg-muted/50'}`}>
-                          {/* Active indicator */}
-                          {isActive && <motion.div layoutId="navIndicator" className="absolute inset-0 bg-gradient-to-r from-primary/15 via-gold/10 to-secondary/15 rounded-lg" transition={{
-                        type: "spring",
-                        bounce: 0.2,
-                        duration: 0.6
-                      }} />}
-                          <Icon className={`w-4 h-4 relative z-10 transition-colors ${isActive ? 'text-primary' : 'text-gold/70 group-hover:text-gold'}`} />
-                          <span className="font-medium text-xs relative z-10 hidden xl:inline">{item.label}</span>
-                          
-                          {/* Hover underline */}
-                          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gold group-hover:w-3/4 transition-all duration-300" />
-                        </Button>
-                      </Link>
-                    </motion.div>;
-              })}
-              </div>
+            {/* Desktop Navigation - Horizontally Scrollable */}
+            <div className="hidden lg:flex items-center flex-1 justify-center px-2">
+              <ScrollArea className="w-full">
+                <div className="flex items-center gap-1 pb-2">
+                  {navItems.map((item, index) => {
+                  const Icon = item.icon;
+                  const isActive = location.pathname === item.path;
+                  return <motion.div key={item.path} initial={{
+                    opacity: 0,
+                    y: -20
+                  }} animate={{
+                    opacity: 1,
+                    y: 0
+                  }} transition={{
+                    delay: index * 0.05
+                  }}>
+                        <Link to={item.path}>
+                          <Button variant="ghost" size="sm" className={`relative flex items-center gap-1.5 px-3 py-2 h-9 rounded-lg transition-all duration-300 group overflow-hidden whitespace-nowrap flex-shrink-0 ${isActive ? 'text-primary bg-primary/10' : 'text-foreground/70 hover:text-foreground hover:bg-muted/50'}`}>
+                            {/* Active indicator */}
+                            {isActive && <motion.div layoutId="navIndicator" className="absolute inset-0 bg-gradient-to-r from-primary/15 via-gold/10 to-secondary/15 rounded-lg" transition={{
+                          type: "spring",
+                          bounce: 0.2,
+                          duration: 0.6
+                        }} />}
+                            <Icon className={`w-4 h-4 relative z-10 transition-colors ${isActive ? 'text-primary' : 'text-gold/70 group-hover:text-gold'}`} />
+                            <span className="font-medium text-xs relative z-10 hidden xl:inline">{item.label}</span>
+                            
+                            {/* Hover underline */}
+                            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gold group-hover:w-3/4 transition-all duration-300" />
+                          </Button>
+                        </Link>
+                      </motion.div>;
+                })}
+                </div>
+              </ScrollArea>
             </div>
 
             {/* Right Side Actions */}
