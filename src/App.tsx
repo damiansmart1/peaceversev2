@@ -49,6 +49,7 @@ import Integrations from "./pages/Integrations";
 import Install from "./pages/Install";
 import Communication from "./pages/Communication";
 import Elections from "./pages/Elections";
+import NuruAI from "./pages/NuruAI";
 
 // Preload Google Maps API on app startup for faster map loading
 import '@/hooks/useGoogleMapsPreloader';
@@ -143,6 +144,7 @@ const App = () => (
                         <Communication />
                       </ProtectedRoute>
                     } />
+                    <Route path="/nuru-ai" element={<NuruAI />} />
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>
