@@ -283,6 +283,48 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_governance_registry: {
+        Row: {
+          created_at: string | null
+          description: string
+          id: string
+          last_reviewed: string | null
+          mitigation_strategies: string[] | null
+          monitoring_metrics: Json | null
+          risk_category: string
+          risk_name: string
+          severity: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description: string
+          id?: string
+          last_reviewed?: string | null
+          mitigation_strategies?: string[] | null
+          monitoring_metrics?: Json | null
+          risk_category: string
+          risk_name: string
+          severity?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string
+          id?: string
+          last_reviewed?: string | null
+          mitigation_strategies?: string[] | null
+          monitoring_metrics?: Json | null
+          risk_category?: string
+          risk_name?: string
+          severity?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       ai_report_exports: {
         Row: {
           completed_at: string | null
@@ -1163,6 +1205,265 @@ export type Database = {
           witness_count?: number | null
         }
         Relationships: []
+      }
+      civic_analytics: {
+        Row: {
+          country: string | null
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          metric_type: string
+          metric_value: number
+          period_end: string | null
+          period_start: string | null
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          metric_type: string
+          metric_value?: number
+          period_end?: string | null
+          period_start?: string | null
+        }
+        Update: {
+          country?: string | null
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          metric_type?: string
+          metric_value?: number
+          period_end?: string | null
+          period_start?: string | null
+        }
+        Relationships: []
+      }
+      civic_claim_reviews: {
+        Row: {
+          claim_text: string
+          created_at: string | null
+          evidence_summary: string | null
+          flagged_by: string | null
+          id: string
+          moderation_notes: string | null
+          review_status: string | null
+          reviewed_by: string | null
+          source_document_id: string | null
+          supporting_passages: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          claim_text: string
+          created_at?: string | null
+          evidence_summary?: string | null
+          flagged_by?: string | null
+          id?: string
+          moderation_notes?: string | null
+          review_status?: string | null
+          reviewed_by?: string | null
+          source_document_id?: string | null
+          supporting_passages?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          claim_text?: string
+          created_at?: string | null
+          evidence_summary?: string | null
+          flagged_by?: string | null
+          id?: string
+          moderation_notes?: string | null
+          review_status?: string | null
+          reviewed_by?: string | null
+          source_document_id?: string | null
+          supporting_passages?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "civic_claim_reviews_source_document_id_fkey"
+            columns: ["source_document_id"]
+            isOneToOne: false
+            referencedRelation: "civic_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      civic_documents: {
+        Row: {
+          ai_summary: Json | null
+          country: string | null
+          created_at: string | null
+          description: string | null
+          document_type: string
+          file_url: string | null
+          financial_allocations: Json | null
+          id: string
+          institutions: string[] | null
+          language: string | null
+          original_text: string | null
+          parsed_sections: Json | null
+          publish_date: string | null
+          question_count: number | null
+          region: string | null
+          source_url: string | null
+          status: string
+          summary: string | null
+          title: string
+          topics: string[] | null
+          updated_at: string | null
+          uploaded_by: string | null
+          view_count: number | null
+        }
+        Insert: {
+          ai_summary?: Json | null
+          country?: string | null
+          created_at?: string | null
+          description?: string | null
+          document_type?: string
+          file_url?: string | null
+          financial_allocations?: Json | null
+          id?: string
+          institutions?: string[] | null
+          language?: string | null
+          original_text?: string | null
+          parsed_sections?: Json | null
+          publish_date?: string | null
+          question_count?: number | null
+          region?: string | null
+          source_url?: string | null
+          status?: string
+          summary?: string | null
+          title: string
+          topics?: string[] | null
+          updated_at?: string | null
+          uploaded_by?: string | null
+          view_count?: number | null
+        }
+        Update: {
+          ai_summary?: Json | null
+          country?: string | null
+          created_at?: string | null
+          description?: string | null
+          document_type?: string
+          file_url?: string | null
+          financial_allocations?: Json | null
+          id?: string
+          institutions?: string[] | null
+          language?: string | null
+          original_text?: string | null
+          parsed_sections?: Json | null
+          publish_date?: string | null
+          question_count?: number | null
+          region?: string | null
+          source_url?: string | null
+          status?: string
+          summary?: string | null
+          title?: string
+          topics?: string[] | null
+          updated_at?: string | null
+          uploaded_by?: string | null
+          view_count?: number | null
+        }
+        Relationships: []
+      }
+      civic_knowledge_graph: {
+        Row: {
+          connections: Json | null
+          created_at: string | null
+          entity_id: string | null
+          entity_name: string
+          entity_type: string
+          id: string
+          properties: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          connections?: Json | null
+          created_at?: string | null
+          entity_id?: string | null
+          entity_name: string
+          entity_type: string
+          id?: string
+          properties?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          connections?: Json | null
+          created_at?: string | null
+          entity_id?: string | null
+          entity_name?: string
+          entity_type?: string
+          id?: string
+          properties?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      civic_questions: {
+        Row: {
+          ai_answer: string | null
+          ai_confidence: number | null
+          asked_by: string | null
+          created_at: string | null
+          document_id: string | null
+          document_references: Json | null
+          id: string
+          is_anonymous: boolean | null
+          is_public: boolean | null
+          question_text: string
+          source_passages: Json | null
+          status: string | null
+          tags: string[] | null
+          updated_at: string | null
+          upvote_count: number | null
+          view_count: number | null
+        }
+        Insert: {
+          ai_answer?: string | null
+          ai_confidence?: number | null
+          asked_by?: string | null
+          created_at?: string | null
+          document_id?: string | null
+          document_references?: Json | null
+          id?: string
+          is_anonymous?: boolean | null
+          is_public?: boolean | null
+          question_text: string
+          source_passages?: Json | null
+          status?: string | null
+          tags?: string[] | null
+          updated_at?: string | null
+          upvote_count?: number | null
+          view_count?: number | null
+        }
+        Update: {
+          ai_answer?: string | null
+          ai_confidence?: number | null
+          asked_by?: string | null
+          created_at?: string | null
+          document_id?: string | null
+          document_references?: Json | null
+          id?: string
+          is_anonymous?: boolean | null
+          is_public?: boolean | null
+          question_text?: string
+          source_passages?: Json | null
+          status?: string | null
+          tags?: string[] | null
+          updated_at?: string | null
+          upvote_count?: number | null
+          view_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "civic_questions_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "civic_documents"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       cms_content: {
         Row: {
@@ -3034,6 +3335,50 @@ export type Database = {
             columns: ["incident_id"]
             isOneToOne: false
             referencedRelation: "citizen_reports_safe"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      institutional_responses: {
+        Row: {
+          attachments: Json | null
+          created_at: string | null
+          id: string
+          institution_name: string
+          question_id: string
+          respondent_id: string | null
+          response_text: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          attachments?: Json | null
+          created_at?: string | null
+          id?: string
+          institution_name: string
+          question_id: string
+          respondent_id?: string | null
+          response_text: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          attachments?: Json | null
+          created_at?: string | null
+          id?: string
+          institution_name?: string
+          question_id?: string
+          respondent_id?: string | null
+          response_text?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "institutional_responses_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "civic_questions"
             referencedColumns: ["id"]
           },
         ]
