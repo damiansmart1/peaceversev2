@@ -15,6 +15,7 @@ export const PLATFORM_FEATURES = [
   { key: 'verification', label: 'Verification', path: '/verification' },
   { key: 'integrations', label: 'Integrations', path: '/integrations' },
   { key: 'early-warning', label: 'Early Warning', path: '/dashboard/early-warning' },
+  { key: 'nuru-ai', label: 'NuruAI', path: '/nuru-ai' },
 ] as const;
 
 export type FeatureKey = typeof PLATFORM_FEATURES[number]['key'];
