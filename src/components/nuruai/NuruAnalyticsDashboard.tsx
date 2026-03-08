@@ -542,7 +542,7 @@ const NuruAnalyticsDashboard = () => {
       autoTable(doc, {
         startY: y,
         head: [['Model', 'Queries', 'Avg Latency (ms)', 'Avg Confidence (%)']],
-        body: modelComparison.map(m => [m.model, String(m.queries), String(m.avgLatency), String(m.avgConfidence)]),
+        body: modelComparison.map(m => [m.name, String(m.queries), String(m.avgTime), String(m.avgConfidence)]),
         styles: { fontSize: 9, cellPadding: 3 },
         headStyles: { fillColor: [7, 79, 152], textColor: 255 },
         alternateRowStyles: { fillColor: [250, 250, 252] },
@@ -641,7 +641,7 @@ const NuruAnalyticsDashboard = () => {
         new Paragraph({ text: '' }),
         new Table({
           width: { size: 100, type: WidthType.PERCENTAGE },
-          rows: [makeHeaderRow(['Model', 'Queries', 'Avg Latency (ms)', 'Avg Confidence (%)']), ...modelComparison.map(m => makeRow([m.model, String(m.queries), String(m.avgLatency), String(m.avgConfidence)]))],
+          rows: [makeHeaderRow(['Model', 'Queries', 'Avg Latency (ms)', 'Avg Confidence (%)']), ...modelComparison.map(m => makeRow([m.name, String(m.queries), String(m.avgTime), String(m.avgConfidence)]))],
         }),
         new Paragraph({ text: '' }),
       );
