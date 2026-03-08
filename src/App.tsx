@@ -50,6 +50,7 @@ import Install from "./pages/Install";
 import Communication from "./pages/Communication";
 import Elections from "./pages/Elections";
 import NuruAI from "./pages/NuruAI";
+import FactCheck from "./pages/FactCheck";
 
 // Preload Google Maps API on app startup for faster map loading
 import '@/hooks/useGoogleMapsPreloader';
