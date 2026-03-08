@@ -120,11 +120,18 @@ const NuruPolicyExplorer = () => {
           impact: parts[1]?.trim() || 'Impact analysis not available.',
         },
       }));
-    } catch {
-      toast.error('Failed to generate explanation');
+    } catch (err: any) {
+      const msg = err?.message || err?.error || '';
+      if (msg.includes('credits') || msg.includes('402')) {
+        toast.error('AI credits depleted. Please top up your workspace credits to continue.');
+      } else if (msg.includes('429') || msg.includes('rate limit')) {
+        toast.error('Rate limit reached. Please wait a moment and try again.');
+      } else {
+        toast.error('Failed to generate explanation. Please try again.');
+      }
       setSectionExplanations(prev => ({
         ...prev,
-        [index]: { explanation: 'Unable to generate explanation. Please try again.', impact: '' },
+        [index]: { explanation: msg.includes('credits') ? 'AI credits depleted. Please contact your administrator to top up credits.' : 'Unable to generate explanation. Please try again.', impact: '' },
       }));
     } finally {
       setLoadingSection(null);
