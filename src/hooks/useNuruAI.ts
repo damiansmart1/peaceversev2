@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useRef, useCallback } from 'react';
 
 const sb = supabase as any;
 
@@ -94,6 +95,15 @@ export interface NuruAuditEntry {
   created_at: string;
 }
 
+export interface ChatAttachment {
+  file: File;
+  name: string;
+  type: string;
+  size: number;
+  previewUrl?: string;
+  extractedText?: string;
+}
+
 // ========== Document Hooks ==========
 
 export function useCivicDocuments(type?: string) {
@@ -181,13 +191,11 @@ export function useUploadDocumentFile() {
       const { data: { publicUrl } } = supabase.storage.from('nuru-documents').getPublicUrl(filePath);
       await sb.from('civic_documents').update({ file_url: publicUrl, processing_status: 'uploaded' }).eq('id', doc.id);
 
-      // Server-side text extraction (robust: pdf-parse + Vision OCR fallback)
       const { data: extractResult, error: extractError } = await supabase.functions.invoke('extract-document-text', {
         body: { documentId: doc.id, fileUrl: publicUrl, fileName: file.name, fileType: file.type },
       });
       if (extractError) {
         console.error('Server-side extraction error:', extractError);
-        // Fallback: try client-side extraction
         const text = await extractTextFromFile(file);
         if (text && text.length > 50) {
           await supabase.functions.invoke('nuru-ai-chat', {
@@ -213,12 +221,10 @@ export function useUploadDocumentFile() {
 
 async function extractTextFromFile(file: File): Promise<string | null> {
   try {
-    // Plain text and CSV files
     if (file.type === 'text/plain' || file.type === 'text/csv' || 
         file.name.endsWith('.txt') || file.name.endsWith('.csv') ||
         file.name.endsWith('.rtf') || file.name.endsWith('.md')) {
       const raw = await file.text();
-      // Strip RTF control codes if present
       if (raw.startsWith('{\\rtf')) {
         return raw.replace(/\{\\[^{}]*\}|\\[a-z]+\d*\s?|[{}]/gi, '').trim() || null;
       }
@@ -228,19 +234,16 @@ async function extractTextFromFile(file: File): Promise<string | null> {
     const arrayBuffer = await file.arrayBuffer();
     const uint8Array = new Uint8Array(arrayBuffer);
 
-    // DOCX: extract from word/document.xml inside the zip
     if (file.name.endsWith('.docx') || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
       const text = extractTextFromDocx(uint8Array);
       if (text && text.length > 50) return text;
     }
 
-    // PDF: multi-strategy extraction
     if (file.name.endsWith('.pdf') || file.type === 'application/pdf') {
       const text = extractTextFromPdf(uint8Array);
       if (text && text.length > 50) return text;
     }
 
-    // Fallback: try reading as UTF-8 and extracting readable segments
     const decoder = new TextDecoder('utf-8', { fatal: false });
     const rawText = decoder.decode(uint8Array);
     const readable = rawText.replace(/[^\x20-\x7E\n\r\t]/g, ' ').replace(/\s{3,}/g, ' ').trim();
@@ -256,16 +259,13 @@ function extractTextFromPdf(data: Uint8Array): string | null {
   const rawText = decoder.decode(data);
   const parts: string[] = [];
 
-  // Strategy 1: BT...ET text blocks with Tj/TJ operators
   const btBlocks = rawText.match(/BT[\s\S]*?ET/g);
   if (btBlocks) {
     for (const block of btBlocks) {
-      // Tj operator - single string
       const tjMatches = block.match(/\(([^)]*)\)\s*Tj/g);
       if (tjMatches) {
         parts.push(...tjMatches.map(t => t.replace(/\)\s*Tj/, '').replace(/^\(/, '')));
       }
-      // TJ operator - array of strings
       const tjArrays = block.match(/\[([^\]]*)\]\s*TJ/gi);
       if (tjArrays) {
         for (const arr of tjArrays) {
@@ -276,7 +276,6 @@ function extractTextFromPdf(data: Uint8Array): string | null {
     }
   }
 
-  // Strategy 2: parenthesized text segments outside BT/ET
   if (parts.length === 0) {
     const segments = rawText.match(/\(([^)]{4,})\)/g);
     if (segments) {
@@ -284,7 +283,6 @@ function extractTextFromPdf(data: Uint8Array): string | null {
     }
   }
 
-  // Strategy 3: stream content between "stream" and "endstream"
   if (parts.length === 0) {
     const streams = rawText.match(/stream\r?\n([\s\S]*?)endstream/g);
     if (streams) {
@@ -296,7 +294,6 @@ function extractTextFromPdf(data: Uint8Array): string | null {
     }
   }
 
-  // Unescape PDF string escapes
   let text = parts.join(' ')
     .replace(/\\n/g, '\n').replace(/\\r/g, '\r').replace(/\\t/g, '\t')
     .replace(/\\\(/g, '(').replace(/\\\)/g, ')').replace(/\\\\/g, '\\')
@@ -307,11 +304,9 @@ function extractTextFromPdf(data: Uint8Array): string | null {
 
 function extractTextFromDocx(data: Uint8Array): string | null {
   try {
-    // Find PK zip entries and locate word/document.xml
     const decoder = new TextDecoder('utf-8', { fatal: false });
     const raw = decoder.decode(data);
     
-    // Simple approach: find XML content between <w:t> tags
     const xmlContent = raw.match(/<w:t[^>]*>([^<]*)<\/w:t>/gi);
     if (!xmlContent || xmlContent.length === 0) return null;
 
@@ -517,17 +512,37 @@ export function useSendChatMessage() {
   });
 }
 
-// Streaming chat
+// Streaming chat with AbortController support
 export function useStreamChatMessage() {
   const qc = useQueryClient();
+  const abortControllerRef = useRef<AbortController | null>(null);
 
-  const streamChat = async (
+  const abort = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+  }, []);
+
+  const streamChat = useCallback(async (
     conversationId: string,
     message: string,
     onDelta: (text: string) => void,
     onDone: () => void,
+    attachmentContext?: string,
   ) => {
+    // Abort any previous stream
+    abort();
+
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/nuru-ai-chat`;
+
+    const messageContent = attachmentContext
+      ? `${message}\n\n---\n**Attached file content:**\n${attachmentContext}`
+      : message;
+
     const resp = await fetch(CHAT_URL, {
       method: 'POST',
       headers: {
@@ -537,8 +552,9 @@ export function useStreamChatMessage() {
       body: JSON.stringify({
         action: 'chat_stream',
         conversationId,
-        messages: [{ role: 'user', content: message }],
+        messages: [{ role: 'user', content: messageContent }],
       }),
+      signal: controller.signal,
     });
 
     if (!resp.ok) {
@@ -559,37 +575,46 @@ export function useStreamChatMessage() {
     const reader = resp.body.getReader();
     const decoder = new TextDecoder();
     let textBuffer = '';
+    let aborted = false;
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      textBuffer += decoder.decode(value, { stream: true });
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        textBuffer += decoder.decode(value, { stream: true });
 
-      let newlineIndex: number;
-      while ((newlineIndex = textBuffer.indexOf('\n')) !== -1) {
-        let line = textBuffer.slice(0, newlineIndex);
-        textBuffer = textBuffer.slice(newlineIndex + 1);
+        let newlineIndex: number;
+        while ((newlineIndex = textBuffer.indexOf('\n')) !== -1) {
+          let line = textBuffer.slice(0, newlineIndex);
+          textBuffer = textBuffer.slice(newlineIndex + 1);
 
-        if (line.endsWith('\r')) line = line.slice(0, -1);
-        if (line.startsWith(':') || line.trim() === '') continue;
-        if (!line.startsWith('data: ')) continue;
+          if (line.endsWith('\r')) line = line.slice(0, -1);
+          if (line.startsWith(':') || line.trim() === '') continue;
+          if (!line.startsWith('data: ')) continue;
 
-        const jsonStr = line.slice(6).trim();
-        if (jsonStr === '[DONE]') break;
+          const jsonStr = line.slice(6).trim();
+          if (jsonStr === '[DONE]') break;
 
-        try {
-          const parsed = JSON.parse(jsonStr);
-          const content = parsed.choices?.[0]?.delta?.content;
-          if (content) onDelta(content);
-        } catch {
-          textBuffer = line + '\n' + textBuffer;
-          break;
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const content = parsed.choices?.[0]?.delta?.content;
+            if (content) onDelta(content);
+          } catch {
+            textBuffer = line + '\n' + textBuffer;
+            break;
+          }
         }
+      }
+    } catch (e: any) {
+      if (e.name === 'AbortError') {
+        aborted = true;
+      } else {
+        throw e;
       }
     }
 
     // Flush remaining
-    if (textBuffer.trim()) {
+    if (!aborted && textBuffer.trim()) {
       for (let raw of textBuffer.split('\n')) {
         if (!raw || !raw.startsWith('data: ')) continue;
         const jsonStr = raw.slice(6).trim();
@@ -602,12 +627,19 @@ export function useStreamChatMessage() {
       }
     }
 
+    abortControllerRef.current = null;
     onDone();
     qc.invalidateQueries({ queryKey: ['nuru-messages', conversationId] });
     qc.invalidateQueries({ queryKey: ['nuru-conversations'] });
-  };
+  }, [qc, abort]);
 
-  return { streamChat };
+  return { streamChat, abort };
+}
+
+// ========== Chat Attachment Helpers ==========
+
+export async function extractTextFromAttachment(file: File): Promise<string | null> {
+  return extractTextFromFile(file);
 }
 
 // ========== Document Bookmarks ==========
