@@ -14,6 +14,7 @@ import {
   AlertCircle, BookOpen, Scale, Trash2, Edit, Eye, RefreshCw
 } from 'lucide-react';
 import { useConstitutions, useUploadConstitution, useDeleteConstitution, useProcessConstitution } from '@/hooks/useConstitutions';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 const AFRICAN_COUNTRIES = [
