@@ -155,9 +155,9 @@ const Navigation = () => {
             </Link>
 
             {/* Desktop Navigation - Horizontally Scrollable */}
-            <div className="hidden lg:flex items-center flex-1 justify-center px-2">
-              <ScrollArea className="w-full">
-                <div className="flex items-center gap-1 pb-2">
+            <div className="hidden lg:flex items-center flex-1 px-2 overflow-hidden">
+              <ScrollArea className="w-full h-auto">
+                <div className="flex items-center gap-0.5 pb-1">
                   {navItems.map((item, index) => {
                   const Icon = item.icon;
                   const isActive = location.pathname === item.path;
@@ -171,15 +171,15 @@ const Navigation = () => {
                     delay: index * 0.05
                   }}>
                         <Link to={item.path}>
-                          <Button variant="ghost" size="sm" className={`relative flex items-center gap-1.5 px-3 py-2 h-9 rounded-lg transition-all duration-300 group overflow-hidden whitespace-nowrap flex-shrink-0 ${isActive ? 'text-primary bg-primary/10' : 'text-foreground/70 hover:text-foreground hover:bg-muted/50'}`}>
+                          <Button variant="ghost" size="sm" className={`relative flex items-center gap-1 px-2 py-1.5 h-8 rounded-md transition-all duration-300 group overflow-hidden whitespace-nowrap flex-shrink-0 text-xs ${isActive ? 'text-primary bg-primary/10' : 'text-foreground/70 hover:text-foreground hover:bg-muted/50'}`}>
                             {/* Active indicator */}
-                            {isActive && <motion.div layoutId="navIndicator" className="absolute inset-0 bg-gradient-to-r from-primary/15 via-gold/10 to-secondary/15 rounded-lg" transition={{
+                            {isActive && <motion.div layoutId="navIndicator" className="absolute inset-0 bg-gradient-to-r from-primary/15 via-gold/10 to-secondary/15 rounded-md" transition={{
                           type: "spring",
                           bounce: 0.2,
                           duration: 0.6
                         }} />}
-                            <Icon className={`w-4 h-4 relative z-10 transition-colors ${isActive ? 'text-primary' : 'text-gold/70 group-hover:text-gold'}`} />
-                            <span className="font-medium text-xs relative z-10 hidden xl:inline">{item.label}</span>
+                            <Icon className={`w-3.5 h-3.5 relative z-10 transition-colors flex-shrink-0 ${isActive ? 'text-primary' : 'text-gold/70 group-hover:text-gold'}`} />
+                            <span className="font-medium relative z-10 hidden 2xl:inline">{item.label}</span>
                             
                             {/* Hover underline */}
                             <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gold group-hover:w-3/4 transition-all duration-300" />
