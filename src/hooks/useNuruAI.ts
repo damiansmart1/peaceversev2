@@ -68,6 +68,7 @@ export interface NuruConversation {
   title: string | null;
   message_count: number;
   last_message_at: string;
+  is_shared: boolean;
   created_at: string;
 }
 
@@ -99,7 +100,7 @@ export function useCivicDocuments(type?: string) {
   return useQuery({
     queryKey: ['civic-documents', type],
     queryFn: async () => {
-      let query = sb.from('civic_documents').select('*').eq('status', 'ready').order('created_at', { ascending: false });
+      let query = sb.from('civic_documents').select('*').order('created_at', { ascending: false });
       if (type && type !== 'all') query = query.eq('document_type', type);
       const { data, error } = await query;
       if (error) throw error;
@@ -151,7 +152,6 @@ export function useUploadDocumentFile() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Must be logged in');
 
-      // Create document record
       const { data: doc, error: docError } = await sb.from('civic_documents').insert({
         title,
         description,
@@ -164,44 +164,27 @@ export function useUploadDocumentFile() {
       }).select().single();
       if (docError) throw docError;
 
-      // Upload file to storage
       const filePath = `${user.id}/${doc.id}/${file.name}`;
       const { error: uploadError } = await supabase.storage.from('nuru-documents').upload(filePath, file);
       if (uploadError) {
-        // Update status on failure
         await sb.from('civic_documents').update({ processing_status: 'upload_failed', processing_error: uploadError.message }).eq('id', doc.id);
         throw uploadError;
       }
 
-      // Update document with file URL
       const { data: { publicUrl } } = supabase.storage.from('nuru-documents').getPublicUrl(filePath);
       await sb.from('civic_documents').update({ file_url: publicUrl, processing_status: 'uploaded' }).eq('id', doc.id);
 
-      // For text-based files, read content directly
-      if (file.type === 'text/plain' || file.type === 'text/csv') {
-        const text = await file.text();
+      // Extract text from file
+      const text = await extractTextFromFile(file);
+      if (text && text.length > 50) {
         await supabase.functions.invoke('nuru-ai-chat', {
           body: { action: 'parse_document', text, documentId: doc.id, fileName: file.name, fileType: file.type },
         });
-      } else if (file.type === 'application/pdf') {
-        // For PDF, extract text client-side using basic approach
-        const text = await extractTextFromFile(file);
-        if (text) {
-          await supabase.functions.invoke('nuru-ai-chat', {
-            body: { action: 'parse_document', text, documentId: doc.id, fileName: file.name, fileType: file.type },
-          });
-        } else {
-          // If can't extract, use description as content
-          await sb.from('civic_documents').update({ processing_status: 'text_extraction_failed', processing_error: 'Could not extract text from PDF. Please paste the text content manually.' }).eq('id', doc.id);
-        }
       } else {
-        // For Word docs etc., try text extraction
-        const text = await extractTextFromFile(file);
-        if (text) {
-          await supabase.functions.invoke('nuru-ai-chat', {
-            body: { action: 'parse_document', text, documentId: doc.id, fileName: file.name, fileType: file.type },
-          });
-        }
+        await sb.from('civic_documents').update({
+          processing_status: 'text_extraction_failed',
+          processing_error: 'Could not extract text. Please paste the text content manually via the text upload tab.',
+        }).eq('id', doc.id);
       }
 
       return doc;
@@ -216,24 +199,20 @@ export function useUploadDocumentFile() {
 
 async function extractTextFromFile(file: File): Promise<string | null> {
   try {
-    if (file.type === 'text/plain' || file.type === 'text/csv') {
+    if (file.type === 'text/plain' || file.type === 'text/csv' || file.name.endsWith('.txt') || file.name.endsWith('.csv')) {
       return await file.text();
     }
-    // For PDF and other binary formats, try reading as text
     const arrayBuffer = await file.arrayBuffer();
     const uint8Array = new Uint8Array(arrayBuffer);
-    // Basic text extraction from PDF - find text between parentheses in stream objects
-    let text = '';
     const decoder = new TextDecoder('utf-8', { fatal: false });
     const rawText = decoder.decode(uint8Array);
     
-    // Extract readable text segments
+    let text = '';
+    // Extract from PDF text objects
     const segments = rawText.match(/\(([^)]{3,})\)/g);
     if (segments) {
       text = segments.map(s => s.slice(1, -1)).join(' ');
     }
-    
-    // Also try extracting from stream content
     const streamMatches = rawText.match(/BT[\s\S]*?ET/g);
     if (streamMatches) {
       for (const match of streamMatches) {
@@ -243,7 +222,6 @@ async function extractTextFromFile(file: File): Promise<string | null> {
         }
       }
     }
-    
     return text.length > 50 ? text : null;
   } catch {
     return null;
@@ -256,7 +234,7 @@ export function useCivicQuestions(documentId?: string) {
   return useQuery({
     queryKey: ['civic-questions', documentId],
     queryFn: async () => {
-      let query = sb.from('civic_questions').select('*').eq('is_public', true).order('created_at', { ascending: false }).limit(50);
+      let query = sb.from('civic_questions').select('*').eq('is_public', true).order('upvote_count', { ascending: false }).limit(100);
       if (documentId) query = query.eq('document_id', documentId);
       const { data, error } = await query;
       if (error) throw error;
@@ -337,7 +315,7 @@ export function useNuruConversations() {
   return useQuery({
     queryKey: ['nuru-conversations'],
     queryFn: async () => {
-      const { data, error } = await sb.from('nuru_conversations').select('*').order('last_message_at', { ascending: false }).limit(20);
+      const { data, error } = await sb.from('nuru_conversations').select('*').order('last_message_at', { ascending: false }).limit(50);
       if (error) throw error;
       return (data || []) as NuruConversation[];
     },
@@ -353,7 +331,7 @@ export function useNuruMessages(conversationId: string) {
       return (data || []) as NuruMessage[];
     },
     enabled: !!conversationId,
-    refetchInterval: 3000,
+    refetchInterval: 5000,
   });
 }
 
@@ -393,6 +371,127 @@ export function useSendChatMessage() {
   });
 }
 
+// Streaming chat
+export function useStreamChatMessage() {
+  const qc = useQueryClient();
+
+  const streamChat = async (
+    conversationId: string,
+    message: string,
+    onDelta: (text: string) => void,
+    onDone: () => void,
+  ) => {
+    const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/nuru-ai-chat`;
+    const resp = await fetch(CHAT_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      },
+      body: JSON.stringify({
+        action: 'chat_stream',
+        conversationId,
+        messages: [{ role: 'user', content: message }],
+      }),
+    });
+
+    if (!resp.ok) {
+      const errText = await resp.text();
+      throw new Error(errText || `Stream failed: ${resp.status}`);
+    }
+
+    if (!resp.body) throw new Error('No response body');
+
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let textBuffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      textBuffer += decoder.decode(value, { stream: true });
+
+      let newlineIndex: number;
+      while ((newlineIndex = textBuffer.indexOf('\n')) !== -1) {
+        let line = textBuffer.slice(0, newlineIndex);
+        textBuffer = textBuffer.slice(newlineIndex + 1);
+
+        if (line.endsWith('\r')) line = line.slice(0, -1);
+        if (line.startsWith(':') || line.trim() === '') continue;
+        if (!line.startsWith('data: ')) continue;
+
+        const jsonStr = line.slice(6).trim();
+        if (jsonStr === '[DONE]') break;
+
+        try {
+          const parsed = JSON.parse(jsonStr);
+          const content = parsed.choices?.[0]?.delta?.content;
+          if (content) onDelta(content);
+        } catch {
+          textBuffer = line + '\n' + textBuffer;
+          break;
+        }
+      }
+    }
+
+    // Flush remaining
+    if (textBuffer.trim()) {
+      for (let raw of textBuffer.split('\n')) {
+        if (!raw || !raw.startsWith('data: ')) continue;
+        const jsonStr = raw.slice(6).trim();
+        if (jsonStr === '[DONE]') continue;
+        try {
+          const parsed = JSON.parse(jsonStr);
+          const content = parsed.choices?.[0]?.delta?.content;
+          if (content) onDelta(content);
+        } catch {}
+      }
+    }
+
+    onDone();
+    qc.invalidateQueries({ queryKey: ['nuru-messages', conversationId] });
+    qc.invalidateQueries({ queryKey: ['nuru-conversations'] });
+  };
+
+  return { streamChat };
+}
+
+// ========== Document Bookmarks ==========
+
+export function useDocumentBookmarks() {
+  return useQuery({
+    queryKey: ['document-bookmarks'],
+    queryFn: async () => {
+      const { data, error } = await sb.from('document_bookmarks').select('*, civic_documents(id, title, document_type, country)').order('created_at', { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+  });
+}
+
+export function useToggleBookmark() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ documentId }: { documentId: string }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Must be logged in');
+
+      const { data: existing } = await sb.from('document_bookmarks').select('id').eq('user_id', user.id).eq('document_id', documentId).single();
+      if (existing) {
+        await sb.from('document_bookmarks').delete().eq('id', existing.id);
+        return { bookmarked: false };
+      } else {
+        await sb.from('document_bookmarks').insert({ user_id: user.id, document_id: documentId });
+        return { bookmarked: true };
+      }
+    },
+    onSuccess: (data) => {
+      qc.invalidateQueries({ queryKey: ['document-bookmarks'] });
+      toast.success(data.bookmarked ? 'Document bookmarked' : 'Bookmark removed');
+    },
+  });
+}
+
 // ========== Review & Analytics Hooks ==========
 
 export function useReviewClaim() {
@@ -405,6 +504,19 @@ export function useReviewClaim() {
       return data;
     },
     onError: (e: any) => toast.error(e.message || 'Claim review failed'),
+  });
+}
+
+export function useCompareDocuments() {
+  return useMutation({
+    mutationFn: async ({ documentIds }: { documentIds: string[] }) => {
+      const { data, error } = await supabase.functions.invoke('nuru-ai-chat', {
+        body: { action: 'compare_documents', documentIds },
+      });
+      if (error) throw error;
+      return data;
+    },
+    onError: (e: any) => toast.error(e.message || 'Document comparison failed'),
   });
 }
 
@@ -434,9 +546,20 @@ export function useNuruAuditLog() {
   return useQuery({
     queryKey: ['nuru-audit-log'],
     queryFn: async () => {
-      const { data, error } = await sb.from('nuru_audit_log').select('*').order('created_at', { ascending: false }).limit(100);
+      const { data, error } = await sb.from('nuru_audit_log').select('*').order('created_at', { ascending: false }).limit(200);
       if (error) throw error;
       return (data || []) as NuruAuditEntry[];
+    },
+  });
+}
+
+export function useClaimReviewHistory() {
+  return useQuery({
+    queryKey: ['claim-review-history'],
+    queryFn: async () => {
+      const { data, error } = await sb.from('civic_claim_reviews').select('*, civic_documents(title)').order('created_at', { ascending: false }).limit(50);
+      if (error) throw error;
+      return data || [];
     },
   });
 }
@@ -454,6 +577,7 @@ export function useSeedNuruDemo() {
       qc.invalidateQueries({ queryKey: ['civic-questions'] });
       qc.invalidateQueries({ queryKey: ['governance-registry'] });
       qc.invalidateQueries({ queryKey: ['civic-analytics'] });
+      qc.invalidateQueries({ queryKey: ['nuru-audit-log'] });
       toast.success('Demo data seeded successfully!');
     },
     onError: (e: any) => toast.error(e.message || 'Failed to seed demo data'),

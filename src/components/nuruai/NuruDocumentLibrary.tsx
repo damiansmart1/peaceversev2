@@ -8,10 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
-  FileText, Upload, Eye, MessageSquare, Calendar, Search, Filter, Loader2, BookOpen, 
-  FileUp, File, Globe, CheckCircle, Clock, AlertCircle
+  FileText, Upload, Eye, MessageSquare, Search, Filter, Loader2, BookOpen, 
+  FileUp, File, Globe, CheckCircle, Clock, Bookmark, BookmarkCheck, BarChart3
 } from 'lucide-react';
-import { useCivicDocuments, useUploadDocument, useUploadDocumentFile } from '@/hooks/useNuruAI';
+import { useCivicDocuments, useUploadDocument, useUploadDocumentFile, useToggleBookmark, useDocumentBookmarks } from '@/hooks/useNuruAI';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 
@@ -45,9 +45,13 @@ const NuruDocumentLibrary = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   
   const { data: documents, isLoading } = useCivicDocuments(typeFilter);
+  const { data: bookmarks } = useDocumentBookmarks();
   const uploadDoc = useUploadDocument();
   const uploadFileDoc = useUploadDocumentFile();
+  const toggleBookmark = useToggleBookmark();
   const { user } = useAuth();
+
+  const bookmarkedIds = new Set(bookmarks?.map((b: any) => b.document_id) || []);
 
   const filtered = documents?.filter(d =>
     d.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -155,18 +159,19 @@ const NuruDocumentLibrary = () => {
 
       {/* Stats */}
       {documents && documents.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
           {[
             { label: 'Documents', value: documents.length, icon: FileText },
             { label: 'Questions', value: documents.reduce((s, d) => s + (d.question_count || 0), 0), icon: MessageSquare },
             { label: 'Views', value: documents.reduce((s, d) => s + (d.view_count || 0), 0), icon: Eye },
             { label: 'Countries', value: new Set(documents.map(d => d.country).filter(Boolean)).size, icon: Globe },
+            { label: 'Bookmarked', value: bookmarkedIds.size, icon: BookmarkCheck },
           ].map((stat, i) => (
             <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
-              className="p-3.5 rounded-xl border border-border/30 bg-card/40 backdrop-blur-sm"
+              className="p-3 rounded-xl border border-border/30 bg-card/40 backdrop-blur-sm"
             >
-              <stat.icon className="h-4 w-4 text-primary/70 mb-1.5" />
-              <p className="text-lg font-bold text-foreground">{stat.value.toLocaleString()}</p>
+              <stat.icon className="h-4 w-4 text-primary/70 mb-1" />
+              <p className="text-lg font-bold text-foreground">{typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value}</p>
               <p className="text-[10px] text-muted-foreground">{stat.label}</p>
             </motion.div>
           ))}
@@ -186,10 +191,29 @@ const NuruDocumentLibrary = () => {
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           {filtered.map((doc, i) => (
             <motion.div key={doc.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}>
-              <div className="group p-4 rounded-2xl border border-border/30 bg-card/40 backdrop-blur-sm hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5 transition-all h-full flex flex-col">
-                <div className="flex items-center gap-2 mb-3">
+              <div className="group p-4 rounded-2xl border border-border/30 bg-card/40 backdrop-blur-sm hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5 transition-all h-full flex flex-col relative">
+                {/* Bookmark button */}
+                {user && (
+                  <button
+                    onClick={() => toggleBookmark.mutate({ documentId: doc.id })}
+                    className="absolute top-3 right-3 p-1.5 rounded-lg hover:bg-muted/40 transition-colors"
+                  >
+                    {bookmarkedIds.has(doc.id) ? (
+                      <BookmarkCheck className="h-4 w-4 text-primary" />
+                    ) : (
+                      <Bookmark className="h-4 w-4 text-muted-foreground/40 group-hover:text-muted-foreground" />
+                    )}
+                  </button>
+                )}
+
+                <div className="flex items-center gap-2 mb-3 pr-8">
                   <Badge variant="outline" className={`text-[10px] capitalize font-medium ${typeColors[doc.document_type] || ''}`}>{doc.document_type}</Badge>
                   {doc.country && <Badge variant="secondary" className="text-[10px] font-normal">{doc.country}</Badge>}
+                  {doc.processing_status && doc.processing_status !== 'completed' && (
+                    <Badge variant="outline" className="text-[10px] gap-1 text-amber-500">
+                      <Clock className="h-2.5 w-2.5" />{doc.processing_status}
+                    </Badge>
+                  )}
                 </div>
                 <h3 className="text-sm font-semibold text-foreground line-clamp-2 mb-1.5 group-hover:text-primary transition-colors">{doc.title}</h3>
                 {doc.summary && <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{doc.summary}</p>}
