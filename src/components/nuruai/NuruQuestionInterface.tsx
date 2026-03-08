@@ -73,8 +73,9 @@ const NuruQuestionInterface = () => {
   const [rightSidebarOpen, setRightSidebarOpen] = useState(false);
   const [streamingContent, setStreamingContent] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
+  const [lastUserMessage, setLastUserMessage] = useState<string>('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [feedbackGiven, setFeedbackGiven] = useState<Record<string, 'up' | 'down'>>({});
   const [editingConvId, setEditingConvId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [pinnedConversations, setPinnedConversations] = useState<Set<string>>(() => {
