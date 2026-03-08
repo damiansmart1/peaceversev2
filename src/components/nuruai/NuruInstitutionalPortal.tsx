@@ -308,6 +308,21 @@ const NuruInstitutionalPortal = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Notifications Dialog */}
+      <NotificationsDialog
+        open={showNotifications}
+        onOpenChange={setShowNotifications}
+        unansweredCount={metrics.unanswered}
+        questions={questions || []}
+        responses={responses || []}
+      />
+
+      {/* Settings Dialog */}
+      <SettingsDialog
+        open={showSettings}
+        onOpenChange={setShowSettings}
+      />
     </div>
   );
 };
