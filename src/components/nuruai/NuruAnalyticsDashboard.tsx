@@ -486,20 +486,7 @@ const NuruAnalyticsDashboard = () => {
                 stroke="hsl(var(--card))"
                 strokeWidth={2}
                 animationDuration={600}
-                content={({ x, y, width, height, name, fill }: any) => {
-                  if (width < 30 || height < 25) return null;
-                  return (
-                    <g>
-                      <rect x={x} y={y} width={width} height={height} fill={fill} opacity={0.8} rx={6} />
-                      <rect x={x} y={y} width={width} height={height} fill="url(#gradPrimary)" rx={6} />
-                      {width > 50 && height > 30 && (
-                        <text x={x + width / 2} y={y + height / 2} textAnchor="middle" dominantBaseline="central" className="fill-foreground text-[9px] font-medium">
-                          {name?.length > 12 ? name.substring(0, 12) + '…' : name}
-                        </text>
-                      )}
-                    </g>
-                  );
-                }}
+                content={<TreemapContent />}
               />
             </ResponsiveContainer>
           ) : (
