@@ -799,9 +799,13 @@ Respond as JSON:
     throw new Error(`Unknown action: ${action}`);
   } catch (error) {
     console.error('NuruAI error:', error);
+    const errMsg = error instanceof Error ? error.message : 'NuruAI processing failed';
+    let status = 500;
+    if (errMsg.includes('credits') || errMsg.includes('402')) status = 402;
+    else if (errMsg.includes('Rate limit') || errMsg.includes('429')) status = 429;
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : 'NuruAI processing failed' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ error: errMsg }),
+      { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
