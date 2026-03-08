@@ -989,7 +989,7 @@ const NuruQuestionInterface = () => {
             animate={{ width: 300, opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="border-l border-border/30 bg-card/60 flex flex-col overflow-hidden"
+            className="border-l border-border/20 bg-gradient-to-b from-card/80 to-card/40 backdrop-blur-md flex flex-col overflow-hidden"
           >
             <div className="h-12 border-b border-border/30 flex items-center justify-between px-4">
               <div className="flex items-center gap-2">
