@@ -84,6 +84,7 @@ const Admin = () => {
       case 'field-reports': return <AdminCommunicationManager />;
       case 'peace-metrics': return <AdminPeaceMetricsManager />;
       case 'elections': return <AdminElectionsManager />;
+      case 'nuru-ai': return <AdminNuruAIManager />;
       case 'settings': return <AdminSettingsManager />;
       default: return <AdminDashboard />;
     }

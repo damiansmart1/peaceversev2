@@ -59,3 +59,9 @@ verify_jwt = false
 
 [functions.comprehensive-incident-analysis]
 verify_jwt = false
+
+[functions.nuru-ai-chat]
+verify_jwt = false
+
+[functions.seed-nuru-demo]
+verify_jwt = false
