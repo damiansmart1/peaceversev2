@@ -5,6 +5,47 @@ import { useRef, useCallback } from 'react';
 
 const sb = supabase as any;
 
+/**
+ * Extract a human-readable error message from edge function responses.
+ * supabase.functions.invoke returns { data, error } where error on non-2xx
+ * is a FunctionsHttpError whose context contains the response body.
+ */
+async function extractEdgeFunctionError(error: any): Promise<string> {
+  // FunctionsHttpError has a context property with the response
+  if (error?.context) {
+    try {
+      // context is the Response object — try to parse its JSON body
+      if (typeof error.context.json === 'function') {
+        const body = await error.context.json();
+        if (body?.error) return body.error;
+      }
+    } catch {
+      // fallback
+    }
+  }
+  // Try .message directly
+  if (error?.message && error.message !== 'Edge Function returned a non-2xx status code') {
+    return error.message;
+  }
+  // Try JSON stringifying
+  try {
+    const str = JSON.stringify(error);
+    if (str && str !== '{}') return str;
+  } catch {}
+  return 'An unexpected error occurred. Please try again.';
+}
+
+/** Wrapper: invoke edge function and throw with the exact error message */
+async function invokeNuruAI(body: Record<string, any>) {
+  const { data, error } = await supabase.functions.invoke('nuru-ai-chat', { body });
+  if (error) {
+    const msg = await extractEdgeFunctionError(error);
+    throw new Error(msg);
+  }
+  if (data?.error) throw new Error(data.error);
+  return data;
+}
+
 export interface CivicDocument {
   id: string;
   title: string;
