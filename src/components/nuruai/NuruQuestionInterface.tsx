@@ -38,7 +38,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter
 } from '@/components/ui/dialog';
 
 interface ChatSettings {
