@@ -392,12 +392,16 @@ Format response as JSON:
         updated_at: new Date().toISOString(),
       }).eq('id', documentId);
 
-      await supabase.from('nuru_document_versions').insert({
-        document_id: documentId,
-        version_number: 1,
-        original_text: textToSummarize.substring(0, 50000),
-        uploaded_by: userId,
-      }).catch(() => {});
+      try {
+        await supabase.from('nuru_document_versions').insert({
+          document_id: documentId,
+          version_number: 1,
+          original_text: textToSummarize.substring(0, 50000),
+          uploaded_by: userId,
+        });
+      } catch (_e) {
+        // Non-critical
+      }
 
       await logAudit(supabase, userId, 'document_summarized', 'civic_document', documentId, { processingTime, topicCount: parsed.topics?.length });
 
@@ -611,14 +615,18 @@ Respond as JSON: {
       const processingTime = Date.now() - startTime;
 
       if (claimText) {
-        await supabase.from('civic_claim_reviews').insert({
-          claim_text: claimText,
-          source_document_id: documentId || null,
-          flagged_by: userId,
-          evidence_summary: parsed.evidenceSummary,
-          supporting_passages: parsed.supportingPassages || [],
-          review_status: parsed.status,
-        }).catch(() => {});
+        try {
+          await supabase.from('civic_claim_reviews').insert({
+            claim_text: claimText,
+            source_document_id: documentId || null,
+            flagged_by: userId,
+            evidence_summary: parsed.evidenceSummary,
+            supporting_passages: parsed.supportingPassages || [],
+            review_status: parsed.status,
+          });
+        } catch (_e) {
+          // Non-critical: don't fail if logging fails
+        }
       }
 
       await logAudit(supabase, userId, 'claim_reviewed', 'civic_claim', undefined, {
