@@ -47,6 +47,7 @@ const menuItems = [
       { id: 'safe-spaces', label: 'Safe Spaces' },
       { id: 'peace-metrics', label: 'Peace Metrics' },
       { id: 'nuru-ai', label: 'NuruAI Civic Intel' },
+      { id: 'constitutions', label: 'Constitutions' },
     ],
   },
   {
