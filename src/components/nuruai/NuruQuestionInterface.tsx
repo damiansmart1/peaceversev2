@@ -1,35 +1,27 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 import { 
-  MessageSquareText, Send, Loader2, FileText, Quote, ThumbsUp, CheckCircle2, 
-  Plus, History, Bot, User, Sparkles, Clock, ArrowRight, BookOpen, AlertCircle
+  Send, Loader2, FileText, Quote, Bot, User, Sparkles, Clock, ArrowRight, 
+  Plus, History, MessageSquareText, BookOpen, AlertCircle, ChevronDown, Zap
 } from 'lucide-react';
-import { useCivicDocuments, useCivicQuestions, useAskQuestion, useNuruConversations, useNuruMessages, useCreateConversation, useSendChatMessage } from '@/hooks/useNuruAI';
+import { useCivicDocuments, useNuruConversations, useNuruMessages, useCreateConversation, useSendChatMessage, useAskQuestion } from '@/hooks/useNuruAI';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 
 const NuruQuestionInterface = () => {
   const [selectedDocId, setSelectedDocId] = useState('');
   const [question, setQuestion] = useState('');
-  const [currentAnswer, setCurrentAnswer] = useState<any>(null);
-  const [mode, setMode] = useState<'quick' | 'chat'>('quick');
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const { data: documents } = useCivicDocuments();
-  const { data: questions, isLoading: questionsLoading } = useCivicQuestions(selectedDocId || undefined);
-  const askQuestion = useAskQuestion();
   const { user } = useAuth();
-
-  // Chat mode hooks
   const { data: conversations } = useNuruConversations();
   const { data: chatMessages } = useNuruMessages(activeConversationId || '');
   const createConversation = useCreateConversation();
@@ -39,366 +31,299 @@ const NuruQuestionInterface = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages]);
 
-  const handleQuickAsk = () => {
-    if (!question.trim() || !selectedDocId) return;
-    askQuestion.mutate({ question, documentId: selectedDocId }, {
-      onSuccess: (data) => {
-        setCurrentAnswer(data);
-        setQuestion('');
-      },
-    });
-  };
+  // Auto-resize textarea
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 160) + 'px';
+    }
+  }, [question]);
 
   const handleStartChat = async () => {
     if (!user) return;
     const doc = documents?.find(d => d.id === selectedDocId);
     createConversation.mutate(
-      { documentId: selectedDocId || undefined, title: doc ? `Chat: ${doc.title.substring(0, 50)}` : 'General Civic Chat' },
-      { onSuccess: (conv) => { setActiveConversationId(conv.id); setMode('chat'); } }
+      { documentId: selectedDocId || undefined, title: doc ? doc.title.substring(0, 60) : 'General Civic Chat' },
+      { onSuccess: (conv) => setActiveConversationId(conv.id) }
     );
   };
 
-  const handleSendChat = () => {
+  const handleSend = () => {
     if (!question.trim() || !activeConversationId) return;
     sendChatMessage.mutate({ conversationId: activeConversationId, message: question });
     setQuestion('');
+    if (textareaRef.current) textareaRef.current.style.height = 'auto';
   };
 
-  const confidenceColor = (c: number) => c >= 0.8 ? 'text-green-500' : c >= 0.5 ? 'text-yellow-500' : 'text-red-500';
-  const confidenceBg = (c: number) => c >= 0.8 ? 'bg-green-500/10 border-green-500/20' : c >= 0.5 ? 'bg-yellow-500/10 border-yellow-500/20' : 'bg-red-500/10 border-red-500/20';
+  const confidenceColor = (c: number) => c >= 0.8 ? 'text-emerald-400' : c >= 0.5 ? 'text-amber-400' : 'text-red-400';
+
+  const selectedDoc = documents?.find(d => d.id === selectedDocId);
 
   return (
-    <div className="grid gap-6 lg:grid-cols-5">
-      {/* Left Panel */}
-      <div className="lg:col-span-2 space-y-4">
-        {/* Mode Toggle */}
-        <div className="flex gap-2 p-1 bg-muted/50 rounded-xl border border-border/50">
-          <Button
-            variant={mode === 'quick' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setMode('quick')}
-            className="flex-1 gap-2"
-          >
-            <Sparkles className="h-4 w-4" />Quick Q&A
-          </Button>
-          <Button
-            variant={mode === 'chat' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setMode('chat')}
-            className="flex-1 gap-2"
-          >
-            <MessageSquareText className="h-4 w-4" />Deep Chat
+    <div className="flex h-[calc(100vh-220px)] rounded-2xl border border-border/40 overflow-hidden bg-card/30 backdrop-blur-sm">
+      {/* Sidebar */}
+      <div className={`${sidebarOpen ? 'w-72' : 'w-0'} transition-all duration-200 border-r border-border/30 bg-card/60 flex flex-col overflow-hidden`}>
+        <div className="p-4 border-b border-border/30">
+          <Button onClick={handleStartChat} disabled={createConversation.isPending || !user} className="w-full gap-2 rounded-xl h-10" size="sm">
+            {createConversation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+            New conversation
           </Button>
         </div>
 
-        {/* Document Selector */}
-        <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Bot className="h-5 w-5 text-primary" />
-              {mode === 'quick' ? 'Ask NuruAI' : 'NuruAI Deep Chat'}
-            </CardTitle>
-            <p className="text-xs text-muted-foreground">
-              {mode === 'quick' 
-                ? 'Ask a question and get an instant evidence-based answer' 
-                : 'Have a multi-turn conversation to deeply explore policy documents'}
-            </p>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Select value={selectedDocId} onValueChange={setSelectedDocId}>
-              <SelectTrigger className="h-11">
-                <FileText className="h-4 w-4 mr-2 text-muted-foreground" />
-                <SelectValue placeholder="Select a document to query..." />
-              </SelectTrigger>
-              <SelectContent>
-                {documents?.map(d => (
-                  <SelectItem key={d.id} value={d.id}>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="text-[10px] capitalize">{d.document_type}</Badge>
-                      <span className="truncate">{d.title}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        {/* Document selector */}
+        <div className="p-3 border-b border-border/30">
+          <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-2">Reference Document</p>
+          <Select value={selectedDocId} onValueChange={setSelectedDocId}>
+            <SelectTrigger className="h-9 text-xs rounded-lg bg-background/50">
+              <FileText className="h-3.5 w-3.5 mr-1.5 text-muted-foreground shrink-0" />
+              <SelectValue placeholder="Select document..." />
+            </SelectTrigger>
+            <SelectContent>
+              {documents?.map(d => (
+                <SelectItem key={d.id} value={d.id} className="text-xs">
+                  <span className="truncate">{d.title}</span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-            {mode === 'chat' && !activeConversationId && (
-              <Button onClick={handleStartChat} disabled={createConversation.isPending || !user} className="w-full gap-2" variant="outline">
-                {createConversation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-                Start New Conversation
-              </Button>
+        {/* Conversation history */}
+        <ScrollArea className="flex-1">
+          <div className="p-2 space-y-0.5">
+            <p className="px-2 py-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wider">History</p>
+            {conversations?.map(c => (
+              <button
+                key={c.id}
+                onClick={() => setActiveConversationId(c.id)}
+                className={`w-full text-left px-3 py-2.5 rounded-lg text-xs transition-all group ${
+                  activeConversationId === c.id 
+                    ? 'bg-primary/10 text-primary' 
+                    : 'hover:bg-muted/40 text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <p className="font-medium truncate text-[13px]">{c.title || 'Untitled'}</p>
+                <p className="text-[10px] mt-0.5 opacity-60">{c.message_count} messages · {format(new Date(c.last_message_at), 'MMM d')}</p>
+              </button>
+            ))}
+            {(!conversations || conversations.length === 0) && (
+              <p className="px-3 py-4 text-[11px] text-muted-foreground/50 text-center">No conversations yet</p>
             )}
-
-            {/* Chat History */}
-            {mode === 'chat' && conversations && conversations.length > 0 && (
-              <div className="space-y-1">
-                <p className="text-xs font-medium text-muted-foreground flex items-center gap-1"><History className="h-3 w-3" />Recent Conversations</p>
-                <ScrollArea className="max-h-32">
-                  {conversations.map(c => (
-                    <button
-                      key={c.id}
-                      onClick={() => setActiveConversationId(c.id)}
-                      className={`w-full text-left px-3 py-2 rounded-lg text-xs transition-all ${activeConversationId === c.id ? 'bg-primary/10 text-primary' : 'hover:bg-muted/50'}`}
-                    >
-                      <p className="font-medium truncate">{c.title}</p>
-                      <p className="text-muted-foreground">{c.message_count} messages</p>
-                    </button>
-                  ))}
-                </ScrollArea>
-              </div>
-            )}
-
-            <Textarea
-              placeholder={mode === 'quick' 
-                ? "Ask a question... e.g., 'What does this budget allocate to healthcare?'"
-                : "Type your message to NuruAI..."
-              }
-              rows={3}
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  mode === 'quick' ? handleQuickAsk() : handleSendChat();
-                }
-              }}
-            />
-            <Button
-              onClick={mode === 'quick' ? handleQuickAsk : handleSendChat}
-              disabled={
-                (mode === 'quick' ? askQuestion.isPending : sendChatMessage.isPending) ||
-                (mode === 'quick' && !selectedDocId) ||
-                (mode === 'chat' && !activeConversationId) ||
-                !question.trim()
-              }
-              className="w-full gap-2"
-            >
-              {(mode === 'quick' ? askQuestion.isPending : sendChatMessage.isPending) 
-                ? <Loader2 className="h-4 w-4 animate-spin" /> 
-                : <Send className="h-4 w-4" />}
-              {(mode === 'quick' ? askQuestion.isPending : sendChatMessage.isPending)
-                ? 'Analyzing document...'
-                : mode === 'quick' ? 'Ask Question' : 'Send Message'}
-            </Button>
-
-            {!user && (
-              <p className="text-xs text-center text-muted-foreground flex items-center justify-center gap-1">
-                <AlertCircle className="h-3 w-3" />Sign in to use Deep Chat mode
-              </p>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Quick Answer */}
-        {mode === 'quick' && currentAnswer && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-            <Card className="border-primary/30 bg-card/80">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <Bot className="h-4 w-4 text-primary" />AI Answer
-                  </CardTitle>
-                  <div className={`flex items-center gap-2 px-2.5 py-1 rounded-full border ${confidenceBg(currentAnswer.confidence || 0)}`}>
-                    <span className="text-xs text-muted-foreground">Confidence:</span>
-                    <span className={`text-sm font-bold ${confidenceColor(currentAnswer.confidence || 0)}`}>
-                      {Math.round((currentAnswer.confidence || 0) * 100)}%
-                    </span>
-                  </div>
-                </div>
-                <Progress value={(currentAnswer.confidence || 0) * 100} className="h-1.5" />
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-sm text-foreground leading-relaxed">{currentAnswer.answer || currentAnswer.ai_answer}</p>
-                
-                {currentAnswer.keyTakeaway && (
-                  <div className="p-3 rounded-lg bg-primary/5 border border-primary/10">
-                    <p className="text-xs font-semibold text-primary mb-1">Key Takeaway</p>
-                    <p className="text-sm text-foreground">{currentAnswer.keyTakeaway}</p>
-                  </div>
-                )}
-
-                {currentAnswer.sourcePassages?.length > 0 && (
-                  <div className="space-y-2">
-                    <h4 className="text-xs font-semibold text-muted-foreground flex items-center gap-1"><Quote className="h-3 w-3" />Source Passages</h4>
-                    {currentAnswer.sourcePassages.map((p: string, i: number) => (
-                      <div key={i} className="text-xs bg-primary/5 border border-primary/10 rounded-lg p-3 italic text-muted-foreground">"{p}"</div>
-                    ))}
-                  </div>
-                )}
-
-                {currentAnswer.suggestedFollowUps?.length > 0 && (
-                  <div className="space-y-2">
-                    <h4 className="text-xs font-semibold text-muted-foreground">Suggested Follow-ups</h4>
-                    {currentAnswer.suggestedFollowUps.map((f: string, i: number) => (
-                      <button
-                        key={i}
-                        onClick={() => setQuestion(f)}
-                        className="w-full text-left text-xs p-2.5 rounded-lg border border-border/50 hover:border-primary/30 hover:bg-primary/5 transition-all flex items-center gap-2"
-                      >
-                        <ArrowRight className="h-3 w-3 text-primary shrink-0" />
-                        {f}
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                {currentAnswer.processingTime && (
-                  <p className="text-[10px] text-muted-foreground flex items-center gap-1">
-                    <Clock className="h-3 w-3" />Processed in {currentAnswer.processingTime}ms using Gemini 2.5 Pro
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
+          </div>
+        </ScrollArea>
       </div>
 
-      {/* Right Panel */}
-      <div className="lg:col-span-3">
-        {mode === 'chat' && activeConversationId ? (
-          /* Chat Messages View */
-          <Card className="border-border/50 bg-card/80 backdrop-blur-sm h-[600px] flex flex-col">
-            <CardHeader className="pb-3 border-b border-border/50">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <MessageSquareText className="h-5 w-5 text-primary" />
-                Conversation
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex-1 overflow-hidden p-0">
-              <ScrollArea className="h-full px-4 py-4">
-                <div className="space-y-4">
-                  {chatMessages?.map((msg, i) => (
-                    <motion.div
-                      key={msg.id}
-                      initial={{ opacity: 0, y: 5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
+      {/* Main Chat Area */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Chat Header */}
+        <div className="h-14 border-b border-border/30 flex items-center justify-between px-4 bg-card/40">
+          <div className="flex items-center gap-3 min-w-0">
+            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1.5 rounded-lg hover:bg-muted/40 transition-colors">
+              <MessageSquareText className="h-4 w-4 text-muted-foreground" />
+            </button>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold truncate">
+                {activeConversationId 
+                  ? conversations?.find(c => c.id === activeConversationId)?.title || 'Conversation'
+                  : 'NuruAI Chat'}
+              </p>
+              {selectedDoc && (
+                <p className="text-[10px] text-muted-foreground truncate flex items-center gap-1">
+                  <FileText className="h-2.5 w-2.5" />{selectedDoc.title}
+                </p>
+              )}
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="text-[10px] gap-1 font-normal">
+              <Zap className="h-2.5 w-2.5" />Gemini 2.5 Pro
+            </Badge>
+          </div>
+        </div>
+
+        {/* Messages Area */}
+        <ScrollArea className="flex-1">
+          <div className="max-w-3xl mx-auto px-4 py-6">
+            {!activeConversationId ? (
+              /* Welcome Screen */
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <div className="relative mb-6">
+                  <div className="absolute inset-0 bg-primary/10 blur-2xl rounded-full scale-150" />
+                  <div className="relative p-5 rounded-3xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/15">
+                    <Brain className="h-10 w-10 text-primary" />
+                  </div>
+                </div>
+                <h2 className="text-xl font-bold text-foreground mb-2">Welcome to NuruAI</h2>
+                <p className="text-sm text-muted-foreground max-w-md mb-8">
+                  Ask questions about African policy documents. Get evidence-grounded answers with source citations.
+                </p>
+                
+                <div className="grid gap-3 sm:grid-cols-2 w-full max-w-lg">
+                  {[
+                    { q: 'What does this budget allocate to healthcare?', icon: '🏥' },
+                    { q: 'How will this policy affect education?', icon: '📚' },
+                    { q: 'What environmental targets are set?', icon: '🌍' },
+                    { q: 'What accountability measures exist?', icon: '⚖️' },
+                  ].map((item, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setQuestion(item.q)}
+                      className="text-left p-3.5 rounded-xl border border-border/40 hover:border-primary/30 hover:bg-primary/5 transition-all text-xs group"
                     >
-                      <div className={`p-2 rounded-full h-8 w-8 flex items-center justify-center shrink-0 ${
-                        msg.role === 'user' ? 'bg-primary/10' : 'bg-accent/50'
-                      }`}>
-                        {msg.role === 'user' ? <User className="h-4 w-4 text-primary" /> : <Bot className="h-4 w-4 text-accent-foreground" />}
-                      </div>
-                      <div className={`flex-1 max-w-[80%] ${msg.role === 'user' ? 'text-right' : ''}`}>
-                        <div className={`inline-block p-3.5 rounded-2xl text-sm leading-relaxed ${
-                          msg.role === 'user'
-                            ? 'bg-primary text-primary-foreground rounded-br-md'
-                            : 'bg-muted/50 border border-border/50 rounded-bl-md'
-                        }`}>
-                          {msg.content}
-                        </div>
-                        <div className="flex items-center gap-2 mt-1 px-1">
-                          {msg.confidence != null && (
-                            <Badge variant="outline" className={`text-[10px] ${confidenceColor(msg.confidence)}`}>
-                              {Math.round(msg.confidence * 100)}% confidence
-                            </Badge>
-                          )}
-                          <span className="text-[10px] text-muted-foreground">
-                            {format(new Date(msg.created_at), 'HH:mm')}
-                          </span>
-                          {msg.processing_time_ms && (
-                            <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
-                              <Clock className="h-2.5 w-2.5" />{msg.processing_time_ms}ms
-                            </span>
-                          )}
-                        </div>
-                        {/* Source passages from chat */}
-                        {msg.sources?.passages?.length > 0 && (
-                          <div className="mt-2 space-y-1">
-                            {msg.sources.passages.slice(0, 2).map((p: string, idx: number) => (
-                              <div key={idx} className="text-[10px] bg-primary/5 border border-primary/10 rounded-lg p-2 italic text-muted-foreground">
-                                "{p}"
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                        {msg.sources?.followUps?.length > 0 && (
-                          <div className="mt-2 flex flex-wrap gap-1">
-                            {msg.sources.followUps.map((f: string, idx: number) => (
-                              <button
-                                key={idx}
-                                onClick={() => setQuestion(f)}
-                                className="text-[10px] px-2 py-1 rounded-full border border-primary/20 text-primary hover:bg-primary/5 transition-colors"
-                              >
-                                {f}
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </motion.div>
+                      <span className="text-base mb-1 block">{item.icon}</span>
+                      <span className="text-muted-foreground group-hover:text-foreground transition-colors">{item.q}</span>
+                    </button>
                   ))}
-                  {sendChatMessage.isPending && (
-                    <div className="flex gap-3">
-                      <div className="p-2 rounded-full h-8 w-8 flex items-center justify-center bg-accent/50">
-                        <Bot className="h-4 w-4 text-accent-foreground" />
-                      </div>
-                      <div className="bg-muted/50 border border-border/50 rounded-2xl rounded-bl-md p-3.5">
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          Analyzing document and preparing response...
+                </div>
+
+                {!user && (
+                  <p className="text-xs text-muted-foreground mt-6 flex items-center gap-1.5">
+                    <AlertCircle className="h-3.5 w-3.5" />Sign in to start a conversation
+                  </p>
+                )}
+              </div>
+            ) : (
+              /* Chat Messages */
+              <div className="space-y-6">
+                {chatMessages?.map((msg) => (
+                  <motion.div
+                    key={msg.id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : ''}`}
+                  >
+                    {msg.role !== 'user' && (
+                      <div className="shrink-0 mt-0.5">
+                        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/15 flex items-center justify-center">
+                          <Bot className="h-4 w-4 text-primary" />
                         </div>
+                      </div>
+                    )}
+                    <div className={`max-w-[85%] ${msg.role === 'user' ? 'order-first' : ''}`}>
+                      <div className={`rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                        msg.role === 'user'
+                          ? 'bg-primary text-primary-foreground rounded-br-lg ml-auto'
+                          : 'bg-muted/40 border border-border/30 rounded-bl-lg'
+                      }`}>
+                        <p className="whitespace-pre-wrap">{msg.content}</p>
+                      </div>
+                      
+                      {/* Metadata row */}
+                      <div className={`flex items-center gap-2 mt-1.5 px-1 ${msg.role === 'user' ? 'justify-end' : ''}`}>
+                        {msg.confidence != null && (
+                          <span className={`text-[10px] font-medium ${confidenceColor(msg.confidence)}`}>
+                            {Math.round(msg.confidence * 100)}% confidence
+                          </span>
+                        )}
+                        <span className="text-[10px] text-muted-foreground/50">
+                          {format(new Date(msg.created_at), 'HH:mm')}
+                        </span>
+                        {msg.processing_time_ms && (
+                          <span className="text-[10px] text-muted-foreground/50 flex items-center gap-0.5">
+                            <Clock className="h-2.5 w-2.5" />{msg.processing_time_ms}ms
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Source passages */}
+                      {msg.sources?.passages?.length > 0 && (
+                        <div className="mt-3 space-y-1.5">
+                          <p className="text-[10px] font-medium text-muted-foreground flex items-center gap-1"><Quote className="h-3 w-3" />Sources</p>
+                          {msg.sources.passages.slice(0, 3).map((p: string, idx: number) => (
+                            <div key={idx} className="text-[11px] bg-primary/5 border border-primary/10 rounded-lg p-2.5 text-muted-foreground italic leading-relaxed">
+                              "{p}"
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Follow-up suggestions */}
+                      {msg.sources?.followUps?.length > 0 && (
+                        <div className="mt-3 flex flex-wrap gap-1.5">
+                          {msg.sources.followUps.map((f: string, idx: number) => (
+                            <button
+                              key={idx}
+                              onClick={() => setQuestion(f)}
+                              className="text-[11px] px-3 py-1.5 rounded-full border border-primary/15 text-primary/80 hover:bg-primary/5 hover:text-primary transition-all flex items-center gap-1"
+                            >
+                              <ArrowRight className="h-2.5 w-2.5" />{f}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    {msg.role === 'user' && (
+                      <div className="shrink-0 mt-0.5">
+                        <div className="w-8 h-8 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center">
+                          <User className="h-4 w-4 text-primary" />
+                        </div>
+                      </div>
+                    )}
+                  </motion.div>
+                ))}
+
+                {sendChatMessage.isPending && (
+                  <div className="flex gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/15 flex items-center justify-center shrink-0">
+                      <Bot className="h-4 w-4 text-primary" />
+                    </div>
+                    <div className="bg-muted/40 border border-border/30 rounded-2xl rounded-bl-lg px-4 py-3">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <div className="flex gap-1">
+                          <span className="w-2 h-2 bg-primary/40 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                          <span className="w-2 h-2 bg-primary/40 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                          <span className="w-2 h-2 bg-primary/40 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                        </div>
+                        Analyzing document...
                       </div>
                     </div>
-                  )}
-                  <div ref={messagesEndRef} />
-                </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
-        ) : (
-          /* Recent Questions List */
-          <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">Recent Civic Questions</CardTitle>
-                <Badge variant="outline" className="text-xs">{questions?.length || 0} questions</Badge>
+                  </div>
+                )}
+                <div ref={messagesEndRef} />
               </div>
-            </CardHeader>
-            <CardContent>
-              {questionsLoading ? (
-                <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
-              ) : questions?.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <BookOpen className="h-12 w-12 mx-auto mb-3 opacity-30" />
-                  <p className="font-medium">No questions yet</p>
-                  <p className="text-xs mt-1">Select a document and ask the first question!</p>
-                </div>
-              ) : (
-                <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
-                  {questions?.map((q, i) => (
-                    <motion.div key={q.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.03 }}>
-                      <div className="p-4 rounded-xl border border-border/50 hover:border-primary/20 transition-all">
-                        <div className="flex items-start justify-between gap-2 mb-2">
-                          <p className="text-sm font-medium text-foreground">{q.question_text}</p>
-                          {q.ai_confidence != null && (
-                            <Badge variant="outline" className={`text-xs shrink-0 ${confidenceColor(q.ai_confidence)}`}>
-                              {Math.round(q.ai_confidence * 100)}%
-                            </Badge>
-                          )}
-                        </div>
-                        {q.ai_answer && <p className="text-xs text-muted-foreground line-clamp-3 mb-2">{q.ai_answer}</p>}
-                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                          <span>{format(new Date(q.created_at), 'MMM d, yyyy')}</span>
-                          <span className="flex items-center gap-1"><ThumbsUp className="h-3 w-3" />{q.upvote_count}</span>
-                          {q.tags?.length > 0 && q.tags.slice(0, 2).map((t, idx) => (
-                            <Badge key={idx} variant="secondary" className="text-[10px]">{t}</Badge>
-                          ))}
-                          {q.status === 'answered' && (
-                            <Badge variant="secondary" className="text-xs gap-1 ml-auto"><CheckCircle2 className="h-3 w-3" />Answered</Badge>
-                          )}
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
+            )}
+          </div>
+        </ScrollArea>
+
+        {/* Input Area */}
+        <div className="border-t border-border/30 p-4 bg-card/40">
+          <div className="max-w-3xl mx-auto">
+            <div className="relative flex items-end gap-2 rounded-2xl border border-border/40 bg-background/60 p-2 focus-within:border-primary/30 focus-within:ring-1 focus-within:ring-primary/10 transition-all">
+              <textarea
+                ref={textareaRef}
+                placeholder={activeConversationId ? "Ask about this policy document..." : "Start a new conversation to begin..."}
+                rows={1}
+                value={question}
+                onChange={(e) => setQuestion(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSend();
+                  }
+                }}
+                disabled={!activeConversationId}
+                className="flex-1 resize-none bg-transparent border-0 outline-none text-sm placeholder:text-muted-foreground/50 py-2 px-2 max-h-40 disabled:opacity-40"
+              />
+              <Button
+                onClick={handleSend}
+                disabled={sendChatMessage.isPending || !activeConversationId || !question.trim()}
+                size="icon"
+                className="shrink-0 h-9 w-9 rounded-xl"
+              >
+                {sendChatMessage.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              </Button>
+            </div>
+            <p className="text-[10px] text-muted-foreground/40 text-center mt-2">
+              NuruAI grounds all answers in source documents. Always verify critical information.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
 };
+
+// Need Brain import
+import { Brain } from 'lucide-react';
 
 export default NuruQuestionInterface;
