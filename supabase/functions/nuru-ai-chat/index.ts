@@ -564,78 +564,240 @@ Format as JSON: {
       });
     }
 
-    // ===== ACTION: REVIEW CLAIM =====
+    // ===== ACTION: REVIEW CLAIM (Enhanced - ClaimReview Schema.org + Multi-source) =====
     if (action === 'review_claim') {
       if (!claimText) throw new Error('Claim text required');
+      const { batchId, batchIndex, claimSource, claimSourceUrl } = body;
 
-      let documentContext = '';
+      // Multi-source: gather ALL available documents + constitutions for cross-referencing
+      let documentContextParts: { id: string; title: string; type: string; excerpt: string }[] = [];
+
       if (documentId) {
-        const { data: doc } = await supabase
-          .from('civic_documents')
-          .select('original_text, summary, title')
-          .eq('id', documentId)
-          .single();
+        const { data: doc } = await supabase.from('civic_documents').select('id, title, document_type, original_text, summary').eq('id', documentId).single();
         if (doc) {
-          documentContext = `Reference Document: "${doc.title}"\n${(doc.original_text || doc.summary || '').substring(0, 25000)}`;
+          documentContextParts.push({ id: doc.id, title: doc.title, type: doc.document_type, excerpt: (doc.original_text || doc.summary || '').substring(0, 15000) });
         }
       }
+
+      // Also search other documents by topic relevance (keyword match)
+      const keywords = claimText.split(/\s+/).filter(w => w.length > 4).slice(0, 5).join(' | ');
+      if (keywords) {
+        const { data: relatedDocs } = await supabase.from('civic_documents').select('id, title, document_type, summary').textSearch('title', keywords, { type: 'websearch', config: 'english' }).limit(3);
+        if (relatedDocs) {
+          for (const rd of relatedDocs) {
+            if (!documentContextParts.find(d => d.id === rd.id)) {
+              documentContextParts.push({ id: rd.id, title: rd.title, type: rd.document_type, excerpt: (rd.summary || '').substring(0, 3000) });
+            }
+          }
+        }
+      }
+
+      // Fetch constitutions for cross-reference
+      const { data: constitutions } = await supabase.from('country_constitutions').select('country_name, constitution_title, summary, key_provisions').eq('is_active', true).limit(3);
+
+      const fullContext = [
+        ...documentContextParts.map((d, i) => `--- SOURCE ${i + 1}: "${d.title}" (${d.type}) ---\n${d.excerpt}`),
+        ...(constitutions || []).map(c => `--- CONSTITUTIONAL REFERENCE: ${c.constitution_title} (${c.country_name}) ---\nSummary: ${c.summary || 'N/A'}\nKey Provisions: ${JSON.stringify(c.key_provisions || []).substring(0, 2000)}`),
+      ].join('\n\n');
 
       const content = await callAI(LOVABLE_API_KEY, [
         {
           role: 'system',
-          content: `You are NuruAI's fact-checking module, a rigorous evidence-based verification system.
+          content: `You are NuruAI's Fact-Check Engine — an IFCN-standard verification system that produces evidence-grounded verdicts comparable to Africa Check, PolitiFact, and Full Fact.
 
-METHODOLOGY:
-1. Extract core factual claims
-2. Compare against document evidence
-3. Assess accuracy, context, completeness
-4. Provide detailed evidence summary
+## METHODOLOGY (5-Step Protocol)
+1. **CLAIM DECOMPOSITION**: Break compound claims into individual verifiable assertions
+2. **EVIDENCE MATCHING**: Search ALL provided sources for supporting/contradicting data
+3. **CROSS-REFERENCE**: Check against constitutional provisions where relevant
+4. **CONTEXTUAL ANALYSIS**: Evaluate if the claim omits critical context or misrepresents data
+5. **VERDICT SYNTHESIS**: Issue a clear, evidence-based ruling
 
-CRITICAL RULES:
-- "supported" = document explicitly confirms with matching data
-- "misleading" = claim takes info out of context
-- "unsupported" = document contradicts the claim
-- "needs_context" = document doesn't address or more info needed
+## VERDICT SCALE (Strict Criteria)
+- "supported" — Source documents explicitly confirm with matching data/quotes
+- "misleading" — Contains truth but omits critical context or distorts meaning
+- "unsupported" — No evidence found OR source documents contradict the claim
+- "needs_context" — Claim addresses topic not covered by available sources
 
-Respond as JSON: {
+## RESPONSE FORMAT (Strict JSON)
+{
   "status": "supported|unsupported|misleading|needs_context",
-  "evidenceSummary": "detailed explanation",
-  "supportingPassages": ["quotes"],
-  "contradictingEvidence": ["quotes"],
   "confidence": 0.0-1.0,
-  "recommendation": "citizen guidance",
-  "factCheckDetails": [{"claim": "specific claim", "verdict": "status", "evidence": "evidence"}]
-}`
+  "verdictLabel": "Human-readable verdict (e.g., 'Mostly Supported', 'Missing Context', 'Contradicted by Budget Data')",
+  "evidenceSummary": "3-5 sentence detailed analysis with specific citations from source documents",
+  "factCheckDetails": [
+    {
+      "claim": "Individual sub-claim extracted",
+      "verdict": "supported|unsupported|misleading|needs_context",
+      "evidence": "Specific evidence with document references and quotes",
+      "sourceDocument": "Document title referenced"
+    }
+  ],
+  "supportingPassages": ["Direct quotes from documents that support the claim"],
+  "contradictingEvidence": ["Direct quotes from documents that contradict the claim"],
+  "sourcesUsed": [{"title": "Document title", "type": "Document type", "relevance": "How this source relates"}],
+  "recommendation": "Actionable citizen guidance — what should the reader do with this information",
+  "constitutionalRelevance": "If applicable, relevant constitutional provisions"
+}
+
+## CRITICAL RULES
+- NEVER fabricate evidence. If no source addresses the claim, say so clearly.
+- ALWAYS cite specific document titles and sections.
+- Confidence score reflects evidence quality: 0.9+ only with exact matching quotes.
+- Each factCheckDetail must reference the specific source document used.`
         },
         {
           role: 'user',
-          content: `Claim to verify: "${claimText}"\n\n${documentContext || 'No specific document referenced.'}`
+          content: `CLAIM TO VERIFY: "${claimText}"${claimSource ? `\nCLAIM SOURCE: ${claimSource}` : ''}${claimSourceUrl ? `\nSOURCE URL: ${claimSourceUrl}` : ''}\n\nAVAILABLE EVIDENCE:\n${fullContext || 'No specific documents referenced. Evaluate based on general knowledge and clearly state limitations.'}`
         }
       ], 0.1);
 
-      const parsed = parseJSON(content) || { status: 'needs_context', evidenceSummary: content };
+      const parsed = parseJSON(content) || { status: 'needs_context', evidenceSummary: content, confidence: 0.3 };
       const processingTime = Date.now() - startTime;
 
-      if (claimText) {
+      // Build ClaimReview Schema.org structured data
+      const claimReviewSchema = {
+        "@context": "https://schema.org",
+        "@type": "ClaimReview",
+        "datePublished": new Date().toISOString(),
+        "url": "", // Will be filled with share URL on frontend
+        "claimReviewed": claimText,
+        "author": {
+          "@type": "Organization",
+          "name": "NuruAI Civic Intelligence",
+          "url": "https://peaceversev2.lovable.app"
+        },
+        "reviewRating": {
+          "@type": "Rating",
+          "ratingValue": parsed.status === 'supported' ? 5 : parsed.status === 'misleading' ? 2 : parsed.status === 'unsupported' ? 1 : 3,
+          "bestRating": 5,
+          "worstRating": 1,
+          "alternateName": parsed.verdictLabel || parsed.status
+        },
+        "itemReviewed": {
+          "@type": "Claim",
+          "author": claimSource ? { "@type": "Person", "name": claimSource } : undefined,
+          "datePublished": new Date().toISOString(),
+          "appearance": claimSourceUrl ? { "@type": "CreativeWork", "url": claimSourceUrl } : undefined
+        }
+      };
+
+      // Save to database with enhanced fields
+      let savedId: string | null = null;
+      try {
+        const { data: saved } = await supabase.from('civic_claim_reviews').insert({
+          claim_text: claimText,
+          source_document_id: documentId || null,
+          flagged_by: userId,
+          evidence_summary: parsed.evidenceSummary,
+          supporting_passages: parsed.supportingPassages || [],
+          review_status: parsed.status,
+          confidence_score: parsed.confidence || null,
+          verdict_label: parsed.verdictLabel || null,
+          claim_source: claimSource || null,
+          claim_source_url: claimSourceUrl || null,
+          source_documents: documentContextParts.map(d => ({ id: d.id, title: d.title, type: d.type })),
+          claimreview_schema: claimReviewSchema,
+          fact_check_details: parsed.factCheckDetails || [],
+          recommendation: parsed.recommendation || null,
+          contradicting_evidence: parsed.contradictingEvidence || [],
+          batch_id: batchId || null,
+          batch_index: batchIndex ?? null,
+          processing_time_ms: processingTime,
+          is_public: false,
+        }).select('id, share_token').single();
+        savedId = saved?.id || null;
+        if (saved?.share_token) {
+          claimReviewSchema.url = `https://peaceversev2.lovable.app/fact-check/${saved.share_token}`;
+        }
+      } catch (_e) {
+        console.error('Claim save error:', _e);
+      }
+
+      await logAudit(supabase, userId, 'claim_reviewed', 'civic_claim', savedId || undefined, {
+        processingTime, status: parsed.status, confidence: parsed.confidence, sourcesCount: documentContextParts.length,
+      });
+
+      return new Response(JSON.stringify({
+        success: true,
+        ...parsed,
+        claimReviewSchema,
+        sourcesUsed: parsed.sourcesUsed || documentContextParts.map(d => ({ title: d.title, type: d.type })),
+        processingTime,
+        reviewId: savedId,
+        shareToken: savedId ? claimReviewSchema.url?.split('/').pop() : null,
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // ===== ACTION: BATCH REVIEW CLAIMS =====
+    if (action === 'batch_review_claims') {
+      const { claims } = body;
+      if (!claims || !Array.isArray(claims) || claims.length === 0) throw new Error('Claims array required');
+      if (claims.length > 10) throw new Error('Maximum 10 claims per batch');
+
+      const batchId = crypto.randomUUID();
+      const results: any[] = [];
+
+      for (let i = 0; i < claims.length; i++) {
+        const claim = claims[i];
         try {
-          await supabase.from('civic_claim_reviews').insert({
-            claim_text: claimText,
-            source_document_id: documentId || null,
-            flagged_by: userId,
-            evidence_summary: parsed.evidenceSummary,
-            supporting_passages: parsed.supportingPassages || [],
-            review_status: parsed.status,
+          // Recursively call self for each claim
+          const url = `${Deno.env.get('SUPABASE_URL')}/functions/v1/nuru-ai-chat`;
+          const resp = await fetch(url, {
+            method: 'POST',
+            headers: {
+              'Authorization': authHeader || `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              action: 'review_claim',
+              claimText: claim.text || claim,
+              documentId: claim.documentId || documentId || null,
+              claimSource: claim.source || null,
+              claimSourceUrl: claim.sourceUrl || null,
+              batchId,
+              batchIndex: i,
+            }),
           });
-        } catch (_e) {
-          // Non-critical: don't fail if logging fails
+          const data = await resp.json();
+          results.push({ index: i, claim: claim.text || claim, ...data });
+        } catch (e: any) {
+          results.push({ index: i, claim: claim.text || claim, success: false, error: e.message });
         }
       }
 
-      await logAudit(supabase, userId, 'claim_reviewed', 'civic_claim', undefined, {
-        processingTime, status: parsed.status, confidence: parsed.confidence,
+      return new Response(JSON.stringify({ success: true, batchId, results, totalClaims: claims.length }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
+    }
 
-      return new Response(JSON.stringify({ success: true, ...parsed, processingTime }), {
+    // ===== ACTION: GET SHARED CLAIM =====
+    if (action === 'get_shared_claim') {
+      const { shareToken } = body;
+      if (!shareToken) throw new Error('Share token required');
+
+      const { data: claim, error } = await supabase.from('civic_claim_reviews').select('*, civic_documents(title, document_type, country)').eq('share_token', shareToken).eq('is_public', true).single();
+      if (error || !claim) throw new Error('Shared claim not found or not public');
+
+      // Increment share count
+      await supabase.from('civic_claim_reviews').update({ shared_count: (claim.shared_count || 0) + 1 }).eq('id', claim.id);
+
+      return new Response(JSON.stringify({ success: true, claim }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // ===== ACTION: TOGGLE CLAIM PUBLIC =====
+    if (action === 'toggle_claim_public') {
+      const { reviewId, isPublic } = body;
+      if (!reviewId) throw new Error('Review ID required');
+      if (!userId) throw new Error('Authentication required');
+
+      const { error } = await supabase.from('civic_claim_reviews').update({ is_public: isPublic }).eq('id', reviewId).eq('flagged_by', userId);
+      if (error) throw error;
+
+      return new Response(JSON.stringify({ success: true }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
