@@ -90,6 +90,10 @@ const NuruQuestionInterface = () => {
   const [lastUserMessage, setLastUserMessage] = useState<string>('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [feedbackGiven, setFeedbackGiven] = useState<Record<string, 'up' | 'down'>>({});
+  const [feedbackDialogMsg, setFeedbackDialogMsg] = useState<any>(null);
+  const [feedbackType, setFeedbackType] = useState('inaccurate');
+  const [feedbackSeverity, setFeedbackSeverity] = useState('medium');
+  const [feedbackDescription, setFeedbackDescription] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [editingConvId, setEditingConvId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
