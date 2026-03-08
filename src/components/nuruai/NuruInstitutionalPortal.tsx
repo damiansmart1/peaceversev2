@@ -140,16 +140,16 @@ const NuruInstitutionalPortal = () => {
               </div>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5">
+              <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5" onClick={() => setShowNotifications(true)}>
                 <Bell className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">Notifications</span>
                 {metrics.unanswered > 0 && (
-                  <Badge className="ml-1 h-4 w-4 p-0 flex items-center justify-center text-[8px] bg-red-500">
+                  <Badge className="ml-1 h-4 w-4 p-0 flex items-center justify-center text-[8px] bg-destructive text-destructive-foreground">
                     {metrics.unanswered}
                   </Badge>
                 )}
               </Button>
-              <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5">
+              <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5" onClick={() => setShowSettings(true)}>
                 <Settings className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">Settings</span>
               </Button>
