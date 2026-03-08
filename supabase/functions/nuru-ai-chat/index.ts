@@ -692,6 +692,68 @@ Respond in markdown format with these sections:
       });
     }
 
+    // ===== ACTION: PROCESS CONSTITUTION =====
+    if (action === 'process_constitution') {
+      const { constitutionId } = body;
+      if (!constitutionId) throw new Error('Constitution ID required');
+
+      const { data: constitution, error } = await supabase
+        .from('country_constitutions')
+        .select('*')
+        .eq('id', constitutionId)
+        .single();
+
+      if (error || !constitution) throw new Error('Constitution not found');
+
+      await supabase.from('country_constitutions').update({ processing_status: 'processing' }).eq('id', constitutionId);
+
+      const textContent = constitution.original_text || '';
+      if (!textContent || textContent.length < 100) {
+        await supabase.from('country_constitutions').update({ processing_status: 'failed' }).eq('id', constitutionId);
+        throw new Error('Constitution text too short for analysis');
+      }
+
+      const content = await callAI(LOVABLE_API_KEY, [
+        {
+          role: 'system',
+          content: `You are a constitutional law analyst. Analyze this national constitution and extract structured information.
+
+Respond as JSON:
+{
+  "summary": "Comprehensive 3-4 paragraph summary of the constitution's key features, governance structure, and rights framework",
+  "keyProvisions": [{"article": "article/section number", "title": "provision title", "description": "what it establishes", "category": "governance|rights|judiciary|legislature|executive|amendment|territory|citizenship"}],
+  "fundamentalRights": [{"right": "right name", "article": "article number", "description": "scope and limitations", "derogable": true/false}],
+  "governanceStructure": {"headOfState": "title", "legislature": "type (unicameral/bicameral)", "judiciary": "structure", "localGovernment": "structure", "electoralSystem": "description"},
+  "amendmentProcess": "description of how the constitution can be amended",
+  "keyPrinciples": ["principle 1", "principle 2"],
+  "humanRightsFramework": "description of the rights framework",
+  "independentBodies": [{"name": "body name", "role": "function", "article": "reference"}]
+}`
+        },
+        { role: 'user', content: textContent.substring(0, 50000) }
+      ], 0.1);
+
+      const parsed = parseJSON(content) || { summary: content };
+
+      await supabase.from('country_constitutions').update({
+        summary: parsed.summary,
+        ai_summary: parsed,
+        key_provisions: parsed.keyProvisions || null,
+        fundamental_rights: parsed.fundamentalRights || null,
+        governance_structure: parsed.governanceStructure || null,
+        processing_status: 'completed',
+        updated_at: new Date().toISOString(),
+      }).eq('id', constitutionId);
+
+      await logAudit(supabase, userId, 'constitution_processed', 'country_constitution', constitutionId, {
+        processingTime: Date.now() - startTime, country: constitution.country_name,
+      });
+
+      return new Response(JSON.stringify({ success: true, summary: parsed }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     throw new Error(`Unknown action: ${action}`);
   } catch (error) {
     console.error('NuruAI error:', error);
