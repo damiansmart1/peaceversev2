@@ -10,8 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { 
   Brain, FileText, MessageSquareText, Shield, Database, 
   Loader2, Activity, CheckCircle, Clock, Trash2, Eye, 
-  AlertTriangle, Building2, ChevronRight
+  AlertTriangle, Building2, ChevronRight, Coins
 } from 'lucide-react';
+import AdminTokenLimitsManager from './AdminTokenLimitsManager';
 import { 
   useCivicDocuments, useAllCivicQuestions, useNuruAuditLog, useSeedNuruDemo,
   useDeleteDocument, useUpdateDocumentStatus, useDocumentQuestions
@@ -73,6 +74,7 @@ const AdminNuruAIManager = () => {
         <TabsList>
           <TabsTrigger value="documents" className="gap-2"><FileText className="h-4 w-4" />Documents</TabsTrigger>
           <TabsTrigger value="questions" className="gap-2"><MessageSquareText className="h-4 w-4" />Questions</TabsTrigger>
+          <TabsTrigger value="token-limits" className="gap-2"><Coins className="h-4 w-4" />Token Limits</TabsTrigger>
           <TabsTrigger value="audit" className="gap-2"><Shield className="h-4 w-4" />Audit Trail</TabsTrigger>
         </TabsList>
 
@@ -182,6 +184,10 @@ const AdminNuruAIManager = () => {
               </div>
             )}
           </div>
+        </TabsContent>
+
+        <TabsContent value="token-limits">
+          <AdminTokenLimitsManager />
         </TabsContent>
 
         <TabsContent value="audit" className="space-y-4">

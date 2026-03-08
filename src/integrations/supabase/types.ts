@@ -3857,6 +3857,78 @@ export type Database = {
           },
         ]
       }
+      nuru_token_limits: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          daily_token_limit: number
+          id: string
+          is_active: boolean
+          max_tokens_per_request: number
+          monthly_token_limit: number
+          name: string
+          scope: string
+          target_role: string | null
+          target_user_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          daily_token_limit?: number
+          id?: string
+          is_active?: boolean
+          max_tokens_per_request?: number
+          monthly_token_limit?: number
+          name: string
+          scope?: string
+          target_role?: string | null
+          target_user_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          daily_token_limit?: number
+          id?: string
+          is_active?: boolean
+          max_tokens_per_request?: number
+          monthly_token_limit?: number
+          name?: string
+          scope?: string
+          target_role?: string | null
+          target_user_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      nuru_token_usage: {
+        Row: {
+          conversation_id: string | null
+          created_at: string
+          id: string
+          request_type: string
+          tokens_used: number
+          user_id: string
+        }
+        Insert: {
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          request_type?: string
+          tokens_used?: number
+          user_id: string
+        }
+        Update: {
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          request_type?: string
+          tokens_used?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       observation_checklists: {
         Row: {
           checklist_data: Json
