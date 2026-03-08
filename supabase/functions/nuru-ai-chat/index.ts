@@ -168,6 +168,9 @@ ${constitution.text}
       const doc = conv.civic_documents;
       const documentContext = doc ? (doc.original_text || doc.summary || doc.description || '') : '';
 
+      // Fetch constitution for cross-referencing
+      const constitution = await fetchConstitution(supabase, doc?.country || null);
+
       const { data: history } = await supabase
         .from('nuru_messages')
         .select('role, content')
@@ -184,7 +187,7 @@ ${constitution.text}
         content: userQuestion,
       });
 
-      const systemPrompt = buildChatSystemPrompt(doc, documentContext);
+      const systemPrompt = buildChatSystemPrompt(doc, documentContext, constitution);
 
       const aiMessages = [
         { role: 'system', content: systemPrompt },
