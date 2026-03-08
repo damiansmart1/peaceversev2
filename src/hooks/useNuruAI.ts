@@ -124,7 +124,7 @@ export function useCivicDocument(id: string) {
 export function useUploadDocument() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (doc: { title: string; description: string; document_type: string; original_text: string; country?: string }) => {
+    mutationFn: async (doc: { title: string; description: string; document_type: string; original_text: string; country?: string; region?: string; source_url?: string; publish_date?: string; language?: string; topics?: string[]; institutions?: string[] }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Must be logged in');
       const { data, error } = await sb.from('civic_documents').insert({
@@ -148,7 +148,7 @@ export function useUploadDocument() {
 export function useUploadDocumentFile() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ file, title, description, documentType, country }: { file: File; title: string; description: string; documentType: string; country?: string }) => {
+    mutationFn: async ({ file, title, description, documentType, country, region, source_url, publish_date, language, topics, institutions }: { file: File; title: string; description: string; documentType: string; country?: string; region?: string; source_url?: string; publish_date?: string; language?: string; topics?: string[]; institutions?: string[] }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Must be logged in');
 
@@ -161,6 +161,13 @@ export function useUploadDocumentFile() {
         processing_status: 'uploading',
         file_type: file.type,
         file_size_bytes: file.size,
+        country: country || null,
+        region: region || null,
+        source_url: source_url || null,
+        publish_date: publish_date || null,
+        language: language || null,
+        topics: topics?.length ? topics : null,
+        institutions: institutions?.length ? institutions : null,
       }).select().single();
       if (docError) throw docError;
 
