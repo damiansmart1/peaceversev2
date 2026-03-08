@@ -529,11 +529,10 @@ const NuruQuestionInterface = () => {
             animate={{ width: 300, opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="border-r border-border/20 bg-gradient-to-b from-card/80 to-card/40 backdrop-blur-md flex flex-col overflow-hidden"
-          >
+            className="border-r border-primary/10 bg-gradient-to-b from-card/90 via-card/60 to-primary/[0.03] backdrop-blur-md flex flex-col overflow-hidden"
             {/* New Chat Button */}
             <div className="p-3 border-b border-border/20">
-              <Button onClick={handleStartChat} disabled={createConversation.isPending || !user} className="w-full gap-2 rounded-xl h-10 text-xs shadow-sm hover:shadow-md transition-shadow" size="sm">
+              <Button onClick={handleStartChat} disabled={createConversation.isPending || !user} className="w-full gap-2 rounded-xl h-10 text-xs shadow-md hover:shadow-lg transition-all bg-gradient-to-r from-primary to-primary-dark hover:from-primary/90 hover:to-primary-dark/90" size="sm">
                 {createConversation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
                 New conversation
               </Button>
@@ -652,7 +651,7 @@ const NuruQuestionInterface = () => {
       {/* ===== MAIN CHAT AREA ===== */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header */}
-        <div className="h-13 border-b border-border/20 flex items-center justify-between px-4 bg-gradient-to-r from-card/50 to-card/30 backdrop-blur-sm">
+        <div className="h-13 border-b border-primary/10 flex items-center justify-between px-4 bg-gradient-to-r from-primary/[0.04] via-card/50 to-secondary/[0.04] backdrop-blur-sm">
           <div className="flex items-center gap-2 min-w-0">
             <Tooltip>
               <TooltipTrigger asChild>
@@ -663,7 +662,7 @@ const NuruQuestionInterface = () => {
               <TooltipContent side="bottom" className="text-xs">{leftSidebarOpen ? 'Close sidebar' : 'Open sidebar'}</TooltipContent>
             </Tooltip>
             <div className="min-w-0">
-              <p className="text-sm font-semibold truncate">
+              <p className="text-sm font-semibold truncate bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
                 {activeConv?.title || 'NuruAI Civic Chat'}
               </p>
               {activeConversationId && (
@@ -677,8 +676,8 @@ const NuruQuestionInterface = () => {
                 <FileText className="h-2.5 w-2.5 shrink-0" />{selectedDoc.title}
               </Badge>
             )}
-            <Badge variant="secondary" className="text-[9px] gap-1 font-normal hidden sm:flex">
-              <Sparkles className="h-2.5 w-2.5" />
+            <Badge className="text-[9px] gap-1 font-normal hidden sm:flex bg-gradient-to-r from-primary/10 to-primary/5 text-primary border-primary/20">
+              <Sparkles className="h-2.5 w-2.5 text-gold" />
               {MODELS.find(m => m.value === settings.model)?.label || 'Gemini Pro'}
             </Badge>
             {activeConversationId && (
@@ -743,9 +742,9 @@ const NuruQuestionInterface = () => {
               <div className="space-y-1">
                 {/* Quick Actions Bar (when document is attached) */}
                 {hasDocContext && chatMessages && chatMessages.length === 0 && (
-                  <div className="mb-6 p-4 rounded-xl border border-border/30 bg-muted/5">
-                    <p className="text-xs font-medium text-muted-foreground mb-3 flex items-center gap-1.5">
-                      <Zap className="h-3.5 w-3.5 text-primary" /> Quick Actions
+                  <div className="mb-6 p-4 rounded-xl border border-primary/15 bg-gradient-to-r from-primary/[0.04] to-secondary/[0.03]">
+                    <p className="text-xs font-medium text-foreground/70 mb-3 flex items-center gap-1.5">
+                      <Zap className="h-3.5 w-3.5 text-gold" /> Quick Actions
                     </p>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                       {QUICK_ACTIONS.map(action => (
@@ -753,9 +752,9 @@ const NuruQuestionInterface = () => {
                           key={action.id}
                           onClick={() => handleQuickAction(action)}
                           disabled={isStreaming}
-                          className="flex flex-col items-center gap-1.5 p-3 rounded-lg border border-border/20 hover:border-primary/30 hover:bg-primary/5 transition-all text-center group disabled:opacity-40"
+                          className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-primary/10 hover:border-primary/30 bg-card/40 hover:bg-gradient-to-br hover:from-primary/10 hover:to-transparent transition-all text-center group disabled:opacity-40 shadow-sm hover:shadow-md"
                         >
-                          <action.icon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                          <action.icon className="h-4 w-4 text-primary/60 group-hover:text-primary transition-colors" />
                           <span className="text-[11px] font-medium text-muted-foreground group-hover:text-foreground">{action.label}</span>
                         </button>
                       ))}
@@ -794,7 +793,7 @@ const NuruQuestionInterface = () => {
                 {isStreaming && streamingContent && (
                   <div className={`flex gap-3 ${settings.compactMode ? 'py-2' : 'py-4'}`}>
                     <div className="shrink-0 mt-1">
-                      <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/15 flex items-center justify-center">
+                      <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary/30 to-gold/10 border border-primary/20 flex items-center justify-center animate-pulse shadow-sm shadow-primary/20">
                         <Bot className="h-3.5 w-3.5 text-primary" />
                       </div>
                     </div>
@@ -961,7 +960,7 @@ const NuruQuestionInterface = () => {
                   }}
                   disabled={!question.trim() || !user}
                   size="icon"
-                  className="shrink-0 h-8 w-8 rounded-lg"
+                  className="shrink-0 h-8 w-8 rounded-xl bg-gradient-to-br from-primary to-primary-dark hover:from-primary/90 hover:to-primary-dark/90 shadow-md shadow-primary/20 disabled:shadow-none transition-all"
                 >
                   <Send className="h-3.5 w-3.5" />
                 </Button>
@@ -1209,10 +1208,10 @@ const ConversationItem = ({
     <div className="group relative">
       <button
         onClick={onSelect}
-        className={`w-full text-left px-3 py-2 rounded-lg text-xs transition-all pr-8 ${
+        className={`w-full text-left px-3 py-2 rounded-xl text-xs transition-all pr-8 ${
           isActive
-            ? 'bg-primary/10 text-primary border border-primary/20'
-            : 'hover:bg-muted/40 text-muted-foreground hover:text-foreground border border-transparent'
+            ? 'bg-gradient-to-r from-primary/15 to-primary/5 text-primary border border-primary/25 shadow-sm shadow-primary/10'
+            : 'hover:bg-primary/[0.04] text-muted-foreground hover:text-foreground border border-transparent'
         }`}
       >
         <div className="flex items-center gap-1.5">
@@ -1301,18 +1300,20 @@ const ChatMessage = ({ msg, onCopy, copiedId, compact, showTimestamps, showConfi
       initial={{ opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2 }}
-      className={`flex gap-3.5 ${compact ? 'py-2.5' : 'py-5'} ${isUser ? '' : 'bg-muted/[0.03] -mx-4 px-4 rounded-xl border border-border/[0.06]'}`}
+      className={`flex gap-3.5 ${compact ? 'py-2.5' : 'py-5'} ${isUser ? '' : 'bg-gradient-to-r from-primary/[0.03] via-transparent to-secondary/[0.02] -mx-4 px-4 rounded-xl border border-primary/[0.08]'}`}
     >
       <div className="shrink-0 mt-1">
         <div className={`w-8 h-8 rounded-xl flex items-center justify-center shadow-sm ${
-          isUser ? 'bg-primary/10 border border-primary/15' : 'bg-gradient-to-br from-primary/20 to-secondary/10 border border-primary/15'
+          isUser 
+            ? 'bg-gradient-to-br from-secondary/20 to-secondary/5 border border-secondary/20' 
+            : 'bg-gradient-to-br from-primary/25 to-gold/10 border border-primary/20 shadow-primary/10'
         }`}>
-          {isUser ? <User className="h-3.5 w-3.5 text-primary" /> : <Bot className="h-3.5 w-3.5 text-primary" />}
+          {isUser ? <User className="h-3.5 w-3.5 text-secondary-foreground" /> : <Bot className="h-3.5 w-3.5 text-primary" />}
         </div>
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
-          <span className="text-[11px] font-medium text-foreground/70">{isUser ? 'You' : 'NuruAI'}</span>
+          <span className={`text-[11px] font-semibold ${isUser ? 'text-foreground/70' : 'text-primary'}`}>{isUser ? 'You' : 'NuruAI'}</span>
           {showTimestamps && <span className="text-[10px] text-muted-foreground/40">{format(new Date(msg.created_at), 'HH:mm')}</span>}
           {msg.processing_time_ms && showTimestamps && (
             <span className="text-[10px] text-muted-foreground/30">{(msg.processing_time_ms / 1000).toFixed(1)}s</span>
@@ -1352,7 +1353,7 @@ const ChatMessage = ({ msg, onCopy, copiedId, compact, showTimestamps, showConfi
             )}
           </div>
         ) : markdownEnabled ? (
-          <div className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed [&>*:first-child]:mt-0 [&_h2]:text-base [&_h3]:text-sm [&_p]:text-sm [&_li]:text-sm [&_blockquote]:border-primary/30 [&_blockquote]:bg-primary/5 [&_blockquote]:rounded-r-lg [&_blockquote]:py-1">
+          <div className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed [&>*:first-child]:mt-0 [&_h2]:text-base [&_h2]:text-primary/80 [&_h3]:text-sm [&_h3]:text-foreground/80 [&_p]:text-sm [&_li]:text-sm [&_blockquote]:border-l-primary/40 [&_blockquote]:bg-primary/[0.04] [&_blockquote]:rounded-r-lg [&_blockquote]:py-1 [&_code]:bg-primary/10 [&_code]:text-primary [&_code]:rounded [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:text-xs [&_strong]:text-foreground">
             <ReactMarkdown>{renderContent}</ReactMarkdown>
           </div>
         ) : (
@@ -1361,7 +1362,7 @@ const ChatMessage = ({ msg, onCopy, copiedId, compact, showTimestamps, showConfi
 
         {/* Action bar for AI messages */}
         {!isUser && (
-          <div className="flex flex-wrap items-center gap-1 mt-3 pt-2 border-t border-border/20">
+          <div className="flex flex-wrap items-center gap-1 mt-3 pt-2 border-t border-primary/10">
             <button
               onClick={() => onCopy(msg.content, msg.id)}
               className="flex items-center gap-1 text-[10px] text-muted-foreground/50 hover:text-muted-foreground transition-colors px-2 py-1 rounded-md hover:bg-muted/30"
@@ -1418,7 +1419,7 @@ const ChatMessage = ({ msg, onCopy, copiedId, compact, showTimestamps, showConfi
                 <button
                   key={i}
                   onClick={() => onFollowUpClick?.(q)}
-                  className="group text-left text-[11px] px-3 py-1.5 rounded-lg border border-border/30 bg-background/60 hover:border-primary/30 hover:bg-primary/5 text-muted-foreground hover:text-foreground transition-all flex items-center gap-1.5 max-w-full"
+                  className="group text-left text-[11px] px-3 py-1.5 rounded-xl border border-primary/15 bg-gradient-to-r from-primary/[0.04] to-transparent hover:border-primary/30 hover:from-primary/10 text-muted-foreground hover:text-foreground transition-all flex items-center gap-1.5 max-w-full shadow-sm hover:shadow-md"
                 >
                   <ArrowRight className="h-3 w-3 text-primary/40 group-hover:text-primary shrink-0 transition-colors" />
                   <span className="truncate">{q}</span>
@@ -1448,10 +1449,11 @@ const WelcomeScreen = ({ setQuestion, user, onNewChat, documents, selectedDocId,
         transition={{ duration: 0.5, ease: 'easeOut' }}
         className="relative mb-8"
       >
-        <div className="absolute inset-0 bg-primary/10 blur-3xl rounded-full scale-[2]" />
-        <div className="absolute inset-0 bg-gold/5 blur-2xl rounded-full scale-150 animate-pulse" />
-        <div className="relative p-5 rounded-3xl bg-gradient-to-br from-primary/20 via-primary/10 to-transparent border border-primary/15 shadow-xl shadow-primary/10">
-          <Brain className="h-10 w-10 text-primary" />
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/15 to-gold/10 blur-3xl rounded-full scale-[2.5]" />
+        <div className="absolute inset-0 bg-gold/10 blur-2xl rounded-full scale-150 animate-pulse" />
+        <div className="relative p-6 rounded-3xl bg-gradient-to-br from-primary/25 via-primary/15 to-gold/10 border border-primary/20 shadow-2xl shadow-primary/15">
+          <Brain className="h-12 w-12 text-primary drop-shadow-lg" />
+          <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-gradient-to-br from-gold to-gold/60 border-2 border-card animate-pulse shadow-md shadow-gold/30" />
         </div>
       </motion.div>
       
@@ -1460,7 +1462,7 @@ const WelcomeScreen = ({ setQuestion, user, onNewChat, documents, selectedDocId,
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.15, duration: 0.4 }}
       >
-        <h2 className="text-2xl font-bold text-foreground mb-2 tracking-tight">NuruAI Civic Intelligence</h2>
+        <h2 className="text-2xl font-bold bg-gradient-to-r from-primary via-foreground to-primary bg-clip-text text-transparent mb-2 tracking-tight">NuruAI Civic Intelligence</h2>
         <p className="text-sm text-muted-foreground max-w-md mb-1.5 leading-relaxed">
           Ask questions about African policy documents. Get evidence-grounded answers with source citations.
         </p>
@@ -1486,9 +1488,11 @@ const WelcomeScreen = ({ setQuestion, user, onNewChat, documents, selectedDocId,
               <button
                 key={action.id}
                 onClick={() => onQuickAction?.(action)}
-                className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border/20 hover:border-primary/30 hover:bg-primary/5 hover:shadow-md hover:shadow-primary/5 transition-all text-center group"
+                className="flex flex-col items-center gap-2 p-4 rounded-xl border border-primary/15 hover:border-primary/30 bg-gradient-to-br from-card/60 to-primary/[0.03] hover:from-primary/10 hover:to-primary/[0.05] hover:shadow-lg hover:shadow-primary/10 transition-all text-center group"
               >
-                <action.icon className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                  <action.icon className="h-5 w-5 text-primary/70 group-hover:text-primary transition-colors" />
+                </div>
                 <span className="text-[11px] font-medium text-muted-foreground group-hover:text-foreground">{action.label}</span>
               </button>
             ))}
@@ -1520,9 +1524,9 @@ const WelcomeScreen = ({ setQuestion, user, onNewChat, documents, selectedDocId,
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.35 + i * 0.05 }}
             onClick={() => setQuestion(item.q)}
-            className="text-left p-4 rounded-xl border border-border/25 hover:border-primary/30 hover:bg-primary/5 hover:shadow-lg hover:shadow-primary/5 transition-all text-xs group backdrop-blur-sm"
+            className="text-left p-4 rounded-xl border border-primary/10 hover:border-primary/25 bg-gradient-to-br from-card/50 to-primary/[0.02] hover:from-primary/[0.06] hover:to-primary/[0.02] hover:shadow-lg hover:shadow-primary/10 transition-all text-xs group backdrop-blur-sm"
           >
-            <span className="text-base mb-1 block">{item.icon}</span>
+            <span className="text-base mb-2 block">{item.icon}</span>
             <span className="text-muted-foreground group-hover:text-foreground transition-colors leading-relaxed">{item.q}</span>
           </motion.button>
         ))}
@@ -1552,16 +1556,16 @@ const WelcomeScreen = ({ setQuestion, user, onNewChat, documents, selectedDocId,
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.55 }}
-        className="mt-10 flex flex-wrap justify-center gap-4 text-[10px] text-muted-foreground/35"
+        className="mt-10 flex flex-wrap justify-center gap-4 text-[10px] text-muted-foreground/40"
       >
-        <span className="flex items-center gap-1.5"><Paperclip className="h-3 w-3" /> Attach files</span>
-        <span className="flex items-center gap-1.5"><Mic className="h-3 w-3" /> Voice input</span>
-        <span className="flex items-center gap-1.5"><Share2 className="h-3 w-3" /> Share chats</span>
-        <span className="flex items-center gap-1.5"><Keyboard className="h-3 w-3" /> Shortcuts</span>
+        <span className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-border/20 bg-card/30"><Paperclip className="h-3 w-3 text-primary/40" /> Attach files</span>
+        <span className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-border/20 bg-card/30"><Mic className="h-3 w-3 text-primary/40" /> Voice input</span>
+        <span className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-border/20 bg-card/30"><Share2 className="h-3 w-3 text-primary/40" /> Share chats</span>
+        <span className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-border/20 bg-card/30"><Keyboard className="h-3 w-3 text-primary/40" /> Shortcuts</span>
       </motion.div>
 
       {!user && (
-        <p className="text-xs text-muted-foreground mt-8 flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border/20 bg-muted/10">
+        <p className="text-xs text-muted-foreground mt-8 flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-primary/15 bg-gradient-to-r from-primary/5 to-transparent shadow-sm">
           <AlertCircle className="h-3.5 w-3.5 text-primary" />Sign in to start a conversation
         </p>
       )}
