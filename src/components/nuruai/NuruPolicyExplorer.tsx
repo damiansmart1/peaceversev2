@@ -43,15 +43,26 @@ const NuruPolicyExplorer = () => {
 
   const sections: PolicySection[] = useMemo(() => {
     if (!selectedDoc) return [];
-    if (selectedDoc.parsed_sections && Array.isArray(selectedDoc.parsed_sections)) {
-      return (selectedDoc.parsed_sections as any[]).map((s: any) => ({
-        title: s.title || s.heading || 'Section',
-        content: s.content || s.text || '',
-      }));
+    if (selectedDoc.parsed_sections && Array.isArray(selectedDoc.parsed_sections) && selectedDoc.parsed_sections.length > 0) {
+      const mapped = (selectedDoc.parsed_sections as any[])
+        .filter((s: any) => (s.content || s.text) && (s.content || s.text).length > 20)
+        .map((s: any) => ({
+          title: s.title || s.heading || 'Section',
+          content: s.content || s.text || '',
+        }));
+      if (mapped.length > 0) return mapped;
     }
     if (selectedDoc.original_text) {
-      return selectedDoc.original_text.split(/\n\n+/).filter((p: string) => p.trim().length > 50)
-        .slice(0, 30).map((p: string, i: number) => ({ title: `Section ${i + 1}`, content: p.trim() }));
+      const paragraphs = selectedDoc.original_text.split(/\n\n+/).filter((p: string) => p.trim().length > 50);
+      return paragraphs.slice(0, 40).map((p: string, i: number) => {
+        const lines = p.trim().split('\n');
+        const firstLine = lines[0].trim();
+        const isHeading = firstLine.length < 100 && (firstLine === firstLine.toUpperCase() || /^(PART|CHAPTER|SECTION|ARTICLE|SCHEDULE|\d+\.)/i.test(firstLine));
+        return {
+          title: isHeading ? firstLine : `Section ${i + 1}`,
+          content: isHeading && lines.length > 1 ? lines.slice(1).join('\n').trim() : p.trim(),
+        };
+      });
     }
     if (selectedDoc.summary) return [{ title: 'Document Summary', content: selectedDoc.summary }];
     return [{ title: 'Document Overview', content: 'This document has not yet been fully processed.' }];
