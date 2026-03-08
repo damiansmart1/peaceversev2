@@ -594,3 +594,51 @@ export function useAllCivicQuestions() {
     },
   });
 }
+
+// ========== Admin Document Management ==========
+
+export function useDeleteDocument() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (documentId: string) => {
+      const { error } = await sb.from('civic_documents').delete().eq('id', documentId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['civic-documents'] });
+      qc.invalidateQueries({ queryKey: ['civic-questions'] });
+      toast.success('Document deleted');
+    },
+    onError: (e: any) => toast.error(e.message || 'Delete failed'),
+  });
+}
+
+export function useUpdateDocumentStatus() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ documentId, status }: { documentId: string; status: string }) => {
+      const { error } = await sb.from('civic_documents').update({ status }).eq('id', documentId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['civic-documents'] });
+      toast.success('Document status updated');
+    },
+    onError: (e: any) => toast.error(e.message || 'Update failed'),
+  });
+}
+
+export function useDocumentQuestions(documentId: string) {
+  return useQuery({
+    queryKey: ['document-questions', documentId],
+    queryFn: async () => {
+      const { data, error } = await sb.from('civic_questions')
+        .select('*, institutional_responses:institutional_responses(id, institution_name, response_text, status, created_at)')
+        .eq('document_id', documentId)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!documentId,
+  });
+}

@@ -29,7 +29,7 @@ const NuruClaimReview = () => {
 
   const handleReview = () => {
     if (!claimText.trim()) return;
-    reviewClaim.mutate({ claimText, documentId: selectedDocId || undefined }, { onSuccess: (data) => setResult(data) });
+    reviewClaim.mutate({ claimText, documentId: (selectedDocId && selectedDocId !== 'none') ? selectedDocId : undefined }, { onSuccess: (data) => setResult(data) });
   };
 
   const statusInfo = result ? statusConfig[result.status] || statusConfig.needs_context : null;
@@ -89,7 +89,7 @@ const NuruClaimReview = () => {
                   <SelectValue placeholder="Reference document (optional)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No specific document</SelectItem>
+                  <SelectItem value="none">No specific document</SelectItem>
                   {documents?.map(d => <SelectItem key={d.id} value={d.id}>{d.title}</SelectItem>)}
                 </SelectContent>
               </Select>
