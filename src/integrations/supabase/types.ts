@@ -1932,6 +1932,81 @@ export type Database = {
           },
         ]
       }
+      country_constitutions: {
+        Row: {
+          ai_summary: Json | null
+          amendment_date: string | null
+          constitution_title: string
+          country_code: string | null
+          country_name: string
+          created_at: string | null
+          effective_date: string | null
+          file_size_bytes: number | null
+          file_type: string | null
+          file_url: string | null
+          fundamental_rights: Json | null
+          governance_structure: Json | null
+          id: string
+          is_active: boolean | null
+          key_provisions: Json | null
+          language: string | null
+          original_text: string
+          processing_status: string | null
+          source_url: string | null
+          summary: string | null
+          updated_at: string | null
+          uploaded_by: string | null
+        }
+        Insert: {
+          ai_summary?: Json | null
+          amendment_date?: string | null
+          constitution_title: string
+          country_code?: string | null
+          country_name: string
+          created_at?: string | null
+          effective_date?: string | null
+          file_size_bytes?: number | null
+          file_type?: string | null
+          file_url?: string | null
+          fundamental_rights?: Json | null
+          governance_structure?: Json | null
+          id?: string
+          is_active?: boolean | null
+          key_provisions?: Json | null
+          language?: string | null
+          original_text: string
+          processing_status?: string | null
+          source_url?: string | null
+          summary?: string | null
+          updated_at?: string | null
+          uploaded_by?: string | null
+        }
+        Update: {
+          ai_summary?: Json | null
+          amendment_date?: string | null
+          constitution_title?: string
+          country_code?: string | null
+          country_name?: string
+          created_at?: string | null
+          effective_date?: string | null
+          file_size_bytes?: number | null
+          file_type?: string | null
+          file_url?: string | null
+          fundamental_rights?: Json | null
+          governance_structure?: Json | null
+          id?: string
+          is_active?: boolean | null
+          key_provisions?: Json | null
+          language?: string | null
+          original_text?: string
+          processing_status?: string | null
+          source_url?: string | null
+          summary?: string | null
+          updated_at?: string | null
+          uploaded_by?: string | null
+        }
+        Relationships: []
+      }
       creator_earnings: {
         Row: {
           amount: number

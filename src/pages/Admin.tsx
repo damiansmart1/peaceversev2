@@ -25,6 +25,7 @@ import { AdminRoleFeatureManager } from '@/components/admin/AdminRoleFeatureMana
 import AdminCMSManager from '@/components/admin/AdminCMSManager';
 import AdminElectionsManager from '@/components/admin/AdminElectionsManager';
 import AdminNuruAIManager from '@/components/admin/AdminNuruAIManager';
+import AdminConstitutionsManager from '@/components/admin/AdminConstitutionsManager';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { Loader2, Shield } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -86,6 +87,7 @@ const Admin = () => {
       case 'peace-metrics': return <AdminPeaceMetricsManager />;
       case 'elections': return <AdminElectionsManager />;
       case 'nuru-ai': return <AdminNuruAIManager />;
+      case 'constitutions': return <AdminConstitutionsManager />;
       case 'settings': return <AdminSettingsManager />;
       default: return <AdminDashboard />;
     }

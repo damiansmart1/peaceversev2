@@ -85,7 +85,52 @@ async function logAudit(supabase: any, userId: string | null, action: string, en
   }
 }
 
-serve(async (req) => {
+// Fetch constitution for a country (for cross-referencing)
+async function fetchConstitution(supabase: any, countryName: string | null): Promise<{ text: string; title: string; country: string } | null> {
+  if (!countryName) return null;
+  try {
+    const { data } = await supabase
+      .from('country_constitutions')
+      .select('original_text, constitution_title, country_name, ai_summary, key_provisions, fundamental_rights')
+      .eq('country_name', countryName)
+      .eq('is_active', true)
+      .single();
+    if (!data) return null;
+    // Build a concise constitutional reference (key provisions + rights first, then full text truncated)
+    let constitutionContext = '';
+    if (data.ai_summary?.summary) constitutionContext += `CONSTITUTIONAL SUMMARY:\n${data.ai_summary.summary}\n\n`;
+    if (data.key_provisions) constitutionContext += `KEY PROVISIONS:\n${JSON.stringify(data.key_provisions)}\n\n`;
+    if (data.fundamental_rights) constitutionContext += `FUNDAMENTAL RIGHTS:\n${JSON.stringify(data.fundamental_rights)}\n\n`;
+    constitutionContext += `FULL CONSTITUTIONAL TEXT:\n${(data.original_text || '').substring(0, 15000)}`;
+    return { text: constitutionContext, title: data.constitution_title, country: data.country_name };
+  } catch (e) {
+    console.error('Error fetching constitution:', e);
+    return null;
+  }
+}
+
+function buildConstitutionalInstructions(constitution: { text: string; title: string; country: string } | null): string {
+  if (!constitution) return '';
+  return `
+
+## 🏛️ CONSTITUTIONAL CROSS-REFERENCE
+You have access to the **${constitution.title}** (${constitution.country}). You MUST use it to:
+1. **Verify constitutional compliance**: Check if document provisions align with or violate constitutional guarantees
+2. **Flag constitutional conflicts**: Identify any policy that contradicts fundamental rights, governance structures, or constitutional principles
+3. **Cite constitutional authority**: When relevant, quote specific constitutional articles/sections that apply
+4. **Sovereignty check**: Ensure proposals respect constitutional sovereignty and territorial integrity
+5. **Rights assessment**: Cross-reference any citizen impact against constitutionally guaranteed rights
+
+In your response, include a **Constitutional Alignment** section when applicable:
+- ✅ Aligned: provisions consistent with constitutional framework
+- ⚠️ Concern: potential tension with constitutional principles
+- ❌ Conflict: direct contradiction of constitutional provisions
+
+**CONSTITUTIONAL REFERENCE:**
+${constitution.text}
+`;
+}
+
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -123,6 +168,9 @@ serve(async (req) => {
       const doc = conv.civic_documents;
       const documentContext = doc ? (doc.original_text || doc.summary || doc.description || '') : '';
 
+      // Fetch constitution for cross-referencing
+      const constitution = await fetchConstitution(supabase, doc?.country || null);
+
       const { data: history } = await supabase
         .from('nuru_messages')
         .select('role, content')
@@ -139,7 +187,7 @@ serve(async (req) => {
         content: userQuestion,
       });
 
-      const systemPrompt = buildChatSystemPrompt(doc, documentContext);
+      const systemPrompt = buildChatSystemPrompt(doc, documentContext, constitution);
 
       const aiMessages = [
         { role: 'system', content: systemPrompt },
@@ -214,13 +262,17 @@ serve(async (req) => {
       const textToSummarize = doc.original_text || doc.description || '';
       if (!textToSummarize) throw new Error('No text content to summarize');
 
+      // Fetch constitution for cross-referencing
+      const constitution = await fetchConstitution(supabase, doc.country || null);
+      const constitutionalContext = buildConstitutionalInstructions(constitution);
+
       await supabase.from('civic_documents').update({ processing_status: 'processing' }).eq('id', documentId);
 
       const content = await callAI(LOVABLE_API_KEY, [
         {
           role: 'system',
           content: `You are NuruAI, a world-class civic intelligence analyst and policy decoder. You operate as critical public infrastructure for democratic participation across Africa.
-
+${constitutionalContext}
 Your task: Perform an exhaustive, multi-dimensional analysis of the provided policy document using the following rigorous methodology. Every claim must be traceable to the source text.
 
 ## ANALYSIS FRAMEWORK
@@ -368,6 +420,9 @@ Format response as JSON:
       const doc = conv.civic_documents;
       const documentContext = doc ? (doc.original_text || doc.summary || doc.description || '') : '';
 
+      // Fetch constitution for cross-referencing
+      const constitution = await fetchConstitution(supabase, doc?.country || null);
+
       const { data: history } = await supabase
         .from('nuru_messages')
         .select('role, content')
@@ -376,7 +431,7 @@ Format response as JSON:
         .limit(30);
 
       const userQuestion = chatMessages?.[chatMessages.length - 1]?.content || '';
-      const systemPrompt = buildChatSystemPrompt(doc, documentContext);
+      const systemPrompt = buildChatSystemPrompt(doc, documentContext, constitution);
 
       const aiMessages = [
         { role: 'system', content: systemPrompt },
@@ -437,11 +492,15 @@ Format response as JSON:
       if (!doc) throw new Error('Document not found');
       const documentContext = doc.original_text || doc.summary || doc.description || '';
 
+      // Fetch constitution for cross-referencing
+      const constitution = await fetchConstitution(supabase, doc.country || null);
+      const constitutionalContext = buildConstitutionalInstructions(constitution);
+
       const content = await callAI(LOVABLE_API_KEY, [
         {
           role: 'system',
           content: `You are NuruAI, a world-class civic intelligence analyst. Answer the citizen's question using ONLY the provided document content. You must be thorough, evidence-based, and strategic.
-
+${constitutionalContext}
 ## RESPONSE METHODOLOGY
 
 1. **Direct Answer**: Address the question comprehensively with structured analysis
@@ -633,6 +692,68 @@ Respond in markdown format with these sections:
       });
     }
 
+    // ===== ACTION: PROCESS CONSTITUTION =====
+    if (action === 'process_constitution') {
+      const { constitutionId } = body;
+      if (!constitutionId) throw new Error('Constitution ID required');
+
+      const { data: constitution, error } = await supabase
+        .from('country_constitutions')
+        .select('*')
+        .eq('id', constitutionId)
+        .single();
+
+      if (error || !constitution) throw new Error('Constitution not found');
+
+      await supabase.from('country_constitutions').update({ processing_status: 'processing' }).eq('id', constitutionId);
+
+      const textContent = constitution.original_text || '';
+      if (!textContent || textContent.length < 100) {
+        await supabase.from('country_constitutions').update({ processing_status: 'failed' }).eq('id', constitutionId);
+        throw new Error('Constitution text too short for analysis');
+      }
+
+      const content = await callAI(LOVABLE_API_KEY, [
+        {
+          role: 'system',
+          content: `You are a constitutional law analyst. Analyze this national constitution and extract structured information.
+
+Respond as JSON:
+{
+  "summary": "Comprehensive 3-4 paragraph summary of the constitution's key features, governance structure, and rights framework",
+  "keyProvisions": [{"article": "article/section number", "title": "provision title", "description": "what it establishes", "category": "governance|rights|judiciary|legislature|executive|amendment|territory|citizenship"}],
+  "fundamentalRights": [{"right": "right name", "article": "article number", "description": "scope and limitations", "derogable": true/false}],
+  "governanceStructure": {"headOfState": "title", "legislature": "type (unicameral/bicameral)", "judiciary": "structure", "localGovernment": "structure", "electoralSystem": "description"},
+  "amendmentProcess": "description of how the constitution can be amended",
+  "keyPrinciples": ["principle 1", "principle 2"],
+  "humanRightsFramework": "description of the rights framework",
+  "independentBodies": [{"name": "body name", "role": "function", "article": "reference"}]
+}`
+        },
+        { role: 'user', content: textContent.substring(0, 50000) }
+      ], 0.1);
+
+      const parsed = parseJSON(content) || { summary: content };
+
+      await supabase.from('country_constitutions').update({
+        summary: parsed.summary,
+        ai_summary: parsed,
+        key_provisions: parsed.keyProvisions || null,
+        fundamental_rights: parsed.fundamentalRights || null,
+        governance_structure: parsed.governanceStructure || null,
+        processing_status: 'completed',
+        updated_at: new Date().toISOString(),
+      }).eq('id', constitutionId);
+
+      await logAudit(supabase, userId, 'constitution_processed', 'country_constitution', constitutionId, {
+        processingTime: Date.now() - startTime, country: constitution.country_name,
+      });
+
+      return new Response(JSON.stringify({ success: true, summary: parsed }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     throw new Error(`Unknown action: ${action}`);
   } catch (error) {
     console.error('NuruAI error:', error);
@@ -643,9 +764,11 @@ Respond in markdown format with these sections:
   }
 });
 
-function buildChatSystemPrompt(doc: any, documentContext: string): string {
-  return `You are NuruAI, an elite civic intelligence analyst and policy advisor that transforms complex government documents into clear, actionable, evidence-based knowledge. You serve as critical public infrastructure for democratic participation, institutional accountability, and informed citizen engagement across Africa.
+function buildChatSystemPrompt(doc: any, documentContext: string, constitution?: { text: string; title: string; country: string } | null): string {
+  const constitutionalContext = buildConstitutionalInstructions(constitution || null);
 
+  return `You are NuruAI, an elite civic intelligence analyst and policy advisor that transforms complex government documents into clear, actionable, evidence-based knowledge. You serve as critical public infrastructure for democratic participation, institutional accountability, and informed citizen engagement across Africa.
+${constitutionalContext}
 ${doc ? `**CONTEXT DOCUMENT**: "${doc.title}"
 - **Type**: ${doc.document_type}
 - **Country**: ${doc.country || 'Not specified'}
