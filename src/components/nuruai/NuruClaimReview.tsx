@@ -65,8 +65,13 @@ const NuruClaimReview = () => {
     }, { onSuccess: (data) => { setBatchResults(data); setActiveTab('batch-results'); } });
   };
 
-  const handleCopyShareLink = (token: string) => {
-    navigator.clipboard.writeText(`https://peaceversev2.lovable.app/fact-check/${token}`);
+  const handleCopyShareLink = (token: string, isPublic: boolean) => {
+    if (!isPublic) {
+      toast.warning('This fact-check is not public yet. Enable the "Public" toggle first so others can view it.');
+      return;
+    }
+    const url = `${window.location.origin}/fact-check/${token}`;
+    navigator.clipboard.writeText(url);
     toast.success('Share link copied to clipboard');
   };
 
@@ -361,7 +366,7 @@ const NuruClaimReview = () => {
                                 />
                               </div>
                               {item.share_token && (
-                                <Button variant="ghost" size="sm" className="h-6 text-[10px] gap-1" onClick={() => handleCopyShareLink(item.share_token)}>
+                                <Button variant="ghost" size="sm" className="h-6 text-[10px] gap-1" onClick={() => handleCopyShareLink(item.share_token, item.is_public)}>
                                   <Link2 className="h-3 w-3" />Copy Link
                                 </Button>
                               )}
@@ -394,7 +399,7 @@ const NuruClaimReview = () => {
 
 /* ========== VERDICT RESULT CARD ========== */
 function FactCheckResultCard({ result, statusInfo, onCopyShareLink, onCopySchema, onTogglePublic, showSchemaPreview, onToggleSchemaPreview }: {
-  result: any; statusInfo: any; onCopyShareLink: (t: string) => void; onCopySchema: (s: any) => void;
+  result: any; statusInfo: any; onCopyShareLink: (t: string, isPublic: boolean) => void; onCopySchema: (s: any) => void;
   onTogglePublic: (id: string, current: boolean) => void; showSchemaPreview: boolean; onToggleSchemaPreview: () => void;
 }) {
   return (
@@ -416,7 +421,7 @@ function FactCheckResultCard({ result, statusInfo, onCopyShareLink, onCopySchema
           </div>
           <div className="flex items-center gap-1">
             {result.shareToken && (
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onCopyShareLink(result.shareToken)} title="Copy share link">
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onCopyShareLink(result.shareToken, result.isPublic ?? false)} title="Copy share link">
                 <Share2 className="h-4 w-4" />
               </Button>
             )}
