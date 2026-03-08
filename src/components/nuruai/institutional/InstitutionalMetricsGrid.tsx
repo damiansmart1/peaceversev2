@@ -20,7 +20,19 @@ interface Props {
   metrics: Metrics;
 }
 
-const metricConfig = [
+interface MetricItem {
+  key: string;
+  icon: typeof MessageSquareText;
+  label: string;
+  color: string;
+  bgColor: string;
+  trend?: string;
+  trendUp?: boolean;
+  suffix?: string;
+  isString?: boolean;
+}
+
+const metricConfig: MetricItem[] = [
   { key: 'totalQuestions', icon: MessageSquareText, label: 'Civic Questions', color: 'text-primary', bgColor: 'bg-primary/10', trend: '+12%', trendUp: true },
   { key: 'answered', icon: CheckCircle, label: 'Responded', color: 'text-emerald-500', bgColor: 'bg-emerald-500/10', trend: '+8%', trendUp: true },
   { key: 'unanswered', icon: AlertCircle, label: 'Pending Review', color: 'text-amber-500', bgColor: 'bg-amber-500/10', trend: '-3%', trendUp: false },
@@ -29,7 +41,7 @@ const metricConfig = [
   { key: 'documentsPublished', icon: FileText, label: 'Documents', color: 'text-blue-500', bgColor: 'bg-blue-500/10', trend: '+4', trendUp: true },
   { key: 'activeInstitutions', icon: Users, label: 'Active Institutions', color: 'text-orange-500', bgColor: 'bg-orange-500/10', trend: '+2', trendUp: true },
   { key: 'citizenSatisfaction', icon: BarChart3, label: 'Satisfaction', color: 'text-rose-500', bgColor: 'bg-rose-500/10', suffix: '%', trend: '+7%', trendUp: true },
-] as const;
+];
 
 export const InstitutionalMetricsGrid = ({ metrics }: Props) => {
   return (
