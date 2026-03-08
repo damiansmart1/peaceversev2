@@ -285,12 +285,17 @@ export type Database = {
       }
       ai_governance_registry: {
         Row: {
+          assigned_to: string | null
           created_at: string | null
           description: string
           id: string
           last_reviewed: string | null
           mitigation_strategies: string[] | null
           monitoring_metrics: Json | null
+          priority: number | null
+          resolution_date: string | null
+          resolution_notes: string | null
+          review_frequency: string | null
           risk_category: string
           risk_name: string
           severity: string | null
@@ -298,12 +303,17 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          assigned_to?: string | null
           created_at?: string | null
           description: string
           id?: string
           last_reviewed?: string | null
           mitigation_strategies?: string[] | null
           monitoring_metrics?: Json | null
+          priority?: number | null
+          resolution_date?: string | null
+          resolution_notes?: string | null
+          review_frequency?: string | null
           risk_category: string
           risk_name: string
           severity?: string | null
@@ -311,12 +321,17 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          assigned_to?: string | null
           created_at?: string | null
           description?: string
           id?: string
           last_reviewed?: string | null
           mitigation_strategies?: string[] | null
           monitoring_metrics?: Json | null
+          priority?: number | null
+          resolution_date?: string | null
+          resolution_notes?: string | null
+          review_frequency?: string | null
           risk_category?: string
           risk_name?: string
           severity?: string | null
@@ -3685,6 +3700,72 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      nuru_ai_feedback: {
+        Row: {
+          ai_response_snippet: string | null
+          conversation_id: string | null
+          created_at: string | null
+          description: string | null
+          feedback_type: string
+          id: string
+          message_id: string | null
+          review_notes: string | null
+          review_status: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          severity: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          ai_response_snippet?: string | null
+          conversation_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          feedback_type?: string
+          id?: string
+          message_id?: string | null
+          review_notes?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          severity?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          ai_response_snippet?: string | null
+          conversation_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          feedback_type?: string
+          id?: string
+          message_id?: string | null
+          review_notes?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          severity?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nuru_ai_feedback_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "nuru_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nuru_ai_feedback_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "nuru_messages"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       nuru_audit_log: {
         Row: {
