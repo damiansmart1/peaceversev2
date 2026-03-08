@@ -109,7 +109,8 @@ const NuruPolicyExplorer = () => {
           documentId: selectedDocId,
         },
       });
-      if (error) throw error;
+      if (error) throw new Error(error?.message || error?.context?.message || JSON.stringify(error));
+      if (data?.error) throw new Error(data.error);
 
       const response = data?.response || data?.message || 'Unable to generate explanation.';
       const parts = response.split(/impact|effects|consequences/i);
