@@ -145,6 +145,7 @@ const App = () => (
                       </ProtectedRoute>
                     } />
                     <Route path="/nuru-ai" element={<NuruAI />} />
+                    <Route path="/fact-check/:token" element={<FactCheck />} />
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>
