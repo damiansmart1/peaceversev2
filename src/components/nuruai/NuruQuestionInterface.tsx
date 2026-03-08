@@ -31,7 +31,6 @@ import {
 } from '@/hooks/useNuruAI';
 import { useSubmitAIFeedback } from '@/hooks/useNuruGovernance';
 import { Textarea } from '@/components/ui/textarea';
-import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/AuthContext';
 import { format, isToday, isYesterday, isThisWeek, isThisMonth } from 'date-fns';
 import { toast } from 'sonner';
