@@ -96,7 +96,7 @@ const AdminConstitutionsManager = () => {
             .getPublicUrl(filePath);
 
           const { data: extractResult, error: extractError } = await supabase.functions.invoke('extract-document-text', {
-            body: { fileUrl: publicUrl, fileName: selectedFile.name },
+            body: { fileUrl: publicUrl, fileName: selectedFile.name, extractOnly: true },
           });
           if (extractError) throw new Error(`Text extraction failed: ${extractError.message}`);
 
