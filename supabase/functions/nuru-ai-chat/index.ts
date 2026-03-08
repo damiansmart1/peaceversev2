@@ -958,6 +958,21 @@ Respond as JSON:
       });
     }
 
+    // ===== ACTION: TOGGLE CLAIM PUBLIC =====
+    if (action === 'toggle_claim_public') {
+      const { reviewId, isPublic } = body;
+      if (!reviewId) throw new Error('Review ID required');
+      const { error: updateError } = await supabase.from('civic_claim_reviews').update({
+        is_public: isPublic,
+        updated_at: new Date().toISOString(),
+      }).eq('id', reviewId);
+      if (updateError) throw new Error(updateError.message);
+      await logAudit(supabase, userId, 'toggle_claim_public', 'civic_claim_review', reviewId, { isPublic });
+      return new Response(JSON.stringify({ success: true, isPublic }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     throw new Error(`Unknown action: ${action}`);
   } catch (error) {
     console.error('NuruAI error:', error);
