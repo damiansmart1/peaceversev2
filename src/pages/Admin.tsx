@@ -24,6 +24,7 @@ import AdminPeaceMetricsManager from '@/components/admin/AdminPeaceMetricsManage
 import { AdminRoleFeatureManager } from '@/components/admin/AdminRoleFeatureManager';
 import AdminCMSManager from '@/components/admin/AdminCMSManager';
 import AdminElectionsManager from '@/components/admin/AdminElectionsManager';
+import AdminNuruAIManager from '@/components/admin/AdminNuruAIManager';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { Loader2, Shield } from 'lucide-react';
 import { motion } from 'framer-motion';
