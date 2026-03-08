@@ -5,6 +5,47 @@ import { useRef, useCallback } from 'react';
 
 const sb = supabase as any;
 
+/**
+ * Extract a human-readable error message from edge function responses.
+ * supabase.functions.invoke returns { data, error } where error on non-2xx
+ * is a FunctionsHttpError whose context contains the response body.
+ */
+async function extractEdgeFunctionError(error: any): Promise<string> {
+  // FunctionsHttpError has a context property with the response
+  if (error?.context) {
+    try {
+      // context is the Response object — try to parse its JSON body
+      if (typeof error.context.json === 'function') {
+        const body = await error.context.json();
+        if (body?.error) return body.error;
+      }
+    } catch {
+      // fallback
+    }
+  }
+  // Try .message directly
+  if (error?.message && error.message !== 'Edge Function returned a non-2xx status code') {
+    return error.message;
+  }
+  // Try JSON stringifying
+  try {
+    const str = JSON.stringify(error);
+    if (str && str !== '{}') return str;
+  } catch {}
+  return 'An unexpected error occurred. Please try again.';
+}
+
+/** Wrapper: invoke edge function and throw with the exact error message */
+async function invokeNuruAI(body: Record<string, any>) {
+  const { data, error } = await supabase.functions.invoke('nuru-ai-chat', { body });
+  if (error) {
+    const msg = await extractEdgeFunctionError(error);
+    throw new Error(msg);
+  }
+  if (data?.error) throw new Error(data.error);
+  return data;
+}
+
 export interface CivicDocument {
   id: string;
   title: string;
@@ -144,7 +185,7 @@ export function useUploadDocument() {
         processing_status: 'pending',
       }).select().single();
       if (error) throw error;
-      await supabase.functions.invoke('nuru-ai-chat', { body: { action: 'summarize', documentId: data.id } });
+      await invokeNuruAI({ action: 'summarize', documentId: data.id });
       return data;
     },
     onSuccess: () => {
@@ -198,9 +239,7 @@ export function useUploadDocumentFile() {
         console.error('Server-side extraction error:', extractError);
         const text = await extractTextFromFile(file);
         if (text && text.length > 50) {
-          await supabase.functions.invoke('nuru-ai-chat', {
-            body: { action: 'parse_document', text, documentId: doc.id, fileName: file.name, fileType: file.type },
-          });
+          await invokeNuruAI({ action: 'parse_document', text, documentId: doc.id, fileName: file.name, fileType: file.type });
         } else {
           await sb.from('civic_documents').update({
             processing_status: 'text_extraction_failed',
@@ -354,10 +393,7 @@ export function useAskQuestion() {
   return useMutation({
     mutationFn: async ({ question, documentId, isAnonymous }: { question: string; documentId: string; isAnonymous?: boolean }) => {
       const { data: { user } } = await supabase.auth.getUser();
-      const { data: aiResult, error: aiError } = await supabase.functions.invoke('nuru-ai-chat', {
-        body: { action: 'ask', question, documentId },
-      });
-      if (aiError) throw aiError;
+      const aiResult = await invokeNuruAI({ action: 'ask', question, documentId });
       const { data, error } = await sb.from('civic_questions').insert({
         question_text: question,
         document_id: documentId,
@@ -498,11 +534,7 @@ export function useSendChatMessage() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ conversationId, message }: { conversationId: string; message: string }) => {
-      const { data, error } = await supabase.functions.invoke('nuru-ai-chat', {
-        body: { action: 'chat', conversationId, messages: [{ role: 'user', content: message }] },
-      });
-      if (error) throw error;
-      return data;
+      return await invokeNuruAI({ action: 'chat', conversationId, messages: [{ role: 'user', content: message }] });
     },
     onSuccess: (_, variables) => {
       qc.invalidateQueries({ queryKey: ['nuru-messages', variables.conversationId] });
@@ -686,12 +718,7 @@ export function useReviewClaim() {
     mutationFn: async ({ claimText, documentId, claimSource, claimSourceUrl }: {
       claimText: string; documentId?: string; claimSource?: string; claimSourceUrl?: string;
     }) => {
-      const { data, error } = await supabase.functions.invoke('nuru-ai-chat', {
-        body: { action: 'review_claim', claimText, documentId, claimSource, claimSourceUrl },
-      });
-      if (error) throw new Error(error?.message || JSON.stringify(error));
-      if (data?.error) throw new Error(data.error);
-      return data;
+      return await invokeNuruAI({ action: 'review_claim', claimText, documentId, claimSource, claimSourceUrl });
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['claim-review-history'] });
@@ -704,12 +731,7 @@ export function useBatchReviewClaims() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ claims, documentId }: { claims: (string | { text: string; source?: string; sourceUrl?: string })[]; documentId?: string }) => {
-      const { data, error } = await supabase.functions.invoke('nuru-ai-chat', {
-        body: { action: 'batch_review_claims', claims, documentId },
-      });
-      if (error) throw new Error(error?.message || JSON.stringify(error));
-      if (data?.error) throw new Error(data.error);
-      return data;
+      return await invokeNuruAI({ action: 'batch_review_claims', claims, documentId });
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['claim-review-history'] });
@@ -722,11 +744,7 @@ export function useToggleClaimPublic() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ reviewId, isPublic }: { reviewId: string; isPublic: boolean }) => {
-      const { data, error } = await supabase.functions.invoke('nuru-ai-chat', {
-        body: { action: 'toggle_claim_public', reviewId, isPublic },
-      });
-      if (error) throw new Error(error?.message || JSON.stringify(error));
-      return data;
+      return await invokeNuruAI({ action: 'toggle_claim_public', reviewId, isPublic });
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['claim-review-history'] });
@@ -739,11 +757,7 @@ export function useToggleClaimPublic() {
 export function useCompareDocuments() {
   return useMutation({
     mutationFn: async ({ documentIds }: { documentIds: string[] }) => {
-      const { data, error } = await supabase.functions.invoke('nuru-ai-chat', {
-        body: { action: 'compare_documents', documentIds },
-      });
-      if (error) throw error;
-      return data;
+      return await invokeNuruAI({ action: 'compare_documents', documentIds });
     },
     onError: (e: any) => toast.error(e.message || 'Document comparison failed'),
   });

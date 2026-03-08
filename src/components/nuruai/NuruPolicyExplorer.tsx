@@ -109,7 +109,23 @@ const NuruPolicyExplorer = () => {
           documentId: selectedDocId,
         },
       });
-      if (error) throw new Error(error?.message || error?.context?.message || JSON.stringify(error));
+      
+      // Extract exact error message from edge function response
+      let errorMessage = '';
+      if (error) {
+        try {
+          if (typeof error.context?.json === 'function') {
+            const body = await error.context.json();
+            errorMessage = body?.error || '';
+          }
+        } catch {}
+        if (!errorMessage) {
+          errorMessage = error?.message && error.message !== 'Edge Function returned a non-2xx status code' 
+            ? error.message 
+            : 'AI service error';
+        }
+        throw new Error(errorMessage);
+      }
       if (data?.error) throw new Error(data.error);
 
       const response = data?.response || data?.message || 'Unable to generate explanation.';
@@ -122,17 +138,11 @@ const NuruPolicyExplorer = () => {
         },
       }));
     } catch (err: any) {
-      const msg = err?.message || err?.error || '';
-      if (msg.includes('credits') || msg.includes('402')) {
-        toast.error('AI credits depleted. Please top up your workspace credits to continue.');
-      } else if (msg.includes('429') || msg.includes('rate limit')) {
-        toast.error('Rate limit reached. Please wait a moment and try again.');
-      } else {
-        toast.error('Failed to generate explanation. Please try again.');
-      }
+      const msg = err?.message || err?.error || 'Unknown error';
+      toast.error(msg);
       setSectionExplanations(prev => ({
         ...prev,
-        [index]: { explanation: msg.includes('credits') ? 'AI credits depleted. Please contact your administrator to top up credits.' : 'Unable to generate explanation. Please try again.', impact: '' },
+        [index]: { explanation: msg, impact: '' },
       }));
     } finally {
       setLoadingSection(null);
