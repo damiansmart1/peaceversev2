@@ -2061,6 +2061,38 @@ export type Database = {
         }
         Relationships: []
       }
+      document_bookmarks: {
+        Row: {
+          created_at: string
+          document_id: string
+          id: string
+          notes: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          document_id: string
+          id?: string
+          notes?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          document_id?: string
+          id?: string
+          notes?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_bookmarks_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "civic_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       election_anomalies: {
         Row: {
           anomaly_type: string
@@ -3617,8 +3649,10 @@ export type Database = {
           created_at: string | null
           document_id: string | null
           id: string
+          is_shared: boolean | null
           last_message_at: string | null
           message_count: number | null
+          shared_at: string | null
           title: string | null
           updated_at: string | null
           user_id: string | null
@@ -3627,8 +3661,10 @@ export type Database = {
           created_at?: string | null
           document_id?: string | null
           id?: string
+          is_shared?: boolean | null
           last_message_at?: string | null
           message_count?: number | null
+          shared_at?: string | null
           title?: string | null
           updated_at?: string | null
           user_id?: string | null
@@ -3637,8 +3673,10 @@ export type Database = {
           created_at?: string | null
           document_id?: string | null
           id?: string
+          is_shared?: boolean | null
           last_message_at?: string | null
           message_count?: number | null
+          shared_at?: string | null
           title?: string | null
           updated_at?: string | null
           user_id?: string | null
