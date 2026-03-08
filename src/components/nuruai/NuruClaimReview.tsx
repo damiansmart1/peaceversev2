@@ -65,8 +65,13 @@ const NuruClaimReview = () => {
     }, { onSuccess: (data) => { setBatchResults(data); setActiveTab('batch-results'); } });
   };
 
-  const handleCopyShareLink = (token: string) => {
-    navigator.clipboard.writeText(`https://peaceversev2.lovable.app/fact-check/${token}`);
+  const handleCopyShareLink = (token: string, isPublic: boolean) => {
+    if (!isPublic) {
+      toast.warning('This fact-check is not public yet. Enable the "Public" toggle first so others can view it.');
+      return;
+    }
+    const url = `${window.location.origin}/fact-check/${token}`;
+    navigator.clipboard.writeText(url);
     toast.success('Share link copied to clipboard');
   };
 
