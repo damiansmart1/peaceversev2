@@ -18,6 +18,7 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 import { useUserRoles } from "@/hooks/useRoleCheck";
 import { useAccessibleFeatures, PLATFORM_FEATURES } from "@/hooks/useRoleFeatureAccess";
 import { motion, AnimatePresence } from "framer-motion";
+import ThemeToggle from "@/components/ThemeToggle";
 const Navigation = () => {
   const {
     t
@@ -198,6 +199,8 @@ const Navigation = () => {
                 <HelpCircle className="w-4 h-4" />
               </Button>
               
+              <ThemeToggle />
+              
               <div className="hidden md:block">
                 <LanguageToggle />
               </div>
@@ -290,6 +293,10 @@ const Navigation = () => {
                   </div>
                   
                   <div className="mt-8 pt-6 border-t border-border/30 space-y-4">
+                    <div className="flex items-center justify-between px-1 py-2">
+                      <span className="text-sm font-medium text-foreground/70">Theme</span>
+                      <ThemeToggle />
+                    </div>
                     <div className="flex items-center justify-between px-1 py-2">
                       <span className="text-sm font-medium text-foreground/70">Language</span>
                       <LanguageToggle />
