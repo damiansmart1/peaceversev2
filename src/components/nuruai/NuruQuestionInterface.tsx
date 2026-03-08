@@ -18,12 +18,16 @@ import {
   Settings2, Search, MoreHorizontal, Pencil, Download,
   Clock, Pin, PinOff, Eraser, ChevronDown, RotateCcw,
   Zap, Globe, Shield, BookOpen, Hash, X,
-  ThumbsUp, ThumbsDown, RefreshCw, ArrowRight, MessageCircleQuestion
+  ThumbsUp, ThumbsDown, RefreshCw, ArrowRight, MessageCircleQuestion,
+  Square, Mic, MicOff, Paperclip, Share2, Keyboard,
+  FileUp, Image, File, XCircle, ExternalLink, Languages,
+  BarChart3, GitCompare, ListChecks
 } from 'lucide-react';
 import {
   useCivicDocuments, useNuruConversations, useNuruMessages,
   useCreateConversation, useStreamChatMessage,
   useDeleteConversation, useRenameConversation, useClearConversation,
+  extractTextFromAttachment, type ChatAttachment,
 } from '@/hooks/useNuruAI';
 import { useAuth } from '@/contexts/AuthContext';
 import { format, isToday, isYesterday, isThisWeek, isThisMonth } from 'date-fns';
@@ -31,6 +35,9 @@ import { toast } from 'sonner';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription
+} from '@/components/ui/dialog';
 
 interface ChatSettings {
   model: string;
@@ -65,6 +72,13 @@ const MODELS = [
   { value: 'gpt-5-mini', label: 'GPT-5 Mini', desc: 'Balanced', icon: '💡' },
 ];
 
+const QUICK_ACTIONS = [
+  { id: 'summarize', label: 'Summarize', icon: ListChecks, prompt: 'Please provide a concise summary of this document, highlighting the key points, financial figures, and citizen impact.' },
+  { id: 'extract', label: 'Extract Data', icon: BarChart3, prompt: 'Extract all key data points, statistics, financial figures, dates, and metrics from this document in a structured format.' },
+  { id: 'compare', label: 'Compare', icon: GitCompare, prompt: 'Compare the key provisions, allocations, and commitments in this document against stated objectives. Identify any gaps or inconsistencies.' },
+  { id: 'translate', label: 'Simplify', icon: Languages, prompt: 'Rewrite the most important parts of this document in simple, everyday language that any citizen can understand. Avoid jargon.' },
+];
+
 const NuruQuestionInterface = () => {
   const [selectedDocId, setSelectedDocId] = useState('');
   const [question, setQuestion] = useState('');
@@ -79,6 +93,14 @@ const NuruQuestionInterface = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [editingConvId, setEditingConvId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [editMessageContent, setEditMessageContent] = useState('');
+  const [attachments, setAttachments] = useState<ChatAttachment[]>([]);
+  const [isExtractingText, setIsExtractingText] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [showShortcutsDialog, setShowShortcutsDialog] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
   const [pinnedConversations, setPinnedConversations] = useState<Set<string>>(() => {
     try { return new Set(JSON.parse(localStorage.getItem('nuru_pinned') || '[]')); } catch { return new Set(); }
   });
@@ -88,6 +110,8 @@ const NuruQuestionInterface = () => {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const recognitionRef = useRef<any>(null);
 
   const { data: documents } = useCivicDocuments();
   const { user } = useAuth();
@@ -97,9 +121,9 @@ const NuruQuestionInterface = () => {
   const deleteConversation = useDeleteConversation();
   const renameConversation = useRenameConversation();
   const clearConversation = useClearConversation();
-  const { streamChat } = useStreamChatMessage();
+  const { streamChat, abort: abortStream } = useStreamChatMessage();
 
-  // Persist settings
+  // Persist settings & pinned
   useEffect(() => {
     localStorage.setItem('nuru_chat_settings', JSON.stringify(settings));
   }, [settings]);
@@ -118,6 +142,36 @@ const NuruQuestionInterface = () => {
       textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 160) + 'px';
     }
   }, [question]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ctrl/Cmd + Shift + N → new conversation
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'N') {
+        e.preventDefault();
+        handleStartChat();
+      }
+      // Ctrl/Cmd + Shift + S → toggle sidebar
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'S') {
+        e.preventDefault();
+        setLeftSidebarOpen(p => !p);
+      }
+      // Escape → stop generation or close dialogs
+      if (e.key === 'Escape') {
+        if (isStreaming) {
+          e.preventDefault();
+          handleStopGeneration();
+        }
+      }
+      // Ctrl + ? → shortcuts dialog
+      if ((e.metaKey || e.ctrlKey) && e.key === '?') {
+        e.preventDefault();
+        setShowShortcutsDialog(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isStreaming]);
 
   // Group conversations by date
   const groupedConversations = useMemo(() => {
@@ -148,6 +202,121 @@ const NuruQuestionInterface = () => {
     );
   };
 
+  const handleStopGeneration = useCallback(() => {
+    abortStream();
+    setIsStreaming(false);
+    setStreamingContent('');
+    toast.info('Generation stopped');
+  }, [abortStream]);
+
+  // File attachment handling
+  const handleFileSelect = useCallback(async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    setIsExtractingText(true);
+    const newAttachments: ChatAttachment[] = [];
+
+    for (const file of Array.from(files)) {
+      if (file.size > 20 * 1024 * 1024) {
+        toast.error(`${file.name} is too large (max 20MB)`);
+        continue;
+      }
+
+      const attachment: ChatAttachment = {
+        file,
+        name: file.name,
+        type: file.type,
+        size: file.size,
+      };
+
+      // Create preview for images
+      if (file.type.startsWith('image/')) {
+        attachment.previewUrl = URL.createObjectURL(file);
+      }
+
+      // Extract text from text-based files
+      const extractedText = await extractTextFromAttachment(file);
+      if (extractedText) {
+        attachment.extractedText = extractedText;
+      }
+
+      newAttachments.push(attachment);
+    }
+
+    setAttachments(prev => [...prev, ...newAttachments].slice(0, 5)); // Max 5 attachments
+    setIsExtractingText(false);
+  }, []);
+
+  const removeAttachment = useCallback((index: number) => {
+    setAttachments(prev => {
+      const next = [...prev];
+      if (next[index]?.previewUrl) URL.revokeObjectURL(next[index].previewUrl!);
+      next.splice(index, 1);
+      return next;
+    });
+  }, []);
+
+  // Drag and drop
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    handleFileSelect(e.dataTransfer.files);
+  }, [handleFileSelect]);
+
+  // Voice input
+  const toggleVoiceInput = useCallback(() => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      toast.error('Voice input is not supported in this browser');
+      return;
+    }
+
+    if (isListening && recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+      return;
+    }
+
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    recognition.onresult = (event: any) => {
+      let transcript = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript;
+      }
+      setQuestion(prev => {
+        // Replace the last interim result with the final one
+        const parts = prev.split('|VOICE|');
+        return (parts[0] || '') + transcript;
+      });
+    };
+
+    recognition.onerror = (e: any) => {
+      console.error('Speech recognition error:', e.error);
+      setIsListening(false);
+      if (e.error === 'not-allowed') toast.error('Microphone access denied');
+    };
+
+    recognition.onend = () => setIsListening(false);
+
+    recognition.start();
+    recognitionRef.current = recognition;
+    setIsListening(true);
+    toast.info('Listening... speak your question', { duration: 2000 });
+  }, [isListening]);
+
   const handleSendMessage = useCallback(async (msg: string, convId?: string) => {
     const targetConvId = convId || activeConversationId;
     if (!msg.trim() || !targetConvId || isStreaming) return;
@@ -157,15 +326,25 @@ const NuruQuestionInterface = () => {
     setStreamingContent('');
     setLastUserMessage(msg);
 
+    // Build attachment context
+    const attachmentContext = attachments
+      .map(a => a.extractedText ? `[File: ${a.name}]\n${a.extractedText.substring(0, 15000)}` : `[File: ${a.name} - binary, no text extracted]`)
+      .join('\n\n');
+
+    // Clear attachments after sending
+    attachments.forEach(a => { if (a.previewUrl) URL.revokeObjectURL(a.previewUrl); });
+    setAttachments([]);
+
     try {
       await streamChat(targetConvId, msg, (delta) => setStreamingContent(prev => prev + delta), () => {
         setIsStreaming(false);
         setStreamingContent('');
-      });
+      }, attachmentContext || undefined);
     } catch (e: any) {
       setIsStreaming(false);
       setStreamingContent('');
       const errorMsg = e.message || 'Failed to send message';
+      if (e.name === 'AbortError') return; // User cancelled
       if (errorMsg.includes('Rate limit') || errorMsg.includes('429')) {
         toast.error(errorMsg, { duration: 8000, description: 'Wait a moment and try again.' });
       } else if (errorMsg.includes('credits') || errorMsg.includes('402')) {
@@ -174,12 +353,29 @@ const NuruQuestionInterface = () => {
         toast.error(errorMsg);
       }
     }
-  }, [activeConversationId, isStreaming, streamChat]);
+  }, [activeConversationId, isStreaming, streamChat, attachments]);
 
   const handleSend = useCallback(() => {
     if (!question.trim() || isStreaming) return;
     handleSendMessage(question);
   }, [question, isStreaming, handleSendMessage]);
+
+  const handleQuickAction = useCallback((action: typeof QUICK_ACTIONS[0]) => {
+    if (isStreaming) return;
+    setQuestion('');
+    handleSendMessage(action.prompt);
+  }, [isStreaming, handleSendMessage]);
+
+  const handleEditMessage = useCallback((msg: any) => {
+    setEditingMessageId(msg.id);
+    setEditMessageContent(msg.content);
+  }, []);
+
+  const handleSaveEdit = useCallback(() => {
+    if (!editMessageContent.trim() || !activeConversationId) return;
+    setEditingMessageId(null);
+    handleSendMessage(editMessageContent);
+  }, [editMessageContent, activeConversationId, handleSendMessage]);
 
   const handleRegenerate = useCallback(async () => {
     if (!lastUserMessage || !activeConversationId || isStreaming) return;
@@ -193,7 +389,7 @@ const NuruQuestionInterface = () => {
     } catch (e: any) {
       setIsStreaming(false);
       setStreamingContent('');
-      toast.error(e.message || 'Regeneration failed');
+      if (e.name !== 'AbortError') toast.error(e.message || 'Regeneration failed');
     }
   }, [lastUserMessage, activeConversationId, isStreaming, streamChat]);
 
@@ -224,6 +420,22 @@ const NuruQuestionInterface = () => {
     toast.success('Conversation exported');
   };
 
+  const handleShareConversation = useCallback(() => {
+    if (!activeConversationId || !chatMessages?.length) return;
+    const conv = conversations?.find(c => c.id === activeConversationId);
+    const text = chatMessages
+      .map(m => `${m.role === 'user' ? '👤 You' : '🤖 NuruAI'}: ${m.content.substring(0, 500)}${m.content.length > 500 ? '...' : ''}`)
+      .join('\n\n');
+    const shareText = `📋 NuruAI Conversation: ${conv?.title || 'Untitled'}\n\n${text}`;
+
+    if (navigator.share) {
+      navigator.share({ title: `NuruAI: ${conv?.title}`, text: shareText }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(shareText);
+      toast.success('Conversation copied to clipboard');
+    }
+  }, [activeConversationId, chatMessages, conversations]);
+
   const togglePin = (id: string) => {
     setPinnedConversations(prev => {
       const next = new Set(prev);
@@ -245,9 +457,70 @@ const NuruQuestionInterface = () => {
   const selectedDoc = documents?.find(d => d.id === selectedDocId);
   const activeConv = conversations?.find(c => c.id === activeConversationId);
   const messageCount = chatMessages?.length || 0;
+  const hasDocContext = !!selectedDoc || !!activeConv?.document_id;
+
+  // Auto-create conversation when typing without one
+  const ensureConversation = useCallback(async (msg: string) => {
+    if (activeConversationId) return activeConversationId;
+    if (!user) return null;
+    return new Promise<string | null>((resolve) => {
+      createConversation.mutate(
+        { documentId: selectedDocId || undefined, title: msg.substring(0, 60) || 'New Chat' },
+        {
+          onSuccess: (conv) => {
+            setActiveConversationId(conv.id);
+            resolve(conv.id);
+          },
+          onError: () => resolve(null),
+        }
+      );
+    });
+  }, [activeConversationId, user, selectedDocId, createConversation]);
+
+  const handleSmartSend = useCallback(async () => {
+    if (!question.trim() || isStreaming || !user) return;
+    const msg = question;
+    const convId = await ensureConversation(msg);
+    if (convId) {
+      setTimeout(() => handleSendMessage(msg, convId), 100);
+    }
+  }, [question, isStreaming, user, ensureConversation, handleSendMessage]);
 
   return (
-    <div className="flex h-[calc(100vh-220px)] rounded-2xl border border-border/40 overflow-hidden bg-card/20">
+    <div
+      className="flex h-[calc(100vh-220px)] rounded-2xl border border-border/40 overflow-hidden bg-card/20 relative"
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      {/* Drag overlay */}
+      <AnimatePresence>
+        {isDragOver && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-50 bg-primary/10 border-2 border-dashed border-primary/40 rounded-2xl flex items-center justify-center backdrop-blur-sm"
+          >
+            <div className="text-center">
+              <FileUp className="h-10 w-10 text-primary mx-auto mb-2" />
+              <p className="text-sm font-medium text-primary">Drop files to attach</p>
+              <p className="text-xs text-muted-foreground mt-1">PDF, DOCX, TXT, CSV, images (max 20MB)</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        accept=".pdf,.doc,.docx,.txt,.csv,.md,.rtf,.xlsx,.xls,.jpg,.jpeg,.png,.webp"
+        className="hidden"
+        onChange={(e) => handleFileSelect(e.target.files)}
+      />
+
       {/* ===== LEFT SIDEBAR: Conversations ===== */}
       <AnimatePresence>
         {leftSidebarOpen && (
@@ -357,9 +630,19 @@ const NuruQuestionInterface = () => {
             <div className="p-3 border-t border-border/30 bg-muted/10">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] text-muted-foreground/50">{conversations?.length || 0} conversations</span>
-                <Button variant="ghost" size="sm" onClick={() => setRightSidebarOpen(!rightSidebarOpen)} className="h-7 px-2 text-[10px] gap-1">
-                  <Settings2 className="h-3 w-3" /> Settings
-                </Button>
+                <div className="flex items-center gap-1">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="ghost" size="sm" onClick={() => setShowShortcutsDialog(true)} className="h-7 w-7 p-0">
+                        <Keyboard className="h-3 w-3" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent className="text-xs">Keyboard shortcuts</TooltipContent>
+                  </Tooltip>
+                  <Button variant="ghost" size="sm" onClick={() => setRightSidebarOpen(!rightSidebarOpen)} className="h-7 px-2 text-[10px] gap-1">
+                    <Settings2 className="h-3 w-3" /> Settings
+                  </Button>
+                </div>
               </div>
             </div>
           </motion.div>
@@ -399,23 +682,36 @@ const NuruQuestionInterface = () => {
               {MODELS.find(m => m.value === settings.model)?.label || 'Gemini Pro'}
             </Badge>
             {activeConversationId && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0"><MoreHorizontal className="h-4 w-4" /></Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem onClick={handleExportConversation} className="text-xs gap-2">
-                    <Download className="h-3.5 w-3.5" /> Export as Markdown
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => clearConversation.mutate(activeConversationId)} className="text-xs gap-2">
-                    <Eraser className="h-3.5 w-3.5" /> Clear messages
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => { setActiveConversationId(null); deleteConversation.mutate(activeConversationId); }} className="text-xs gap-2 text-destructive">
-                    <Trash2 className="h-3.5 w-3.5" /> Delete conversation
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={handleShareConversation}>
+                      <Share2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="text-xs">Share conversation</TooltipContent>
+                </Tooltip>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0"><MoreHorizontal className="h-4 w-4" /></Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem onClick={handleExportConversation} className="text-xs gap-2">
+                      <Download className="h-3.5 w-3.5" /> Export as Markdown
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleShareConversation} className="text-xs gap-2">
+                      <Share2 className="h-3.5 w-3.5" /> Share conversation
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => clearConversation.mutate(activeConversationId)} className="text-xs gap-2">
+                      <Eraser className="h-3.5 w-3.5" /> Clear messages
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => { setActiveConversationId(null); deleteConversation.mutate(activeConversationId); }} className="text-xs gap-2 text-destructive">
+                      <Trash2 className="h-3.5 w-3.5" /> Delete conversation
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
             )}
             <Tooltip>
               <TooltipTrigger asChild>
@@ -432,9 +728,41 @@ const NuruQuestionInterface = () => {
         <ScrollArea className="flex-1">
           <div className="max-w-3xl mx-auto px-4 py-6">
             {!activeConversationId ? (
-              <WelcomeScreen setQuestion={setQuestion} user={user} onNewChat={handleStartChat} />
+              <WelcomeScreen
+                setQuestion={setQuestion}
+                user={user}
+                onNewChat={handleStartChat}
+                documents={documents}
+                selectedDocId={selectedDocId}
+                onQuickAction={(action) => {
+                  if (!user) return;
+                  setQuestion(action.prompt);
+                }}
+              />
             ) : (
               <div className="space-y-1">
+                {/* Quick Actions Bar (when document is attached) */}
+                {hasDocContext && chatMessages && chatMessages.length === 0 && (
+                  <div className="mb-6 p-4 rounded-xl border border-border/30 bg-muted/5">
+                    <p className="text-xs font-medium text-muted-foreground mb-3 flex items-center gap-1.5">
+                      <Zap className="h-3.5 w-3.5 text-primary" /> Quick Actions
+                    </p>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      {QUICK_ACTIONS.map(action => (
+                        <button
+                          key={action.id}
+                          onClick={() => handleQuickAction(action)}
+                          disabled={isStreaming}
+                          className="flex flex-col items-center gap-1.5 p-3 rounded-lg border border-border/20 hover:border-primary/30 hover:bg-primary/5 transition-all text-center group disabled:opacity-40"
+                        >
+                          <action.icon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                          <span className="text-[11px] font-medium text-muted-foreground group-hover:text-foreground">{action.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {chatMessages?.map((msg, idx) => (
                   <ChatMessage
                     key={msg.id}
@@ -454,6 +782,12 @@ const NuruQuestionInterface = () => {
                       setFeedbackGiven(prev => ({ ...prev, [msg.id]: type }));
                       toast.success(type === 'up' ? 'Thanks for the positive feedback!' : 'Thanks — we\'ll improve this response type.');
                     }}
+                    isEditing={editingMessageId === msg.id}
+                    editContent={editMessageContent}
+                    onStartEdit={() => handleEditMessage(msg)}
+                    onEditChange={setEditMessageContent}
+                    onSaveEdit={handleSaveEdit}
+                    onCancelEdit={() => setEditingMessageId(null)}
                   />
                 ))}
 
@@ -472,6 +806,14 @@ const NuruQuestionInterface = () => {
                         <span className="text-[10px] text-primary/60 flex items-center gap-1">
                           <Loader2 className="h-2.5 w-2.5 animate-spin" />Generating...
                         </span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleStopGeneration}
+                          className="h-6 text-[10px] gap-1 px-2 rounded-md border-destructive/30 text-destructive hover:bg-destructive/10"
+                        >
+                          <Square className="h-2.5 w-2.5 fill-current" /> Stop
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -482,13 +824,21 @@ const NuruQuestionInterface = () => {
                     <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/15 flex items-center justify-center shrink-0">
                       <Bot className="h-3.5 w-3.5 text-primary" />
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground py-2">
+                    <div className="flex items-center gap-3 text-sm text-muted-foreground py-2">
                       <div className="flex gap-1">
                         <span className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                         <span className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
                         <span className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                       </div>
                       <span className="text-xs">Analyzing...</span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleStopGeneration}
+                        className="h-6 text-[10px] gap-1 px-2 rounded-md border-destructive/30 text-destructive hover:bg-destructive/10"
+                      >
+                        <Square className="h-2.5 w-2.5 fill-current" /> Stop
+                      </Button>
                     </div>
                   </div>
                 )}
@@ -498,13 +848,63 @@ const NuruQuestionInterface = () => {
           </div>
         </ScrollArea>
 
+        {/* Attachment Preview */}
+        <AnimatePresence>
+          {attachments.length > 0 && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="border-t border-border/30 bg-muted/10 px-4 py-2"
+            >
+              <div className="max-w-3xl mx-auto flex flex-wrap gap-2">
+                {attachments.map((att, i) => (
+                  <div key={i} className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-border/30 bg-background/60 text-xs group">
+                    {att.previewUrl ? (
+                      <img src={att.previewUrl} alt={att.name} className="h-6 w-6 rounded object-cover" />
+                    ) : (
+                      <File className="h-4 w-4 text-muted-foreground shrink-0" />
+                    )}
+                    <span className="truncate max-w-[120px] text-muted-foreground">{att.name}</span>
+                    <span className="text-[9px] text-muted-foreground/50">
+                      {att.extractedText ? `${(att.extractedText.length / 1000).toFixed(1)}k chars` : att.type.startsWith('image/') ? 'image' : 'binary'}
+                    </span>
+                    <button onClick={() => removeAttachment(i)} className="opacity-50 group-hover:opacity-100 transition-opacity">
+                      <XCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-destructive" />
+                    </button>
+                  </div>
+                ))}
+                {isExtractingText && (
+                  <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                    <Loader2 className="h-3 w-3 animate-spin" /> Extracting text...
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Input */}
         <div className="border-t border-border/30 p-3 bg-card/30">
           <div className="max-w-3xl mx-auto">
             <div className="relative flex items-end gap-2 rounded-xl border border-border/40 bg-background/60 p-1.5 focus-within:border-primary/30 focus-within:ring-1 focus-within:ring-primary/10 transition-all">
+              {/* Attach button */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isStreaming}
+                    className="shrink-0 p-2 rounded-lg hover:bg-muted/40 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-30"
+                  >
+                    <Paperclip className="h-4 w-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent className="text-xs">Attach files (PDF, DOCX, images...)</TooltipContent>
+              </Tooltip>
+
               <textarea
                 ref={textareaRef}
-                placeholder={activeConversationId ? "Ask about policies, budgets, legislation..." : "Start a new conversation to begin..."}
+                placeholder={activeConversationId ? "Ask about policies, budgets, legislation..." : "Type your question — a conversation will be created automatically..."}
                 rows={1}
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
@@ -512,41 +912,71 @@ const NuruQuestionInterface = () => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
                     if (!activeConversationId && user && question.trim()) {
-                      const msg = question;
-                      createConversation.mutate(
-                        { documentId: selectedDocId || undefined, title: question.substring(0, 60) || 'New Chat' },
-                        { onSuccess: (conv) => { setActiveConversationId(conv.id); setTimeout(() => handleSendMessage(msg, conv.id), 100); } }
-                      );
+                      handleSmartSend();
                       return;
                     }
                     handleSend();
                   }
                 }}
                 disabled={isStreaming || !user}
-                className="flex-1 resize-none bg-transparent border-0 outline-none text-sm placeholder:text-muted-foreground/40 py-2 px-2 max-h-40 disabled:opacity-40"
+                className="flex-1 resize-none bg-transparent border-0 outline-none text-sm placeholder:text-muted-foreground/40 py-2 px-1 max-h-40 disabled:opacity-40"
               />
-              <Button
-                onClick={() => {
-                  if (!activeConversationId && user && question.trim()) {
-                    const msg = question;
-                    createConversation.mutate(
-                      { documentId: selectedDocId || undefined, title: question.substring(0, 60) || 'New Chat' },
-                      { onSuccess: (conv) => { setActiveConversationId(conv.id); setTimeout(() => handleSendMessage(msg, conv.id), 100); } }
-                    );
-                    return;
-                  }
-                  handleSend();
-                }}
-                disabled={isStreaming || !question.trim() || !user}
-                size="icon"
-                className="shrink-0 h-8 w-8 rounded-lg"
-              >
-                {isStreaming ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
-              </Button>
+
+              {/* Voice input */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={toggleVoiceInput}
+                    disabled={isStreaming}
+                    className={`shrink-0 p-2 rounded-lg transition-colors disabled:opacity-30 ${
+                      isListening
+                        ? 'bg-destructive/10 text-destructive animate-pulse'
+                        : 'hover:bg-muted/40 text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent className="text-xs">{isListening ? 'Stop listening' : 'Voice input'}</TooltipContent>
+              </Tooltip>
+
+              {/* Send / Stop button */}
+              {isStreaming ? (
+                <Button
+                  onClick={handleStopGeneration}
+                  size="icon"
+                  variant="destructive"
+                  className="shrink-0 h-8 w-8 rounded-lg"
+                >
+                  <Square className="h-3.5 w-3.5 fill-current" />
+                </Button>
+              ) : (
+                <Button
+                  onClick={() => {
+                    if (!activeConversationId && user && question.trim()) {
+                      handleSmartSend();
+                      return;
+                    }
+                    handleSend();
+                  }}
+                  disabled={!question.trim() || !user}
+                  size="icon"
+                  className="shrink-0 h-8 w-8 rounded-lg"
+                >
+                  <Send className="h-3.5 w-3.5" />
+                </Button>
+              )}
             </div>
-            <p className="text-[9px] text-muted-foreground/30 text-center mt-1.5">
-              NuruAI grounds answers in source documents · Press Enter to send, Shift+Enter for new line
-            </p>
+            <div className="flex items-center justify-between mt-1.5 px-1">
+              <p className="text-[9px] text-muted-foreground/30">
+                NuruAI grounds answers in source documents · Enter to send · Shift+Enter for new line · Esc to stop
+              </p>
+              <div className="flex items-center gap-2">
+                {attachments.length > 0 && (
+                  <span className="text-[9px] text-primary/60">{attachments.length} file{attachments.length > 1 ? 's' : ''} attached</span>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -605,7 +1035,7 @@ const NuruQuestionInterface = () => {
                 {/* Response Settings */}
                 <div className="space-y-3">
                   <Label className="text-xs font-semibold text-foreground/80 flex items-center gap-1.5">
-                    <Zap className="h-3.5 w-3.5 text-gold" /> Response
+                    <Zap className="h-3.5 w-3.5 text-yellow-500" /> Response
                   </Label>
 
                   <div className="space-y-2">
@@ -646,7 +1076,7 @@ const NuruQuestionInterface = () => {
                 {/* Display Settings */}
                 <div className="space-y-3">
                   <Label className="text-xs font-semibold text-foreground/80 flex items-center gap-1.5">
-                    <Globe className="h-3.5 w-3.5 text-secondary" /> Display
+                    <Globe className="h-3.5 w-3.5 text-blue-500" /> Display
                   </Label>
 
                   {[
@@ -714,6 +1144,31 @@ const NuruQuestionInterface = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Keyboard Shortcuts Dialog */}
+      <Dialog open={showShortcutsDialog} onOpenChange={setShowShortcutsDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-base"><Keyboard className="h-4 w-4" /> Keyboard Shortcuts</DialogTitle>
+            <DialogDescription>Quick actions for NuruAI Chat</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 text-sm">
+            {[
+              { keys: 'Enter', desc: 'Send message' },
+              { keys: 'Shift + Enter', desc: 'New line' },
+              { keys: 'Escape', desc: 'Stop generation' },
+              { keys: 'Ctrl/⌘ + Shift + N', desc: 'New conversation' },
+              { keys: 'Ctrl/⌘ + Shift + S', desc: 'Toggle sidebar' },
+              { keys: 'Ctrl/⌘ + ?', desc: 'Show shortcuts' },
+            ].map(s => (
+              <div key={s.keys} className="flex items-center justify-between">
+                <span className="text-muted-foreground text-xs">{s.desc}</span>
+                <kbd className="px-2 py-0.5 rounded border border-border/50 bg-muted/30 text-[10px] font-mono text-foreground/70">{s.keys}</kbd>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
@@ -761,7 +1216,7 @@ const ConversationItem = ({
         }`}
       >
         <div className="flex items-center gap-1.5">
-          {isPinned && <Pin className="h-2.5 w-2.5 text-gold shrink-0" />}
+          {isPinned && <Pin className="h-2.5 w-2.5 text-yellow-500 shrink-0" />}
           <p className="font-medium truncate text-[12px]">{conversation.title || 'Untitled'}</p>
         </div>
         <p className="text-[10px] mt-0.5 opacity-50">
@@ -799,14 +1254,12 @@ const ConversationItem = ({
 // ===== Follow-Up Question Extractor =====
 function extractFollowUpQuestions(content: string): string[] {
   const questions: string[] = [];
-  // Match the "Strategic Questions to Explore Next" section or similar patterns
   const sectionMatch = content.match(/#{1,3}\s*🔍.*?(?=\n#{1,3}\s[^🔍]|$)/s) 
     || content.match(/#{1,3}\s*Strategic Questions.*?(?=\n#{1,3}\s|$)/si)
     || content.match(/#{1,3}\s*Follow[\s-]?[Uu]p.*?(?=\n#{1,3}\s|$)/si);
   
   if (sectionMatch) {
     const section = sectionMatch[0];
-    // Extract bullet points or numbered items that end with ?
     const lines = section.split('\n');
     for (const line of lines) {
       const cleaned = line.replace(/^[\s\-*\d.)+]+/, '').replace(/\*\*/g, '').replace(/"/g, '').trim();
@@ -816,7 +1269,6 @@ function extractFollowUpQuestions(content: string): string[] {
     }
   }
   
-  // Fallback: find any bold questions or quoted questions in last portion of text
   if (questions.length === 0) {
     const lastThird = content.slice(Math.floor(content.length * 0.6));
     const qMatches = lastThird.match(/(?:\*\*|"|")([^*""\n]{20,200}\?)(?:\*\*|"|")/g);
@@ -831,16 +1283,17 @@ function extractFollowUpQuestions(content: string): string[] {
 }
 
 // ===== Chat Message =====
-const ChatMessage = ({ msg, onCopy, copiedId, compact, showTimestamps, showConfidence, markdownEnabled, isLastAssistant, onFollowUpClick, onRegenerate, isStreaming, feedback, onFeedback }: {
+const ChatMessage = ({ msg, onCopy, copiedId, compact, showTimestamps, showConfidence, markdownEnabled, isLastAssistant, onFollowUpClick, onRegenerate, isStreaming, feedback, onFeedback, isEditing, editContent, onStartEdit, onEditChange, onSaveEdit, onCancelEdit }: {
   msg: any; onCopy: (c: string, id: string) => void; copiedId: string | null;
   compact: boolean; showTimestamps: boolean; showConfidence: boolean; markdownEnabled: boolean;
   isLastAssistant?: boolean; onFollowUpClick?: (q: string) => void; onRegenerate?: () => void;
   isStreaming?: boolean; feedback?: 'up' | 'down'; onFeedback?: (type: 'up' | 'down') => void;
+  isEditing?: boolean; editContent?: string; onStartEdit?: () => void; onEditChange?: (v: string) => void;
+  onSaveEdit?: () => void; onCancelEdit?: () => void;
 }) => {
   const isUser = msg.role === 'user';
   const followUps = !isUser && isLastAssistant ? extractFollowUpQuestions(msg.content) : [];
 
-  // Strip follow-up section from rendered content for cleaner display (they appear as chips instead)
   const renderContent = msg.content;
 
   return (
@@ -861,8 +1314,38 @@ const ChatMessage = ({ msg, onCopy, copiedId, compact, showTimestamps, showConfi
           )}
         </div>
 
-        {isUser ? (
-          <p className="text-sm leading-relaxed text-foreground">{renderContent}</p>
+        {/* Editable user message */}
+        {isUser && isEditing ? (
+          <div className="space-y-2">
+            <textarea
+              value={editContent || ''}
+              onChange={(e) => onEditChange?.(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); onSaveEdit?.(); }
+                if (e.key === 'Escape') onCancelEdit?.();
+              }}
+              className="w-full text-sm p-2 rounded-lg border border-primary/30 bg-background/80 outline-none resize-none min-h-[60px]"
+              autoFocus
+            />
+            <div className="flex gap-2">
+              <Button size="sm" onClick={onSaveEdit} className="h-7 text-xs gap-1">
+                <Send className="h-3 w-3" /> Send edited
+              </Button>
+              <Button size="sm" variant="outline" onClick={onCancelEdit} className="h-7 text-xs">Cancel</Button>
+            </div>
+          </div>
+        ) : isUser ? (
+          <div className="group/msg">
+            <p className="text-sm leading-relaxed text-foreground">{renderContent}</p>
+            {!isStreaming && (
+              <button
+                onClick={onStartEdit}
+                className="opacity-0 group-hover/msg:opacity-100 transition-opacity mt-1 text-[10px] text-muted-foreground/50 hover:text-muted-foreground flex items-center gap-1"
+              >
+                <Pencil className="h-2.5 w-2.5" /> Edit
+              </button>
+            )}
+          </div>
         ) : markdownEnabled ? (
           <div className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed [&>*:first-child]:mt-0 [&_h2]:text-base [&_h3]:text-sm [&_p]:text-sm [&_li]:text-sm [&_blockquote]:border-primary/30 [&_blockquote]:bg-primary/5 [&_blockquote]:rounded-r-lg [&_blockquote]:py-1">
             <ReactMarkdown>{renderContent}</ReactMarkdown>
@@ -874,20 +1357,18 @@ const ChatMessage = ({ msg, onCopy, copiedId, compact, showTimestamps, showConfi
         {/* Action bar for AI messages */}
         {!isUser && (
           <div className="flex flex-wrap items-center gap-1 mt-3 pt-2 border-t border-border/20">
-            {/* Copy */}
             <button
               onClick={() => onCopy(msg.content, msg.id)}
               className="flex items-center gap-1 text-[10px] text-muted-foreground/50 hover:text-muted-foreground transition-colors px-2 py-1 rounded-md hover:bg-muted/30"
             >
-              {copiedId === msg.id ? <Check className="h-3 w-3 text-success" /> : <Copy className="h-3 w-3" />}
+              {copiedId === msg.id ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
               {copiedId === msg.id ? 'Copied' : 'Copy'}
             </button>
 
-            {/* Feedback buttons */}
             <button
               onClick={() => onFeedback?.('up')}
               className={`flex items-center gap-1 text-[10px] px-2 py-1 rounded-md transition-colors ${
-                feedback === 'up' ? 'text-success bg-success/10' : 'text-muted-foreground/50 hover:text-muted-foreground hover:bg-muted/30'
+                feedback === 'up' ? 'text-green-500 bg-green-500/10' : 'text-muted-foreground/50 hover:text-muted-foreground hover:bg-muted/30'
               }`}
             >
               <ThumbsUp className="h-3 w-3" />
@@ -901,7 +1382,6 @@ const ChatMessage = ({ msg, onCopy, copiedId, compact, showTimestamps, showConfi
               <ThumbsDown className="h-3 w-3" />
             </button>
 
-            {/* Regenerate (only on last assistant message) */}
             {isLastAssistant && onRegenerate && (
               <button
                 onClick={onRegenerate}
@@ -912,10 +1392,9 @@ const ChatMessage = ({ msg, onCopy, copiedId, compact, showTimestamps, showConfi
               </button>
             )}
 
-            {/* Confidence */}
             {showConfidence && msg.confidence != null && (
               <span className={`text-[10px] px-2 py-0.5 rounded-full ml-auto ${
-                msg.confidence >= 0.8 ? 'bg-success/10 text-success' : msg.confidence >= 0.5 ? 'bg-warning/10 text-warning' : 'bg-destructive/10 text-destructive'
+                msg.confidence >= 0.8 ? 'bg-green-500/10 text-green-500' : msg.confidence >= 0.5 ? 'bg-yellow-500/10 text-yellow-500' : 'bg-destructive/10 text-destructive'
               }`}>
                 {Math.round(msg.confidence * 100)}% confidence
               </span>
@@ -949,46 +1428,106 @@ const ChatMessage = ({ msg, onCopy, copiedId, compact, showTimestamps, showConfi
 };
 
 // ===== Welcome Screen =====
-const WelcomeScreen = ({ setQuestion, user, onNewChat }: { setQuestion: (q: string) => void; user: any; onNewChat: () => void }) => (
-  <div className="flex flex-col items-center justify-center py-16 text-center">
-    <div className="relative mb-6">
-      <div className="absolute inset-0 bg-primary/10 blur-2xl rounded-full scale-150" />
-      <div className="relative p-4 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/15">
-        <Brain className="h-8 w-8 text-primary" />
+const WelcomeScreen = ({ setQuestion, user, onNewChat, documents, selectedDocId, onQuickAction }: {
+  setQuestion: (q: string) => void; user: any; onNewChat: () => void;
+  documents?: any[]; selectedDocId?: string; onQuickAction?: (action: typeof QUICK_ACTIONS[0]) => void;
+}) => {
+  const selectedDoc = documents?.find(d => d.id === selectedDocId);
+  const recentDocs = documents?.slice(0, 3);
+
+  return (
+    <div className="flex flex-col items-center justify-center py-12 text-center">
+      <div className="relative mb-6">
+        <div className="absolute inset-0 bg-primary/10 blur-2xl rounded-full scale-150" />
+        <div className="relative p-4 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/15">
+          <Brain className="h-8 w-8 text-primary" />
+        </div>
       </div>
-    </div>
-    <h2 className="text-xl font-bold text-foreground mb-1">NuruAI Civic Intelligence</h2>
-    <p className="text-sm text-muted-foreground max-w-md mb-2">
-      Ask questions about African policy documents. Get evidence-grounded answers with source citations.
-    </p>
-    <p className="text-xs text-muted-foreground/50 mb-8">
-      Just type your question below — a conversation will be created automatically.
-    </p>
-
-    <div className="grid gap-2.5 sm:grid-cols-2 w-full max-w-lg">
-      {[
-        { q: 'What does this budget allocate to healthcare?', icon: '🏥' },
-        { q: 'How will this policy affect education?', icon: '📚' },
-        { q: 'What environmental targets are set?', icon: '🌍' },
-        { q: 'What accountability measures exist?', icon: '⚖️' },
-      ].map((item, i) => (
-        <button
-          key={i}
-          onClick={() => setQuestion(item.q)}
-          className="text-left p-3 rounded-xl border border-border/30 hover:border-primary/30 hover:bg-primary/5 transition-all text-xs group"
-        >
-          <span className="text-sm mb-0.5 block">{item.icon}</span>
-          <span className="text-muted-foreground group-hover:text-foreground transition-colors leading-relaxed">{item.q}</span>
-        </button>
-      ))}
-    </div>
-
-    {!user && (
-      <p className="text-xs text-muted-foreground mt-6 flex items-center gap-1.5">
-        <AlertCircle className="h-3.5 w-3.5" />Sign in to start a conversation
+      <h2 className="text-xl font-bold text-foreground mb-1">NuruAI Civic Intelligence</h2>
+      <p className="text-sm text-muted-foreground max-w-md mb-2">
+        Ask questions about African policy documents. Get evidence-grounded answers with source citations.
       </p>
-    )}
-  </div>
-);
+      <p className="text-xs text-muted-foreground/50 mb-6">
+        Just type your question below — a conversation will be created automatically.
+      </p>
+
+      {/* Document-aware quick actions */}
+      {selectedDoc && (
+        <div className="w-full max-w-lg mb-6">
+          <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center justify-center gap-1.5">
+            <FileText className="h-3.5 w-3.5 text-primary" />
+            Quick actions for "{selectedDoc.title}"
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {QUICK_ACTIONS.map(action => (
+              <button
+                key={action.id}
+                onClick={() => {
+                  onQuickAction?.(action);
+                }}
+                className="flex flex-col items-center gap-1.5 p-3 rounded-lg border border-border/20 hover:border-primary/30 hover:bg-primary/5 transition-all text-center group"
+              >
+                <action.icon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                <span className="text-[11px] font-medium text-muted-foreground group-hover:text-foreground">{action.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Suggested prompts */}
+      <div className="grid gap-2.5 sm:grid-cols-2 w-full max-w-lg">
+        {(selectedDoc ? [
+          { q: `What are the key financial allocations in "${selectedDoc.title}"?`, icon: '💰' },
+          { q: `How does "${selectedDoc.title}" impact ordinary citizens?`, icon: '👥' },
+          { q: `What accountability mechanisms are in "${selectedDoc.title}"?`, icon: '⚖️' },
+          { q: `What are the implementation risks in "${selectedDoc.title}"?`, icon: '⚠️' },
+        ] : [
+          { q: 'What does this budget allocate to healthcare?', icon: '🏥' },
+          { q: 'How will this policy affect education?', icon: '📚' },
+          { q: 'What environmental targets are set?', icon: '🌍' },
+          { q: 'What accountability measures exist?', icon: '⚖️' },
+        ]).map((item, i) => (
+          <button
+            key={i}
+            onClick={() => setQuestion(item.q)}
+            className="text-left p-3 rounded-xl border border-border/30 hover:border-primary/30 hover:bg-primary/5 transition-all text-xs group"
+          >
+            <span className="text-sm mb-0.5 block">{item.icon}</span>
+            <span className="text-muted-foreground group-hover:text-foreground transition-colors leading-relaxed">{item.q}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Recent documents hint */}
+      {!selectedDoc && recentDocs && recentDocs.length > 0 && (
+        <div className="mt-6 w-full max-w-lg">
+          <p className="text-[10px] text-muted-foreground/40 mb-2">Recent documents available for analysis:</p>
+          <div className="flex flex-wrap justify-center gap-1.5">
+            {recentDocs.map(d => (
+              <Badge key={d.id} variant="outline" className="text-[10px] font-normal cursor-default">
+                <FileText className="h-2.5 w-2.5 mr-1" />{d.title.substring(0, 30)}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Feature hints */}
+      <div className="mt-8 flex flex-wrap justify-center gap-3 text-[10px] text-muted-foreground/40">
+        <span className="flex items-center gap-1"><Paperclip className="h-3 w-3" /> Attach files</span>
+        <span className="flex items-center gap-1"><Mic className="h-3 w-3" /> Voice input</span>
+        <span className="flex items-center gap-1"><Share2 className="h-3 w-3" /> Share chats</span>
+        <span className="flex items-center gap-1"><Keyboard className="h-3 w-3" /> Shortcuts</span>
+      </div>
+
+      {!user && (
+        <p className="text-xs text-muted-foreground mt-6 flex items-center gap-1.5">
+          <AlertCircle className="h-3.5 w-3.5" />Sign in to start a conversation
+        </p>
+      )}
+    </div>
+  );
+};
 
 export default NuruQuestionInterface;
