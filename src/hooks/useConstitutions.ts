@@ -61,9 +61,15 @@ export function useUploadConstitution() {
       if (error) throw error;
 
       // Trigger AI processing
-      await supabase.functions.invoke('nuru-ai-chat', {
+      const { error: procError } = await supabase.functions.invoke('nuru-ai-chat', {
         body: { action: 'process_constitution', constitutionId: data.id },
-      }).catch(e => console.error('Constitution processing trigger failed:', e));
+      });
+      if (procError) {
+        try {
+          const body = typeof procError.context?.json === 'function' ? await procError.context.json() : null;
+          console.error('Constitution processing trigger failed:', body?.error || procError.message);
+        } catch { console.error('Constitution processing trigger failed:', procError); }
+      }
 
       return data;
     },
@@ -103,7 +109,14 @@ export function useProcessConstitution() {
       const { error } = await supabase.functions.invoke('nuru-ai-chat', {
         body: { action: 'process_constitution', constitutionId: id },
       });
-      if (error) throw error;
+      if (error) {
+        let msg = 'Processing failed';
+        try {
+          const body = typeof error.context?.json === 'function' ? await error.context.json() : null;
+          if (body?.error) msg = body.error;
+        } catch {}
+        throw new Error(msg);
+      }
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['country-constitutions'] });
