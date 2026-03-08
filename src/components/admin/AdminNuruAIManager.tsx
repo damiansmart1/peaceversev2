@@ -74,6 +74,7 @@ const AdminNuruAIManager = () => {
         <TabsList>
           <TabsTrigger value="documents" className="gap-2"><FileText className="h-4 w-4" />Documents</TabsTrigger>
           <TabsTrigger value="questions" className="gap-2"><MessageSquareText className="h-4 w-4" />Questions</TabsTrigger>
+          <TabsTrigger value="token-limits" className="gap-2"><Coins className="h-4 w-4" />Token Limits</TabsTrigger>
           <TabsTrigger value="audit" className="gap-2"><Shield className="h-4 w-4" />Audit Trail</TabsTrigger>
         </TabsList>
 
