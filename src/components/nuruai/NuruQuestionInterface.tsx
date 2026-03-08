@@ -677,7 +677,7 @@ const NuruQuestionInterface = () => {
                 <FileText className="h-2.5 w-2.5 shrink-0" />{selectedDoc.title}
               </Badge>
             )}
-            <Badge className="text-[9px] gap-1 font-semibold hidden sm:flex bg-primary/15 text-primary-foreground border border-primary/30 dark:bg-primary/25 dark:text-primary" variant="outline">
+            <Badge className="text-[9px] gap-1 font-semibold hidden sm:flex bg-primary text-primary-foreground border-primary/50" variant="outline">
               <Sparkles className="h-2.5 w-2.5 text-gold" />
               {MODELS.find(m => m.value === settings.model)?.label || 'Gemini Pro'}
             </Badge>
