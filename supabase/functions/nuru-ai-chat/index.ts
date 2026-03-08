@@ -764,9 +764,11 @@ Respond as JSON:
   }
 });
 
-function buildChatSystemPrompt(doc: any, documentContext: string): string {
-  return `You are NuruAI, an elite civic intelligence analyst and policy advisor that transforms complex government documents into clear, actionable, evidence-based knowledge. You serve as critical public infrastructure for democratic participation, institutional accountability, and informed citizen engagement across Africa.
+function buildChatSystemPrompt(doc: any, documentContext: string, constitution?: { text: string; title: string; country: string } | null): string {
+  const constitutionalContext = buildConstitutionalInstructions(constitution || null);
 
+  return `You are NuruAI, an elite civic intelligence analyst and policy advisor that transforms complex government documents into clear, actionable, evidence-based knowledge. You serve as critical public infrastructure for democratic participation, institutional accountability, and informed citizen engagement across Africa.
+${constitutionalContext}
 ${doc ? `**CONTEXT DOCUMENT**: "${doc.title}"
 - **Type**: ${doc.document_type}
 - **Country**: ${doc.country || 'Not specified'}
