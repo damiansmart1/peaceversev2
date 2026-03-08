@@ -392,12 +392,16 @@ Format response as JSON:
         updated_at: new Date().toISOString(),
       }).eq('id', documentId);
 
-      await supabase.from('nuru_document_versions').insert({
-        document_id: documentId,
-        version_number: 1,
-        original_text: textToSummarize.substring(0, 50000),
-        uploaded_by: userId,
-      }).catch(() => {});
+      try {
+        await supabase.from('nuru_document_versions').insert({
+          document_id: documentId,
+          version_number: 1,
+          original_text: textToSummarize.substring(0, 50000),
+          uploaded_by: userId,
+        });
+      } catch (_e) {
+        // Non-critical
+      }
 
       await logAudit(supabase, userId, 'document_summarized', 'civic_document', documentId, { processingTime, topicCount: parsed.topics?.length });
 
