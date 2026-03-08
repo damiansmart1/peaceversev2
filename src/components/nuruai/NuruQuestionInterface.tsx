@@ -642,9 +642,9 @@ const NuruQuestionInterface = () => {
               </div>
             </div>
 
-            {/* Document Context */}
+            {/* Document Context — Multi-select */}
             <div className="px-3 pb-2">
-              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-1.5">Context Document</p>
+              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-1.5">Context Documents</p>
               <Select value={selectedDocId} onValueChange={setSelectedDocId}>
                 <SelectTrigger className="h-8 text-xs rounded-lg bg-background/50">
                   <FileText className="h-3 w-3 mr-1 text-muted-foreground shrink-0" />
@@ -659,6 +659,34 @@ const NuruQuestionInterface = () => {
                   ))}
                 </SelectContent>
               </Select>
+              {/* Additional document chips */}
+              {selectedDocIds.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-1.5">
+                  {selectedDocIds.map(id => {
+                    const doc = documents?.find(d => d.id === id);
+                    return doc ? (
+                      <Badge key={id} variant="secondary" className="text-[8px] gap-1 pr-0.5">
+                        <FileText className="h-2 w-2" />
+                        <span className="truncate max-w-[80px]">{doc.title}</span>
+                        <button onClick={() => setSelectedDocIds(prev => prev.filter(i => i !== id))} className="ml-0.5 p-0.5 rounded hover:bg-muted">
+                          <X className="h-2 w-2" />
+                        </button>
+                      </Badge>
+                    ) : null;
+                  })}
+                </div>
+              )}
+              {selectedDocIds.length > 0 && documents && documents.length > selectedDocIds.length && (
+                <button
+                  className="text-[9px] text-primary/60 hover:text-primary mt-1 flex items-center gap-1"
+                  onClick={() => {
+                    const nextDoc = documents.find(d => !selectedDocIds.includes(d.id));
+                    if (nextDoc) setSelectedDocIds(prev => [...prev, nextDoc.id]);
+                  }}
+                >
+                  <Plus className="h-2.5 w-2.5" /> Add another document
+                </button>
+              )}
             </div>
 
             <Separator className="opacity-30" />
