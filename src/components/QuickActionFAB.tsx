@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Plus, Mic2, FileStack, Users, LifeBuoy } from 'lucide-react';
+import { Plus, AudioLines, ScrollText, UsersRound, ShieldPlus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 const quickActions = [
-  { icon: Mic2, label: 'Share Story', path: '/community', color: 'bg-voice-active' },
-  { icon: FileStack, label: 'Create Proposal', path: '/proposals', color: 'bg-primary' },
-  { icon: Users, label: 'Community Hub', path: '/community', color: 'bg-accent' },
-  { icon: LifeBuoy, label: 'Safety Portal', path: '/safety', color: 'bg-success' },
+  { icon: AudioLines, label: 'Share Story', path: '/community', color: 'bg-voice-active' },
+  { icon: ScrollText, label: 'Create Proposal', path: '/proposals', color: 'bg-primary' },
+  { icon: UsersRound, label: 'Community Hub', path: '/community', color: 'bg-accent' },
+  { icon: ShieldPlus, label: 'Safety Portal', path: '/safety', color: 'bg-success' },
 ];
 
 export default function QuickActionFAB() {

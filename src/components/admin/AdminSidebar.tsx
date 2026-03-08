@@ -1,8 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard, Users, FileStack, MapPinned, ShieldCheck, Medal,
-  MessagesSquare, Gamepad2, HeartHandshake, SlidersHorizontal, Siren,
-  ChevronDown, BrainCircuit, Home, Plug, Radio, Vote,
+  LayoutGrid, UsersRound, FolderKanban, MapPinned, ShieldHalf, Medal,
+  MessageCircleMore, Flame, HeartHandshake, Sliders, Siren,
+  ChevronDown, BrainCircuit, House, Unplug, Antenna, Landmark,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,9 +21,9 @@ interface AdminSidebarProps {
 }
 
 const menuItems = [
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, singleItem: true },
+  { id: 'dashboard', label: 'Dashboard', icon: LayoutGrid, singleItem: true },
   {
-    id: 'users-management', label: 'Users & Roles', icon: Users,
+    id: 'users-management', label: 'Users & Roles', icon: UsersRound,
     children: [
       { id: 'users', label: 'Users' },
       { id: 'roles', label: 'Role Management' },
@@ -31,7 +31,7 @@ const menuItems = [
     ],
   },
   {
-    id: 'content', label: 'Content', icon: FileStack,
+    id: 'content', label: 'Content', icon: FolderKanban,
     children: [
       { id: 'cms', label: 'Website Content (CMS)' },
       { id: 'content', label: 'Stories & Posts' },
@@ -51,7 +51,7 @@ const menuItems = [
     ],
   },
   {
-    id: 'communication', label: 'Communication', icon: Radio,
+    id: 'communication', label: 'Communication', icon: Antenna,
     children: [
       { id: 'comm-hub', label: 'Communication Hub' },
       { id: 'broadcasts', label: 'Broadcasts' },
@@ -60,7 +60,7 @@ const menuItems = [
     ],
   },
   {
-    id: 'engagement', label: 'Engagement', icon: MessagesSquare,
+    id: 'engagement', label: 'Engagement', icon: MessageCircleMore,
     children: [
       { id: 'proposals', label: 'Proposals' },
       { id: 'challenges', label: 'Challenges' },
@@ -68,7 +68,7 @@ const menuItems = [
     ],
   },
   {
-    id: 'configuration', label: 'Configuration', icon: SlidersHorizontal,
+    id: 'configuration', label: 'Configuration', icon: Sliders,
     children: [
       { id: 'ai-analytics', label: 'AI Analytics' },
       { id: 'api-analytics', label: 'API Usage' },
@@ -111,7 +111,7 @@ export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarPro
             onClick={() => navigate('/')}
             className="w-full justify-start gap-2 h-8 text-xs text-muted-foreground hover:text-foreground"
           >
-            <Home className="h-3.5 w-3.5" />
+            <House className="h-3.5 w-3.5" />
             {!collapsed && <span>Back to Homepage</span>}
           </Button>
         </div>

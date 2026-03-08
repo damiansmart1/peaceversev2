@@ -16,7 +16,7 @@ import { useContentFilters } from '@/hooks/useContentFilters';
 import { useTranslationContext } from '@/components/TranslationProvider';
 import SectionImageBanner from '@/components/SectionImageBanner';
 import { SocialHub } from '@/components/social/SocialHub';
-import { Map, MessageSquare, Users, Calendar, BookOpen, Award, Radio as RadioIcon, Mic, Sparkles } from 'lucide-react';
+import { MapPinned, MessageCircleMore, UsersRound, CalendarRange, BookMarked, Award, Antenna, AudioLines, Sparkles } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import communityUnity from "@/assets/community-unity.jpg";
 import radioBroadcasting from "@/assets/radio-broadcasting.jpg";
@@ -47,15 +47,15 @@ const Community = () => {
               Social
             </TabsTrigger>
             <TabsTrigger value="map" className="flex items-center gap-2">
-              <Map className="w-4 h-4" />
+              <MapPinned className="w-4 h-4" />
               {t('community.tabs.safeSpaces')}
             </TabsTrigger>
             <TabsTrigger value="events" className="flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
+              <CalendarRange className="w-4 h-4" />
               {t('community.tabs.events')}
             </TabsTrigger>
             <TabsTrigger value="stories" className="flex items-center gap-2">
-              <MessageSquare className="w-4 h-4" />
+              <MessageCircleMore className="w-4 h-4" />
               {t('community.tabs.stories')}
             </TabsTrigger>
             <TabsTrigger value="challenges" className="flex items-center gap-2">
@@ -63,15 +63,15 @@ const Community = () => {
               {t('community.tabs.challenges')}
             </TabsTrigger>
             <TabsTrigger value="radio" className="flex items-center gap-2">
-              <RadioIcon className="w-4 h-4" />
+              <Antenna className="w-4 h-4" />
               {t('community.tabs.radio')}
             </TabsTrigger>
             <TabsTrigger value="voice" className="flex items-center gap-2">
-              <Mic className="w-4 h-4" />
+              <AudioLines className="w-4 h-4" />
               {t('community.tabs.voiceStories')}
             </TabsTrigger>
             <TabsTrigger value="resources" className="flex items-center gap-2">
-              <BookOpen className="w-4 h-4" />
+              <BookMarked className="w-4 h-4" />
               {t('community.tabs.resources')}
             </TabsTrigger>
           </TabsList>

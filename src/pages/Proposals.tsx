@@ -5,7 +5,7 @@ import { ProposalFilters } from '@/components/ProposalFilters';
 import { useTranslationContext } from '@/components/TranslationProvider';
 import SectionImageBanner from '@/components/SectionImageBanner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FileText, TrendingUp, Clock, Archive, Vote, BarChart3 } from 'lucide-react';
+import { ScrollText, TrendingUp, Clock, Archive, Landmark, AreaChart } from 'lucide-react';
 import proposalsDemocracy from "@/assets/proposals-democracy.jpg";
 import { PollsSection } from '@/components/polls/PollsSection';
 
@@ -33,11 +33,11 @@ const Proposals = () => {
           <Tabs defaultValue="polls" className="w-full">
             <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 mb-6">
               <TabsTrigger value="polls" className="gap-2">
-                <Vote className="w-4 h-4" />
+                <Landmark className="w-4 h-4" />
                 <span className="hidden sm:inline">{t('proposals.tabs.polls')}</span>
               </TabsTrigger>
               <TabsTrigger value="all" className="gap-2">
-                <FileText className="w-4 h-4" />
+                <ScrollText className="w-4 h-4" />
                 <span className="hidden sm:inline">{t('proposals.tabs.all')}</span>
               </TabsTrigger>
               <TabsTrigger value="trending" className="gap-2">

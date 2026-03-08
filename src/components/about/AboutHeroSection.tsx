@@ -1,15 +1,15 @@
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { Shield, Globe, AlertTriangle, Users, Eye, Target, Zap, Radio } from 'lucide-react';
+import { ShieldHalf, Earth, OctagonAlert, UsersRound, ScanSearch, Target, Zap, Antenna } from 'lucide-react';
 
 const platformCapabilities = [
-  { icon: AlertTriangle, label: 'Early Warning', value: '12,450+ incidents tracked' },
-  { icon: Shield, label: 'Verification', value: '71.6% verification rate' },
-  { icon: Globe, label: 'Coverage', value: '47 African nations' },
-  { icon: Users, label: 'Community', value: '156,000+ registered users' },
-  { icon: Eye, label: 'Election Monitoring', value: 'Carter Center standards' },
+  { icon: OctagonAlert, label: 'Early Warning', value: '12,450+ incidents tracked' },
+  { icon: ShieldHalf, label: 'Verification', value: '71.6% verification rate' },
+  { icon: Earth, label: 'Coverage', value: '47 African nations' },
+  { icon: UsersRound, label: 'Community', value: '156,000+ registered users' },
+  { icon: ScanSearch, label: 'Election Monitoring', value: 'Carter Center standards' },
   { icon: Zap, label: 'Response Time', value: '< 4 hrs avg.' },
-  { icon: Radio, label: 'Communication', value: 'Multi-channel broadcast' },
+  { icon: Antenna, label: 'Communication', value: 'Multi-channel broadcast' },
   { icon: Target, label: 'Prevention', value: '340+ conflicts averted' },
 ];
 

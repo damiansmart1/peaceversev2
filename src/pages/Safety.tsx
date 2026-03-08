@@ -8,7 +8,7 @@ import { SafetyResourceLibrary } from '@/components/SafetyResourceLibrary';
 import { useTranslationContext } from '@/components/TranslationProvider';
 import SectionImageBanner from '@/components/SectionImageBanner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Shield, AlertTriangle, Users, Wifi, BookOpen } from 'lucide-react';
+import { ShieldHalf, OctagonAlert, UsersRound, WifiHigh, BookMarked } from 'lucide-react';
 import safetyProtection from "@/assets/safety-protection.jpg";
 
 const Safety = () => {
@@ -31,23 +31,23 @@ const Safety = () => {
         <Tabs defaultValue="moderation" className="max-w-6xl mx-auto">
           <TabsList className="grid w-full grid-cols-5 mb-6 sm:mb-8 h-auto p-1">
             <TabsTrigger value="moderation" className="gap-1 sm:gap-2 text-xs sm:text-sm py-2 px-1 sm:px-3 flex-col sm:flex-row h-auto">
-              <Shield className="w-4 h-4 shrink-0" />
+              <ShieldHalf className="w-4 h-4 shrink-0" />
               <span className="hidden xs:inline truncate">{t('safety.moderation')}</span>
             </TabsTrigger>
             <TabsTrigger value="protection" className="gap-1 sm:gap-2 text-xs sm:text-sm py-2 px-1 sm:px-3 flex-col sm:flex-row h-auto">
-              <AlertTriangle className="w-4 h-4 shrink-0" />
+              <OctagonAlert className="w-4 h-4 shrink-0" />
               <span className="hidden xs:inline truncate">{t('safety.protection')}</span>
             </TabsTrigger>
             <TabsTrigger value="trust" className="gap-1 sm:gap-2 text-xs sm:text-sm py-2 px-1 sm:px-3 flex-col sm:flex-row h-auto">
-              <Users className="w-4 h-4 shrink-0" />
+              <UsersRound className="w-4 h-4 shrink-0" />
               <span className="hidden xs:inline truncate">{t('safety.trust')}</span>
             </TabsTrigger>
             <TabsTrigger value="offline" className="gap-1 sm:gap-2 text-xs sm:text-sm py-2 px-1 sm:px-3 flex-col sm:flex-row h-auto">
-              <Wifi className="w-4 h-4 shrink-0" />
+              <WifiHigh className="w-4 h-4 shrink-0" />
               <span className="hidden xs:inline truncate">{t('safety.offline')}</span>
             </TabsTrigger>
             <TabsTrigger value="resources" className="gap-1 sm:gap-2 text-xs sm:text-sm py-2 px-1 sm:px-3 flex-col sm:flex-row h-auto">
-              <BookOpen className="w-4 h-4 shrink-0" />
+              <BookMarked className="w-4 h-4 shrink-0" />
               <span className="hidden xs:inline truncate">{t('safety.resources')}</span>
             </TabsTrigger>
           </TabsList>

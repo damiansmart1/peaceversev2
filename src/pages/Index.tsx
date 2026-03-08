@@ -4,9 +4,9 @@ import SponsorsCarousel from "@/components/SponsorsCarousel";
 import AfricaMap from "@/components/AfricaMap";
 import { useNavigate } from "react-router-dom";
 import { 
-  Mic2, Users, Radio, Medal, ShieldCheck, Vote, Activity, Siren,
-  ArrowRight, Globe, ScanEye, BadgeCheck, Zap, TrendingUp, MapPinned, BellRing, HeartHandshake, Sprout,
-  Scale, Crosshair, Handshake, BookOpenText, Target, Leaf, MapPin, BarChart3, CheckCircle, AlertCircle, Eye, Bell, Heart, BookOpen, Shield
+  AudioLines, UsersRound, Antenna, Medal, ShieldHalf, Landmark, HeartPulse, Siren,
+  ArrowRight, Earth, ScanEye, BadgeCheck, Zap, TrendingUp, MapPinned, BellRing, HeartHandshake, Sprout,
+  Scale, Crosshair, Handshake, BookOpenText, Target, Leaf, MapPinCheck, AreaChart, CircleCheckBig, CircleAlert, ScanSearch, BellDot, Heart, BookMarked, ShieldHalf as ShieldIcon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -16,18 +16,18 @@ const Index = () => {
 
   const features = [
     { icon: Siren, color: "bg-destructive", path: "/incidents", label: "Report", desc: "Submit incidents securely" },
-    { icon: Activity, color: "bg-primary", path: "/peace-pulse", label: "Analytics", desc: "Real-time intelligence" },
-    { icon: Users, color: "bg-secondary", path: "/community", label: "Community", desc: "Connect & collaborate" },
-    { icon: ShieldCheck, color: "bg-earth", path: "/safety", label: "Safety", desc: "Find safe spaces" },
-    { icon: Vote, color: "bg-gold", path: "/proposals", label: "Vote", desc: "Shape policies" },
-    { icon: Mic2, color: "bg-accent", path: "/community", label: "Voice", desc: "Share your story" },
+    { icon: HeartPulse, color: "bg-primary", path: "/peace-pulse", label: "Analytics", desc: "Real-time intelligence" },
+    { icon: UsersRound, color: "bg-secondary", path: "/community", label: "Community", desc: "Connect & collaborate" },
+    { icon: ShieldHalf, color: "bg-earth", path: "/safety", label: "Safety", desc: "Find safe spaces" },
+    { icon: Landmark, color: "bg-gold", path: "/proposals", label: "Vote", desc: "Shape policies" },
+    { icon: AudioLines, color: "bg-accent", path: "/community", label: "Voice", desc: "Share your story" },
   ];
 
   const processSteps = [
-    { step: "01", icon: AlertCircle, title: "Report", desc: "Citizens submit geo-tagged incidents with evidence" },
-    { step: "02", icon: Eye, title: "Verify", desc: "AI + human verification ensures accuracy" },
-    { step: "03", icon: Bell, title: "Alert", desc: "Real-time alerts to relevant stakeholders" },
-    { step: "04", icon: CheckCircle, title: "Respond", desc: "Coordinated action and prevention" },
+    { step: "01", icon: CircleAlert, title: "Report", desc: "Citizens submit geo-tagged incidents with evidence" },
+    { step: "02", icon: ScanSearch, title: "Verify", desc: "AI + human verification ensures accuracy" },
+    { step: "03", icon: BellDot, title: "Alert", desc: "Real-time alerts to relevant stakeholders" },
+    { step: "04", icon: CircleCheckBig, title: "Respond", desc: "Coordinated action and prevention" },
   ];
 
   const impactStats = [
@@ -39,7 +39,7 @@ const Index = () => {
 
   const frameworks = [
     {
-      icon: Users,
+      icon: UsersRound,
       badge: "UNSCR 2250",
       title: "Youth, Peace & Security",
       description: "Empowering young Africans as agents of peace through participation, protection, prevention, partnerships, and disengagement & reintegration.",
@@ -47,7 +47,7 @@ const Index = () => {
       color: "primary"
     },
     {
-      icon: Globe,
+      icon: Earth,
       badge: "Agenda 2063",
       title: "The Africa We Want",
       description: "Contributing to the African Union's 50-year vision for an integrated, prosperous, and peaceful Africa driven by its own citizens.",
@@ -55,7 +55,7 @@ const Index = () => {
       color: "secondary"
     },
     {
-      icon: Shield,
+      icon: ShieldIcon,
       badge: "Aspiration 4",
       title: "A Peaceful & Secure Africa",
       description: "Advancing conflict prevention, peacekeeping, and post-conflict reconstruction through citizen-powered early warning systems.",
@@ -105,7 +105,7 @@ const Index = () => {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
             >
-              <BookOpen className="w-4 h-4 text-primary" />
+              <BookMarked className="w-4 h-4 text-primary" />
               <span className="text-primary text-sm font-semibold tracking-wider uppercase">International Alignment</span>
             </motion.div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4">
@@ -156,7 +156,7 @@ const Index = () => {
                         key={highlight}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-muted/50 border border-border/50 rounded-lg text-sm text-foreground/80"
                       >
-                        <CheckCircle className="w-3.5 h-3.5 text-gold" />
+                        <CircleCheckBig className="w-3.5 h-3.5 text-gold" />
                         {highlight}
                       </span>
                     ))}
@@ -274,7 +274,7 @@ const Index = () => {
               transition={{ duration: 0.6 }}
             >
               <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/30 px-4 py-2 rounded-full mb-6">
-                <Globe className="w-4 h-4 text-primary" />
+                <Earth className="w-4 h-4 text-primary" />
                 <span className="text-primary text-sm font-semibold tracking-wider uppercase">Continental Coverage</span>
               </div>
               <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-6 leading-tight">
@@ -286,10 +286,10 @@ const Index = () => {
               
               <div className="grid grid-cols-2 gap-4 mb-8">
                 {[
-                  { icon: MapPin, label: "Geo-tagged Reports" },
+                  { icon: MapPinCheck, label: "Geo-tagged Reports" },
                   { icon: Zap, label: "Instant Alerts" },
-                  { icon: BarChart3, label: "Trend Analysis" },
-                  { icon: Shield, label: "Verified Data" },
+                  { icon: AreaChart, label: "Trend Analysis" },
+                  { icon: ShieldIcon, label: "Verified Data" },
                 ].map((item, i) => (
                   <motion.div
                     key={item.label}
@@ -341,7 +341,7 @@ const Index = () => {
             viewport={{ once: true }}
           >
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 px-4 py-2 rounded-full mb-6">
-              <Activity className="w-4 h-4 text-gold" />
+              <HeartPulse className="w-4 h-4 text-gold" />
               <span className="text-gold text-sm font-semibold tracking-wider uppercase">The Process</span>
             </div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white">
@@ -466,7 +466,7 @@ const Index = () => {
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                <Shield className="w-5 h-5 text-primary-foreground" />
+                <ShieldIcon className="w-5 h-5 text-primary-foreground" />
               </div>
               <div>
                 <h3 className="font-bold text-foreground">PeaceVerse</h3>

@@ -10,7 +10,7 @@ import { IncidentTimeline } from '@/components/IncidentTimeline';
 import { useIncidentNotifications } from '@/hooks/useIncidentNotifications';
 import SectionImageBanner from '@/components/SectionImageBanner';
 import Navigation from '@/components/Navigation';
-import { AlertTriangle } from 'lucide-react';
+import { Siren } from 'lucide-react';
 import { useTranslationContext } from '@/components/TranslationProvider';
 import incidentReporting from "@/assets/incident-reporting.jpg";
 
@@ -45,7 +45,7 @@ export default function Incidents() {
               size="lg"
               className="gap-2 w-full sm:w-auto"
             >
-              <AlertTriangle className="h-5 w-5" />
+              <Siren className="h-5 w-5" />
               <span className="whitespace-nowrap">{t('incidents.submitReport')}</span>
             </Button>
           </div>
