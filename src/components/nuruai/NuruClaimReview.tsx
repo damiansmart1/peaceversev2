@@ -366,7 +366,7 @@ const NuruClaimReview = () => {
                                 />
                               </div>
                               {item.share_token && (
-                                <Button variant="ghost" size="sm" className="h-6 text-[10px] gap-1" onClick={() => handleCopyShareLink(item.share_token)}>
+                                <Button variant="ghost" size="sm" className="h-6 text-[10px] gap-1" onClick={() => handleCopyShareLink(item.share_token, item.is_public)}>
                                   <Link2 className="h-3 w-3" />Copy Link
                                 </Button>
                               )}
@@ -399,7 +399,7 @@ const NuruClaimReview = () => {
 
 /* ========== VERDICT RESULT CARD ========== */
 function FactCheckResultCard({ result, statusInfo, onCopyShareLink, onCopySchema, onTogglePublic, showSchemaPreview, onToggleSchemaPreview }: {
-  result: any; statusInfo: any; onCopyShareLink: (t: string) => void; onCopySchema: (s: any) => void;
+  result: any; statusInfo: any; onCopyShareLink: (t: string, isPublic: boolean) => void; onCopySchema: (s: any) => void;
   onTogglePublic: (id: string, current: boolean) => void; showSchemaPreview: boolean; onToggleSchemaPreview: () => void;
 }) {
   return (
