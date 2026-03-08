@@ -10,8 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { 
   Brain, FileText, MessageSquareText, Shield, Database, 
   Loader2, Activity, CheckCircle, Clock, Trash2, Eye, 
-  AlertTriangle, Building2, ChevronRight
+  AlertTriangle, Building2, ChevronRight, Coins
 } from 'lucide-react';
+import AdminTokenLimitsManager from './AdminTokenLimitsManager';
 import { 
   useCivicDocuments, useAllCivicQuestions, useNuruAuditLog, useSeedNuruDemo,
   useDeleteDocument, useUpdateDocumentStatus, useDocumentQuestions
