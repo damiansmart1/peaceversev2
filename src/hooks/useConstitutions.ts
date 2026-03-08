@@ -53,13 +53,8 @@ export function useUploadConstitution() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Must be logged in');
 
-      // Sanitize text to prevent "unsupported Unicode escape sequence" errors
-      // by escaping lone backslashes that PostgreSQL may interpret as Unicode escapes
-      const sanitizedText = input.original_text.replace(/\\/g, '\\\\');
-
       const { data, error } = await sb.from('country_constitutions').insert({
         ...input,
-        original_text: sanitizedText,
         uploaded_by: user.id,
         processing_status: 'pending',
       }).select().single();

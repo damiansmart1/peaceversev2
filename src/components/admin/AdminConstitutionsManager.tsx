@@ -14,6 +14,7 @@ import {
   AlertCircle, BookOpen, Scale, Trash2, Edit, Eye, RefreshCw
 } from 'lucide-react';
 import { useConstitutions, useUploadConstitution, useDeleteConstitution, useProcessConstitution } from '@/hooks/useConstitutions';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 const AFRICAN_COUNTRIES = [
@@ -74,9 +75,48 @@ const AdminConstitutionsManager = () => {
     let textContent = form.original_text;
 
     if (uploadMode === 'file' && selectedFile) {
-      // Read file as text for now
-      textContent = await selectedFile.text();
+      const isPdf = selectedFile.name.toLowerCase().endsWith('.pdf');
+      const isDoc = selectedFile.name.toLowerCase().endsWith('.doc') || selectedFile.name.toLowerCase().endsWith('.docx');
+
+      if (isPdf || isDoc) {
+        // Upload file to storage, then extract text via edge function
+        toast.info('Extracting text from document...');
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (!user) throw new Error('Must be logged in');
+
+          const filePath = `constitutions/${user.id}/${Date.now()}_${selectedFile.name}`;
+          const { error: uploadError } = await supabase.storage
+            .from('nuru-documents')
+            .upload(filePath, selectedFile);
+          if (uploadError) throw new Error(`File upload failed: ${uploadError.message}`);
+
+          const { data: { publicUrl } } = supabase.storage
+            .from('nuru-documents')
+            .getPublicUrl(filePath);
+
+          const { data: extractResult, error: extractError } = await supabase.functions.invoke('extract-document-text', {
+            body: { fileUrl: publicUrl, fileName: selectedFile.name },
+          });
+          if (extractError) throw new Error(`Text extraction failed: ${extractError.message}`);
+
+          textContent = extractResult?.text || '';
+          if (!textContent || textContent.length < 100) {
+            throw new Error('Could not extract sufficient text from the document. Try pasting the text directly.');
+          }
+          toast.success(`Extracted ${textContent.length.toLocaleString()} characters from document`);
+        } catch (e: any) {
+          toast.error(e.message || 'Failed to process document');
+          return;
+        }
+      } else {
+        // Plain text file - read directly but sanitize
+        textContent = await selectedFile.text();
+      }
     }
+
+    // Sanitize: remove null bytes and other problematic characters
+    textContent = textContent.replace(/\u0000/g, '').replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
 
     if (!textContent || textContent.length < 100) {
       toast.error('Constitution text must be at least 100 characters');
