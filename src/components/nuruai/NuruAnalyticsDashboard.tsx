@@ -484,10 +484,10 @@ const NuruAnalyticsDashboard = () => {
                 data={treemapData}
                 dataKey="size"
                 stroke="hsl(var(--card))"
-                strokeWidth={2}
                 animationDuration={600}
-                content={<TreemapContent />}
-              />
+              >
+                <RechartsTooltip content={<CustomTooltip />} />
+              </Treemap>
             </ResponsiveContainer>
           ) : (
             <div className="h-[260px] flex items-center justify-center text-sm text-muted-foreground">No topic data available</div>
