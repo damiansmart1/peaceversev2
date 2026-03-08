@@ -17,7 +17,8 @@ import {
   PanelLeftClose, PanelLeft, PanelRightClose, PanelRight,
   Settings2, Search, MoreHorizontal, Pencil, Download,
   Clock, Pin, PinOff, Eraser, ChevronDown, RotateCcw,
-  Zap, Globe, Shield, BookOpen, Hash, X
+  Zap, Globe, Shield, BookOpen, Hash, X,
+  ThumbsUp, ThumbsDown, RefreshCw, ArrowRight, MessageCircleQuestion
 } from 'lucide-react';
 import {
   useCivicDocuments, useNuruConversations, useNuruMessages,
@@ -72,7 +73,9 @@ const NuruQuestionInterface = () => {
   const [rightSidebarOpen, setRightSidebarOpen] = useState(false);
   const [streamingContent, setStreamingContent] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
+  const [lastUserMessage, setLastUserMessage] = useState<string>('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [feedbackGiven, setFeedbackGiven] = useState<Record<string, 'up' | 'down'>>({});
   const [searchQuery, setSearchQuery] = useState('');
   const [editingConvId, setEditingConvId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
@@ -145,25 +148,60 @@ const NuruQuestionInterface = () => {
     );
   };
 
-  const handleSend = useCallback(async () => {
-    if (!question.trim() || !activeConversationId || isStreaming) return;
-    const msg = question;
+  const handleSendMessage = useCallback(async (msg: string, convId?: string) => {
+    const targetConvId = convId || activeConversationId;
+    if (!msg.trim() || !targetConvId || isStreaming) return;
     setQuestion('');
     if (textareaRef.current) textareaRef.current.style.height = 'auto';
     setIsStreaming(true);
     setStreamingContent('');
+    setLastUserMessage(msg);
 
     try {
-      await streamChat(activeConversationId, msg, (delta) => setStreamingContent(prev => prev + delta), () => {
+      await streamChat(targetConvId, msg, (delta) => setStreamingContent(prev => prev + delta), () => {
         setIsStreaming(false);
         setStreamingContent('');
       });
     } catch (e: any) {
       setIsStreaming(false);
       setStreamingContent('');
-      toast.error(e.message || 'Failed to send message');
+      const errorMsg = e.message || 'Failed to send message';
+      if (errorMsg.includes('Rate limit') || errorMsg.includes('429')) {
+        toast.error(errorMsg, { duration: 8000, description: 'Wait a moment and try again.' });
+      } else if (errorMsg.includes('credits') || errorMsg.includes('402')) {
+        toast.error(errorMsg, { duration: 10000, description: 'Go to Settings → Workspace → Usage to add credits.' });
+      } else {
+        toast.error(errorMsg);
+      }
     }
-  }, [question, activeConversationId, isStreaming, streamChat]);
+  }, [activeConversationId, isStreaming, streamChat]);
+
+  const handleSend = useCallback(() => {
+    if (!question.trim() || isStreaming) return;
+    handleSendMessage(question);
+  }, [question, isStreaming, handleSendMessage]);
+
+  const handleRegenerate = useCallback(async () => {
+    if (!lastUserMessage || !activeConversationId || isStreaming) return;
+    setIsStreaming(true);
+    setStreamingContent('');
+    try {
+      await streamChat(activeConversationId, lastUserMessage, (delta) => setStreamingContent(prev => prev + delta), () => {
+        setIsStreaming(false);
+        setStreamingContent('');
+      });
+    } catch (e: any) {
+      setIsStreaming(false);
+      setStreamingContent('');
+      toast.error(e.message || 'Regeneration failed');
+    }
+  }, [lastUserMessage, activeConversationId, isStreaming, streamChat]);
+
+  const handleFollowUpClick = useCallback((followUp: string) => {
+    if (isStreaming) return;
+    setQuestion('');
+    handleSendMessage(followUp);
+  }, [isStreaming, handleSendMessage]);
 
   const handleCopy = (content: string, id: string) => {
     navigator.clipboard.writeText(content);
@@ -397,7 +435,7 @@ const NuruQuestionInterface = () => {
               <WelcomeScreen setQuestion={setQuestion} user={user} onNewChat={handleStartChat} />
             ) : (
               <div className="space-y-1">
-                {chatMessages?.map((msg) => (
+                {chatMessages?.map((msg, idx) => (
                   <ChatMessage
                     key={msg.id}
                     msg={msg}
@@ -407,6 +445,15 @@ const NuruQuestionInterface = () => {
                     showTimestamps={settings.showTimestamps}
                     showConfidence={settings.showConfidence}
                     markdownEnabled={settings.markdownEnabled}
+                    isLastAssistant={msg.role === 'assistant' && (!chatMessages[idx + 1] || chatMessages[idx + 1]?.role !== 'assistant')}
+                    onFollowUpClick={handleFollowUpClick}
+                    onRegenerate={handleRegenerate}
+                    isStreaming={isStreaming}
+                    feedback={feedbackGiven[msg.id]}
+                    onFeedback={(type) => {
+                      setFeedbackGiven(prev => ({ ...prev, [msg.id]: type }));
+                      toast.success(type === 'up' ? 'Thanks for the positive feedback!' : 'Thanks — we\'ll improve this response type.');
+                    }}
                   />
                 ))}
 
@@ -464,29 +511,11 @@ const NuruQuestionInterface = () => {
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
-                    if (!activeConversationId && user) {
-                      // Auto-create conversation on first message
-                      const doc = documents?.find(d => d.id === selectedDocId);
+                    if (!activeConversationId && user && question.trim()) {
+                      const msg = question;
                       createConversation.mutate(
                         { documentId: selectedDocId || undefined, title: question.substring(0, 60) || 'New Chat' },
-                        {
-                          onSuccess: (conv) => {
-                            setActiveConversationId(conv.id);
-                            // Send will be triggered after state update
-                            setTimeout(async () => {
-                              setIsStreaming(true);
-                              setStreamingContent('');
-                              const msg = question;
-                              setQuestion('');
-                              try {
-                                await streamChat(conv.id, msg, (delta) => setStreamingContent(prev => prev + delta), () => { setIsStreaming(false); setStreamingContent(''); });
-                              } catch (err: any) {
-                                setIsStreaming(false); setStreamingContent('');
-                                toast.error(err.message || 'Failed');
-                              }
-                            }, 100);
-                          }
-                        }
+                        { onSuccess: (conv) => { setActiveConversationId(conv.id); setTimeout(() => handleSendMessage(msg, conv.id), 100); } }
                       );
                       return;
                     }
@@ -499,20 +528,10 @@ const NuruQuestionInterface = () => {
               <Button
                 onClick={() => {
                   if (!activeConversationId && user && question.trim()) {
+                    const msg = question;
                     createConversation.mutate(
                       { documentId: selectedDocId || undefined, title: question.substring(0, 60) || 'New Chat' },
-                      {
-                        onSuccess: (conv) => {
-                          setActiveConversationId(conv.id);
-                          setTimeout(async () => {
-                            setIsStreaming(true); setStreamingContent('');
-                            const msg = question; setQuestion('');
-                            try {
-                              await streamChat(conv.id, msg, (d) => setStreamingContent(p => p + d), () => { setIsStreaming(false); setStreamingContent(''); });
-                            } catch (err: any) { setIsStreaming(false); setStreamingContent(''); toast.error(err.message || 'Failed'); }
-                          }, 100);
-                        }
-                      }
+                      { onSuccess: (conv) => { setActiveConversationId(conv.id); setTimeout(() => handleSendMessage(msg, conv.id), 100); } }
                     );
                     return;
                   }
@@ -777,12 +796,52 @@ const ConversationItem = ({
   );
 };
 
+// ===== Follow-Up Question Extractor =====
+function extractFollowUpQuestions(content: string): string[] {
+  const questions: string[] = [];
+  // Match the "Strategic Questions to Explore Next" section or similar patterns
+  const sectionMatch = content.match(/#{1,3}\s*🔍.*?(?=\n#{1,3}\s[^🔍]|$)/s) 
+    || content.match(/#{1,3}\s*Strategic Questions.*?(?=\n#{1,3}\s|$)/si)
+    || content.match(/#{1,3}\s*Follow[\s-]?[Uu]p.*?(?=\n#{1,3}\s|$)/si);
+  
+  if (sectionMatch) {
+    const section = sectionMatch[0];
+    // Extract bullet points or numbered items that end with ?
+    const lines = section.split('\n');
+    for (const line of lines) {
+      const cleaned = line.replace(/^[\s\-*\d.)+]+/, '').replace(/\*\*/g, '').replace(/"/g, '').trim();
+      if (cleaned.endsWith('?') && cleaned.length > 15 && cleaned.length < 300) {
+        questions.push(cleaned);
+      }
+    }
+  }
+  
+  // Fallback: find any bold questions or quoted questions in last portion of text
+  if (questions.length === 0) {
+    const lastThird = content.slice(Math.floor(content.length * 0.6));
+    const qMatches = lastThird.match(/(?:\*\*|"|")([^*""\n]{20,200}\?)(?:\*\*|"|")/g);
+    if (qMatches) {
+      for (const m of qMatches.slice(0, 6)) {
+        questions.push(m.replace(/\*\*/g, '').replace(/[""]/g, '').trim());
+      }
+    }
+  }
+  
+  return questions.slice(0, 6);
+}
+
 // ===== Chat Message =====
-const ChatMessage = ({ msg, onCopy, copiedId, compact, showTimestamps, showConfidence, markdownEnabled }: {
+const ChatMessage = ({ msg, onCopy, copiedId, compact, showTimestamps, showConfidence, markdownEnabled, isLastAssistant, onFollowUpClick, onRegenerate, isStreaming, feedback, onFeedback }: {
   msg: any; onCopy: (c: string, id: string) => void; copiedId: string | null;
   compact: boolean; showTimestamps: boolean; showConfidence: boolean; markdownEnabled: boolean;
+  isLastAssistant?: boolean; onFollowUpClick?: (q: string) => void; onRegenerate?: () => void;
+  isStreaming?: boolean; feedback?: 'up' | 'down'; onFeedback?: (type: 'up' | 'down') => void;
 }) => {
   const isUser = msg.role === 'user';
+  const followUps = !isUser && isLastAssistant ? extractFollowUpQuestions(msg.content) : [];
+
+  // Strip follow-up section from rendered content for cleaner display (they appear as chips instead)
+  const renderContent = msg.content;
 
   return (
     <div className={`flex gap-3 ${compact ? 'py-2' : 'py-4'} ${isUser ? '' : 'bg-muted/5 -mx-4 px-4 rounded-lg'}`}>
@@ -803,17 +862,19 @@ const ChatMessage = ({ msg, onCopy, copiedId, compact, showTimestamps, showConfi
         </div>
 
         {isUser ? (
-          <p className="text-sm leading-relaxed text-foreground">{msg.content}</p>
+          <p className="text-sm leading-relaxed text-foreground">{renderContent}</p>
         ) : markdownEnabled ? (
           <div className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed [&>*:first-child]:mt-0 [&_h2]:text-base [&_h3]:text-sm [&_p]:text-sm [&_li]:text-sm [&_blockquote]:border-primary/30 [&_blockquote]:bg-primary/5 [&_blockquote]:rounded-r-lg [&_blockquote]:py-1">
-            <ReactMarkdown>{msg.content}</ReactMarkdown>
+            <ReactMarkdown>{renderContent}</ReactMarkdown>
           </div>
         ) : (
-          <p className="text-sm leading-relaxed text-foreground whitespace-pre-wrap">{msg.content}</p>
+          <p className="text-sm leading-relaxed text-foreground whitespace-pre-wrap">{renderContent}</p>
         )}
 
+        {/* Action bar for AI messages */}
         {!isUser && (
-          <div className="flex items-center gap-1 mt-2">
+          <div className="flex flex-wrap items-center gap-1 mt-3 pt-2 border-t border-border/20">
+            {/* Copy */}
             <button
               onClick={() => onCopy(msg.content, msg.id)}
               className="flex items-center gap-1 text-[10px] text-muted-foreground/50 hover:text-muted-foreground transition-colors px-2 py-1 rounded-md hover:bg-muted/30"
@@ -821,13 +882,65 @@ const ChatMessage = ({ msg, onCopy, copiedId, compact, showTimestamps, showConfi
               {copiedId === msg.id ? <Check className="h-3 w-3 text-success" /> : <Copy className="h-3 w-3" />}
               {copiedId === msg.id ? 'Copied' : 'Copy'}
             </button>
+
+            {/* Feedback buttons */}
+            <button
+              onClick={() => onFeedback?.('up')}
+              className={`flex items-center gap-1 text-[10px] px-2 py-1 rounded-md transition-colors ${
+                feedback === 'up' ? 'text-success bg-success/10' : 'text-muted-foreground/50 hover:text-muted-foreground hover:bg-muted/30'
+              }`}
+            >
+              <ThumbsUp className="h-3 w-3" />
+            </button>
+            <button
+              onClick={() => onFeedback?.('down')}
+              className={`flex items-center gap-1 text-[10px] px-2 py-1 rounded-md transition-colors ${
+                feedback === 'down' ? 'text-destructive bg-destructive/10' : 'text-muted-foreground/50 hover:text-muted-foreground hover:bg-muted/30'
+              }`}
+            >
+              <ThumbsDown className="h-3 w-3" />
+            </button>
+
+            {/* Regenerate (only on last assistant message) */}
+            {isLastAssistant && onRegenerate && (
+              <button
+                onClick={onRegenerate}
+                disabled={isStreaming}
+                className="flex items-center gap-1 text-[10px] text-muted-foreground/50 hover:text-muted-foreground transition-colors px-2 py-1 rounded-md hover:bg-muted/30 disabled:opacity-30"
+              >
+                <RefreshCw className="h-3 w-3" /> Regenerate
+              </button>
+            )}
+
+            {/* Confidence */}
             {showConfidence && msg.confidence != null && (
-              <span className={`text-[10px] px-2 py-0.5 rounded-full ${
+              <span className={`text-[10px] px-2 py-0.5 rounded-full ml-auto ${
                 msg.confidence >= 0.8 ? 'bg-success/10 text-success' : msg.confidence >= 0.5 ? 'bg-warning/10 text-warning' : 'bg-destructive/10 text-destructive'
               }`}>
                 {Math.round(msg.confidence * 100)}% confidence
               </span>
             )}
+          </div>
+        )}
+
+        {/* Follow-up question chips */}
+        {!isUser && isLastAssistant && followUps.length > 0 && !isStreaming && (
+          <div className="mt-3 space-y-1.5">
+            <p className="text-[10px] font-medium text-muted-foreground/60 flex items-center gap-1">
+              <MessageCircleQuestion className="h-3 w-3" /> Follow-up questions
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {followUps.map((q, i) => (
+                <button
+                  key={i}
+                  onClick={() => onFollowUpClick?.(q)}
+                  className="group text-left text-[11px] px-3 py-1.5 rounded-lg border border-border/30 bg-background/60 hover:border-primary/30 hover:bg-primary/5 text-muted-foreground hover:text-foreground transition-all flex items-center gap-1.5 max-w-full"
+                >
+                  <ArrowRight className="h-3 w-3 text-primary/40 group-hover:text-primary shrink-0 transition-colors" />
+                  <span className="truncate">{q}</span>
+                </button>
+              ))}
+            </div>
           </div>
         )}
       </div>

@@ -542,8 +542,16 @@ export function useStreamChatMessage() {
     });
 
     if (!resp.ok) {
-      const errText = await resp.text();
-      throw new Error(errText || `Stream failed: ${resp.status}`);
+      let errMsg = '';
+      try { const errData = JSON.parse(await resp.text()); errMsg = errData.error || ''; } catch { errMsg = await resp.text().catch(() => ''); }
+      
+      if (resp.status === 429) {
+        throw new Error('⏳ Rate limit reached. Please wait a moment before sending another message.');
+      }
+      if (resp.status === 402) {
+        throw new Error('💳 AI credits depleted. Please add credits to your workspace under Settings → Workspace → Usage.');
+      }
+      throw new Error(errMsg || `Stream failed: ${resp.status}`);
     }
 
     if (!resp.body) throw new Error('No response body');
