@@ -1353,6 +1353,53 @@ const NuruQuestionInterface = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Export Conversation Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-sm flex items-center gap-2">
+              <Download className="h-4 w-4 text-primary" /> Export Conversation
+            </DialogTitle>
+            <DialogDescription className="text-[11px]">
+              Download this conversation in your preferred format
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-[11px] font-medium text-muted-foreground">Export Format</label>
+              <Select value={exportFormat} onValueChange={setExportFormat}>
+                <SelectTrigger className="h-9 text-xs mt-1.5"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pdf" className="text-xs">📄 PDF — Professional formatted report</SelectItem>
+                  <SelectItem value="word" className="text-xs">📝 Word (.doc) — Editable document</SelectItem>
+                  <SelectItem value="markdown" className="text-xs">📋 Markdown — Plain text with formatting</SelectItem>
+                  <SelectItem value="json" className="text-xs">🔧 JSON — Structured data with metadata</SelectItem>
+                  <SelectItem value="csv" className="text-xs">📊 CSV — Spreadsheet-compatible</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="p-3 rounded-lg bg-muted/30 border border-border/10">
+              <p className="text-[10px] text-muted-foreground">
+                {exportFormat === 'pdf' && 'Generates a branded PDF with speaker columns, timestamps, and PeaceVerse headers.'}
+                {exportFormat === 'word' && 'Creates a styled Word document with formatted Q&A pairs for institutional sharing.'}
+                {exportFormat === 'markdown' && 'Clean markdown with headers per speaker — ideal for documentation.'}
+                {exportFormat === 'json' && 'Full JSON export including metadata, model info, and processing times.'}
+                {exportFormat === 'csv' && 'Tabular format with Role, Content, Timestamp, and Model columns.'}
+              </p>
+            </div>
+            <div className="text-[10px] text-muted-foreground flex items-center gap-1.5">
+              <MessageSquareText className="h-3 w-3" /> {chatMessages?.length || 0} messages will be exported
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" size="sm" className="text-xs" onClick={() => setShowExportDialog(false)}>Cancel</Button>
+            <Button size="sm" className="text-xs gap-1.5" onClick={() => handleExportConversation()}>
+              <Download className="h-3 w-3" /> Download {exportFormat.toUpperCase()}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
