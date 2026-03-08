@@ -530,6 +530,7 @@ const NuruQuestionInterface = () => {
             exit={{ width: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
             className="border-r border-primary/10 bg-gradient-to-b from-card/90 via-card/60 to-primary/[0.03] backdrop-blur-md flex flex-col overflow-hidden"
+          >
             {/* New Chat Button */}
             <div className="p-3 border-b border-border/20">
               <Button onClick={handleStartChat} disabled={createConversation.isPending || !user} className="w-full gap-2 rounded-xl h-10 text-xs shadow-md hover:shadow-lg transition-all bg-gradient-to-r from-primary to-primary-dark hover:from-primary/90 hover:to-primary-dark/90" size="sm">
