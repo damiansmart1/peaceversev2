@@ -796,12 +796,52 @@ const ConversationItem = ({
   );
 };
 
+// ===== Follow-Up Question Extractor =====
+function extractFollowUpQuestions(content: string): string[] {
+  const questions: string[] = [];
+  // Match the "Strategic Questions to Explore Next" section or similar patterns
+  const sectionMatch = content.match(/#{1,3}\s*🔍.*?(?=\n#{1,3}\s[^🔍]|$)/s) 
+    || content.match(/#{1,3}\s*Strategic Questions.*?(?=\n#{1,3}\s|$)/si)
+    || content.match(/#{1,3}\s*Follow[\s-]?[Uu]p.*?(?=\n#{1,3}\s|$)/si);
+  
+  if (sectionMatch) {
+    const section = sectionMatch[0];
+    // Extract bullet points or numbered items that end with ?
+    const lines = section.split('\n');
+    for (const line of lines) {
+      const cleaned = line.replace(/^[\s\-*\d.)+]+/, '').replace(/\*\*/g, '').replace(/"/g, '').trim();
+      if (cleaned.endsWith('?') && cleaned.length > 15 && cleaned.length < 300) {
+        questions.push(cleaned);
+      }
+    }
+  }
+  
+  // Fallback: find any bold questions or quoted questions in last portion of text
+  if (questions.length === 0) {
+    const lastThird = content.slice(Math.floor(content.length * 0.6));
+    const qMatches = lastThird.match(/(?:\*\*|"|")([^*""\n]{20,200}\?)(?:\*\*|"|")/g);
+    if (qMatches) {
+      for (const m of qMatches.slice(0, 6)) {
+        questions.push(m.replace(/\*\*/g, '').replace(/[""]/g, '').trim());
+      }
+    }
+  }
+  
+  return questions.slice(0, 6);
+}
+
 // ===== Chat Message =====
-const ChatMessage = ({ msg, onCopy, copiedId, compact, showTimestamps, showConfidence, markdownEnabled }: {
+const ChatMessage = ({ msg, onCopy, copiedId, compact, showTimestamps, showConfidence, markdownEnabled, isLastAssistant, onFollowUpClick, onRegenerate, isStreaming, feedback, onFeedback }: {
   msg: any; onCopy: (c: string, id: string) => void; copiedId: string | null;
   compact: boolean; showTimestamps: boolean; showConfidence: boolean; markdownEnabled: boolean;
+  isLastAssistant?: boolean; onFollowUpClick?: (q: string) => void; onRegenerate?: () => void;
+  isStreaming?: boolean; feedback?: 'up' | 'down'; onFeedback?: (type: 'up' | 'down') => void;
 }) => {
   const isUser = msg.role === 'user';
+  const followUps = !isUser && isLastAssistant ? extractFollowUpQuestions(msg.content) : [];
+
+  // Strip follow-up section from rendered content for cleaner display (they appear as chips instead)
+  const renderContent = msg.content;
 
   return (
     <div className={`flex gap-3 ${compact ? 'py-2' : 'py-4'} ${isUser ? '' : 'bg-muted/5 -mx-4 px-4 rounded-lg'}`}>
@@ -822,17 +862,19 @@ const ChatMessage = ({ msg, onCopy, copiedId, compact, showTimestamps, showConfi
         </div>
 
         {isUser ? (
-          <p className="text-sm leading-relaxed text-foreground">{msg.content}</p>
+          <p className="text-sm leading-relaxed text-foreground">{renderContent}</p>
         ) : markdownEnabled ? (
           <div className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed [&>*:first-child]:mt-0 [&_h2]:text-base [&_h3]:text-sm [&_p]:text-sm [&_li]:text-sm [&_blockquote]:border-primary/30 [&_blockquote]:bg-primary/5 [&_blockquote]:rounded-r-lg [&_blockquote]:py-1">
-            <ReactMarkdown>{msg.content}</ReactMarkdown>
+            <ReactMarkdown>{renderContent}</ReactMarkdown>
           </div>
         ) : (
-          <p className="text-sm leading-relaxed text-foreground whitespace-pre-wrap">{msg.content}</p>
+          <p className="text-sm leading-relaxed text-foreground whitespace-pre-wrap">{renderContent}</p>
         )}
 
+        {/* Action bar for AI messages */}
         {!isUser && (
-          <div className="flex items-center gap-1 mt-2">
+          <div className="flex flex-wrap items-center gap-1 mt-3 pt-2 border-t border-border/20">
+            {/* Copy */}
             <button
               onClick={() => onCopy(msg.content, msg.id)}
               className="flex items-center gap-1 text-[10px] text-muted-foreground/50 hover:text-muted-foreground transition-colors px-2 py-1 rounded-md hover:bg-muted/30"
@@ -840,13 +882,65 @@ const ChatMessage = ({ msg, onCopy, copiedId, compact, showTimestamps, showConfi
               {copiedId === msg.id ? <Check className="h-3 w-3 text-success" /> : <Copy className="h-3 w-3" />}
               {copiedId === msg.id ? 'Copied' : 'Copy'}
             </button>
+
+            {/* Feedback buttons */}
+            <button
+              onClick={() => onFeedback?.('up')}
+              className={`flex items-center gap-1 text-[10px] px-2 py-1 rounded-md transition-colors ${
+                feedback === 'up' ? 'text-success bg-success/10' : 'text-muted-foreground/50 hover:text-muted-foreground hover:bg-muted/30'
+              }`}
+            >
+              <ThumbsUp className="h-3 w-3" />
+            </button>
+            <button
+              onClick={() => onFeedback?.('down')}
+              className={`flex items-center gap-1 text-[10px] px-2 py-1 rounded-md transition-colors ${
+                feedback === 'down' ? 'text-destructive bg-destructive/10' : 'text-muted-foreground/50 hover:text-muted-foreground hover:bg-muted/30'
+              }`}
+            >
+              <ThumbsDown className="h-3 w-3" />
+            </button>
+
+            {/* Regenerate (only on last assistant message) */}
+            {isLastAssistant && onRegenerate && (
+              <button
+                onClick={onRegenerate}
+                disabled={isStreaming}
+                className="flex items-center gap-1 text-[10px] text-muted-foreground/50 hover:text-muted-foreground transition-colors px-2 py-1 rounded-md hover:bg-muted/30 disabled:opacity-30"
+              >
+                <RefreshCw className="h-3 w-3" /> Regenerate
+              </button>
+            )}
+
+            {/* Confidence */}
             {showConfidence && msg.confidence != null && (
-              <span className={`text-[10px] px-2 py-0.5 rounded-full ${
+              <span className={`text-[10px] px-2 py-0.5 rounded-full ml-auto ${
                 msg.confidence >= 0.8 ? 'bg-success/10 text-success' : msg.confidence >= 0.5 ? 'bg-warning/10 text-warning' : 'bg-destructive/10 text-destructive'
               }`}>
                 {Math.round(msg.confidence * 100)}% confidence
               </span>
             )}
+          </div>
+        )}
+
+        {/* Follow-up question chips */}
+        {!isUser && isLastAssistant && followUps.length > 0 && !isStreaming && (
+          <div className="mt-3 space-y-1.5">
+            <p className="text-[10px] font-medium text-muted-foreground/60 flex items-center gap-1">
+              <MessageCircleQuestion className="h-3 w-3" /> Follow-up questions
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {followUps.map((q, i) => (
+                <button
+                  key={i}
+                  onClick={() => onFollowUpClick?.(q)}
+                  className="group text-left text-[11px] px-3 py-1.5 rounded-lg border border-border/30 bg-background/60 hover:border-primary/30 hover:bg-primary/5 text-muted-foreground hover:text-foreground transition-all flex items-center gap-1.5 max-w-full"
+                >
+                  <ArrowRight className="h-3 w-3 text-primary/40 group-hover:text-primary shrink-0 transition-colors" />
+                  <span className="truncate">{q}</span>
+                </button>
+              ))}
+            </div>
           </div>
         )}
       </div>
