@@ -452,6 +452,53 @@ export function useCreateConversation() {
   });
 }
 
+export function useDeleteConversation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (conversationId: string) => {
+      await sb.from('nuru_messages').delete().eq('conversation_id', conversationId);
+      const { error } = await sb.from('nuru_conversations').delete().eq('id', conversationId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['nuru-conversations'] });
+      toast.success('Conversation deleted');
+    },
+    onError: (e: any) => toast.error(e.message || 'Failed to delete'),
+  });
+}
+
+export function useRenameConversation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ conversationId, title }: { conversationId: string; title: string }) => {
+      const { error } = await sb.from('nuru_conversations').update({ title }).eq('id', conversationId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['nuru-conversations'] });
+    },
+    onError: (e: any) => toast.error(e.message || 'Failed to rename'),
+  });
+}
+
+export function useClearConversation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (conversationId: string) => {
+      const { error } = await sb.from('nuru_messages').delete().eq('conversation_id', conversationId);
+      if (error) throw error;
+      await sb.from('nuru_conversations').update({ message_count: 0 }).eq('id', conversationId);
+    },
+    onSuccess: (_, conversationId) => {
+      qc.invalidateQueries({ queryKey: ['nuru-messages', conversationId] });
+      qc.invalidateQueries({ queryKey: ['nuru-conversations'] });
+      toast.success('Conversation cleared');
+    },
+    onError: (e: any) => toast.error(e.message || 'Failed to clear'),
+  });
+}
+
 export function useSendChatMessage() {
   const qc = useQueryClient();
   return useMutation({
