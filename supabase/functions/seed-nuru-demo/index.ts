@@ -428,7 +428,8 @@ PUBLIC COMMENTS: This White Paper is open for public comment for 90 days until 3
           { question_id: insertedQs[6].id, institution_name: 'National Health Insurance Authority, Ghana', response_text: 'We confirm that the exempt categories maintain our commitment to protecting vulnerable populations. The premium assessment for informal sector workers uses a standardized income assessment tool to ensure fairness.', status: 'published' },
         ];
 
-        await supabase.from('institutional_responses').insert(responses).catch(e => console.error('Response insert error:', e));
+        const { error: respError } = await supabase.from('institutional_responses').insert(responses);
+        if (respError) console.error('Response insert error:', respError);
       }
     }
 
@@ -442,10 +443,11 @@ PUBLIC COMMENTS: This White Paper is open for public comment for 90 days until 3
       { risk_category: 'Data Privacy', risk_name: 'User Query Privacy', description: 'Risk of exposing sensitive user queries or behavioral patterns that could compromise citizen privacy or reveal policy interests.', severity: 'high', mitigation_strategies: ['Anonymous question submission option', 'Query data encryption at rest', 'No user profiling for commercial purposes', 'GDPR-aligned data retention policies'], status: 'active', monitoring_metrics: { anonymousQueries: 2340, dataRetentionCompliance: 1.0, privacyAudits: 4 } },
     ];
 
-    await supabase.from('ai_governance_registry').upsert(governanceRisks, { onConflict: 'risk_name' }).catch(() => {
-      // If upsert fails due to no unique constraint, try insert
-      supabase.from('ai_governance_registry').insert(governanceRisks).catch(e => console.error('Governance insert error:', e));
-    });
+    const { error: govUpsertError } = await supabase.from('ai_governance_registry').upsert(governanceRisks, { onConflict: 'risk_name' });
+    if (govUpsertError) {
+      const { error: govInsertError } = await supabase.from('ai_governance_registry').insert(governanceRisks);
+      if (govInsertError) console.error('Governance insert error:', govInsertError);
+    }
 
     // 5. Seed civic analytics
     const analyticsData = [];
@@ -482,7 +484,8 @@ PUBLIC COMMENTS: This White Paper is open for public comment for 90 days until 3
       }
     }
 
-    await supabase.from('civic_analytics').insert(analyticsData).catch(e => console.error('Analytics insert error:', e));
+    const { error: analyticsError } = await supabase.from('civic_analytics').insert(analyticsData);
+    if (analyticsError) console.error('Analytics insert error:', analyticsError);
 
     return new Response(JSON.stringify({ 
       success: true, 
