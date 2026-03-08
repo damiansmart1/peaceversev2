@@ -529,11 +529,11 @@ const NuruQuestionInterface = () => {
             animate={{ width: 300, opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="border-r border-border/30 bg-card/60 flex flex-col overflow-hidden"
+            className="border-r border-border/20 bg-gradient-to-b from-card/80 to-card/40 backdrop-blur-md flex flex-col overflow-hidden"
           >
             {/* New Chat Button */}
-            <div className="p-3 border-b border-border/30">
-              <Button onClick={handleStartChat} disabled={createConversation.isPending || !user} className="w-full gap-2 rounded-xl h-9 text-xs" size="sm">
+            <div className="p-3 border-b border-border/20">
+              <Button onClick={handleStartChat} disabled={createConversation.isPending || !user} className="w-full gap-2 rounded-xl h-10 text-xs shadow-sm hover:shadow-md transition-shadow" size="sm">
                 {createConversation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
                 New conversation
               </Button>
@@ -652,7 +652,7 @@ const NuruQuestionInterface = () => {
       {/* ===== MAIN CHAT AREA ===== */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header */}
-        <div className="h-12 border-b border-border/30 flex items-center justify-between px-3 bg-card/30">
+        <div className="h-13 border-b border-border/20 flex items-center justify-between px-4 bg-gradient-to-r from-card/50 to-card/30 backdrop-blur-sm">
           <div className="flex items-center gap-2 min-w-0">
             <Tooltip>
               <TooltipTrigger asChild>
@@ -885,9 +885,9 @@ const NuruQuestionInterface = () => {
         </AnimatePresence>
 
         {/* Input */}
-        <div className="border-t border-border/30 p-3 bg-card/30">
+        <div className="border-t border-border/20 p-4 bg-gradient-to-t from-card/40 to-transparent backdrop-blur-sm">
           <div className="max-w-3xl mx-auto">
-            <div className="relative flex items-end gap-2 rounded-xl border border-border/40 bg-background/60 p-1.5 focus-within:border-primary/30 focus-within:ring-1 focus-within:ring-primary/10 transition-all">
+            <div className="relative flex items-end gap-2 rounded-2xl border border-border/30 bg-background/70 backdrop-blur-md p-2 focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/10 focus-within:shadow-lg focus-within:shadow-primary/5 transition-all">
               {/* Attach button */}
               <Tooltip>
                 <TooltipTrigger asChild>
