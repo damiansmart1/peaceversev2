@@ -435,7 +435,7 @@ const NuruQuestionInterface = () => {
               <WelcomeScreen setQuestion={setQuestion} user={user} onNewChat={handleStartChat} />
             ) : (
               <div className="space-y-1">
-                {chatMessages?.map((msg) => (
+                {chatMessages?.map((msg, idx) => (
                   <ChatMessage
                     key={msg.id}
                     msg={msg}
@@ -445,6 +445,15 @@ const NuruQuestionInterface = () => {
                     showTimestamps={settings.showTimestamps}
                     showConfidence={settings.showConfidence}
                     markdownEnabled={settings.markdownEnabled}
+                    isLastAssistant={msg.role === 'assistant' && (!chatMessages[idx + 1] || chatMessages[idx + 1]?.role !== 'assistant')}
+                    onFollowUpClick={handleFollowUpClick}
+                    onRegenerate={handleRegenerate}
+                    isStreaming={isStreaming}
+                    feedback={feedbackGiven[msg.id]}
+                    onFeedback={(type) => {
+                      setFeedbackGiven(prev => ({ ...prev, [msg.id]: type }));
+                      toast.success(type === 'up' ? 'Thanks for the positive feedback!' : 'Thanks — we\'ll improve this response type.');
+                    }}
                   />
                 ))}
 
