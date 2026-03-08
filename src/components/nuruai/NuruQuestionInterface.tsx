@@ -82,7 +82,9 @@ const QUICK_ACTIONS = [
 ];
 
 const NuruQuestionInterface = () => {
-  const [selectedDocId, setSelectedDocId] = useState('');
+  const [selectedDocIds, setSelectedDocIds] = useState<string[]>([]);
+  const selectedDocId = selectedDocIds[0] || '';
+  const setSelectedDocId = (id: string) => setSelectedDocIds(id && id !== 'none' ? [id] : []);
   const [question, setQuestion] = useState('');
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(true);
@@ -106,6 +108,8 @@ const NuruQuestionInterface = () => {
   const [isListening, setIsListening] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [showShortcutsDialog, setShowShortcutsDialog] = useState(false);
+  const [showExportDialog, setShowExportDialog] = useState(false);
+  const [exportFormat, setExportFormat] = useState('pdf');
   const [isDragOver, setIsDragOver] = useState(false);
   const [pinnedConversations, setPinnedConversations] = useState<Set<string>>(() => {
     try { return new Set(JSON.parse(localStorage.getItem('nuru_pinned') || '[]')); } catch { return new Set(); }
