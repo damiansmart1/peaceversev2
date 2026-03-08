@@ -22,17 +22,17 @@ const Voice = () => {
           badge={t('voice.badge')}
           title={t('voice.title')}
           subtitle={t('voice.subtitle')}
-          icon={<Mic className="w-4 h-4" />}
+          icon={<AudioLines className="w-4 h-4" />}
         />
         
         <Tabs defaultValue="share" className="max-w-6xl mx-auto">
           <TabsList className="grid w-full grid-cols-3 mb-8">
             <TabsTrigger value="share" className="gap-2">
-              <Upload className="w-4 h-4" />
+              <CloudUpload className="w-4 h-4" />
               {t('voice.tabs.share')}
             </TabsTrigger>
             <TabsTrigger value="browse" className="gap-2">
-              <Library className="w-4 h-4" />
+              <LibraryBig className="w-4 h-4" />
               {t('voice.tabs.browse')}
             </TabsTrigger>
             <TabsTrigger value="featured" className="gap-2">
@@ -49,7 +49,7 @@ const Voice = () => {
                 badge={t('content.badge')}
                 title={t('content.share.title')}
                 subtitle={t('content.share.subtitle')}
-                icon={<Upload className="w-4 h-4" />}
+                icon={<CloudUpload className="w-4 h-4" />}
               />
               <ContentUpload />
             </div>

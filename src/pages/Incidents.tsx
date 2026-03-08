@@ -45,7 +45,7 @@ export default function Incidents() {
               size="lg"
               className="gap-2 w-full sm:w-auto"
             >
-              <AlertTriangle className="h-5 w-5" />
+              <Siren className="h-5 w-5" />
               <span className="whitespace-nowrap">{t('incidents.submitReport')}</span>
             </Button>
           </div>

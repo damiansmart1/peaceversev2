@@ -18,7 +18,7 @@ const Challenges = () => {
           badge={t('challenges.badge')}
           title={t('challenges.title')}
           subtitle={t('challenges.subtitle')}
-          icon={<Award className="w-4 h-4" />}
+          icon={<Flame className="w-4 h-4" />}
         />
         
         <div className="space-y-16">

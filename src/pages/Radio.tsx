@@ -21,7 +21,7 @@ const Radio = () => {
           badge={t('radio.badge')}
           title={t('radio.title')}
           subtitle={t('radio.subtitle')}
-          icon={<RadioIcon className="w-4 h-4" />}
+          icon={<Antenna className="w-4 h-4" />}
         />
         
         <Tabs defaultValue="live" className="max-w-6xl mx-auto">
@@ -31,7 +31,7 @@ const Radio = () => {
               <span className="hidden sm:inline">{t('radio.tabs.live')}</span>
             </TabsTrigger>
             <TabsTrigger value="chat" className="gap-2">
-              <MessageCircle className="w-4 h-4" />
+              <MessageCircleMore className="w-4 h-4" />
               <span className="hidden sm:inline">{t('radio.tabs.chat')}</span>
             </TabsTrigger>
             <TabsTrigger value="podcasts" className="gap-2">
@@ -39,15 +39,15 @@ const Radio = () => {
               <span className="hidden sm:inline">{t('radio.tabs.podcasts')}</span>
             </TabsTrigger>
             <TabsTrigger value="callin" className="gap-2">
-              <Phone className="w-4 h-4" />
+              <PhoneCall className="w-4 h-4" />
               <span className="hidden sm:inline">{t('radio.tabs.callIn')}</span>
             </TabsTrigger>
             <TabsTrigger value="schedule" className="gap-2">
-              <Calendar className="w-4 h-4" />
+              <CalendarRange className="w-4 h-4" />
               <span className="hidden sm:inline">{t('radio.tabs.schedule')}</span>
             </TabsTrigger>
             <TabsTrigger value="accessibility" className="gap-2">
-              <Settings className="w-4 h-4" />
+              <Sliders className="w-4 h-4" />
               <span className="hidden sm:inline">{t('common.accessibility')}</span>
             </TabsTrigger>
           </TabsList>

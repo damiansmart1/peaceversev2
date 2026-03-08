@@ -60,14 +60,14 @@ const PeacePulse = () => {
           badge={t('peacePulse.badge')}
           title={t('peacePulse.title')}
           subtitle={t('peacePulse.subtitle')}
-          icon={<Activity className="w-4 h-4" />}
+          icon={<HeartPulse className="w-4 h-4" />}
         />
 
         <div className="max-w-7xl mx-auto space-y-6">
           <div className="flex justify-between items-center">
             <Select value={selectedCountry} onValueChange={setSelectedCountry}>
               <SelectTrigger className="w-80 bg-card border-border">
-                <Globe className="w-4 h-4 mr-2 text-primary" />
+                <Earth className="w-4 h-4 mr-2 text-primary" />
                 <SelectValue placeholder="Select a country">{getSelectedCountryName()}</SelectValue>
               </SelectTrigger>
               <SelectContent className="bg-popover border-border max-h-[400px]">
@@ -100,14 +100,14 @@ const PeacePulse = () => {
           ) : (
             <Tabs defaultValue="overview" className="space-y-6">
               <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8">
-                <TabsTrigger value="overview" className="gap-1"><Activity className="w-3 h-3 hidden sm:inline" />{t('peacePulse.tabs.overview')}</TabsTrigger>
-                <TabsTrigger value="indicators" className="gap-1"><Shield className="w-3 h-3 hidden sm:inline" />Indicators</TabsTrigger>
+                <TabsTrigger value="overview" className="gap-1"><HeartPulse className="w-3 h-3 hidden sm:inline" />{t('peacePulse.tabs.overview')}</TabsTrigger>
+                <TabsTrigger value="indicators" className="gap-1"><ShieldHalf className="w-3 h-3 hidden sm:inline" />Indicators</TabsTrigger>
                 <TabsTrigger value="crossborder" className="gap-1"><ArrowRightLeft className="w-3 h-3 hidden sm:inline" />Cross-Border</TabsTrigger>
-                <TabsTrigger value="alerts" className="gap-1"><Bell className="w-3 h-3 hidden sm:inline" />Alerts</TabsTrigger>
-                <TabsTrigger value="heatmap" className="gap-1"><MapPin className="w-3 h-3 hidden sm:inline" />{t('peacePulse.tabs.heatmap')}</TabsTrigger>
-                <TabsTrigger value="regional" className="gap-1"><Globe className="w-3 h-3 hidden sm:inline" />Regional</TabsTrigger>
-                <TabsTrigger value="accountability" className="gap-1"><BarChart3 className="w-3 h-3 hidden sm:inline" />{t('peacePulse.tabs.accountability')}</TabsTrigger>
-                <TabsTrigger value="reports" className="gap-1"><FileText className="w-3 h-3 hidden sm:inline" />Reports</TabsTrigger>
+                <TabsTrigger value="alerts" className="gap-1"><BellDot className="w-3 h-3 hidden sm:inline" />Alerts</TabsTrigger>
+                <TabsTrigger value="heatmap" className="gap-1"><MapPinCheck className="w-3 h-3 hidden sm:inline" />{t('peacePulse.tabs.heatmap')}</TabsTrigger>
+                <TabsTrigger value="regional" className="gap-1"><Earth className="w-3 h-3 hidden sm:inline" />Regional</TabsTrigger>
+                <TabsTrigger value="accountability" className="gap-1"><AreaChart className="w-3 h-3 hidden sm:inline" />{t('peacePulse.tabs.accountability')}</TabsTrigger>
+                <TabsTrigger value="reports" className="gap-1"><ScrollText className="w-3 h-3 hidden sm:inline" />Reports</TabsTrigger>
               </TabsList>
 
               <TabsContent value="overview" className="space-y-6">
@@ -115,7 +115,7 @@ const PeacePulse = () => {
                   <Card>
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm font-medium flex items-center gap-2">
-                        <Activity className="w-4 h-4" />
+                        <HeartPulse className="w-4 h-4" />
                         {t('peacePulse.activityLevel')}
                       </CardTitle>
                     </CardHeader>
@@ -144,7 +144,7 @@ const PeacePulse = () => {
                   <Card>
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm font-medium flex items-center gap-2">
-                        <AlertTriangle className="w-4 h-4" />
+                        <OctagonAlert className="w-4 h-4" />
                         {t('peacePulse.tensionLevel')}
                       </CardTitle>
                     </CardHeader>
@@ -159,7 +159,7 @@ const PeacePulse = () => {
                   <Card>
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm font-medium flex items-center gap-2">
-                        <BarChart3 className="w-4 h-4" />
+                        <AreaChart className="w-4 h-4" />
                         {t('peacePulse.riskScore')}
                       </CardTitle>
                     </CardHeader>
@@ -196,7 +196,7 @@ const PeacePulse = () => {
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <MapPin className="w-5 h-5" />
+                      <MapPinCheck className="w-5 h-5" />
                       {t('peacePulse.hotspotLocations')}
                     </CardTitle>
                     <CardDescription>{t('peacePulse.hotspotDescription')}</CardDescription>

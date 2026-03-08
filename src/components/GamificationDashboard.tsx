@@ -55,7 +55,7 @@ const GamificationDashboard = () => {
     id: '1',
     title: 'First Voice',
     description: 'Share your first story with the community',
-    icon: <Mic className="w-6 h-6" />,
+    icon: <AudioLines className="w-6 h-6" />,
     progress: 1,
     maxProgress: 1,
     earned: true,
@@ -64,7 +64,7 @@ const GamificationDashboard = () => {
     id: '2',
     title: 'Community Builder',
     description: 'Connect with 10 other peace builders',
-    icon: <Users className="w-6 h-6" />,
+    icon: <UsersRound className="w-6 h-6" />,
     progress: 7,
     maxProgress: 10,
     earned: false,
@@ -82,7 +82,7 @@ const GamificationDashboard = () => {
     id: '4',
     title: 'Safe Space Guardian',
     description: 'Help moderate and maintain safe dialogue spaces',
-    icon: <Shield className="w-6 h-6" />,
+    icon: <ShieldHalf className="w-6 h-6" />,
     progress: 0,
     maxProgress: 1,
     earned: false,
@@ -157,7 +157,7 @@ const GamificationDashboard = () => {
 
             <div className="space-y-2">
               <div className="w-16 h-16 bg-gradient-to-br from-warning to-warning/70 rounded-2xl flex items-center justify-center mx-auto shadow-warm">
-                <Users className="w-8 h-8 text-warning-foreground" />
+                <UsersRound className="w-8 h-8 text-warning-foreground" />
               </div>
               <div>
                 <div className="text-3xl md:text-4xl font-bold text-warning">{livesImpacted}</div>

@@ -15,7 +15,7 @@ const Verification = () => {
           badge={t('verification.badge')}
           title={t('verification.title')}
           subtitle={t('verification.subtitle')}
-          icon={<CheckCircle className="w-4 h-4" />}
+          icon={<BadgeCheck className="w-4 h-4" />}
         />
         
         <div className="max-w-6xl mx-auto">
