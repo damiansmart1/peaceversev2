@@ -393,10 +393,7 @@ export function useAskQuestion() {
   return useMutation({
     mutationFn: async ({ question, documentId, isAnonymous }: { question: string; documentId: string; isAnonymous?: boolean }) => {
       const { data: { user } } = await supabase.auth.getUser();
-      const { data: aiResult, error: aiError } = await supabase.functions.invoke('nuru-ai-chat', {
-        body: { action: 'ask', question, documentId },
-      });
-      if (aiError) throw aiError;
+      const aiResult = await invokeNuruAI({ action: 'ask', question, documentId });
       const { data, error } = await sb.from('civic_questions').insert({
         question_text: question,
         document_id: documentId,
