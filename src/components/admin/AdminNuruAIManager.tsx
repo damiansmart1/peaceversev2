@@ -186,6 +186,10 @@ const AdminNuruAIManager = () => {
           </div>
         </TabsContent>
 
+        <TabsContent value="token-limits">
+          <AdminTokenLimitsManager />
+        </TabsContent>
+
         <TabsContent value="audit" className="space-y-4">
           <div className="border rounded-lg overflow-hidden">
             <table className="w-full text-sm">
