@@ -262,13 +262,17 @@ ${constitution.text}
       const textToSummarize = doc.original_text || doc.description || '';
       if (!textToSummarize) throw new Error('No text content to summarize');
 
+      // Fetch constitution for cross-referencing
+      const constitution = await fetchConstitution(supabase, doc.country || null);
+      const constitutionalContext = buildConstitutionalInstructions(constitution);
+
       await supabase.from('civic_documents').update({ processing_status: 'processing' }).eq('id', documentId);
 
       const content = await callAI(LOVABLE_API_KEY, [
         {
           role: 'system',
           content: `You are NuruAI, a world-class civic intelligence analyst and policy decoder. You operate as critical public infrastructure for democratic participation across Africa.
-
+${constitutionalContext}
 Your task: Perform an exhaustive, multi-dimensional analysis of the provided policy document using the following rigorous methodology. Every claim must be traceable to the source text.
 
 ## ANALYSIS FRAMEWORK
@@ -416,6 +420,9 @@ Format response as JSON:
       const doc = conv.civic_documents;
       const documentContext = doc ? (doc.original_text || doc.summary || doc.description || '') : '';
 
+      // Fetch constitution for cross-referencing
+      const constitution = await fetchConstitution(supabase, doc?.country || null);
+
       const { data: history } = await supabase
         .from('nuru_messages')
         .select('role, content')
@@ -424,7 +431,7 @@ Format response as JSON:
         .limit(30);
 
       const userQuestion = chatMessages?.[chatMessages.length - 1]?.content || '';
-      const systemPrompt = buildChatSystemPrompt(doc, documentContext);
+      const systemPrompt = buildChatSystemPrompt(doc, documentContext, constitution);
 
       const aiMessages = [
         { role: 'system', content: systemPrompt },
