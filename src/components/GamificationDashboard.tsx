@@ -211,7 +211,7 @@ const GamificationDashboard = () => {
                 Every story shared, every connection made, every voice heard brings us closer to a peaceful world.
               </p>
               <Button variant="secondary" size="lg" className="mt-3 rounded-full shadow-sm">
-                <Mic className="w-5 h-5 mr-2" />
+                <AudioLines className="w-5 h-5 mr-2" />
                 Share Another Story
               </Button>
             </div>
