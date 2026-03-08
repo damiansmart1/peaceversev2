@@ -206,29 +206,114 @@ export function useUploadDocumentFile() {
 
 async function extractTextFromFile(file: File): Promise<string | null> {
   try {
-    if (file.type === 'text/plain' || file.type === 'text/csv' || file.name.endsWith('.txt') || file.name.endsWith('.csv')) {
-      return await file.text();
+    // Plain text and CSV files
+    if (file.type === 'text/plain' || file.type === 'text/csv' || 
+        file.name.endsWith('.txt') || file.name.endsWith('.csv') ||
+        file.name.endsWith('.rtf') || file.name.endsWith('.md')) {
+      const raw = await file.text();
+      // Strip RTF control codes if present
+      if (raw.startsWith('{\\rtf')) {
+        return raw.replace(/\{\\[^{}]*\}|\\[a-z]+\d*\s?|[{}]/gi, '').trim() || null;
+      }
+      return raw.length > 10 ? raw : null;
     }
+
     const arrayBuffer = await file.arrayBuffer();
     const uint8Array = new Uint8Array(arrayBuffer);
+
+    // DOCX: extract from word/document.xml inside the zip
+    if (file.name.endsWith('.docx') || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+      const text = extractTextFromDocx(uint8Array);
+      if (text && text.length > 50) return text;
+    }
+
+    // PDF: multi-strategy extraction
+    if (file.name.endsWith('.pdf') || file.type === 'application/pdf') {
+      const text = extractTextFromPdf(uint8Array);
+      if (text && text.length > 50) return text;
+    }
+
+    // Fallback: try reading as UTF-8 and extracting readable segments
     const decoder = new TextDecoder('utf-8', { fatal: false });
     const rawText = decoder.decode(uint8Array);
-    
-    let text = '';
-    // Extract from PDF text objects
-    const segments = rawText.match(/\(([^)]{3,})\)/g);
-    if (segments) {
-      text = segments.map(s => s.slice(1, -1)).join(' ');
-    }
-    const streamMatches = rawText.match(/BT[\s\S]*?ET/g);
-    if (streamMatches) {
-      for (const match of streamMatches) {
-        const tjMatches = match.match(/\(([^)]+)\)\s*Tj/g);
-        if (tjMatches) {
-          text += ' ' + tjMatches.map(t => t.replace(/\)\s*Tj/, '').replace(/^\(/, '')).join(' ');
+    const readable = rawText.replace(/[^\x20-\x7E\n\r\t]/g, ' ').replace(/\s{3,}/g, ' ').trim();
+    return readable.length > 50 ? readable : null;
+  } catch (e) {
+    console.error('Text extraction error:', e);
+    return null;
+  }
+}
+
+function extractTextFromPdf(data: Uint8Array): string | null {
+  const decoder = new TextDecoder('utf-8', { fatal: false });
+  const rawText = decoder.decode(data);
+  const parts: string[] = [];
+
+  // Strategy 1: BT...ET text blocks with Tj/TJ operators
+  const btBlocks = rawText.match(/BT[\s\S]*?ET/g);
+  if (btBlocks) {
+    for (const block of btBlocks) {
+      // Tj operator - single string
+      const tjMatches = block.match(/\(([^)]*)\)\s*Tj/g);
+      if (tjMatches) {
+        parts.push(...tjMatches.map(t => t.replace(/\)\s*Tj/, '').replace(/^\(/, '')));
+      }
+      // TJ operator - array of strings
+      const tjArrays = block.match(/\[([^\]]*)\]\s*TJ/gi);
+      if (tjArrays) {
+        for (const arr of tjArrays) {
+          const strs = arr.match(/\(([^)]*)\)/g);
+          if (strs) parts.push(...strs.map(s => s.slice(1, -1)));
         }
       }
     }
+  }
+
+  // Strategy 2: parenthesized text segments outside BT/ET
+  if (parts.length === 0) {
+    const segments = rawText.match(/\(([^)]{4,})\)/g);
+    if (segments) {
+      parts.push(...segments.map(s => s.slice(1, -1)));
+    }
+  }
+
+  // Strategy 3: stream content between "stream" and "endstream"
+  if (parts.length === 0) {
+    const streams = rawText.match(/stream\r?\n([\s\S]*?)endstream/g);
+    if (streams) {
+      for (const stream of streams) {
+        const content = stream.replace(/^stream\r?\n/, '').replace(/endstream$/, '');
+        const readable = content.replace(/[^\x20-\x7E\n\r]/g, '').trim();
+        if (readable.length > 20) parts.push(readable);
+      }
+    }
+  }
+
+  // Unescape PDF string escapes
+  let text = parts.join(' ')
+    .replace(/\\n/g, '\n').replace(/\\r/g, '\r').replace(/\\t/g, '\t')
+    .replace(/\\\(/g, '(').replace(/\\\)/g, ')').replace(/\\\\/g, '\\')
+    .replace(/\s{2,}/g, ' ').trim();
+
+  return text.length > 50 ? text : null;
+}
+
+function extractTextFromDocx(data: Uint8Array): string | null {
+  try {
+    // Find PK zip entries and locate word/document.xml
+    const decoder = new TextDecoder('utf-8', { fatal: false });
+    const raw = decoder.decode(data);
+    
+    // Simple approach: find XML content between <w:t> tags
+    const xmlContent = raw.match(/<w:t[^>]*>([^<]*)<\/w:t>/gi);
+    if (!xmlContent || xmlContent.length === 0) return null;
+
+    const text = xmlContent
+      .map(tag => tag.replace(/<[^>]+>/g, ''))
+      .join(' ')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
+
     return text.length > 50 ? text : null;
   } catch {
     return null;
