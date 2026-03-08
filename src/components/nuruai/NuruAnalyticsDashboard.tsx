@@ -25,6 +25,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { format, subDays, isToday, isYesterday, differenceInMinutes, parseISO, getHours, getDay } from 'date-fns';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import { Document, Packer, Paragraph, Table, TableCell, TableRow, TextRun, AlignmentType, WidthType, HeadingLevel, ShadingType, PageBreak } from 'docx';
 import { toast } from 'sonner';
 
 const COLORS = {
@@ -403,7 +406,7 @@ const NuruAnalyticsDashboard = () => {
   }), [totalDocs, totalQuestions, avgConfidence, totalTokensUsed]);
 
   // === EXPORT ===
-  const handleExport = useCallback((format: 'csv' | 'json') => {
+  const handleExport = useCallback((fmt: 'csv' | 'json') => {
     const exportData = {
       generatedAt: new Date().toISOString(),
       metrics: {
@@ -420,11 +423,11 @@ const NuruAnalyticsDashboard = () => {
       modelPerformance: modelComparison,
       confidenceDistribution,
     };
-    if (format === 'json') {
+    if (fmt === 'json') {
       const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url; a.download = `nuru-analytics-${format}-${new Date().toISOString().slice(0, 10)}.json`; a.click();
+      a.href = url; a.download = `nuru-analytics-${fmt}-${new Date().toISOString().slice(0, 10)}.json`; a.click();
       URL.revokeObjectURL(url);
     } else {
       const rows = [
@@ -442,8 +445,218 @@ const NuruAnalyticsDashboard = () => {
       a.href = url; a.download = `nuru-analytics-${new Date().toISOString().slice(0, 10)}.csv`; a.click();
       URL.revokeObjectURL(url);
     }
-    toast.success(`Analytics exported as ${format.toUpperCase()}`);
+    toast.success(`Analytics exported as ${fmt.toUpperCase()}`);
   }, [totalDocs, totalQuestions, answeredQuestions, avgConfidence, totalTokensUsed, totalRequests, engagementMetrics, responseQuality, claimStats, accountabilityStats, countryData, topicData, modelComparison, confidenceDistribution]);
+
+  const handleExportPDF = useCallback(() => {
+    const doc = new jsPDF('portrait', 'mm', 'a4');
+    const pw = doc.internal.pageSize.getWidth();
+    let y = 20;
+
+    // Header bar
+    doc.setFillColor(7, 79, 152);
+    doc.rect(0, 0, pw, 25, 'F');
+    doc.setFontSize(14);
+    doc.setTextColor(255, 255, 255);
+    doc.text('NURU AI — ANALYTICS REPORT', pw / 2, 12, { align: 'center' });
+    doc.setFontSize(10);
+    doc.text('Comprehensive Intelligence Metrics & Insights', pw / 2, 19, { align: 'center' });
+    y = 35;
+
+    doc.setFontSize(9);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`Generated: ${format(new Date(), 'MMMM d, yyyy HH:mm')}`, pw / 2, y, { align: 'center' });
+    y += 12;
+
+    // KPI Summary
+    doc.setFontSize(12);
+    doc.setTextColor(7, 79, 152);
+    doc.text('KEY PERFORMANCE INDICATORS', 15, y);
+    y += 6;
+
+    autoTable(doc, {
+      startY: y,
+      head: [['Metric', 'Value']],
+      body: [
+        ['Total Documents', String(totalDocs)],
+        ['Total Questions', String(totalQuestions)],
+        ['Answered Questions', String(answeredQuestions)],
+        ['Average Confidence', `${avgConfidence}%`],
+        ['Total Tokens Used', totalTokensUsed.toLocaleString()],
+        ['Total Requests', String(totalRequests)],
+        ['Unique Users', String(engagementMetrics.uniqueUsers)],
+        ['Return Rate', `${engagementMetrics.returnRate}%`],
+        ['Source Citation Rate', `${responseQuality.sourceCitation}%`],
+        ['Claim Reviews', String(claimStats.total)],
+        ['Institutional Responses', String(accountabilityStats.total)],
+      ],
+      styles: { fontSize: 9, cellPadding: 3 },
+      headStyles: { fillColor: [7, 79, 152], textColor: 255 },
+      alternateRowStyles: { fillColor: [250, 250, 252] },
+      columnStyles: { 0: { fontStyle: 'bold' } },
+    });
+    y = (doc as any).lastAutoTable.finalY + 10;
+
+    // Country breakdown
+    if (countryData.length > 0) {
+      doc.setFontSize(12);
+      doc.setTextColor(7, 79, 152);
+      doc.text('GEOGRAPHIC DISTRIBUTION', 15, y);
+      y += 6;
+      autoTable(doc, {
+        startY: y,
+        head: [['Country', 'Documents']],
+        body: countryData.map(c => [c.name, String(c.value)]),
+        styles: { fontSize: 9, cellPadding: 3 },
+        headStyles: { fillColor: [7, 79, 152], textColor: 255 },
+        alternateRowStyles: { fillColor: [250, 250, 252] },
+      });
+      y = (doc as any).lastAutoTable.finalY + 10;
+    }
+
+    // Topic breakdown
+    if (topicData.length > 0) {
+      if (y > 230) { doc.addPage(); y = 20; }
+      doc.setFontSize(12);
+      doc.setTextColor(7, 79, 152);
+      doc.text('TOPIC COVERAGE', 15, y);
+      y += 6;
+      autoTable(doc, {
+        startY: y,
+        head: [['Topic', 'Count']],
+        body: topicData.map(t => [t.name, String(t.value)]),
+        styles: { fontSize: 9, cellPadding: 3 },
+        headStyles: { fillColor: [7, 79, 152], textColor: 255 },
+        alternateRowStyles: { fillColor: [250, 250, 252] },
+      });
+      y = (doc as any).lastAutoTable.finalY + 10;
+    }
+
+    // Model comparison
+    if (modelComparison.length > 0) {
+      if (y > 230) { doc.addPage(); y = 20; }
+      doc.setFontSize(12);
+      doc.setTextColor(7, 79, 152);
+      doc.text('MODEL PERFORMANCE COMPARISON', 15, y);
+      y += 6;
+      autoTable(doc, {
+        startY: y,
+        head: [['Model', 'Queries', 'Avg Latency (ms)', 'Avg Confidence (%)']],
+        body: modelComparison.map(m => [m.model, String(m.queries), String(m.avgLatency), String(m.avgConfidence)]),
+        styles: { fontSize: 9, cellPadding: 3 },
+        headStyles: { fillColor: [7, 79, 152], textColor: 255 },
+        alternateRowStyles: { fillColor: [250, 250, 252] },
+      });
+    }
+
+    // Footer
+    const pageCount = doc.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setTextColor(128, 128, 128);
+      doc.text(`Page ${i} of ${pageCount} | Nuru AI Analytics | Peaceverse`, pw / 2, doc.internal.pageSize.getHeight() - 10, { align: 'center' });
+    }
+
+    doc.save(`nuru-analytics-${new Date().toISOString().slice(0, 10)}.pdf`);
+    toast.success('PDF report downloaded successfully');
+  }, [totalDocs, totalQuestions, answeredQuestions, avgConfidence, totalTokensUsed, totalRequests, engagementMetrics, responseQuality, claimStats, accountabilityStats, countryData, topicData, modelComparison]);
+
+  const handleExportWord = useCallback(async () => {
+    const makeHeaderRow = (cells: string[]) =>
+      new TableRow({
+        children: cells.map(text =>
+          new TableCell({
+            children: [new Paragraph({ children: [new TextRun({ text, bold: true, color: 'FFFFFF', size: 20 })], alignment: AlignmentType.CENTER })],
+            shading: { fill: '074F98', type: ShadingType.SOLID, color: '074F98' },
+          })
+        ),
+      });
+
+    const makeRow = (cells: string[]) =>
+      new TableRow({
+        children: cells.map((text, i) =>
+          new TableCell({
+            children: [new Paragraph({ text, alignment: i === 0 ? AlignmentType.LEFT : AlignmentType.CENTER })],
+          })
+        ),
+      });
+
+    const kpiRows = [
+      ['Total Documents', String(totalDocs)],
+      ['Total Questions', String(totalQuestions)],
+      ['Answered Questions', String(answeredQuestions)],
+      ['Average Confidence', `${avgConfidence}%`],
+      ['Total Tokens Used', totalTokensUsed.toLocaleString()],
+      ['Unique Users', String(engagementMetrics.uniqueUsers)],
+      ['Return Rate', `${engagementMetrics.returnRate}%`],
+      ['Source Citation Rate', `${responseQuality.sourceCitation}%`],
+      ['Claim Reviews', String(claimStats.total)],
+      ['Institutional Responses', String(accountabilityStats.total)],
+    ];
+
+    const sections: any[] = [
+      new Paragraph({ text: 'NURU AI', heading: HeadingLevel.TITLE, alignment: AlignmentType.CENTER }),
+      new Paragraph({ text: 'Analytics Report', heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER }),
+      new Paragraph({ children: [new TextRun({ text: `Generated: ${format(new Date(), 'MMMM d, yyyy HH:mm:ss')}`, italics: true })], alignment: AlignmentType.CENTER }),
+      new Paragraph({ text: '' }),
+      new Paragraph({ children: [new PageBreak()] }),
+
+      new Paragraph({ text: 'KEY PERFORMANCE INDICATORS', heading: HeadingLevel.HEADING_1 }),
+      new Paragraph({ text: '' }),
+      new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: [makeHeaderRow(['Metric', 'Value']), ...kpiRows.map(r => makeRow(r))],
+      }),
+      new Paragraph({ text: '' }),
+    ];
+
+    if (countryData.length > 0) {
+      sections.push(
+        new Paragraph({ text: 'GEOGRAPHIC DISTRIBUTION', heading: HeadingLevel.HEADING_1 }),
+        new Paragraph({ text: '' }),
+        new Table({
+          width: { size: 100, type: WidthType.PERCENTAGE },
+          rows: [makeHeaderRow(['Country', 'Documents']), ...countryData.map(c => makeRow([c.name, String(c.value)]))],
+        }),
+        new Paragraph({ text: '' }),
+      );
+    }
+
+    if (topicData.length > 0) {
+      sections.push(
+        new Paragraph({ text: 'TOPIC COVERAGE', heading: HeadingLevel.HEADING_1 }),
+        new Paragraph({ text: '' }),
+        new Table({
+          width: { size: 100, type: WidthType.PERCENTAGE },
+          rows: [makeHeaderRow(['Topic', 'Count']), ...topicData.map(t => makeRow([t.name, String(t.value)]))],
+        }),
+        new Paragraph({ text: '' }),
+      );
+    }
+
+    if (modelComparison.length > 0) {
+      sections.push(
+        new Paragraph({ text: 'MODEL PERFORMANCE', heading: HeadingLevel.HEADING_1 }),
+        new Paragraph({ text: '' }),
+        new Table({
+          width: { size: 100, type: WidthType.PERCENTAGE },
+          rows: [makeHeaderRow(['Model', 'Queries', 'Avg Latency (ms)', 'Avg Confidence (%)']), ...modelComparison.map(m => makeRow([m.model, String(m.queries), String(m.avgLatency), String(m.avgConfidence)]))],
+        }),
+        new Paragraph({ text: '' }),
+      );
+    }
+
+    const wordDoc = new Document({ sections: [{ children: sections }] });
+    const blob = await Packer.toBlob(wordDoc);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `nuru-analytics-${new Date().toISOString().slice(0, 10)}.docx`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success('Word document downloaded successfully');
+  }, [totalDocs, totalQuestions, answeredQuestions, avgConfidence, totalTokensUsed, engagementMetrics, responseQuality, claimStats, accountabilityStats, countryData, topicData, modelComparison]);
 
   // Stats cards
   const stats = [
@@ -479,6 +692,12 @@ const NuruAnalyticsDashboard = () => {
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleExport('json')} className="text-xs gap-2">
                 <FileText className="h-3.5 w-3.5" /> Export as JSON
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleExportPDF} className="text-xs gap-2">
+                <Download className="h-3.5 w-3.5" /> Export as PDF
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleExportWord} className="text-xs gap-2">
+                <FileText className="h-3.5 w-3.5" /> Export as Word
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
