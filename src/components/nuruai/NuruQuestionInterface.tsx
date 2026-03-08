@@ -416,19 +416,93 @@ const NuruQuestionInterface = () => {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const handleExportConversation = () => {
+  const handleExportConversation = (fmt?: string) => {
     if (!chatMessages || chatMessages.length === 0) return;
     const conv = conversations?.find(c => c.id === activeConversationId);
-    const content = chatMessages.map(m => `## ${m.role === 'user' ? 'You' : 'NuruAI'}\n${m.content}\n`).join('\n---\n\n');
-    const header = `# ${conv?.title || 'Conversation'}\nExported: ${new Date().toISOString()}\n\n---\n\n`;
-    const blob = new Blob([header + content], { type: 'text/markdown' });
+    const title = conv?.title || 'NuruAI Conversation';
+    const dateStr = format(new Date(), 'yyyy-MM-dd-HHmm');
+    const selectedFormat = fmt || exportFormat;
+
+    if (selectedFormat === 'json') {
+      const jsonData = {
+        title,
+        exportedAt: new Date().toISOString(),
+        messageCount: chatMessages.length,
+        messages: chatMessages.map(m => ({
+          role: m.role, content: m.content, timestamp: m.created_at,
+          model: m.model_used || undefined, processingTime: m.processing_time_ms || undefined,
+        })),
+      };
+      downloadBlob(new Blob([JSON.stringify(jsonData, null, 2)], { type: 'application/json' }), `nuru-chat-${dateStr}.json`);
+    } else if (selectedFormat === 'csv') {
+      const rows = [['Role', 'Content', 'Timestamp', 'Model'].join(',')];
+      chatMessages.forEach(m => {
+        rows.push([m.role, `"${m.content.replace(/"/g, '""')}"`, m.created_at, m.model_used || ''].join(','));
+      });
+      downloadBlob(new Blob([rows.join('\n')], { type: 'text/csv' }), `nuru-chat-${dateStr}.csv`);
+    } else if (selectedFormat === 'word') {
+      const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+        <head><meta charset="utf-8"><title>${title}</title>
+        <style>body{font-family:Calibri,sans-serif;margin:40px;color:#333}h1{color:#074F98;font-size:20px;border-bottom:2px solid #074F98;padding-bottom:8px}
+        .user{background:#f0f4f8;padding:12px;border-radius:8px;margin:8px 0;border-left:4px solid #275432}
+        .assistant{background:#fafbfc;padding:12px;border-radius:8px;margin:8px 0;border-left:4px solid #074F98}
+        .meta{color:#888;font-size:10px}.footer{margin-top:30px;border-top:1px solid #ccc;padding-top:10px;font-size:9px;color:#999}</style></head>
+        <body><p class="meta">PEACEVERSE — NuruAI Civic Intelligence | Exported: ${new Date().toLocaleDateString()}</p>
+        <h1>${title}</h1>
+        ${chatMessages.map(m => `<div class="${m.role}"><p class="meta"><strong>${m.role === 'user' ? '👤 You' : '🤖 NuruAI'}</strong> · ${m.created_at ? format(new Date(m.created_at), 'MMM d, yyyy HH:mm') : ''}</p><p>${m.content.replace(/\n/g, '<br>')}</p></div>`).join('')}
+        <div class="footer">PeaceVerse — NuruAI Civic Intelligence Platform</div></body></html>`;
+      downloadBlob(new Blob([html], { type: 'application/msword' }), `nuru-chat-${dateStr}.doc`);
+    } else if (selectedFormat === 'pdf') {
+      import('jspdf').then(({ jsPDF }) => {
+        import('jspdf-autotable').then((autoTableMod) => {
+          const pdf = new jsPDF('p', 'mm', 'a4');
+          const autoTable = autoTableMod.default;
+          pdf.setFontSize(8); pdf.setTextColor(120);
+          pdf.text('PEACEVERSE — NuruAI Civic Intelligence | Conversation Export', 14, 12);
+          pdf.text(`Generated: ${new Date().toISOString().split('T')[0]}`, 14, 17);
+          pdf.setDrawColor(200); pdf.line(14, 19, 196, 19);
+          pdf.setFontSize(14); pdf.setTextColor(30);
+          pdf.text(title, 14, 28);
+          pdf.setFontSize(9); pdf.setTextColor(80);
+          pdf.text(`${chatMessages.length} messages`, 14, 34);
+
+          const rows = chatMessages.map(m => [
+            m.role === 'user' ? 'You' : 'NuruAI',
+            m.content.substring(0, 2000),
+            m.created_at ? format(new Date(m.created_at), 'MMM d HH:mm') : '',
+          ]);
+          autoTable(pdf, {
+            startY: 38, head: [['Speaker', 'Message', 'Time']], body: rows,
+            theme: 'grid', headStyles: { fillColor: [7, 79, 152], fontSize: 8 },
+            bodyStyles: { fontSize: 7, cellPadding: 3 },
+            columnStyles: { 0: { cellWidth: 18 }, 1: { cellWidth: 145 }, 2: { cellWidth: 23 } },
+            margin: { left: 14, right: 14 },
+          });
+          const pageCount = pdf.getNumberOfPages();
+          for (let i = 1; i <= pageCount; i++) {
+            pdf.setPage(i); pdf.setFontSize(7); pdf.setTextColor(150);
+            pdf.text(`PeaceVerse — NuruAI | Page ${i} of ${pageCount}`, 14, 290);
+          }
+          pdf.save(`nuru-chat-${dateStr}.pdf`);
+        });
+      });
+    } else {
+      // Markdown fallback
+      const content = chatMessages.map(m => `## ${m.role === 'user' ? 'You' : 'NuruAI'}\n${m.content}\n`).join('\n---\n\n');
+      const header = `# ${title}\nExported: ${new Date().toISOString()}\n\n---\n\n`;
+      downloadBlob(new Blob([header + content], { type: 'text/markdown' }), `nuru-chat-${dateStr}.md`);
+    }
+
+    toast.success(`Conversation exported as ${selectedFormat.toUpperCase()}`);
+    setShowExportDialog(false);
+  };
+
+  const downloadBlob = (blob: Blob, filename: string) => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url;
-    a.download = `nuru-chat-${format(new Date(), 'yyyy-MM-dd-HHmm')}.md`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success('Conversation exported');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
   };
 
   const handleShareConversation = useCallback(() => {
