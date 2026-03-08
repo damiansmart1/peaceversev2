@@ -17,7 +17,8 @@ import {
   PanelLeftClose, PanelLeft, PanelRightClose, PanelRight,
   Settings2, Search, MoreHorizontal, Pencil, Download,
   Clock, Pin, PinOff, Eraser, ChevronDown, RotateCcw,
-  Zap, Globe, Shield, BookOpen, Hash, X
+  Zap, Globe, Shield, BookOpen, Hash, X,
+  ThumbsUp, ThumbsDown, RefreshCw, ArrowRight, MessageCircleQuestion
 } from 'lucide-react';
 import {
   useCivicDocuments, useNuruConversations, useNuruMessages,
