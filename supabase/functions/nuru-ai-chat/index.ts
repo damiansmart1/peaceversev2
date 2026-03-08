@@ -611,14 +611,18 @@ Respond as JSON: {
       const processingTime = Date.now() - startTime;
 
       if (claimText) {
-        await supabase.from('civic_claim_reviews').insert({
-          claim_text: claimText,
-          source_document_id: documentId || null,
-          flagged_by: userId,
-          evidence_summary: parsed.evidenceSummary,
-          supporting_passages: parsed.supportingPassages || [],
-          review_status: parsed.status,
-        }).catch(() => {});
+        try {
+          await supabase.from('civic_claim_reviews').insert({
+            claim_text: claimText,
+            source_document_id: documentId || null,
+            flagged_by: userId,
+            evidence_summary: parsed.evidenceSummary,
+            supporting_passages: parsed.supportingPassages || [],
+            review_status: parsed.status,
+          });
+        } catch (_e) {
+          // Non-critical: don't fail if logging fails
+        }
       }
 
       await logAudit(supabase, userId, 'claim_reviewed', 'civic_claim', undefined, {
