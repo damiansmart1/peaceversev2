@@ -1256,43 +1256,88 @@ export type Database = {
       }
       civic_claim_reviews: {
         Row: {
+          batch_id: string | null
+          batch_index: number | null
+          claim_source: string | null
+          claim_source_url: string | null
           claim_text: string
+          claimreview_schema: Json | null
+          confidence_score: number | null
+          contradicting_evidence: Json | null
           created_at: string | null
           evidence_summary: string | null
+          fact_check_details: Json | null
           flagged_by: string | null
           id: string
+          is_public: boolean | null
           moderation_notes: string | null
+          processing_time_ms: number | null
+          recommendation: string | null
           review_status: string | null
           reviewed_by: string | null
+          share_token: string | null
+          shared_count: number | null
           source_document_id: string | null
+          source_documents: Json | null
           supporting_passages: Json | null
           updated_at: string | null
+          verdict_label: string | null
         }
         Insert: {
+          batch_id?: string | null
+          batch_index?: number | null
+          claim_source?: string | null
+          claim_source_url?: string | null
           claim_text: string
+          claimreview_schema?: Json | null
+          confidence_score?: number | null
+          contradicting_evidence?: Json | null
           created_at?: string | null
           evidence_summary?: string | null
+          fact_check_details?: Json | null
           flagged_by?: string | null
           id?: string
+          is_public?: boolean | null
           moderation_notes?: string | null
+          processing_time_ms?: number | null
+          recommendation?: string | null
           review_status?: string | null
           reviewed_by?: string | null
+          share_token?: string | null
+          shared_count?: number | null
           source_document_id?: string | null
+          source_documents?: Json | null
           supporting_passages?: Json | null
           updated_at?: string | null
+          verdict_label?: string | null
         }
         Update: {
+          batch_id?: string | null
+          batch_index?: number | null
+          claim_source?: string | null
+          claim_source_url?: string | null
           claim_text?: string
+          claimreview_schema?: Json | null
+          confidence_score?: number | null
+          contradicting_evidence?: Json | null
           created_at?: string | null
           evidence_summary?: string | null
+          fact_check_details?: Json | null
           flagged_by?: string | null
           id?: string
+          is_public?: boolean | null
           moderation_notes?: string | null
+          processing_time_ms?: number | null
+          recommendation?: string | null
           review_status?: string | null
           reviewed_by?: string | null
+          share_token?: string | null
+          shared_count?: number | null
           source_document_id?: string | null
+          source_documents?: Json | null
           supporting_passages?: Json | null
           updated_at?: string | null
+          verdict_label?: string | null
         }
         Relationships: [
           {
