@@ -7,8 +7,44 @@ const corsHeaders = {
 };
 
 const AI_GATEWAY = 'https://ai.gateway.lovable.dev/v1/chat/completions';
-const MODEL = 'google/gemini-2.5-pro';
-const FAST_MODEL = 'google/gemini-2.5-flash';
+
+// ===== MODEL TIER SYSTEM =====
+// Tier 1: Deep analysis (document summarization, fact-checking, constitution processing)
+const DEEP_MODEL = 'google/gemini-3.1-pro-preview';
+// Tier 2: Conversational chat (streaming, Q&A, comparisons)
+const CHAT_MODEL = 'google/gemini-3-flash-preview';
+// Tier 3: Lightweight tasks (simple lookups, formatting)
+const FAST_MODEL = 'google/gemini-2.5-flash-lite';
+
+// Fallback chains per tier
+const FALLBACK_CHAINS: Record<string, string[]> = {
+  deep: [DEEP_MODEL, 'google/gemini-2.5-pro', CHAT_MODEL],
+  chat: [CHAT_MODEL, 'google/gemini-2.5-flash', FAST_MODEL],
+  fast: [FAST_MODEL, 'google/gemini-2.5-flash-lite', CHAT_MODEL],
+};
+
+// Simple in-memory cache for document summaries (per-instance, lasts until cold start)
+const summaryCache = new Map<string, { data: any; ts: number }>();
+const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
+
+function getCached(key: string): any | null {
+  const entry = summaryCache.get(key);
+  if (!entry) return null;
+  if (Date.now() - entry.ts > CACHE_TTL_MS) {
+    summaryCache.delete(key);
+    return null;
+  }
+  return entry.data;
+}
+
+function setCache(key: string, data: any) {
+  // Keep cache bounded
+  if (summaryCache.size > 100) {
+    const oldest = summaryCache.keys().next().value;
+    if (oldest) summaryCache.delete(oldest);
+  }
+  summaryCache.set(key, { data, ts: Date.now() });
+}
 
 function getSupabase() {
   return createClient(
@@ -17,47 +53,100 @@ function getSupabase() {
   );
 }
 
-async function callAI(apiKey: string, messages: any[], temperature = 0.1, model = MODEL) {
-  const response = await fetch(AI_GATEWAY, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ model, messages, temperature }),
-  });
+// ===== AI CALL WITH AUTOMATIC FALLBACK =====
+async function callAI(apiKey: string, messages: any[], temperature = 0.1, tier: 'deep' | 'chat' | 'fast' = 'chat') {
+  const models = FALLBACK_CHAINS[tier];
+  let lastError: Error | null = null;
 
-  if (!response.ok) {
-    if (response.status === 429) throw new Error('Rate limit exceeded. Please try again later.');
-    if (response.status === 402) throw new Error('AI credits depleted. Please contact admin.');
-    const t = await response.text();
-    console.error('AI gateway error:', response.status, t);
-    throw new Error(`AI service error: ${response.status}`);
+  for (const model of models) {
+    try {
+      const response = await fetch(AI_GATEWAY, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ model, messages, temperature }),
+      });
+
+      if (response.status === 429) {
+        console.warn(`Rate limited on ${model}, trying next...`);
+        await response.text(); // consume body
+        lastError = new Error('Rate limit exceeded');
+        // Brief backoff before trying next model
+        await new Promise(r => setTimeout(r, 500));
+        continue;
+      }
+
+      if (response.status === 402) {
+        throw new Error('AI credits depleted. Please add credits under Settings → Workspace → Usage.');
+      }
+
+      if (!response.ok) {
+        const t = await response.text();
+        console.error(`AI error on ${model}:`, response.status, t);
+        lastError = new Error(`AI service error: ${response.status}`);
+        continue;
+      }
+
+      const data = await response.json();
+      console.log(`✅ Used model: ${model} (tier: ${tier})`);
+      return { content: data.choices[0].message.content, modelUsed: model };
+    } catch (e: any) {
+      if (e.message?.includes('credits')) throw e; // Don't retry payment errors
+      lastError = e;
+      console.warn(`Model ${model} failed:`, e.message);
+    }
   }
 
-  const data = await response.json();
-  return data.choices[0].message.content;
+  throw lastError || new Error('All AI models failed');
 }
 
-async function streamAI(apiKey: string, messages: any[], temperature = 0.1, model = MODEL) {
-  const response = await fetch(AI_GATEWAY, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ model, messages, temperature, stream: true }),
-  });
+// ===== STREAMING AI WITH FALLBACK =====
+async function streamAI(apiKey: string, messages: any[], temperature = 0.1, tier: 'deep' | 'chat' | 'fast' = 'chat') {
+  const models = FALLBACK_CHAINS[tier];
+  let lastError: Error | null = null;
 
-  if (!response.ok) {
-    if (response.status === 429) throw new Error('Rate limit exceeded. Please try again later.');
-    if (response.status === 402) throw new Error('AI credits depleted. Please contact admin.');
-    const t = await response.text();
-    console.error('AI gateway error:', response.status, t);
-    throw new Error(`AI service error: ${response.status}`);
+  for (const model of models) {
+    try {
+      const response = await fetch(AI_GATEWAY, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ model, messages, temperature, stream: true }),
+      });
+
+      if (response.status === 429) {
+        console.warn(`Rate limited on ${model} (stream), trying next...`);
+        await response.text();
+        lastError = new Error('Rate limit exceeded. Please try again later.');
+        await new Promise(r => setTimeout(r, 500));
+        continue;
+      }
+
+      if (response.status === 402) {
+        throw new Error('AI credits depleted. Please add credits under Settings → Workspace → Usage.');
+      }
+
+      if (!response.ok) {
+        const t = await response.text();
+        console.error(`Stream error on ${model}:`, response.status, t);
+        lastError = new Error(`AI service error: ${response.status}`);
+        continue;
+      }
+
+      console.log(`✅ Streaming with model: ${model} (tier: ${tier})`);
+      return { response, modelUsed: model };
+    } catch (e: any) {
+      if (e.message?.includes('credits')) throw e;
+      lastError = e;
+      console.warn(`Stream model ${model} failed:`, e.message);
+    }
   }
 
-  return response;
+  throw lastError || new Error('All AI models failed for streaming');
 }
 
 function parseJSON(content: string) {
@@ -88,6 +177,12 @@ async function logAudit(supabase: any, userId: string | null, action: string, en
 // Fetch constitution for a country (for cross-referencing)
 async function fetchConstitution(supabase: any, countryName: string | null): Promise<{ text: string; title: string; country: string } | null> {
   if (!countryName) return null;
+  
+  // Check cache first
+  const cacheKey = `constitution:${countryName}`;
+  const cached = getCached(cacheKey);
+  if (cached) return cached;
+  
   try {
     const { data } = await supabase
       .from('country_constitutions')
@@ -96,13 +191,14 @@ async function fetchConstitution(supabase: any, countryName: string | null): Pro
       .eq('is_active', true)
       .single();
     if (!data) return null;
-    // Build a concise constitutional reference (key provisions + rights first, then full text truncated)
     let constitutionContext = '';
     if (data.ai_summary?.summary) constitutionContext += `CONSTITUTIONAL SUMMARY:\n${data.ai_summary.summary}\n\n`;
     if (data.key_provisions) constitutionContext += `KEY PROVISIONS:\n${JSON.stringify(data.key_provisions)}\n\n`;
     if (data.fundamental_rights) constitutionContext += `FUNDAMENTAL RIGHTS:\n${JSON.stringify(data.fundamental_rights)}\n\n`;
     constitutionContext += `FULL CONSTITUTIONAL TEXT:\n${(data.original_text || '').substring(0, 15000)}`;
-    return { text: constitutionContext, title: data.constitution_title, country: data.country_name };
+    const result = { text: constitutionContext, title: data.constitution_title, country: data.country_name };
+    setCache(cacheKey, result);
+    return result;
   } catch (e) {
     console.error('Error fetching constitution:', e);
     return null;
@@ -139,7 +235,6 @@ serve(async (req) => {
   try {
     const body = await req.json();
     const { action: rawAction, documentId, question, claimText, conversationId, messages: chatMessages, stream: useStream, message } = body;
-    // Infer action from payload if not explicitly provided
     const action = rawAction || (message ? 'simple_chat' : (question ? 'ask' : undefined));
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY not configured');
@@ -156,7 +251,7 @@ serve(async (req) => {
 
     const startTime = Date.now();
 
-    // ===== ACTION: STREAMING CHAT =====
+    // ===== ACTION: STREAMING CHAT (uses CHAT tier for speed) =====
     if (action === 'chat_stream') {
       if (!conversationId) throw new Error('Conversation ID required');
 
@@ -171,7 +266,6 @@ serve(async (req) => {
       const doc = conv.civic_documents;
       const documentContext = doc ? (doc.original_text || doc.summary || doc.description || '') : '';
 
-      // Fetch constitution for cross-referencing
       const constitution = await fetchConstitution(supabase, doc?.country || null);
 
       const { data: history } = await supabase
@@ -198,14 +292,13 @@ serve(async (req) => {
         { role: 'user', content: userQuestion },
       ];
 
-      const streamResponse = await streamAI(LOVABLE_API_KEY, aiMessages, 0.1);
+      // Use CHAT tier for streaming — faster response
+      const { response: streamResponse, modelUsed } = await streamAI(LOVABLE_API_KEY, aiMessages, 0.1, 'chat');
 
-      // Create a TransformStream to intercept and save the complete response
       let fullContent = '';
       const { readable, writable } = new TransformStream({
         transform(chunk, controller) {
           const text = new TextDecoder().decode(chunk);
-          // Extract content from SSE chunks for saving
           const lines = text.split('\n');
           for (const line of lines) {
             if (line.startsWith('data: ') && line !== 'data: [DONE]') {
@@ -220,15 +313,13 @@ serve(async (req) => {
         },
         async flush() {
           const processingTime = Date.now() - startTime;
-          // Save complete AI response
           await supabase.from('nuru_messages').insert({
             conversation_id: conversationId,
             role: 'assistant',
             content: fullContent,
-            model_used: MODEL,
+            model_used: modelUsed,
             processing_time_ms: processingTime,
           });
-          // Update conversation
           await supabase.from('nuru_conversations').update({
             message_count: (conv.message_count || 0) + 2,
             last_message_at: new Date().toISOString(),
@@ -241,7 +332,7 @@ serve(async (req) => {
             }).eq('id', doc.id);
           }
 
-          await logAudit(supabase, userId, 'chat_streamed', 'nuru_conversation', conversationId, { processingTime, documentId: doc?.id });
+          await logAudit(supabase, userId, 'chat_streamed', 'nuru_conversation', conversationId, { processingTime, modelUsed, documentId: doc?.id });
         }
       });
 
@@ -252,7 +343,7 @@ serve(async (req) => {
       });
     }
 
-    // ===== ACTION: SUMMARIZE DOCUMENT =====
+    // ===== ACTION: SUMMARIZE DOCUMENT (uses DEEP tier for thorough analysis) =====
     if (action === 'summarize') {
       const { data: doc, error } = await supabase
         .from('civic_documents')
@@ -265,13 +356,22 @@ serve(async (req) => {
       const textToSummarize = doc.original_text || doc.description || '';
       if (!textToSummarize) throw new Error('No text content to summarize');
 
-      // Fetch constitution for cross-referencing
+      // Check cache
+      const cacheKey = `summary:${documentId}:${textToSummarize.length}`;
+      const cached = getCached(cacheKey);
+      if (cached) {
+        return new Response(JSON.stringify({ success: true, summary: cached, processingTime: 0, fromCache: true }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
       const constitution = await fetchConstitution(supabase, doc.country || null);
       const constitutionalContext = buildConstitutionalInstructions(constitution);
 
       await supabase.from('civic_documents').update({ processing_status: 'processing' }).eq('id', documentId);
 
-      const content = await callAI(LOVABLE_API_KEY, [
+      // Use DEEP tier for document analysis — maximum reasoning capability
+      const { content, modelUsed } = await callAI(LOVABLE_API_KEY, [
         {
           role: 'system',
           content: `You are NuruAI, a world-class civic intelligence analyst and policy decoder. You operate as critical public infrastructure for democratic participation across Africa.
@@ -378,10 +478,13 @@ Format response as JSON:
 }`
         },
         { role: 'user', content: textToSummarize.substring(0, 50000) }
-      ], 0.12);
+      ], 0.12, 'deep');
 
       const parsed = parseJSON(content) || { summary: content };
       const processingTime = Date.now() - startTime;
+
+      // Cache the result
+      setCache(cacheKey, parsed);
 
       await supabase.from('civic_documents').update({
         summary: parsed.summary,
@@ -405,14 +508,14 @@ Format response as JSON:
         // Non-critical
       }
 
-      await logAudit(supabase, userId, 'document_summarized', 'civic_document', documentId, { processingTime, topicCount: parsed.topics?.length });
+      await logAudit(supabase, userId, 'document_summarized', 'civic_document', documentId, { processingTime, modelUsed, topicCount: parsed.topics?.length });
 
-      return new Response(JSON.stringify({ success: true, summary: parsed, processingTime }), {
+      return new Response(JSON.stringify({ success: true, summary: parsed, processingTime, modelUsed }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // ===== ACTION: CONVERSATIONAL Q&A (non-streaming fallback) =====
+    // ===== ACTION: CONVERSATIONAL Q&A (non-streaming fallback, CHAT tier) =====
     if (action === 'chat') {
       if (!conversationId) throw new Error('Conversation ID required');
 
@@ -427,7 +530,6 @@ Format response as JSON:
       const doc = conv.civic_documents;
       const documentContext = doc ? (doc.original_text || doc.summary || doc.description || '') : '';
 
-      // Fetch constitution for cross-referencing
       const constitution = await fetchConstitution(supabase, doc?.country || null);
 
       const { data: history } = await supabase
@@ -446,7 +548,7 @@ Format response as JSON:
         { role: 'user', content: userQuestion },
       ];
 
-      const content = await callAI(LOVABLE_API_KEY, aiMessages, 0.1);
+      const { content, modelUsed } = await callAI(LOVABLE_API_KEY, aiMessages, 0.1, 'chat');
       const processingTime = Date.now() - startTime;
 
       // Save user message
@@ -461,7 +563,7 @@ Format response as JSON:
         conversation_id: conversationId,
         role: 'assistant',
         content: content,
-        model_used: MODEL,
+        model_used: modelUsed,
         processing_time_ms: processingTime,
       });
 
@@ -478,15 +580,15 @@ Format response as JSON:
       }
 
       await logAudit(supabase, userId, 'question_asked', 'nuru_conversation', conversationId, {
-        processingTime, documentId: doc?.id,
+        processingTime, modelUsed, documentId: doc?.id,
       });
 
-      return new Response(JSON.stringify({ success: true, answer: content, processingTime }), {
+      return new Response(JSON.stringify({ success: true, answer: content, processingTime, modelUsed }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // ===== ACTION: SINGLE QUESTION =====
+    // ===== ACTION: SINGLE QUESTION (CHAT tier) =====
     if (action === 'ask') {
       if (!question || !documentId) throw new Error('Question and document ID required');
 
@@ -499,11 +601,10 @@ Format response as JSON:
       if (!doc) throw new Error('Document not found');
       const documentContext = doc.original_text || doc.summary || doc.description || '';
 
-      // Fetch constitution for cross-referencing
       const constitution = await fetchConstitution(supabase, doc.country || null);
       const constitutionalContext = buildConstitutionalInstructions(constitution);
 
-      const content = await callAI(LOVABLE_API_KEY, [
+      const { content, modelUsed } = await callAI(LOVABLE_API_KEY, [
         {
           role: 'system',
           content: `You are NuruAI, a world-class civic intelligence analyst. Answer the citizen's question using ONLY the provided document content. You must be thorough, evidence-based, and strategic.
@@ -550,26 +651,25 @@ Format as JSON: {
           role: 'user',
           content: `Document: "${doc.title}"\n\nContent:\n${documentContext.substring(0, 40000)}\n\nQuestion: ${question}`
         }
-      ], 0.1);
+      ], 0.1, 'chat');
 
       const parsed = parseJSON(content) || { answer: content, confidence: 0.5 };
       const processingTime = Date.now() - startTime;
 
       await logAudit(supabase, userId, 'civic_question_asked', 'civic_document', documentId, {
-        processingTime, confidence: parsed.confidence,
+        processingTime, modelUsed, confidence: parsed.confidence,
       });
 
-      return new Response(JSON.stringify({ success: true, ...parsed, processingTime }), {
+      return new Response(JSON.stringify({ success: true, ...parsed, processingTime, modelUsed }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // ===== ACTION: REVIEW CLAIM (Enhanced - ClaimReview Schema.org + Multi-source) =====
+    // ===== ACTION: REVIEW CLAIM (DEEP tier for thorough fact-checking) =====
     if (action === 'review_claim') {
       if (!claimText) throw new Error('Claim text required');
       const { batchId, batchIndex, claimSource, claimSourceUrl } = body;
 
-      // Multi-source: gather ALL available documents + constitutions for cross-referencing
       let documentContextParts: { id: string; title: string; type: string; excerpt: string }[] = [];
 
       if (documentId) {
@@ -579,8 +679,7 @@ Format as JSON: {
         }
       }
 
-      // Also search other documents by topic relevance (keyword match)
-      const keywords = claimText.split(/\s+/).filter(w => w.length > 4).slice(0, 5).join(' | ');
+      const keywords = claimText.split(/\s+/).filter((w: string) => w.length > 4).slice(0, 5).join(' | ');
       if (keywords) {
         const { data: relatedDocs } = await supabase.from('civic_documents').select('id, title, document_type, summary').textSearch('title', keywords, { type: 'websearch', config: 'english' }).limit(3);
         if (relatedDocs) {
@@ -592,15 +691,15 @@ Format as JSON: {
         }
       }
 
-      // Fetch constitutions for cross-reference
       const { data: constitutions } = await supabase.from('country_constitutions').select('country_name, constitution_title, summary, key_provisions').eq('is_active', true).limit(3);
 
       const fullContext = [
         ...documentContextParts.map((d, i) => `--- SOURCE ${i + 1}: "${d.title}" (${d.type}) ---\n${d.excerpt}`),
-        ...(constitutions || []).map(c => `--- CONSTITUTIONAL REFERENCE: ${c.constitution_title} (${c.country_name}) ---\nSummary: ${c.summary || 'N/A'}\nKey Provisions: ${JSON.stringify(c.key_provisions || []).substring(0, 2000)}`),
+        ...(constitutions || []).map((c: any) => `--- CONSTITUTIONAL REFERENCE: ${c.constitution_title} (${c.country_name}) ---\nSummary: ${c.summary || 'N/A'}\nKey Provisions: ${JSON.stringify(c.key_provisions || []).substring(0, 2000)}`),
       ].join('\n\n');
 
-      const content = await callAI(LOVABLE_API_KEY, [
+      // Use DEEP tier for fact-checking — accuracy is critical
+      const { content, modelUsed } = await callAI(LOVABLE_API_KEY, [
         {
           role: 'system',
           content: `You are NuruAI's Fact-Check Engine — an IFCN-standard verification system that produces evidence-grounded verdicts comparable to Africa Check, PolitiFact, and Full Fact.
@@ -649,17 +748,16 @@ Format as JSON: {
           role: 'user',
           content: `CLAIM TO VERIFY: "${claimText}"${claimSource ? `\nCLAIM SOURCE: ${claimSource}` : ''}${claimSourceUrl ? `\nSOURCE URL: ${claimSourceUrl}` : ''}\n\nAVAILABLE EVIDENCE:\n${fullContext || 'No specific documents referenced. Evaluate based on general knowledge and clearly state limitations.'}`
         }
-      ], 0.1);
+      ], 0.1, 'deep');
 
       const parsed = parseJSON(content) || { status: 'needs_context', evidenceSummary: content, confidence: 0.3 };
       const processingTime = Date.now() - startTime;
 
-      // Build ClaimReview Schema.org structured data
       const claimReviewSchema = {
         "@context": "https://schema.org",
         "@type": "ClaimReview",
         "datePublished": new Date().toISOString(),
-        "url": "", // Will be filled with share URL on frontend
+        "url": "",
         "claimReviewed": claimText,
         "author": {
           "@type": "Organization",
@@ -681,7 +779,6 @@ Format as JSON: {
         }
       };
 
-      // Save to database with enhanced fields
       let savedId: string | null = null;
       try {
         const { data: saved } = await supabase.from('civic_claim_reviews').insert({
@@ -714,7 +811,7 @@ Format as JSON: {
       }
 
       await logAudit(supabase, userId, 'claim_reviewed', 'civic_claim', savedId || undefined, {
-        processingTime, status: parsed.status, confidence: parsed.confidence, sourcesCount: documentContextParts.length,
+        processingTime, modelUsed, status: parsed.status, confidence: parsed.confidence, sourcesCount: documentContextParts.length,
       });
 
       return new Response(JSON.stringify({
@@ -723,6 +820,7 @@ Format as JSON: {
         claimReviewSchema,
         sourcesUsed: parsed.sourcesUsed || documentContextParts.map(d => ({ title: d.title, type: d.type })),
         processingTime,
+        modelUsed,
         reviewId: savedId,
         shareToken: savedId ? claimReviewSchema.url?.split('/').pop() : null,
       }), {
@@ -742,7 +840,6 @@ Format as JSON: {
       for (let i = 0; i < claims.length; i++) {
         const claim = claims[i];
         try {
-          // Recursively call self for each claim
           const url = `${Deno.env.get('SUPABASE_URL')}/functions/v1/nuru-ai-chat`;
           const resp = await fetch(url, {
             method: 'POST',
@@ -780,7 +877,6 @@ Format as JSON: {
       const { data: claim, error } = await supabase.from('civic_claim_reviews').select('*, civic_documents(title, document_type, country)').eq('share_token', shareToken).eq('is_public', true).single();
       if (error || !claim) throw new Error('Shared claim not found or not public');
 
-      // Increment share count
       await supabase.from('civic_claim_reviews').update({ shared_count: (claim.shared_count || 0) + 1 }).eq('id', claim.id);
 
       return new Response(JSON.stringify({ success: true, claim }), {
@@ -792,12 +888,15 @@ Format as JSON: {
     if (action === 'toggle_claim_public') {
       const { reviewId, isPublic } = body;
       if (!reviewId) throw new Error('Review ID required');
-      if (!userId) throw new Error('Authentication required');
 
-      const { error } = await supabase.from('civic_claim_reviews').update({ is_public: isPublic }).eq('id', reviewId).eq('flagged_by', userId);
-      if (error) throw error;
-
-      return new Response(JSON.stringify({ success: true }), {
+      const { error: updateError } = await supabase.from('civic_claim_reviews').update({
+        is_public: isPublic,
+        updated_at: new Date().toISOString(),
+      }).eq('id', reviewId);
+      if (updateError) throw new Error(updateError.message);
+      
+      await logAudit(supabase, userId, 'toggle_claim_public', 'civic_claim_review', reviewId, { isPublic });
+      return new Response(JSON.stringify({ success: true, isPublic }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
@@ -813,7 +912,6 @@ Format as JSON: {
         processing_status: 'text_extracted',
       }).eq('id', docId);
 
-      // Trigger summarization
       const url = `${Deno.env.get('SUPABASE_URL')}/functions/v1/nuru-ai-chat`;
       await fetch(url, {
         method: 'POST',
@@ -829,7 +927,7 @@ Format as JSON: {
       });
     }
 
-    // ===== ACTION: COMPARE DOCUMENTS =====
+    // ===== ACTION: COMPARE DOCUMENTS (CHAT tier — balanced speed/quality) =====
     if (action === 'compare_documents') {
       const { documentIds } = body;
       if (!documentIds || documentIds.length < 2) throw new Error('Need at least 2 document IDs');
@@ -841,7 +939,7 @@ Format as JSON: {
 
       if (!docs || docs.length < 2) throw new Error('Documents not found');
 
-      const content = await callAI(LOVABLE_API_KEY, [
+      const { content, modelUsed } = await callAI(LOVABLE_API_KEY, [
         {
           role: 'system',
           content: `You are NuruAI. Compare these policy documents and provide a structured analysis.
@@ -856,16 +954,16 @@ Respond in markdown format with these sections:
         },
         {
           role: 'user',
-          content: docs.map(d => `Document: "${d.title}" (${d.country})\nSummary: ${d.summary}\nTopics: ${d.topics?.join(', ')}\nFinancials: ${JSON.stringify(d.financial_allocations)}`).join('\n\n---\n\n')
+          content: docs.map((d: any) => `Document: "${d.title}" (${d.country})\nSummary: ${d.summary}\nTopics: ${d.topics?.join(', ')}\nFinancials: ${JSON.stringify(d.financial_allocations)}`).join('\n\n---\n\n')
         }
-      ], 0.15, FAST_MODEL);
+      ], 0.15, 'chat');
 
-      return new Response(JSON.stringify({ success: true, comparison: content, documents: docs.map(d => ({ id: d.id, title: d.title, country: d.country })) }), {
+      return new Response(JSON.stringify({ success: true, comparison: content, modelUsed, documents: docs.map((d: any) => ({ id: d.id, title: d.title, country: d.country })) }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // ===== ACTION: PROCESS CONSTITUTION =====
+    // ===== ACTION: PROCESS CONSTITUTION (DEEP tier) =====
     if (action === 'process_constitution') {
       const { constitutionId } = body;
       if (!constitutionId) throw new Error('Constitution ID required');
@@ -886,7 +984,7 @@ Respond in markdown format with these sections:
         throw new Error('Constitution text too short for analysis');
       }
 
-      const content = await callAI(LOVABLE_API_KEY, [
+      const { content, modelUsed } = await callAI(LOVABLE_API_KEY, [
         {
           role: 'system',
           content: `You are a constitutional law analyst. Analyze this national constitution and extract structured information.
@@ -904,7 +1002,7 @@ Respond as JSON:
 }`
         },
         { role: 'user', content: textContent.substring(0, 50000) }
-      ], 0.1);
+      ], 0.1, 'deep');
 
       const parsed = parseJSON(content) || { summary: content };
 
@@ -919,15 +1017,15 @@ Respond as JSON:
       }).eq('id', constitutionId);
 
       await logAudit(supabase, userId, 'constitution_processed', 'country_constitution', constitutionId, {
-        processingTime: Date.now() - startTime, country: constitution.country_name,
+        processingTime: Date.now() - startTime, modelUsed, country: constitution.country_name,
       });
 
-      return new Response(JSON.stringify({ success: true, summary: parsed }), {
+      return new Response(JSON.stringify({ success: true, summary: parsed, modelUsed }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // ===== ACTION: SIMPLE CHAT (legacy / Policy Explorer) =====
+    // ===== ACTION: SIMPLE CHAT (FAST tier for quick responses) =====
     if (action === 'simple_chat') {
       const userMessage = message || question || '';
       if (!userMessage) throw new Error('Message is required');
@@ -948,27 +1046,13 @@ Respond as JSON:
         { role: 'user', content: userMessage },
       ];
 
-      const content = await callAI(LOVABLE_API_KEY, aiMessages, 0.1);
+      // Use CHAT tier for simple_chat — good balance
+      const { content, modelUsed } = await callAI(LOVABLE_API_KEY, aiMessages, 0.1, 'chat');
       const processingTime = Date.now() - startTime;
 
-      await logAudit(supabase, userId, 'simple_chat', 'nuru_chat', undefined, { processingTime, documentId });
+      await logAudit(supabase, userId, 'simple_chat', 'nuru_chat', undefined, { processingTime, modelUsed, documentId });
 
-      return new Response(JSON.stringify({ response: content, processingTime }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    // ===== ACTION: TOGGLE CLAIM PUBLIC =====
-    if (action === 'toggle_claim_public') {
-      const { reviewId, isPublic } = body;
-      if (!reviewId) throw new Error('Review ID required');
-      const { error: updateError } = await supabase.from('civic_claim_reviews').update({
-        is_public: isPublic,
-        updated_at: new Date().toISOString(),
-      }).eq('id', reviewId);
-      if (updateError) throw new Error(updateError.message);
-      await logAudit(supabase, userId, 'toggle_claim_public', 'civic_claim_review', reviewId, { isPublic });
-      return new Response(JSON.stringify({ success: true, isPublic }), {
+      return new Response(JSON.stringify({ response: content, processingTime, modelUsed }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
