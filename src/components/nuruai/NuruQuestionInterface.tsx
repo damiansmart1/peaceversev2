@@ -785,9 +785,10 @@ const NuruQuestionInterface = () => {
             </div>
           </div>
           <div className="flex items-center gap-1.5">
-            {selectedDoc && (
-              <Badge variant="outline" className="text-[9px] gap-1 font-normal max-w-[140px] truncate hidden sm:flex">
-                <FileText className="h-2.5 w-2.5 shrink-0" />{selectedDoc.title}
+            {selectedDocIds.length > 0 && (
+              <Badge variant="outline" className="text-[9px] gap-1 font-normal max-w-[160px] truncate hidden sm:flex">
+                <FileText className="h-2.5 w-2.5 shrink-0" />
+                {selectedDocIds.length === 1 ? selectedDoc?.title : `${selectedDocIds.length} documents`}
               </Badge>
             )}
             <Badge className="text-[9px] gap-1 font-semibold hidden sm:flex bg-primary text-primary-foreground border-primary/50" variant="outline">
