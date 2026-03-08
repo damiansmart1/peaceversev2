@@ -29,6 +29,8 @@ import {
   useDeleteConversation, useRenameConversation, useClearConversation,
   extractTextFromAttachment, type ChatAttachment,
 } from '@/hooks/useNuruAI';
+import { useSubmitAIFeedback } from '@/hooks/useNuruGovernance';
+import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/AuthContext';
 import { format, isToday, isYesterday, isThisWeek, isThisMonth } from 'date-fns';
 import { toast } from 'sonner';
@@ -36,7 +38,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter
 } from '@/components/ui/dialog';
 
 interface ChatSettings {
@@ -90,6 +92,10 @@ const NuruQuestionInterface = () => {
   const [lastUserMessage, setLastUserMessage] = useState<string>('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [feedbackGiven, setFeedbackGiven] = useState<Record<string, 'up' | 'down'>>({});
+  const [feedbackDialogMsg, setFeedbackDialogMsg] = useState<any>(null);
+  const [feedbackType, setFeedbackType] = useState('inaccurate');
+  const [feedbackSeverity, setFeedbackSeverity] = useState('medium');
+  const [feedbackDescription, setFeedbackDescription] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [editingConvId, setEditingConvId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
@@ -122,6 +128,7 @@ const NuruQuestionInterface = () => {
   const renameConversation = useRenameConversation();
   const clearConversation = useClearConversation();
   const { streamChat, abort: abortStream } = useStreamChatMessage();
+  const submitAIFeedback = useSubmitAIFeedback();
 
   // Persist settings & pinned
   useEffect(() => {
@@ -780,7 +787,14 @@ const NuruQuestionInterface = () => {
                     feedback={feedbackGiven[msg.id]}
                     onFeedback={(type) => {
                       setFeedbackGiven(prev => ({ ...prev, [msg.id]: type }));
-                      toast.success(type === 'up' ? 'Thanks for the positive feedback!' : 'Thanks — we\'ll improve this response type.');
+                      if (type === 'up') {
+                        toast.success('Thanks for the positive feedback!');
+                      } else {
+                        setFeedbackDialogMsg(msg);
+                        setFeedbackDescription('');
+                        setFeedbackType('inaccurate');
+                        setFeedbackSeverity('medium');
+                      }
                     }}
                     isEditing={editingMessageId === msg.id}
                     editContent={editMessageContent}
@@ -1167,6 +1181,70 @@ const NuruQuestionInterface = () => {
               </div>
             ))}
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* AI Feedback Dialog */}
+      <Dialog open={!!feedbackDialogMsg} onOpenChange={() => setFeedbackDialogMsg(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle className="text-sm">Flag AI Response</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <p className="text-xs text-muted-foreground">Help us improve NuruAI by describing the issue with this response.</p>
+            {feedbackDialogMsg?.content && (
+              <div className="p-2 rounded-lg bg-muted/30 text-[11px] text-muted-foreground/70 italic border-l-2 border-primary/20 max-h-24 overflow-auto">
+                "{feedbackDialogMsg.content.substring(0, 200)}..."
+              </div>
+            )}
+            <div>
+              <label className="text-xs font-medium text-muted-foreground">Issue Type</label>
+              <Select value={feedbackType} onValueChange={setFeedbackType}>
+                <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="inaccurate">Inaccurate Information</SelectItem>
+                  <SelectItem value="hallucination">Hallucination (made up facts)</SelectItem>
+                  <SelectItem value="bias">Biased Response</SelectItem>
+                  <SelectItem value="outdated">Outdated Information</SelectItem>
+                  <SelectItem value="offensive">Offensive Content</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground">Severity</label>
+              <Select value={feedbackSeverity} onValueChange={setFeedbackSeverity}>
+                <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Low — Minor issue</SelectItem>
+                  <SelectItem value="medium">Medium — Noticeable problem</SelectItem>
+                  <SelectItem value="high">High — Significantly misleading</SelectItem>
+                  <SelectItem value="critical">Critical — Dangerous misinformation</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground">Description (optional)</label>
+              <Textarea className="text-xs" placeholder="Describe what was wrong with this response..." value={feedbackDescription} onChange={e => setFeedbackDescription(e.target.value)} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" size="sm" className="text-xs" onClick={() => setFeedbackDialogMsg(null)}>Cancel</Button>
+            <Button size="sm" className="text-xs" onClick={async () => {
+              try {
+                await submitAIFeedback.mutateAsync({
+                  message_id: feedbackDialogMsg?.id,
+                  conversation_id: activeConversationId || undefined,
+                  feedback_type: feedbackType,
+                  severity: feedbackSeverity,
+                  description: feedbackDescription || undefined,
+                  ai_response_snippet: feedbackDialogMsg?.content?.substring(0, 500),
+                });
+                toast.success('Thank you — your feedback has been submitted for review');
+                setFeedbackDialogMsg(null);
+              } catch {
+                toast.error('Failed to submit feedback');
+              }
+            }}>Submit Feedback</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
