@@ -71,13 +71,18 @@ function parseJSON(content: string) {
 }
 
 async function logAudit(supabase: any, userId: string | null, action: string, entityType: string, entityId?: string, details?: any) {
-  await supabase.from('nuru_audit_log').insert({
-    user_id: userId,
-    action,
-    entity_type: entityType,
-    entity_id: entityId,
-    details: details || {},
-  }).catch((e: any) => console.error('Audit log error:', e));
+  try {
+    const { error } = await supabase.from('nuru_audit_log').insert({
+      user_id: userId,
+      action,
+      entity_type: entityType,
+      entity_id: entityId,
+      details: details || {},
+    });
+    if (error) console.error('Audit log error:', error);
+  } catch (e) {
+    console.error('Audit log exception:', e);
+  }
 }
 
 serve(async (req) => {
