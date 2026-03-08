@@ -138,7 +138,9 @@ serve(async (req) => {
 
   try {
     const body = await req.json();
-    const { action, documentId, question, claimText, conversationId, messages: chatMessages, stream: useStream } = body;
+    const { action: rawAction, documentId, question, claimText, conversationId, messages: chatMessages, stream: useStream, message } = body;
+    // Infer action from payload if not explicitly provided
+    const action = rawAction || (message ? 'simple_chat' : (question ? 'ask' : undefined));
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY not configured');
 
@@ -759,6 +761,37 @@ Respond as JSON:
       });
 
       return new Response(JSON.stringify({ success: true, summary: parsed }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // ===== ACTION: SIMPLE CHAT (legacy / Policy Explorer) =====
+    if (action === 'simple_chat') {
+      const userMessage = message || question || '';
+      if (!userMessage) throw new Error('Message is required');
+
+      let documentContext = '';
+      let doc: any = null;
+      if (documentId) {
+        const { data } = await supabase.from('civic_documents').select('*').eq('id', documentId).single();
+        doc = data;
+        documentContext = doc ? (doc.original_text || doc.summary || doc.description || '') : '';
+      }
+
+      const constitution = await fetchConstitution(supabase, doc?.country || null);
+      const systemPrompt = buildChatSystemPrompt(doc, documentContext, constitution);
+
+      const aiMessages = [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userMessage },
+      ];
+
+      const content = await callAI(LOVABLE_API_KEY, aiMessages, 0.1);
+      const processingTime = Date.now() - startTime;
+
+      await logAudit(supabase, userId, 'simple_chat', 'nuru_chat', undefined, { processingTime, documentId });
+
+      return new Response(JSON.stringify({ response: content, processingTime }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
