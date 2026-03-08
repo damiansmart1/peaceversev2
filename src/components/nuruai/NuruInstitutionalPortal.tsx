@@ -21,6 +21,7 @@ import { CivicConcernsPanel } from './institutional/CivicConcernsPanel';
 import { InstitutionalDocumentsPanel } from './institutional/InstitutionalDocumentsPanel';
 import { PublishedResponsesPanel } from './institutional/PublishedResponsesPanel';
 import { InstitutionalAnalyticsPanel } from './institutional/InstitutionalAnalyticsPanel';
+import { NotificationsDialog, SettingsDialog } from './institutional/InstitutionalDialogs';
 
 const sb = supabase as any;
 
@@ -38,6 +39,8 @@ const NuruInstitutionalPortal = () => {
   });
 
   const [showClarification, setShowClarification] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [clarificationText, setClarificationText] = useState('');
   const [clarificationDocId, setClarificationDocId] = useState('');
   const [responseText, setResponseText] = useState('');
