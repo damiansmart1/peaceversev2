@@ -85,7 +85,52 @@ async function logAudit(supabase: any, userId: string | null, action: string, en
   }
 }
 
-serve(async (req) => {
+// Fetch constitution for a country (for cross-referencing)
+async function fetchConstitution(supabase: any, countryName: string | null): Promise<{ text: string; title: string; country: string } | null> {
+  if (!countryName) return null;
+  try {
+    const { data } = await supabase
+      .from('country_constitutions')
+      .select('original_text, constitution_title, country_name, ai_summary, key_provisions, fundamental_rights')
+      .eq('country_name', countryName)
+      .eq('is_active', true)
+      .single();
+    if (!data) return null;
+    // Build a concise constitutional reference (key provisions + rights first, then full text truncated)
+    let constitutionContext = '';
+    if (data.ai_summary?.summary) constitutionContext += `CONSTITUTIONAL SUMMARY:\n${data.ai_summary.summary}\n\n`;
+    if (data.key_provisions) constitutionContext += `KEY PROVISIONS:\n${JSON.stringify(data.key_provisions)}\n\n`;
+    if (data.fundamental_rights) constitutionContext += `FUNDAMENTAL RIGHTS:\n${JSON.stringify(data.fundamental_rights)}\n\n`;
+    constitutionContext += `FULL CONSTITUTIONAL TEXT:\n${(data.original_text || '').substring(0, 15000)}`;
+    return { text: constitutionContext, title: data.constitution_title, country: data.country_name };
+  } catch (e) {
+    console.error('Error fetching constitution:', e);
+    return null;
+  }
+}
+
+function buildConstitutionalInstructions(constitution: { text: string; title: string; country: string } | null): string {
+  if (!constitution) return '';
+  return `
+
+## 🏛️ CONSTITUTIONAL CROSS-REFERENCE
+You have access to the **${constitution.title}** (${constitution.country}). You MUST use it to:
+1. **Verify constitutional compliance**: Check if document provisions align with or violate constitutional guarantees
+2. **Flag constitutional conflicts**: Identify any policy that contradicts fundamental rights, governance structures, or constitutional principles
+3. **Cite constitutional authority**: When relevant, quote specific constitutional articles/sections that apply
+4. **Sovereignty check**: Ensure proposals respect constitutional sovereignty and territorial integrity
+5. **Rights assessment**: Cross-reference any citizen impact against constitutionally guaranteed rights
+
+In your response, include a **Constitutional Alignment** section when applicable:
+- ✅ Aligned: provisions consistent with constitutional framework
+- ⚠️ Concern: potential tension with constitutional principles
+- ❌ Conflict: direct contradiction of constitutional provisions
+
+**CONSTITUTIONAL REFERENCE:**
+${constitution.text}
+`;
+}
+
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
