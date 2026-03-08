@@ -1296,6 +1296,9 @@ export type Database = {
           created_at: string | null
           description: string | null
           document_type: string
+          file_checksum: string | null
+          file_size_bytes: number | null
+          file_type: string | null
           file_url: string | null
           financial_allocations: Json | null
           id: string
@@ -1303,6 +1306,8 @@ export type Database = {
           language: string | null
           original_text: string | null
           parsed_sections: Json | null
+          processing_error: string | null
+          processing_status: string | null
           publish_date: string | null
           question_count: number | null
           region: string | null
@@ -1313,6 +1318,7 @@ export type Database = {
           topics: string[] | null
           updated_at: string | null
           uploaded_by: string | null
+          version_count: number | null
           view_count: number | null
         }
         Insert: {
@@ -1321,6 +1327,9 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           document_type?: string
+          file_checksum?: string | null
+          file_size_bytes?: number | null
+          file_type?: string | null
           file_url?: string | null
           financial_allocations?: Json | null
           id?: string
@@ -1328,6 +1337,8 @@ export type Database = {
           language?: string | null
           original_text?: string | null
           parsed_sections?: Json | null
+          processing_error?: string | null
+          processing_status?: string | null
           publish_date?: string | null
           question_count?: number | null
           region?: string | null
@@ -1338,6 +1349,7 @@ export type Database = {
           topics?: string[] | null
           updated_at?: string | null
           uploaded_by?: string | null
+          version_count?: number | null
           view_count?: number | null
         }
         Update: {
@@ -1346,6 +1358,9 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           document_type?: string
+          file_checksum?: string | null
+          file_size_bytes?: number | null
+          file_type?: string | null
           file_url?: string | null
           financial_allocations?: Json | null
           id?: string
@@ -1353,6 +1368,8 @@ export type Database = {
           language?: string | null
           original_text?: string | null
           parsed_sections?: Json | null
+          processing_error?: string | null
+          processing_status?: string | null
           publish_date?: string | null
           question_count?: number | null
           region?: string | null
@@ -1363,6 +1380,7 @@ export type Database = {
           topics?: string[] | null
           updated_at?: string | null
           uploaded_by?: string | null
+          version_count?: number | null
           view_count?: number | null
         }
         Relationships: []
@@ -3560,6 +3578,171 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      nuru_audit_log: {
+        Row: {
+          action: string
+          created_at: string | null
+          details: Json | null
+          entity_id: string | null
+          entity_type: string
+          id: string
+          ip_address: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          details?: Json | null
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          ip_address?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          details?: Json | null
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          ip_address?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      nuru_conversations: {
+        Row: {
+          created_at: string | null
+          document_id: string | null
+          id: string
+          last_message_at: string | null
+          message_count: number | null
+          title: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          document_id?: string | null
+          id?: string
+          last_message_at?: string | null
+          message_count?: number | null
+          title?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          document_id?: string | null
+          id?: string
+          last_message_at?: string | null
+          message_count?: number | null
+          title?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nuru_conversations_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "civic_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nuru_document_versions: {
+        Row: {
+          checksum: string | null
+          created_at: string | null
+          document_id: string
+          file_size_bytes: number | null
+          file_type: string | null
+          file_url: string | null
+          id: string
+          original_text: string | null
+          uploaded_by: string | null
+          version_number: number
+        }
+        Insert: {
+          checksum?: string | null
+          created_at?: string | null
+          document_id: string
+          file_size_bytes?: number | null
+          file_type?: string | null
+          file_url?: string | null
+          id?: string
+          original_text?: string | null
+          uploaded_by?: string | null
+          version_number?: number
+        }
+        Update: {
+          checksum?: string | null
+          created_at?: string | null
+          document_id?: string
+          file_size_bytes?: number | null
+          file_type?: string | null
+          file_url?: string | null
+          id?: string
+          original_text?: string | null
+          uploaded_by?: string | null
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nuru_document_versions_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "civic_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nuru_messages: {
+        Row: {
+          confidence: number | null
+          content: string
+          conversation_id: string
+          created_at: string | null
+          id: string
+          model_used: string | null
+          processing_time_ms: number | null
+          role: string
+          sources: Json | null
+        }
+        Insert: {
+          confidence?: number | null
+          content: string
+          conversation_id: string
+          created_at?: string | null
+          id?: string
+          model_used?: string | null
+          processing_time_ms?: number | null
+          role: string
+          sources?: Json | null
+        }
+        Update: {
+          confidence?: number | null
+          content?: string
+          conversation_id?: string
+          created_at?: string | null
+          id?: string
+          model_used?: string | null
+          processing_time_ms?: number | null
+          role?: string
+          sources?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nuru_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "nuru_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       observation_checklists: {
         Row: {
