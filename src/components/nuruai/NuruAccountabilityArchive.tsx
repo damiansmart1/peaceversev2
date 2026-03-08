@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Building2, MessageSquare, Clock, Send, Loader2, CheckCircle, AlertCircle, Users } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Building2, MessageSquare, Clock, Send, Loader2, CheckCircle, AlertCircle, Users, ArrowRight } from 'lucide-react';
 import { useCivicQuestions, useInstitutionalResponses, useSubmitResponse } from '@/hooks/useNuruAI';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
@@ -22,112 +21,118 @@ const NuruAccountabilityArchive = () => {
 
   const handleSubmitResponse = () => {
     if (!selectedQuestion || !responseText.trim() || !institutionName.trim()) return;
-    submitResponse.mutate({ questionId: selectedQuestion, institutionName, responseText }, {
-      onSuccess: () => { setResponseText(''); },
-    });
+    submitResponse.mutate({ questionId: selectedQuestion, institutionName, responseText }, { onSuccess: () => setResponseText('') });
   };
 
   const answeredQuestions = questions?.filter(q => q.status === 'answered') || [];
+  const selectedQ = answeredQuestions.find(q => q.id === selectedQuestion);
 
   return (
-    <div className="grid gap-6 lg:grid-cols-2">
-      {/* Questions Archive */}
-      <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Building2 className="h-5 w-5 text-primary" />Public Accountability Archive
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">Track how institutions respond to civic questions</p>
-        </CardHeader>
-        <CardContent>
+    <div className="flex h-[calc(100vh-260px)] rounded-2xl border border-border/30 overflow-hidden bg-card/30 backdrop-blur-sm">
+      {/* Questions List */}
+      <div className="w-80 border-r border-border/30 flex flex-col bg-card/40">
+        <div className="p-4 border-b border-border/30">
+          <h2 className="text-sm font-semibold flex items-center gap-2">
+            <Building2 className="h-4 w-4 text-primary" />Accountability Archive
+          </h2>
+          <p className="text-[10px] text-muted-foreground mt-0.5">{answeredQuestions.length} civic interactions recorded</p>
+        </div>
+        <ScrollArea className="flex-1">
           {isLoading ? (
-            <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+            <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-primary/50" /></div>
           ) : answeredQuestions.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <Users className="h-12 w-12 mx-auto mb-3 opacity-30" />
-              <p>No civic interactions recorded yet.</p>
+            <div className="p-6 text-center text-muted-foreground">
+              <Users className="h-10 w-10 mx-auto mb-2 opacity-20" />
+              <p className="text-xs">No civic interactions yet</p>
             </div>
           ) : (
-            <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
-              {answeredQuestions.map((q, i) => (
-                <motion.div
+            <div className="p-2 space-y-0.5">
+              {answeredQuestions.map((q) => (
+                <button
                   key={q.id}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: i * 0.03 }}
                   onClick={() => setSelectedQuestion(q.id)}
-                  className={`p-4 rounded-xl border cursor-pointer transition-all ${selectedQuestion === q.id ? 'border-primary bg-primary/5' : 'border-border/50 hover:border-primary/20'}`}
+                  className={`w-full text-left p-3 rounded-xl transition-all text-xs ${
+                    selectedQuestion === q.id ? 'bg-primary/10 border border-primary/20' : 'hover:bg-muted/30 border border-transparent'
+                  }`}
                 >
-                  <p className="text-sm font-medium line-clamp-2">{q.question_text}</p>
-                  <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                  <p className="font-medium line-clamp-2 text-[13px] text-foreground">{q.question_text}</p>
+                  <div className="flex items-center gap-2 mt-1.5 text-muted-foreground">
                     <Clock className="h-3 w-3" />
-                    {format(new Date(q.created_at), 'MMM d, yyyy HH:mm')}
-                    <Badge variant={q.ai_answer ? 'secondary' : 'outline'} className="text-xs ml-auto">
-                      {q.ai_answer ? 'AI Answered' : 'Pending'}
+                    <span>{format(new Date(q.created_at), 'MMM d, yyyy')}</span>
+                    <Badge variant={q.ai_answer ? 'secondary' : 'outline'} className="text-[9px] ml-auto h-4">
+                      {q.ai_answer ? 'Answered' : 'Pending'}
                     </Badge>
                   </div>
-                </motion.div>
+                </button>
               ))}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </ScrollArea>
+      </div>
 
       {/* Response Thread */}
-      <div className="space-y-4">
-        {selectedQuestion ? (
+      <div className="flex-1 flex flex-col">
+        {selectedQ ? (
           <>
-            <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="text-base">Institutional Responses</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {responses?.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <AlertCircle className="h-8 w-8 mx-auto mb-2 opacity-30" />
-                    <p className="text-sm">No institutional responses yet.</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {responses?.map((r) => (
-                      <div key={r.id} className="p-4 rounded-xl bg-primary/5 border border-primary/10">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Building2 className="h-4 w-4 text-primary" />
-                          <span className="text-sm font-semibold">{r.institution_name}</span>
-                          <Badge variant="secondary" className="text-xs ml-auto gap-1"><CheckCircle className="h-3 w-3" />Official</Badge>
-                        </div>
-                        <p className="text-sm text-foreground">{r.response_text}</p>
-                        <p className="text-xs text-muted-foreground mt-2">{format(new Date(r.created_at), 'MMM d, yyyy HH:mm')}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            {/* Question Detail */}
+            <div className="p-5 border-b border-border/30">
+              <p className="text-sm font-medium text-foreground">{selectedQ.question_text}</p>
+              {selectedQ.ai_answer && (
+                <div className="mt-3 p-3.5 rounded-xl bg-primary/5 border border-primary/10">
+                  <p className="text-[10px] font-medium text-primary mb-1 flex items-center gap-1">🤖 AI Answer</p>
+                  <p className="text-xs text-foreground leading-relaxed">{selectedQ.ai_answer}</p>
+                </div>
+              )}
+            </div>
 
+            {/* Responses */}
+            <ScrollArea className="flex-1 p-5">
+              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Institutional Responses</h3>
+              {responses?.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <AlertCircle className="h-8 w-8 mx-auto mb-2 opacity-20" />
+                  <p className="text-xs">No institutional responses yet</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {responses?.map((r) => (
+                    <motion.div key={r.id} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }}
+                      className="p-4 rounded-xl bg-muted/20 border border-border/30"
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <Building2 className="h-3.5 w-3.5 text-primary" />
+                        <span className="text-xs font-semibold">{r.institution_name}</span>
+                        <Badge variant="secondary" className="text-[9px] ml-auto gap-1 h-4"><CheckCircle className="h-2.5 w-2.5" />Official</Badge>
+                      </div>
+                      <p className="text-xs text-foreground leading-relaxed">{r.response_text}</p>
+                      <p className="text-[10px] text-muted-foreground mt-2">{format(new Date(r.created_at), 'MMM d, yyyy HH:mm')}</p>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </ScrollArea>
+
+            {/* Response Form */}
             {user && (
-              <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle className="text-base">Submit Institutional Response</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <Input placeholder="Institution name" value={institutionName} onChange={(e) => setInstitutionName(e.target.value)} />
-                  <Textarea placeholder="Write the official response..." rows={4} value={responseText} onChange={(e) => setResponseText(e.target.value)} />
-                  <Button onClick={handleSubmitResponse} disabled={submitResponse.isPending} className="w-full gap-2">
+              <div className="p-4 border-t border-border/30 bg-card/40">
+                <div className="flex gap-2">
+                  <Input placeholder="Institution name" value={institutionName} onChange={(e) => setInstitutionName(e.target.value)} className="flex-1 rounded-xl text-xs h-9" />
+                </div>
+                <div className="flex gap-2 mt-2">
+                  <Textarea placeholder="Official response..." rows={2} value={responseText} onChange={(e) => setResponseText(e.target.value)} className="flex-1 rounded-xl text-xs" />
+                  <Button onClick={handleSubmitResponse} disabled={submitResponse.isPending || !responseText.trim() || !institutionName.trim()} size="icon" className="shrink-0 h-auto rounded-xl">
                     {submitResponse.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                    Publish Response
                   </Button>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             )}
           </>
         ) : (
-          <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
-            <CardContent className="flex flex-col items-center justify-center py-20 text-center">
-              <MessageSquare className="h-16 w-16 text-muted-foreground/20 mb-4" />
-              <p className="text-muted-foreground">Select a question to view institutional responses</p>
-            </CardContent>
-          </Card>
+          <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
+            <MessageSquare className="h-14 w-14 text-muted-foreground/15 mb-4" />
+            <p className="text-sm text-muted-foreground">Select a question to view the accountability thread</p>
+            <p className="text-xs text-muted-foreground/60 mt-1">Track how institutions respond to civic concerns</p>
+          </div>
         )}
       </div>
     </div>
