@@ -1297,10 +1297,15 @@ const ChatMessage = ({ msg, onCopy, copiedId, compact, showTimestamps, showConfi
   const renderContent = msg.content;
 
   return (
-    <div className={`flex gap-3 ${compact ? 'py-2' : 'py-4'} ${isUser ? '' : 'bg-muted/5 -mx-4 px-4 rounded-lg'}`}>
+    <motion.div 
+      initial={{ opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2 }}
+      className={`flex gap-3.5 ${compact ? 'py-2.5' : 'py-5'} ${isUser ? '' : 'bg-muted/[0.03] -mx-4 px-4 rounded-xl border border-border/[0.06]'}`}
+    >
       <div className="shrink-0 mt-1">
-        <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
-          isUser ? 'bg-primary/10 border border-primary/15' : 'bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/15'
+        <div className={`w-8 h-8 rounded-xl flex items-center justify-center shadow-sm ${
+          isUser ? 'bg-primary/10 border border-primary/15' : 'bg-gradient-to-br from-primary/20 to-secondary/10 border border-primary/15'
         }`}>
           {isUser ? <User className="h-3.5 w-3.5 text-primary" /> : <Bot className="h-3.5 w-3.5 text-primary" />}
         </div>
@@ -1423,7 +1428,7 @@ const ChatMessage = ({ msg, onCopy, copiedId, compact, showTimestamps, showConfi
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 };
 
@@ -1436,47 +1441,68 @@ const WelcomeScreen = ({ setQuestion, user, onNewChat, documents, selectedDocId,
   const recentDocs = documents?.slice(0, 3);
 
   return (
-    <div className="flex flex-col items-center justify-center py-12 text-center">
-      <div className="relative mb-6">
-        <div className="absolute inset-0 bg-primary/10 blur-2xl rounded-full scale-150" />
-        <div className="relative p-4 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/15">
-          <Brain className="h-8 w-8 text-primary" />
+    <div className="flex flex-col items-center justify-center py-16 text-center">
+      <motion.div 
+        initial={{ scale: 0.7, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
+        className="relative mb-8"
+      >
+        <div className="absolute inset-0 bg-primary/10 blur-3xl rounded-full scale-[2]" />
+        <div className="absolute inset-0 bg-gold/5 blur-2xl rounded-full scale-150 animate-pulse" />
+        <div className="relative p-5 rounded-3xl bg-gradient-to-br from-primary/20 via-primary/10 to-transparent border border-primary/15 shadow-xl shadow-primary/10">
+          <Brain className="h-10 w-10 text-primary" />
         </div>
-      </div>
-      <h2 className="text-xl font-bold text-foreground mb-1">NuruAI Civic Intelligence</h2>
-      <p className="text-sm text-muted-foreground max-w-md mb-2">
-        Ask questions about African policy documents. Get evidence-grounded answers with source citations.
-      </p>
-      <p className="text-xs text-muted-foreground/50 mb-6">
-        Just type your question below — a conversation will be created automatically.
-      </p>
+      </motion.div>
+      
+      <motion.div
+        initial={{ y: 10, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.15, duration: 0.4 }}
+      >
+        <h2 className="text-2xl font-bold text-foreground mb-2 tracking-tight">NuruAI Civic Intelligence</h2>
+        <p className="text-sm text-muted-foreground max-w-md mb-1.5 leading-relaxed">
+          Ask questions about African policy documents. Get evidence-grounded answers with source citations.
+        </p>
+        <p className="text-xs text-muted-foreground/40 mb-8">
+          Just type your question below — a conversation will be created automatically.
+        </p>
+      </motion.div>
 
       {/* Document-aware quick actions */}
       {selectedDoc && (
-        <div className="w-full max-w-lg mb-6">
-          <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center justify-center gap-1.5">
+        <motion.div 
+          initial={{ y: 10, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.25 }}
+          className="w-full max-w-lg mb-8"
+        >
+          <p className="text-xs font-medium text-muted-foreground mb-3 flex items-center justify-center gap-1.5">
             <FileText className="h-3.5 w-3.5 text-primary" />
             Quick actions for "{selectedDoc.title}"
           </p>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
             {QUICK_ACTIONS.map(action => (
               <button
                 key={action.id}
-                onClick={() => {
-                  onQuickAction?.(action);
-                }}
-                className="flex flex-col items-center gap-1.5 p-3 rounded-lg border border-border/20 hover:border-primary/30 hover:bg-primary/5 transition-all text-center group"
+                onClick={() => onQuickAction?.(action)}
+                className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border/20 hover:border-primary/30 hover:bg-primary/5 hover:shadow-md hover:shadow-primary/5 transition-all text-center group"
               >
-                <action.icon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                <action.icon className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
                 <span className="text-[11px] font-medium text-muted-foreground group-hover:text-foreground">{action.label}</span>
               </button>
             ))}
           </div>
-        </div>
+        </motion.div>
       )}
 
       {/* Suggested prompts */}
-      <div className="grid gap-2.5 sm:grid-cols-2 w-full max-w-lg">
+      <motion.div 
+        initial={{ y: 10, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.3 }}
+        className="grid gap-3 sm:grid-cols-2 w-full max-w-lg"
+      >
         {(selectedDoc ? [
           { q: `What are the key financial allocations in "${selectedDoc.title}"?`, icon: '💰' },
           { q: `How does "${selectedDoc.title}" impact ordinary citizens?`, icon: '👥' },
@@ -1488,42 +1514,55 @@ const WelcomeScreen = ({ setQuestion, user, onNewChat, documents, selectedDocId,
           { q: 'What environmental targets are set?', icon: '🌍' },
           { q: 'What accountability measures exist?', icon: '⚖️' },
         ]).map((item, i) => (
-          <button
+          <motion.button
             key={i}
+            initial={{ y: 10, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.35 + i * 0.05 }}
             onClick={() => setQuestion(item.q)}
-            className="text-left p-3 rounded-xl border border-border/30 hover:border-primary/30 hover:bg-primary/5 transition-all text-xs group"
+            className="text-left p-4 rounded-xl border border-border/25 hover:border-primary/30 hover:bg-primary/5 hover:shadow-lg hover:shadow-primary/5 transition-all text-xs group backdrop-blur-sm"
           >
-            <span className="text-sm mb-0.5 block">{item.icon}</span>
+            <span className="text-base mb-1 block">{item.icon}</span>
             <span className="text-muted-foreground group-hover:text-foreground transition-colors leading-relaxed">{item.q}</span>
-          </button>
+          </motion.button>
         ))}
-      </div>
+      </motion.div>
 
       {/* Recent documents hint */}
       {!selectedDoc && recentDocs && recentDocs.length > 0 && (
-        <div className="mt-6 w-full max-w-lg">
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="mt-8 w-full max-w-lg"
+        >
           <p className="text-[10px] text-muted-foreground/40 mb-2">Recent documents available for analysis:</p>
           <div className="flex flex-wrap justify-center gap-1.5">
             {recentDocs.map(d => (
-              <Badge key={d.id} variant="outline" className="text-[10px] font-normal cursor-default">
+              <Badge key={d.id} variant="outline" className="text-[10px] font-normal cursor-default hover:border-primary/30 transition-colors">
                 <FileText className="h-2.5 w-2.5 mr-1" />{d.title.substring(0, 30)}
               </Badge>
             ))}
           </div>
-        </div>
+        </motion.div>
       )}
 
       {/* Feature hints */}
-      <div className="mt-8 flex flex-wrap justify-center gap-3 text-[10px] text-muted-foreground/40">
-        <span className="flex items-center gap-1"><Paperclip className="h-3 w-3" /> Attach files</span>
-        <span className="flex items-center gap-1"><Mic className="h-3 w-3" /> Voice input</span>
-        <span className="flex items-center gap-1"><Share2 className="h-3 w-3" /> Share chats</span>
-        <span className="flex items-center gap-1"><Keyboard className="h-3 w-3" /> Shortcuts</span>
-      </div>
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.55 }}
+        className="mt-10 flex flex-wrap justify-center gap-4 text-[10px] text-muted-foreground/35"
+      >
+        <span className="flex items-center gap-1.5"><Paperclip className="h-3 w-3" /> Attach files</span>
+        <span className="flex items-center gap-1.5"><Mic className="h-3 w-3" /> Voice input</span>
+        <span className="flex items-center gap-1.5"><Share2 className="h-3 w-3" /> Share chats</span>
+        <span className="flex items-center gap-1.5"><Keyboard className="h-3 w-3" /> Shortcuts</span>
+      </motion.div>
 
       {!user && (
-        <p className="text-xs text-muted-foreground mt-6 flex items-center gap-1.5">
-          <AlertCircle className="h-3.5 w-3.5" />Sign in to start a conversation
+        <p className="text-xs text-muted-foreground mt-8 flex items-center gap-1.5 px-4 py-2 rounded-lg border border-border/20 bg-muted/10">
+          <AlertCircle className="h-3.5 w-3.5 text-primary" />Sign in to start a conversation
         </p>
       )}
     </div>
