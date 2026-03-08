@@ -228,14 +228,28 @@ serve(async (req) => {
     extractedText = extractedText.substring(0, 100000);
 
     if (extractedText.length < 50) {
-      await supabase.from('civic_documents').update({
-        processing_status: 'text_extraction_failed',
-        processing_error: `Extraction method "${extractionMethod}" yielded insufficient text (${extractedText.length} chars). Please paste document text manually.`,
-      }).eq('id', documentId);
+      if (!isExtractOnly) {
+        await supabase.from('civic_documents').update({
+          processing_status: 'text_extraction_failed',
+          processing_error: `Extraction method "${extractionMethod}" yielded insufficient text (${extractedText.length} chars). Please paste document text manually.`,
+        }).eq('id', documentId);
+      }
 
       return new Response(JSON.stringify({
         success: false,
+        text: extractedText,
         error: 'Insufficient text extracted',
+        method: extractionMethod,
+        charCount: extractedText.length,
+      }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+    // For extractOnly mode, just return the text
+    if (isExtractOnly) {
+      console.log(`Extract-only complete: ${extractedText.length} chars via ${extractionMethod}`);
+      return new Response(JSON.stringify({
+        success: true,
+        text: extractedText,
         method: extractionMethod,
         charCount: extractedText.length,
       }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
