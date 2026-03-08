@@ -146,25 +146,60 @@ const NuruQuestionInterface = () => {
     );
   };
 
-  const handleSend = useCallback(async () => {
-    if (!question.trim() || !activeConversationId || isStreaming) return;
-    const msg = question;
+  const handleSendMessage = useCallback(async (msg: string, convId?: string) => {
+    const targetConvId = convId || activeConversationId;
+    if (!msg.trim() || !targetConvId || isStreaming) return;
     setQuestion('');
     if (textareaRef.current) textareaRef.current.style.height = 'auto';
     setIsStreaming(true);
     setStreamingContent('');
+    setLastUserMessage(msg);
 
     try {
-      await streamChat(activeConversationId, msg, (delta) => setStreamingContent(prev => prev + delta), () => {
+      await streamChat(targetConvId, msg, (delta) => setStreamingContent(prev => prev + delta), () => {
         setIsStreaming(false);
         setStreamingContent('');
       });
     } catch (e: any) {
       setIsStreaming(false);
       setStreamingContent('');
-      toast.error(e.message || 'Failed to send message');
+      const errorMsg = e.message || 'Failed to send message';
+      if (errorMsg.includes('Rate limit') || errorMsg.includes('429')) {
+        toast.error(errorMsg, { duration: 8000, description: 'Wait a moment and try again.' });
+      } else if (errorMsg.includes('credits') || errorMsg.includes('402')) {
+        toast.error(errorMsg, { duration: 10000, description: 'Go to Settings → Workspace → Usage to add credits.' });
+      } else {
+        toast.error(errorMsg);
+      }
     }
-  }, [question, activeConversationId, isStreaming, streamChat]);
+  }, [activeConversationId, isStreaming, streamChat]);
+
+  const handleSend = useCallback(() => {
+    if (!question.trim() || isStreaming) return;
+    handleSendMessage(question);
+  }, [question, isStreaming, handleSendMessage]);
+
+  const handleRegenerate = useCallback(async () => {
+    if (!lastUserMessage || !activeConversationId || isStreaming) return;
+    setIsStreaming(true);
+    setStreamingContent('');
+    try {
+      await streamChat(activeConversationId, lastUserMessage, (delta) => setStreamingContent(prev => prev + delta), () => {
+        setIsStreaming(false);
+        setStreamingContent('');
+      });
+    } catch (e: any) {
+      setIsStreaming(false);
+      setStreamingContent('');
+      toast.error(e.message || 'Regeneration failed');
+    }
+  }, [lastUserMessage, activeConversationId, isStreaming, streamChat]);
+
+  const handleFollowUpClick = useCallback((followUp: string) => {
+    if (isStreaming) return;
+    setQuestion('');
+    handleSendMessage(followUp);
+  }, [isStreaming, handleSendMessage]);
 
   const handleCopy = (content: string, id: string) => {
     navigator.clipboard.writeText(content);
