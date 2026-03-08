@@ -1,22 +1,27 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import ReactMarkdown from 'react-markdown';
 import { 
-  Send, Loader2, FileText, Quote, Bot, User, Sparkles, Clock, ArrowRight, 
-  Plus, History, MessageSquareText, BookOpen, AlertCircle, ChevronDown, Zap
+  Send, Loader2, FileText, Bot, User, Plus, MessageSquareText, 
+  AlertCircle, Zap, Brain, Trash2, Share2, PanelLeftClose, PanelLeft, Copy, Check, Sparkles
 } from 'lucide-react';
-import { useCivicDocuments, useNuruConversations, useNuruMessages, useCreateConversation, useSendChatMessage, useAskQuestion } from '@/hooks/useNuruAI';
+import { useCivicDocuments, useNuruConversations, useNuruMessages, useCreateConversation, useStreamChatMessage } from '@/hooks/useNuruAI';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
+import { toast } from 'sonner';
 
 const NuruQuestionInterface = () => {
   const [selectedDocId, setSelectedDocId] = useState('');
   const [question, setQuestion] = useState('');
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [streamingContent, setStreamingContent] = useState('');
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -25,13 +30,12 @@ const NuruQuestionInterface = () => {
   const { data: conversations } = useNuruConversations();
   const { data: chatMessages } = useNuruMessages(activeConversationId || '');
   const createConversation = useCreateConversation();
-  const sendChatMessage = useSendChatMessage();
+  const { streamChat } = useStreamChatMessage();
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [chatMessages]);
+  }, [chatMessages, streamingContent]);
 
-  // Auto-resize textarea
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
@@ -43,239 +47,179 @@ const NuruQuestionInterface = () => {
     if (!user) return;
     const doc = documents?.find(d => d.id === selectedDocId);
     createConversation.mutate(
-      { documentId: selectedDocId || undefined, title: doc ? doc.title.substring(0, 60) : 'General Civic Chat' },
+      { documentId: selectedDocId || undefined, title: doc ? doc.title.substring(0, 60) : 'New Conversation' },
       { onSuccess: (conv) => setActiveConversationId(conv.id) }
     );
   };
 
-  const handleSend = () => {
-    if (!question.trim() || !activeConversationId) return;
-    sendChatMessage.mutate({ conversationId: activeConversationId, message: question });
+  const handleSend = useCallback(async () => {
+    if (!question.trim() || !activeConversationId || isStreaming) return;
+    const msg = question;
     setQuestion('');
     if (textareaRef.current) textareaRef.current.style.height = 'auto';
-  };
+    
+    setIsStreaming(true);
+    setStreamingContent('');
 
-  const confidenceColor = (c: number) => c >= 0.8 ? 'text-emerald-400' : c >= 0.5 ? 'text-amber-400' : 'text-red-400';
+    try {
+      await streamChat(
+        activeConversationId,
+        msg,
+        (delta) => setStreamingContent(prev => prev + delta),
+        () => {
+          setIsStreaming(false);
+          setStreamingContent('');
+        }
+      );
+    } catch (e: any) {
+      setIsStreaming(false);
+      setStreamingContent('');
+      toast.error(e.message || 'Failed to send message');
+    }
+  }, [question, activeConversationId, isStreaming, streamChat]);
+
+  const handleCopy = (content: string, id: string) => {
+    navigator.clipboard.writeText(content);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
 
   const selectedDoc = documents?.find(d => d.id === selectedDocId);
 
   return (
-    <div className="flex h-[calc(100vh-220px)] rounded-2xl border border-border/40 overflow-hidden bg-card/30 backdrop-blur-sm">
+    <div className="flex h-[calc(100vh-220px)] rounded-2xl border border-border/40 overflow-hidden bg-card/20">
       {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'w-72' : 'w-0'} transition-all duration-200 border-r border-border/30 bg-card/60 flex flex-col overflow-hidden`}>
-        <div className="p-4 border-b border-border/30">
-          <Button onClick={handleStartChat} disabled={createConversation.isPending || !user} className="w-full gap-2 rounded-xl h-10" size="sm">
-            {createConversation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-            New conversation
-          </Button>
-        </div>
+      <AnimatePresence>
+        {sidebarOpen && (
+          <motion.div
+            initial={{ width: 0, opacity: 0 }}
+            animate={{ width: 280, opacity: 1 }}
+            exit={{ width: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="border-r border-border/30 bg-card/60 flex flex-col overflow-hidden"
+          >
+            <div className="p-3 border-b border-border/30">
+              <Button onClick={handleStartChat} disabled={createConversation.isPending || !user} className="w-full gap-2 rounded-xl h-9 text-xs" size="sm">
+                {createConversation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
+                New conversation
+              </Button>
+            </div>
 
-        {/* Document selector */}
-        <div className="p-3 border-b border-border/30">
-          <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-2">Reference Document</p>
-          <Select value={selectedDocId} onValueChange={setSelectedDocId}>
-            <SelectTrigger className="h-9 text-xs rounded-lg bg-background/50">
-              <FileText className="h-3.5 w-3.5 mr-1.5 text-muted-foreground shrink-0" />
-              <SelectValue placeholder="Select document..." />
-            </SelectTrigger>
-            <SelectContent>
-              {documents?.map(d => (
-                <SelectItem key={d.id} value={d.id} className="text-xs">
-                  <span className="truncate">{d.title}</span>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+            <div className="p-3 border-b border-border/30">
+              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-1.5">Context Document</p>
+              <Select value={selectedDocId} onValueChange={setSelectedDocId}>
+                <SelectTrigger className="h-8 text-xs rounded-lg bg-background/50">
+                  <FileText className="h-3 w-3 mr-1 text-muted-foreground shrink-0" />
+                  <SelectValue placeholder="Select document..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {documents?.map(d => (
+                    <SelectItem key={d.id} value={d.id} className="text-xs">
+                      <span className="truncate">{d.title}</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-        {/* Conversation history */}
-        <ScrollArea className="flex-1">
-          <div className="p-2 space-y-0.5">
-            <p className="px-2 py-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wider">History</p>
-            {conversations?.map(c => (
-              <button
-                key={c.id}
-                onClick={() => setActiveConversationId(c.id)}
-                className={`w-full text-left px-3 py-2.5 rounded-lg text-xs transition-all group ${
-                  activeConversationId === c.id 
-                    ? 'bg-primary/10 text-primary' 
-                    : 'hover:bg-muted/40 text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <p className="font-medium truncate text-[13px]">{c.title || 'Untitled'}</p>
-                <p className="text-[10px] mt-0.5 opacity-60">{c.message_count} messages · {format(new Date(c.last_message_at), 'MMM d')}</p>
-              </button>
-            ))}
-            {(!conversations || conversations.length === 0) && (
-              <p className="px-3 py-4 text-[11px] text-muted-foreground/50 text-center">No conversations yet</p>
-            )}
-          </div>
-        </ScrollArea>
-      </div>
+            <ScrollArea className="flex-1">
+              <div className="p-2 space-y-0.5">
+                <p className="px-2 py-1 text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Conversations</p>
+                {conversations?.map(c => (
+                  <button
+                    key={c.id}
+                    onClick={() => setActiveConversationId(c.id)}
+                    className={`w-full text-left px-3 py-2 rounded-lg text-xs transition-all ${
+                      activeConversationId === c.id 
+                        ? 'bg-primary/10 text-primary border border-primary/20' 
+                        : 'hover:bg-muted/40 text-muted-foreground hover:text-foreground border border-transparent'
+                    }`}
+                  >
+                    <p className="font-medium truncate text-[12px]">{c.title || 'Untitled'}</p>
+                    <p className="text-[10px] mt-0.5 opacity-50">{c.message_count} msgs · {format(new Date(c.last_message_at), 'MMM d')}</p>
+                  </button>
+                ))}
+                {(!conversations || conversations.length === 0) && (
+                  <p className="px-3 py-4 text-[11px] text-muted-foreground/40 text-center">No conversations yet</p>
+                )}
+              </div>
+            </ScrollArea>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Chat Header */}
-        <div className="h-14 border-b border-border/30 flex items-center justify-between px-4 bg-card/40">
-          <div className="flex items-center gap-3 min-w-0">
+        {/* Header */}
+        <div className="h-12 border-b border-border/30 flex items-center justify-between px-4 bg-card/30">
+          <div className="flex items-center gap-2 min-w-0">
             <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1.5 rounded-lg hover:bg-muted/40 transition-colors">
-              <MessageSquareText className="h-4 w-4 text-muted-foreground" />
+              {sidebarOpen ? <PanelLeftClose className="h-4 w-4 text-muted-foreground" /> : <PanelLeft className="h-4 w-4 text-muted-foreground" />}
             </button>
             <div className="min-w-0">
               <p className="text-sm font-semibold truncate">
                 {activeConversationId 
                   ? conversations?.find(c => c.id === activeConversationId)?.title || 'Conversation'
-                  : 'NuruAI Chat'}
+                  : 'NuruAI Civic Chat'}
               </p>
-              {selectedDoc && (
-                <p className="text-[10px] text-muted-foreground truncate flex items-center gap-1">
-                  <FileText className="h-2.5 w-2.5" />{selectedDoc.title}
-                </p>
-              )}
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-[10px] gap-1 font-normal">
-              <Zap className="h-2.5 w-2.5" />Gemini 2.5 Pro
+          <div className="flex items-center gap-1.5">
+            {selectedDoc && (
+              <Badge variant="outline" className="text-[9px] gap-1 font-normal max-w-[160px] truncate">
+                <FileText className="h-2.5 w-2.5 shrink-0" />{selectedDoc.title}
+              </Badge>
+            )}
+            <Badge variant="secondary" className="text-[9px] gap-1 font-normal">
+              <Sparkles className="h-2.5 w-2.5" />Gemini 2.5 Pro
             </Badge>
           </div>
         </div>
 
-        {/* Messages Area */}
+        {/* Messages */}
         <ScrollArea className="flex-1">
           <div className="max-w-3xl mx-auto px-4 py-6">
             {!activeConversationId ? (
-              /* Welcome Screen */
-              <div className="flex flex-col items-center justify-center py-16 text-center">
-                <div className="relative mb-6">
-                  <div className="absolute inset-0 bg-primary/10 blur-2xl rounded-full scale-150" />
-                  <div className="relative p-5 rounded-3xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/15">
-                    <Brain className="h-10 w-10 text-primary" />
-                  </div>
-                </div>
-                <h2 className="text-xl font-bold text-foreground mb-2">Welcome to NuruAI</h2>
-                <p className="text-sm text-muted-foreground max-w-md mb-8">
-                  Ask questions about African policy documents. Get evidence-grounded answers with source citations.
-                </p>
-                
-                <div className="grid gap-3 sm:grid-cols-2 w-full max-w-lg">
-                  {[
-                    { q: 'What does this budget allocate to healthcare?', icon: '🏥' },
-                    { q: 'How will this policy affect education?', icon: '📚' },
-                    { q: 'What environmental targets are set?', icon: '🌍' },
-                    { q: 'What accountability measures exist?', icon: '⚖️' },
-                  ].map((item, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setQuestion(item.q)}
-                      className="text-left p-3.5 rounded-xl border border-border/40 hover:border-primary/30 hover:bg-primary/5 transition-all text-xs group"
-                    >
-                      <span className="text-base mb-1 block">{item.icon}</span>
-                      <span className="text-muted-foreground group-hover:text-foreground transition-colors">{item.q}</span>
-                    </button>
-                  ))}
-                </div>
-
-                {!user && (
-                  <p className="text-xs text-muted-foreground mt-6 flex items-center gap-1.5">
-                    <AlertCircle className="h-3.5 w-3.5" />Sign in to start a conversation
-                  </p>
-                )}
-              </div>
+              <WelcomeScreen setQuestion={setQuestion} user={user} />
             ) : (
-              /* Chat Messages */
-              <div className="space-y-6">
+              <div className="space-y-1">
                 {chatMessages?.map((msg) => (
-                  <motion.div
-                    key={msg.id}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : ''}`}
-                  >
-                    {msg.role !== 'user' && (
-                      <div className="shrink-0 mt-0.5">
-                        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/15 flex items-center justify-center">
-                          <Bot className="h-4 w-4 text-primary" />
-                        </div>
-                      </div>
-                    )}
-                    <div className={`max-w-[85%] ${msg.role === 'user' ? 'order-first' : ''}`}>
-                      <div className={`rounded-2xl px-4 py-3 text-sm leading-relaxed ${
-                        msg.role === 'user'
-                          ? 'bg-primary text-primary-foreground rounded-br-lg ml-auto'
-                          : 'bg-muted/40 border border-border/30 rounded-bl-lg'
-                      }`}>
-                        <p className="whitespace-pre-wrap">{msg.content}</p>
-                      </div>
-                      
-                      {/* Metadata row */}
-                      <div className={`flex items-center gap-2 mt-1.5 px-1 ${msg.role === 'user' ? 'justify-end' : ''}`}>
-                        {msg.confidence != null && (
-                          <span className={`text-[10px] font-medium ${confidenceColor(msg.confidence)}`}>
-                            {Math.round(msg.confidence * 100)}% confidence
-                          </span>
-                        )}
-                        <span className="text-[10px] text-muted-foreground/50">
-                          {format(new Date(msg.created_at), 'HH:mm')}
-                        </span>
-                        {msg.processing_time_ms && (
-                          <span className="text-[10px] text-muted-foreground/50 flex items-center gap-0.5">
-                            <Clock className="h-2.5 w-2.5" />{msg.processing_time_ms}ms
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Source passages */}
-                      {msg.sources?.passages?.length > 0 && (
-                        <div className="mt-3 space-y-1.5">
-                          <p className="text-[10px] font-medium text-muted-foreground flex items-center gap-1"><Quote className="h-3 w-3" />Sources</p>
-                          {msg.sources.passages.slice(0, 3).map((p: string, idx: number) => (
-                            <div key={idx} className="text-[11px] bg-primary/5 border border-primary/10 rounded-lg p-2.5 text-muted-foreground italic leading-relaxed">
-                              "{p}"
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Follow-up suggestions */}
-                      {msg.sources?.followUps?.length > 0 && (
-                        <div className="mt-3 flex flex-wrap gap-1.5">
-                          {msg.sources.followUps.map((f: string, idx: number) => (
-                            <button
-                              key={idx}
-                              onClick={() => setQuestion(f)}
-                              className="text-[11px] px-3 py-1.5 rounded-full border border-primary/15 text-primary/80 hover:bg-primary/5 hover:text-primary transition-all flex items-center gap-1"
-                            >
-                              <ArrowRight className="h-2.5 w-2.5" />{f}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    {msg.role === 'user' && (
-                      <div className="shrink-0 mt-0.5">
-                        <div className="w-8 h-8 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center">
-                          <User className="h-4 w-4 text-primary" />
-                        </div>
-                      </div>
-                    )}
-                  </motion.div>
+                  <ChatMessage key={msg.id} msg={msg} onCopy={handleCopy} copiedId={copiedId} />
                 ))}
 
-                {sendChatMessage.isPending && (
-                  <div className="flex gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/15 flex items-center justify-center shrink-0">
-                      <Bot className="h-4 w-4 text-primary" />
-                    </div>
-                    <div className="bg-muted/40 border border-border/30 rounded-2xl rounded-bl-lg px-4 py-3">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <div className="flex gap-1">
-                          <span className="w-2 h-2 bg-primary/40 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                          <span className="w-2 h-2 bg-primary/40 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                          <span className="w-2 h-2 bg-primary/40 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                        </div>
-                        Analyzing document...
+                {/* Streaming message */}
+                {isStreaming && streamingContent && (
+                  <div className="flex gap-3 py-4">
+                    <div className="shrink-0 mt-1">
+                      <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/15 flex items-center justify-center">
+                        <Bot className="h-3.5 w-3.5 text-primary" />
                       </div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed">
+                        <ReactMarkdown>{streamingContent}</ReactMarkdown>
+                      </div>
+                      <div className="flex items-center gap-2 mt-2">
+                        <span className="text-[10px] text-primary/60 flex items-center gap-1">
+                          <Loader2 className="h-2.5 w-2.5 animate-spin" />Generating...
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {isStreaming && !streamingContent && (
+                  <div className="flex gap-3 py-4">
+                    <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/15 flex items-center justify-center shrink-0">
+                      <Bot className="h-3.5 w-3.5 text-primary" />
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground py-2">
+                      <div className="flex gap-1">
+                        <span className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                        <span className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                        <span className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                      </div>
+                      <span className="text-xs">Analyzing...</span>
                     </div>
                   </div>
                 )}
@@ -285,10 +229,10 @@ const NuruQuestionInterface = () => {
           </div>
         </ScrollArea>
 
-        {/* Input Area */}
-        <div className="border-t border-border/30 p-4 bg-card/40">
+        {/* Input */}
+        <div className="border-t border-border/30 p-3 bg-card/30">
           <div className="max-w-3xl mx-auto">
-            <div className="relative flex items-end gap-2 rounded-2xl border border-border/40 bg-background/60 p-2 focus-within:border-primary/30 focus-within:ring-1 focus-within:ring-primary/10 transition-all">
+            <div className="relative flex items-end gap-2 rounded-xl border border-border/40 bg-background/60 p-1.5 focus-within:border-primary/30 focus-within:ring-1 focus-within:ring-primary/10 transition-all">
               <textarea
                 ref={textareaRef}
                 placeholder={activeConversationId ? "Ask about this policy document..." : "Start a new conversation to begin..."}
@@ -301,20 +245,20 @@ const NuruQuestionInterface = () => {
                     handleSend();
                   }
                 }}
-                disabled={!activeConversationId}
-                className="flex-1 resize-none bg-transparent border-0 outline-none text-sm placeholder:text-muted-foreground/50 py-2 px-2 max-h-40 disabled:opacity-40"
+                disabled={!activeConversationId || isStreaming}
+                className="flex-1 resize-none bg-transparent border-0 outline-none text-sm placeholder:text-muted-foreground/40 py-2 px-2 max-h-40 disabled:opacity-40"
               />
               <Button
                 onClick={handleSend}
-                disabled={sendChatMessage.isPending || !activeConversationId || !question.trim()}
+                disabled={isStreaming || !activeConversationId || !question.trim()}
                 size="icon"
-                className="shrink-0 h-9 w-9 rounded-xl"
+                className="shrink-0 h-8 w-8 rounded-lg"
               >
-                {sendChatMessage.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                {isStreaming ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
               </Button>
             </div>
-            <p className="text-[10px] text-muted-foreground/40 text-center mt-2">
-              NuruAI grounds all answers in source documents. Always verify critical information.
+            <p className="text-[9px] text-muted-foreground/30 text-center mt-1.5">
+              NuruAI grounds answers in source documents · Verify critical information independently
             </p>
           </div>
         </div>
@@ -323,7 +267,100 @@ const NuruQuestionInterface = () => {
   );
 };
 
-// Need Brain import
-import { Brain } from 'lucide-react';
+// Chat message component
+const ChatMessage = ({ msg, onCopy, copiedId }: { msg: any; onCopy: (content: string, id: string) => void; copiedId: string | null }) => {
+  const isUser = msg.role === 'user';
+  
+  return (
+    <div className={`flex gap-3 py-4 ${isUser ? '' : 'bg-muted/5 -mx-4 px-4 rounded-lg'}`}>
+      <div className="shrink-0 mt-1">
+        <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
+          isUser 
+            ? 'bg-primary/10 border border-primary/15' 
+            : 'bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/15'
+        }`}>
+          {isUser ? <User className="h-3.5 w-3.5 text-primary" /> : <Bot className="h-3.5 w-3.5 text-primary" />}
+        </div>
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-[11px] font-medium text-foreground/70">{isUser ? 'You' : 'NuruAI'}</span>
+          <span className="text-[10px] text-muted-foreground/40">{format(new Date(msg.created_at), 'HH:mm')}</span>
+          {msg.processing_time_ms && (
+            <span className="text-[10px] text-muted-foreground/30">{(msg.processing_time_ms / 1000).toFixed(1)}s</span>
+          )}
+        </div>
+        
+        {isUser ? (
+          <p className="text-sm leading-relaxed text-foreground">{msg.content}</p>
+        ) : (
+          <div className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed [&>*:first-child]:mt-0 [&_h2]:text-base [&_h3]:text-sm [&_p]:text-sm [&_li]:text-sm [&_blockquote]:border-primary/30 [&_blockquote]:bg-primary/5 [&_blockquote]:rounded-r-lg [&_blockquote]:py-1">
+            <ReactMarkdown>{msg.content}</ReactMarkdown>
+          </div>
+        )}
+
+        {/* Actions for AI messages */}
+        {!isUser && (
+          <div className="flex items-center gap-1 mt-2">
+            <button
+              onClick={() => onCopy(msg.content, msg.id)}
+              className="flex items-center gap-1 text-[10px] text-muted-foreground/50 hover:text-muted-foreground transition-colors px-2 py-1 rounded-md hover:bg-muted/30"
+            >
+              {copiedId === msg.id ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
+              {copiedId === msg.id ? 'Copied' : 'Copy'}
+            </button>
+            {msg.confidence != null && (
+              <span className={`text-[10px] px-2 py-0.5 rounded-full ${
+                msg.confidence >= 0.8 ? 'bg-emerald-500/10 text-emerald-500' : msg.confidence >= 0.5 ? 'bg-amber-500/10 text-amber-500' : 'bg-red-500/10 text-red-500'
+              }`}>
+                {Math.round(msg.confidence * 100)}% confidence
+              </span>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// Welcome screen
+const WelcomeScreen = ({ setQuestion, user }: { setQuestion: (q: string) => void; user: any }) => (
+  <div className="flex flex-col items-center justify-center py-20 text-center">
+    <div className="relative mb-6">
+      <div className="absolute inset-0 bg-primary/10 blur-2xl rounded-full scale-150" />
+      <div className="relative p-4 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/15">
+        <Brain className="h-8 w-8 text-primary" />
+      </div>
+    </div>
+    <h2 className="text-xl font-bold text-foreground mb-1">NuruAI Civic Intelligence</h2>
+    <p className="text-sm text-muted-foreground max-w-md mb-8">
+      Ask questions about African policy documents. Get evidence-grounded answers with source citations and expert analysis.
+    </p>
+    
+    <div className="grid gap-2.5 sm:grid-cols-2 w-full max-w-lg">
+      {[
+        { q: 'What does this budget allocate to healthcare?', icon: '🏥' },
+        { q: 'How will this policy affect education?', icon: '📚' },
+        { q: 'What environmental targets are set?', icon: '🌍' },
+        { q: 'What accountability measures exist?', icon: '⚖️' },
+      ].map((item, i) => (
+        <button
+          key={i}
+          onClick={() => setQuestion(item.q)}
+          className="text-left p-3 rounded-xl border border-border/30 hover:border-primary/30 hover:bg-primary/5 transition-all text-xs group"
+        >
+          <span className="text-sm mb-0.5 block">{item.icon}</span>
+          <span className="text-muted-foreground group-hover:text-foreground transition-colors leading-relaxed">{item.q}</span>
+        </button>
+      ))}
+    </div>
+
+    {!user && (
+      <p className="text-xs text-muted-foreground mt-6 flex items-center gap-1.5">
+        <AlertCircle className="h-3.5 w-3.5" />Sign in to start a conversation
+      </p>
+    )}
+  </div>
+);
 
 export default NuruQuestionInterface;
