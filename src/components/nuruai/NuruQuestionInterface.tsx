@@ -781,8 +781,8 @@ const NuruQuestionInterface = () => {
                     <Button variant="ghost" size="sm" className="h-7 w-7 p-0"><MoreHorizontal className="h-4 w-4" /></Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuItem onClick={handleExportConversation} className="text-xs gap-2">
-                      <Download className="h-3.5 w-3.5" /> Export as Markdown
+                    <DropdownMenuItem onClick={() => setShowExportDialog(true)} className="text-xs gap-2">
+                      <Download className="h-3.5 w-3.5" /> Export conversation
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={handleShareConversation} className="text-xs gap-2">
                       <Share2 className="h-3.5 w-3.5" /> Share conversation
