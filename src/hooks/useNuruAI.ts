@@ -185,7 +185,7 @@ export function useUploadDocument() {
         processing_status: 'pending',
       }).select().single();
       if (error) throw error;
-      await supabase.functions.invoke('nuru-ai-chat', { body: { action: 'summarize', documentId: data.id } });
+      await invokeNuruAI({ action: 'summarize', documentId: data.id });
       return data;
     },
     onSuccess: () => {
