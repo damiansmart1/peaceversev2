@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Brain, FileText, MessageSquareText, Building2, BarChart3, Shield, Search, Sparkles } from 'lucide-react';
+import { Brain, FileText, MessageSquareText, Building2, BarChart3, Shield, Search, Sparkles, GitBranch, BookOpen, Globe } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import NuruDocumentLibrary from '@/components/nuruai/NuruDocumentLibrary';
 import NuruQuestionInterface from '@/components/nuruai/NuruQuestionInterface';
@@ -8,13 +8,21 @@ import NuruAccountabilityArchive from '@/components/nuruai/NuruAccountabilityArc
 import NuruAnalyticsDashboard from '@/components/nuruai/NuruAnalyticsDashboard';
 import NuruGovernancePortal from '@/components/nuruai/NuruGovernancePortal';
 import NuruClaimReview from '@/components/nuruai/NuruClaimReview';
+import NuruKnowledgeGraph from '@/components/nuruai/NuruKnowledgeGraph';
+import NuruPolicyExplorer from '@/components/nuruai/NuruPolicyExplorer';
+import NuruInstitutionalPortal from '@/components/nuruai/NuruInstitutionalPortal';
+import NuruCivicTransparency from '@/components/nuruai/NuruCivicTransparency';
 
 const tabItems = [
   { value: 'questions', label: 'AI Chat', icon: MessageSquareText, desc: 'Ask policy questions' },
   { value: 'documents', label: 'Documents', icon: FileText, desc: 'Policy library' },
+  { value: 'explorer', label: 'Policy Explorer', icon: BookOpen, desc: 'Section explanations' },
   { value: 'claims', label: 'Fact Check', icon: Search, desc: 'Verify claims' },
   { value: 'accountability', label: 'Accountability', icon: Building2, desc: 'Track responses' },
+  { value: 'graph', label: 'Knowledge Graph', icon: GitBranch, desc: 'Explore connections' },
+  { value: 'institutional', label: 'Institutions', icon: Building2, desc: 'Engagement portal' },
   { value: 'analytics', label: 'Analytics', icon: BarChart3, desc: 'Usage insights' },
+  { value: 'transparency', label: 'Transparency', icon: Globe, desc: 'Public impact' },
   { value: 'governance', label: 'Governance', icon: Shield, desc: 'AI transparency' },
 ];
 
@@ -27,7 +35,6 @@ const NuruAI = () => {
       <main className="pt-20 pb-0">
         {/* Premium Hero */}
         <div className="relative overflow-hidden border-b border-border/20">
-          {/* Background layers */}
           <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-background to-secondary/5" />
           <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, currentColor 0.5px, transparent 0)', backgroundSize: '24px 24px' }} />
           <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3" />
@@ -61,7 +68,7 @@ const NuruAI = () => {
               </motion.div>
             </div>
 
-            {/* Tab Navigation - Pill Style */}
+            {/* Tab Navigation */}
             <motion.div 
               initial={{ y: 8, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -107,9 +114,13 @@ const NuruAI = () => {
             >
               {activeTab === 'questions' && <NuruQuestionInterface />}
               {activeTab === 'documents' && <NuruDocumentLibrary />}
+              {activeTab === 'explorer' && <NuruPolicyExplorer />}
               {activeTab === 'claims' && <NuruClaimReview />}
               {activeTab === 'accountability' && <NuruAccountabilityArchive />}
+              {activeTab === 'graph' && <NuruKnowledgeGraph />}
+              {activeTab === 'institutional' && <NuruInstitutionalPortal />}
               {activeTab === 'analytics' && <NuruAnalyticsDashboard />}
+              {activeTab === 'transparency' && <NuruCivicTransparency />}
               {activeTab === 'governance' && <NuruGovernancePortal />}
             </motion.div>
           </AnimatePresence>
