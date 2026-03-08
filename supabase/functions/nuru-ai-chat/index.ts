@@ -492,11 +492,15 @@ Format response as JSON:
       if (!doc) throw new Error('Document not found');
       const documentContext = doc.original_text || doc.summary || doc.description || '';
 
+      // Fetch constitution for cross-referencing
+      const constitution = await fetchConstitution(supabase, doc.country || null);
+      const constitutionalContext = buildConstitutionalInstructions(constitution);
+
       const content = await callAI(LOVABLE_API_KEY, [
         {
           role: 'system',
           content: `You are NuruAI, a world-class civic intelligence analyst. Answer the citizen's question using ONLY the provided document content. You must be thorough, evidence-based, and strategic.
-
+${constitutionalContext}
 ## RESPONSE METHODOLOGY
 
 1. **Direct Answer**: Address the question comprehensively with structured analysis
