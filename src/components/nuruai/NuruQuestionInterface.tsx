@@ -128,6 +128,7 @@ const NuruQuestionInterface = () => {
   const renameConversation = useRenameConversation();
   const clearConversation = useClearConversation();
   const { streamChat, abort: abortStream } = useStreamChatMessage();
+  const submitAIFeedback = useSubmitAIFeedback();
 
   // Persist settings & pinned
   useEffect(() => {
