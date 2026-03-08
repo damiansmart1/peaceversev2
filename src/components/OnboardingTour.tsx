@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { X, ChevronRight, ChevronLeft, Sparkles, Mic2, UsersRound, Trophy, ShieldCheck, Globe2, Bolt } from 'lucide-react';
+import { X, ChevronRight, ChevronLeft, Sparkles, Mic2, UsersRound, Trophy, ShieldCheck, Globe2, Radio, Vote, AlertTriangle, Brain, BarChart3, Landmark } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { Progress } from '@/components/ui/progress';
@@ -18,50 +18,66 @@ interface OnboardingStep {
 const steps: OnboardingStep[] = [
   {
     title: 'Welcome to PeaceVerse! 🎉',
-    description: 'Your gateway to building peace, sharing stories, and making a real impact across Africa. Ready to be part of something amazing?',
+    description: 'Africa\'s premier civic intelligence and peacebuilding platform — powered by AI, built for accountability, and designed for every citizen.',
     icon: <Globe2 className="w-12 h-12" />,
     color: 'from-primary to-primary/60',
-    features: ['Connect with peacebuilders', 'Share your voice', 'Make a difference'],
+    features: ['10+ integrated modules', 'AI-powered insights', 'Pan-African coverage'],
     action: "Let's explore!"
   },
   {
-    title: 'Your Voice Matters 🎙️',
-    description: 'Record voice stories, write posts, share videos - your perspective is unique and valuable. Be heard by thousands!',
-    icon: <Mic2 className="w-12 h-12" />,
-    color: 'from-gold to-gold/60',
-    features: ['Voice recordings', 'Photo & video posts', 'Written stories'],
-    action: 'Express yourself'
+    title: 'NuruAI Civic Intelligence 🧠',
+    description: 'Upload government budgets, legislation, and policy documents. Ask questions in plain language and get AI-verified, evidence-based answers with source citations.',
+    icon: <Brain className="w-12 h-12" />,
+    color: 'from-primary to-secondary',
+    features: ['Document Q&A', 'Fact-checking (IFCN standard)', 'Policy comparison', 'Constitutional cross-reference'],
+    action: 'Explore NuruAI'
   },
   {
-    title: 'Join the Community 🤝',
-    description: 'Connect with like-minded people in chatrooms, follow inspiring creators, and find safe spaces near you.',
+    title: 'Community Hub & Social Network 🤝',
+    description: 'Connect with peacebuilders, join chatrooms, share stories, follow creators, and send direct messages. Your voice matters — amplify it!',
     icon: <UsersRound className="w-12 h-12" />,
     color: 'from-forest to-forest/60',
-    features: ['Topic-based chatrooms', 'Direct messaging', 'Safe spaces map'],
-    action: 'Find your tribe'
+    features: ['Social feed & profiles', 'Topic-based chatrooms', 'Voice & video stories', 'Direct messaging'],
+    action: 'Join the community'
   },
   {
-    title: 'Earn While You Impact 💰',
-    description: 'Create content, receive tips from fans, and grow your earnings. Turn your passion into rewards!',
-    icon: <Bolt className="w-12 h-12" />,
+    title: 'Incident Reporting & Early Warning ⚠️',
+    description: 'Report incidents anonymously, track verification status in real-time, and access AI-powered risk analysis with predictive hotspot mapping.',
+    icon: <AlertTriangle className="w-12 h-12" />,
     color: 'from-earth to-earth/60',
-    features: ['Receive tips in your currency', 'Withdraw to Paystack/M-Pesa', 'Track your earnings'],
-    action: 'Start earning'
+    features: ['Anonymous reporting', 'AI threat analysis', 'Predictive hotspots', 'Real-time tracking'],
+    action: 'Stay informed'
   },
   {
-    title: 'Level Up & Win 🏆',
-    description: 'Complete challenges, earn Peace Points, unlock badges, and climb the leaderboard. Every action counts!',
-    icon: <Trophy className="w-12 h-12" />,
+    title: 'Polls, Proposals & Democracy 🗳️',
+    description: 'Create and vote on community proposals, participate in polls, and drive real policy change through structured democratic engagement.',
+    icon: <Vote className="w-12 h-12" />,
+    color: 'from-gold to-gold/60',
+    features: ['Community proposals', 'Live polls', 'Voting & comments', 'Impact tracking'],
+    action: 'Have your say'
+  },
+  {
+    title: 'Election Monitoring & PeacePulse 📊',
+    description: 'Monitor elections with observer accreditation, real-time dashboards, and statistical anomaly detection. Track peace indices across the continent with PeacePulse.',
+    icon: <Landmark className="w-12 h-12" />,
+    color: 'from-primary to-forest',
+    features: ['Observer accreditation', 'Result collation', 'Peace index tracking', 'Cross-border analysis'],
+    action: 'Monitor & track'
+  },
+  {
+    title: 'Peace Radio & Challenges 📻',
+    description: 'Tune into live peace radio streams, explore the podcast library, and complete weekly peacebuilding challenges to earn points and climb the leaderboard.',
+    icon: <Radio className="w-12 h-12" />,
     color: 'from-accent to-accent/60',
-    features: ['Daily & weekly challenges', 'Exclusive rewards', 'Leaderboard rankings'],
-    action: 'Accept the challenge'
+    features: ['Live radio streams', 'Podcast library', 'Weekly challenges', 'Leaderboard & rewards'],
+    action: 'Tune in & compete'
   },
   {
-    title: 'Stay Safe & Protected 🛡️',
-    description: 'AI-powered moderation, anonymous reporting, and community guidelines ensure everyone feels welcome and secure.',
+    title: 'Safety & Verification 🛡️',
+    description: 'Access safety resources, emergency contacts, and safe spaces. Our multi-layered verification system ensures information integrity with AI-assisted analysis.',
     icon: <ShieldCheck className="w-12 h-12" />,
-    color: 'from-primary to-secondary',
-    features: ['Anonymous reporting', '24/7 AI moderation', 'Safe spaces network'],
+    color: 'from-forest to-primary',
+    features: ['Safety resource library', 'Emergency contacts', 'AI-assisted verification', 'Source credibility scoring'],
     action: "I'm ready!"
   },
 ];
