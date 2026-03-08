@@ -237,9 +237,12 @@ const NuruPolicyExplorer = () => {
                     <div className="flex flex-wrap gap-2 mb-2">
                       <Badge variant="outline" className="text-[10px]">{selectedDoc.document_type}</Badge>
                       {selectedDoc.country && <Badge variant="outline" className="text-[10px] gap-1"><Globe className="h-3 w-3" />{selectedDoc.country}</Badge>}
-                      {selectedDoc.institutions?.map((inst: string) => (
-                        <Badge key={inst} variant="outline" className="text-[10px] gap-1"><Building2 className="h-3 w-3" />{inst}</Badge>
-                      ))}
+                      {selectedDoc.institutions?.map((inst: any, idx: number) => {
+                        const name = typeof inst === 'string' ? inst : (inst?.NAME || inst?.name || JSON.stringify(inst));
+                        return (
+                          <Badge key={idx} variant="outline" className="text-[10px] gap-1"><Building2 className="h-3 w-3" />{name}</Badge>
+                        );
+                      })}
                     </div>
                     {selectedDoc.summary && <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">{selectedDoc.summary}</p>}
                   </div>
