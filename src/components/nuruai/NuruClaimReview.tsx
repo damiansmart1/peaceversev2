@@ -89,7 +89,7 @@ const NuruClaimReview = () => {
                   <SelectValue placeholder="Reference document (optional)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No specific document</SelectItem>
+                  <SelectItem value="none">No specific document</SelectItem>
                   {documents?.map(d => <SelectItem key={d.id} value={d.id}>{d.title}</SelectItem>)}
                 </SelectContent>
               </Select>
