@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Menu, X, Users, Vote, BadgeCheck, ShieldCheck, Globe, HeartHandshake, User, LogOut, Settings, Compass, HelpCircle, Siren, Cable, Wand2, Radio, Gamepad2, AudioWaveform, Award, AlertTriangle, Plug, Sparkles, Shield, Heart, MapPin as MapIcon, Volume2, MessageSquare, Brain } from "lucide-react";
+import { Menu, X, UsersRound, Landmark, BadgeCheck, ShieldHalf, Earth, HeartHandshake, CircleUserRound, Power, Bolt, Compass, CircleHelp, Siren, Unplug, Wand2, Antenna, Flame, AudioLines, Award, OctagonAlert, Plug, Sparkles, ShieldHalf as ShieldIcon, Heart, MapPin as MapIcon, Volume2, MessageCircleMore, BrainCircuit } from "lucide-react";
 import peaceverselogo from "@/assets/peaceverse-logo.png";
 import GlobalSearch from '@/components/GlobalSearch';
 import KeyboardShortcuts from '@/components/KeyboardShortcuts';
@@ -67,30 +67,30 @@ const Navigation = () => {
   // Map feature keys to navigation items
   const featureNavMap: Record<string, { path: string; label: string; icon: React.ElementType }> = {
     'incidents': { path: '/incidents', label: t('nav.incidents'), icon: Siren },
-    'community': { path: '/community', label: t('nav.community'), icon: Users },
-    'peace-pulse': { path: '/peace-pulse', label: t('nav.peacePulse'), icon: Globe },
-    'proposals': { path: '/proposals', label: t('nav.pollsProposals'), icon: Vote },
-    'safety': { path: '/safety', label: t('nav.safetyPortal'), icon: ShieldCheck },
-    'radio': { path: '/radio', label: 'Peace Radio', icon: Radio },
-    'challenges': { path: '/challenges', label: t('nav.challenges'), icon: Gamepad2 },
-    'voice': { path: '/voice', label: 'Voice Stories', icon: AudioWaveform },
+    'community': { path: '/community', label: t('nav.community'), icon: UsersRound },
+    'peace-pulse': { path: '/peace-pulse', label: t('nav.peacePulse'), icon: Earth },
+    'proposals': { path: '/proposals', label: t('nav.pollsProposals'), icon: Landmark },
+    'safety': { path: '/safety', label: t('nav.safetyPortal'), icon: ShieldHalf },
+    'radio': { path: '/radio', label: 'Peace Radio', icon: Antenna },
+    'challenges': { path: '/challenges', label: t('nav.challenges'), icon: Flame },
+    'voice': { path: '/voice', label: 'Voice Stories', icon: AudioLines },
     'verification': { path: '/verification', label: t('nav.verification'), icon: BadgeCheck },
-    'integrations': { path: '/integrations', label: 'Integrations', icon: Cable },
-    'early-warning': { path: '/dashboard/early-warning', label: t('nav.earlyWarning'), icon: AlertTriangle },
-    'communication': { path: '/communication', label: 'Communication Hub', icon: MessageSquare },
-    'elections': { path: '/elections', label: 'Election Monitoring', icon: Vote },
-    'nuru-ai': { path: '/nuru-ai', label: 'NuruAI', icon: Brain },
+    'integrations': { path: '/integrations', label: 'Integrations', icon: Unplug },
+    'early-warning': { path: '/dashboard/early-warning', label: t('nav.earlyWarning'), icon: OctagonAlert },
+    'communication': { path: '/communication', label: 'Communication Hub', icon: MessageCircleMore },
+    'elections': { path: '/elections', label: 'Election Monitoring', icon: Landmark },
+    'nuru-ai': { path: '/nuru-ai', label: 'NuruAI', icon: BrainCircuit },
   };
 
   // Build navigation items based on accessible features
   const navItems = useMemo(() => {
     const items: { path: string; label: string; icon: React.ElementType }[] = [
-      { path: '/about', label: t('nav.about'), icon: HeartHandshake },
+      { path: '/about', label: t('nav.about'), icon: Compass },
     ];
 
     // Add dashboard if logged in
     if (user && !isAnonymous) {
-      items.push({ path: '/dashboard', label: t('nav.dashboard'), icon: User });
+      items.push({ path: '/dashboard', label: t('nav.dashboard'), icon: CircleUserRound });
     }
 
     // Add feature-based items only if accessible
@@ -196,7 +196,7 @@ const Navigation = () => {
               <NotificationCenter />
               
               <Button variant="ghost" size="sm" onClick={() => navigate('/help')} className="hidden xl:flex h-8 w-8 p-0 rounded-lg text-foreground/70 hover:text-foreground hover:bg-muted/50">
-                <HelpCircle className="w-4 h-4" />
+                <CircleHelp className="w-4 h-4" />
               </Button>
               
               <ThemeToggle />
@@ -216,7 +216,7 @@ const Navigation = () => {
                   scale: 0.95
                 }}>
                         <Button variant="outline" size="sm" onClick={() => navigate('/admin')} className="hidden xl:flex items-center gap-1.5 h-8 px-3 rounded-lg bg-primary/10 border-primary/30 hover:bg-primary/20 hover:border-primary/50 text-primary transition-all">
-                          <Settings className="w-3.5 h-3.5" />
+                          <Bolt className="w-3.5 h-3.5" />
                           <span className="font-semibold text-xs">Admin</span>
                         </Button>
                       </motion.div>}
@@ -227,7 +227,7 @@ const Navigation = () => {
                   scale: 0.95
                 }}>
                       <Button variant="ghost" size="sm" onClick={handleSignOut} className="flex items-center gap-1 sm:gap-1.5 h-8 px-2 sm:px-3 rounded-lg bg-destructive/10 hover:bg-destructive text-destructive hover:text-destructive-foreground transition-all">
-                        <LogOut className="w-3.5 h-3.5 flex-shrink-0" />
+                        <Power className="w-3.5 h-3.5 flex-shrink-0" />
                         <span className="text-xs font-medium whitespace-nowrap">Sign Out</span>
                       </Button>
                     </motion.div>
@@ -317,13 +317,13 @@ const Navigation = () => {
                         
                         {isAdmin && <SheetClose asChild>
                             <Button variant="outline" onClick={() => navigate('/admin')} className="w-full justify-start gap-2 h-11 rounded-lg bg-primary/10 border-primary/30">
-                              <Settings className="w-4 h-4" />
+                              <Bolt className="w-4 h-4" />
                               Admin Portal
                             </Button>
                           </SheetClose>}
                         
                         <Button variant="ghost" onClick={handleSignOut} className="w-full justify-start gap-2 h-11 rounded-lg bg-destructive/10 hover:bg-destructive text-destructive hover:text-destructive-foreground">
-                          <LogOut className="w-4 h-4" />
+                          <Power className="w-4 h-4" />
                           {isAnonymous ? 'Sign Out (Guest)' : 'Sign Out'}
                         </Button>
                       </> : <SheetClose asChild>

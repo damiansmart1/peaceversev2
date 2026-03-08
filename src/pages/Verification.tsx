@@ -2,7 +2,7 @@ import Navigation from '@/components/Navigation';
 import SectionHeader from '@/components/SectionHeader';
 import { VerificationQueue } from '@/components/VerificationQueue';
 import { useTranslationContext } from '@/components/TranslationProvider';
-import { CheckCircle } from 'lucide-react';
+import { BadgeCheck } from 'lucide-react';
 
 const Verification = () => {
   const { t } = useTranslationContext();

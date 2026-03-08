@@ -8,7 +8,7 @@ import PodcastLibrary from '@/components/radio/PodcastLibrary';
 import CommunityCallIn from '@/components/radio/CommunityCallIn';
 import { useTranslationContext } from '@/components/TranslationProvider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Radio as RadioIcon, Waves, Calendar, Settings, MessageCircle, Podcast, Phone } from 'lucide-react';
+import { Antenna, Waves, CalendarRange, Sliders, MessageCircleMore, Podcast, PhoneCall } from 'lucide-react';
 
 const Radio = () => {
   const { t } = useTranslationContext();

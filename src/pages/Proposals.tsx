@@ -5,7 +5,7 @@ import { ProposalFilters } from '@/components/ProposalFilters';
 import { useTranslationContext } from '@/components/TranslationProvider';
 import SectionImageBanner from '@/components/SectionImageBanner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FileText, TrendingUp, Clock, Archive, Vote, BarChart3 } from 'lucide-react';
+import { ScrollText, TrendingUp, Clock, Archive, Landmark, AreaChart } from 'lucide-react';
 import proposalsDemocracy from "@/assets/proposals-democracy.jpg";
 import { PollsSection } from '@/components/polls/PollsSection';
 

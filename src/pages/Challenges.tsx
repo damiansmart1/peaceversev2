@@ -5,7 +5,7 @@ import GamificationDashboard from '@/components/GamificationDashboard';
 import ChallengeLeaderboard from '@/components/ChallengeLeaderboard';
 import WeeklyChallengesSection from '@/components/WeeklyChallengesSection';
 import { useTranslationContext } from '@/components/TranslationProvider';
-import { Award } from 'lucide-react';
+import { Flame } from 'lucide-react';
 
 const Challenges = () => {
   const { t } = useTranslationContext();

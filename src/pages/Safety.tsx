@@ -8,7 +8,7 @@ import { SafetyResourceLibrary } from '@/components/SafetyResourceLibrary';
 import { useTranslationContext } from '@/components/TranslationProvider';
 import SectionImageBanner from '@/components/SectionImageBanner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Shield, AlertTriangle, Users, Wifi, BookOpen } from 'lucide-react';
+import { ShieldHalf, OctagonAlert, UsersRound, WifiHigh, BookMarked } from 'lucide-react';
 import safetyProtection from "@/assets/safety-protection.jpg";
 
 const Safety = () => {

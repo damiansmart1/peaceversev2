@@ -1,15 +1,15 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
-  BarChart3, 
-  Map, 
-  FileText, 
-  Shield, 
-  Bell, 
-  Download, 
-  Users,
-  Radio,
-  AlertTriangle,
+  AreaChart, 
+  MapPinned, 
+  ScrollText, 
+  ShieldHalf, 
+  BellDot, 
+  CloudDownload, 
+  UsersRound,
+  Antenna,
+  OctagonAlert,
   Megaphone
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -20,7 +20,7 @@ export const QuickActionsPanel = () => {
 
   const actions = [
     {
-      icon: BarChart3,
+      icon: AreaChart,
       label: 'Analytics Dashboard',
       description: 'View comprehensive metrics',
       color: 'text-blue-500',
@@ -28,7 +28,7 @@ export const QuickActionsPanel = () => {
       onClick: () => navigate('/peace-pulse'),
     },
     {
-      icon: Map,
+      icon: MapPinned,
       label: 'Incident Heatmap',
       description: 'Geographic incident analysis',
       color: 'text-orange-500',
@@ -36,7 +36,7 @@ export const QuickActionsPanel = () => {
       onClick: () => navigate('/incidents'),
     },
     {
-      icon: FileText,
+      icon: ScrollText,
       label: 'Policy Proposals',
       description: 'Review community proposals',
       color: 'text-purple-500',
@@ -44,7 +44,7 @@ export const QuickActionsPanel = () => {
       onClick: () => navigate('/proposals'),
     },
     {
-      icon: Shield,
+      icon: ShieldHalf,
       label: 'Safety Resources',
       description: 'Manage safety information',
       color: 'text-green-500',
@@ -52,7 +52,7 @@ export const QuickActionsPanel = () => {
       onClick: () => navigate('/safety'),
     },
     {
-      icon: AlertTriangle,
+      icon: OctagonAlert,
       label: 'Early Warning',
       description: 'Predictive risk analysis',
       color: 'text-red-500',
@@ -60,7 +60,7 @@ export const QuickActionsPanel = () => {
       onClick: () => navigate('/early-warning'),
     },
     {
-      icon: Users,
+      icon: UsersRound,
       label: 'Community Hub',
       description: 'Engage with citizens',
       color: 'text-teal-500',
@@ -68,7 +68,7 @@ export const QuickActionsPanel = () => {
       onClick: () => navigate('/community'),
     },
     {
-      icon: Radio,
+      icon: Antenna,
       label: 'Radio Broadcasts',
       description: 'Peace radio programs',
       color: 'text-amber-500',
@@ -76,7 +76,7 @@ export const QuickActionsPanel = () => {
       onClick: () => navigate('/radio'),
     },
     {
-      icon: Download,
+      icon: CloudDownload,
       label: 'Export Reports',
       description: 'Download data reports',
       color: 'text-indigo-500',

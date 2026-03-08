@@ -1,17 +1,17 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, ShieldCheck, Globe, Activity, Play, Radio, Users, Handshake, HeartHandshake, RefreshCw, Shield } from "lucide-react";
+import { ArrowRight, ShieldHalf, Earth, HeartPulse, Play, Antenna, UsersRound, Handshake, HeartHandshake, RefreshCw, ShieldHalf as ShieldIcon } from "lucide-react";
 import heroImage from "@/assets/hero-image.jpg";
 import { useNavigate } from "react-router-dom";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 const unscr2250Pillars = [{
   name: "Participation",
-  icon: Users,
+  icon: UsersRound,
   description: "Inclusive youth engagement in peace processes and decision-making",
   color: "primary"
 }, {
   name: "Prevention",
-  icon: Shield,
+  icon: ShieldIcon,
   description: "Early warning systems to prevent violence and conflict escalation",
   color: "secondary"
 }, {
@@ -195,7 +195,7 @@ const HeroSection = () => {
                   <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-secondary"></span>
                 </span>
                 <span className="text-foreground/90 text-sm font-medium">Live Monitoring Active</span>
-                <Radio className="w-4 h-4 text-secondary animate-pulse" />
+                <Antenna className="w-4 h-4 text-secondary animate-pulse" />
               </motion.div>
 
               {/* Main Heading */}
@@ -292,7 +292,7 @@ const HeroSection = () => {
               delay: 0.4
             }}>
                 <div className="flex items-center gap-3 mb-2">
-                  <Globe className="w-5 h-5 text-gold" />
+                  <Earth className="w-5 h-5 text-gold" />
                   <span className="text-sm font-semibold text-gold uppercase tracking-wide">UNSCR 2250</span>
                 </div>
                 <h3 className="text-lg font-bold text-foreground">Youth, Peace & Security</h3>

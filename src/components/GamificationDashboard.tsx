@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Award, Star, Users, Mic, Heart, Shield } from "lucide-react";
+import { Award, Star, UsersRound, AudioLines, Heart, ShieldHalf } from "lucide-react";
 import { useUserGamificationProfile } from "@/hooks/useGamification";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";

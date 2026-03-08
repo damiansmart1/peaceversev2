@@ -16,7 +16,7 @@ import { useContentFilters } from '@/hooks/useContentFilters';
 import { useTranslationContext } from '@/components/TranslationProvider';
 import SectionImageBanner from '@/components/SectionImageBanner';
 import { SocialHub } from '@/components/social/SocialHub';
-import { Map, MessageSquare, Users, Calendar, BookOpen, Award, Radio as RadioIcon, Mic, Sparkles } from 'lucide-react';
+import { MapPinned, MessageCircleMore, UsersRound, CalendarRange, BookMarked, Award, Antenna, AudioLines, Sparkles } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import communityUnity from "@/assets/community-unity.jpg";
 import radioBroadcasting from "@/assets/radio-broadcasting.jpg";

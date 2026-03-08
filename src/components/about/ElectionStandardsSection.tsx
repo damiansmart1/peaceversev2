@@ -1,11 +1,11 @@
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, ShieldCheck, BarChart3, MapPin, Users, FileCheck, Lock, Eye } from 'lucide-react';
+import { CircleCheckBig, ShieldCheck, AreaChart, MapPinCheck, UsersRound, FileCheck, Lock, ScanSearch } from 'lucide-react';
 
 const standards = [
   {
     category: 'Statistical Integrity',
-    icon: BarChart3,
+    icon: AreaChart,
     items: [
       "Benford's Law first-digit analysis with chi-squared testing",
       'Turnout spike detection (>2σ deviation from regional mean)',
@@ -15,7 +15,7 @@ const standards = [
   },
   {
     category: 'Observer Management',
-    icon: Users,
+    icon: UsersRound,
     items: [
       'Accreditation workflow with credential verification',
       'Real-time GPS tracking of observer deployment',
@@ -82,7 +82,7 @@ export default function ElectionStandardsSection() {
               <ul className="space-y-2.5">
                 {std.items.map((item, j) => (
                   <li key={j} className="flex items-start gap-2.5">
-                    <CheckCircle2 className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
+                    <CircleCheckBig className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
                     <span className="text-sm text-muted-foreground">{item}</span>
                   </li>
                 ))}

@@ -1,6 +1,6 @@
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, Shield, Users, Handshake, Ban, Target } from 'lucide-react';
+import { CircleCheckBig, ShieldHalf, UsersRound, Handshake, Ban, Target } from 'lucide-react';
 
 const frameworks = [
   {
@@ -8,8 +8,8 @@ const frameworks = [
     subtitle: 'Youth, Peace & Security',
     description: 'Peaceverse operationalises all five pillars of UNSCR 2250, empowering youth as agents of peace across the continent.',
     pillars: [
-      { icon: Users, name: 'Participation', detail: 'Citizen reporting & democratic proposals' },
-      { icon: Shield, name: 'Prevention', detail: 'AI-powered predictive hotspot mapping' },
+      { icon: UsersRound, name: 'Participation', detail: 'Citizen reporting & democratic proposals' },
+      { icon: ShieldHalf, name: 'Prevention', detail: 'AI-powered predictive hotspot mapping' },
       { icon: Target, name: 'Protection', detail: 'Anonymous reporting & safety resources' },
       { icon: Handshake, name: 'Partnerships', detail: 'Multi-stakeholder coordination channels' },
       { icon: Ban, name: 'Disengagement', detail: 'Community peacebuilding challenges' },
@@ -84,7 +84,7 @@ export default function InternationalFrameworksSection() {
                   <ul className="space-y-3">
                     {fw.stats?.map((s, j) => (
                       <li key={j} className="flex items-start gap-3">
-                        <CheckCircle2 className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
+                        <CircleCheckBig className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
                         <span className="text-sm text-muted-foreground">{s}</span>
                       </li>
                     ))}

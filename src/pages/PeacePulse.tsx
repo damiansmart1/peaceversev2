@@ -4,7 +4,7 @@ import SectionHeader from '@/components/SectionHeader';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Activity, TrendingUp, AlertTriangle, BarChart3, Globe, MapPin, Shield, FileText, Bell, ArrowRightLeft } from 'lucide-react';
+import { HeartPulse, TrendingUp, OctagonAlert, AreaChart, Earth, MapPinCheck, ShieldHalf, ScrollText, BellDot, ArrowRightLeft } from 'lucide-react';
 import { usePeacePulseMetrics, useAccountabilityMetrics, useCountriesByBlock } from '@/hooks/usePeaceMetrics';
 import { useTranslationContext } from '@/components/TranslationProvider';
 import LoadingSpinner from '@/components/LoadingSpinner';

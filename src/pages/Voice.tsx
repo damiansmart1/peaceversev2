@@ -8,7 +8,7 @@ import { FeaturedStories } from '@/components/FeaturedStories';
 import { useTranslationContext } from '@/components/TranslationProvider';
 import { useContentFilters } from '@/hooks/useContentFilters';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Mic, Upload, Library, TrendingUp } from 'lucide-react';
+import { AudioLines, CloudUpload, LibraryBig, TrendingUp } from 'lucide-react';
 
 const Voice = () => {
   const { t } = useTranslationContext();

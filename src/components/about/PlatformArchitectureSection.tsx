@@ -1,55 +1,55 @@
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
-  AlertTriangle, Shield, Eye, BarChart3, Radio, Vote,
-  MessageSquare, Gamepad2, Globe, Smartphone, Lock, Wifi
+  OctagonAlert, ShieldHalf, ScanSearch, AreaChart, Antenna, Landmark,
+  MessageCircleMore, Flame, Earth, Smartphone, Lock, WifiHigh
 } from 'lucide-react';
 
 const modules = [
   {
-    icon: AlertTriangle,
+    icon: OctagonAlert,
     name: 'Incident Reporting',
     description: 'Multi-channel citizen reporting with AI-powered threat classification, sentiment analysis, and geographic clustering.',
     standards: ['OCHA ReliefWeb taxonomy', 'ACLED methodology'],
   },
   {
-    icon: Shield,
+    icon: ShieldHalf,
     name: 'Verification Engine',
     description: 'Multi-layer verification with source credibility scoring, cross-referencing, risk assessment, and evidence review.',
     standards: ['Carter Center verification protocol', 'Bellingcat OSINT'],
   },
   {
-    icon: Eye,
+    icon: ScanSearch,
     name: 'Early Warning System',
     description: 'Predictive hotspot mapping with 78% accuracy, real-time alert feeds, and recommended intervention actions.',
     standards: ['UN Framework for Early Warning', 'AU CEWS'],
   },
   {
-    icon: Vote,
+    icon: Landmark,
     name: 'Election Monitoring',
     description: 'Statistical anomaly detection (Benford\'s Law), PVT with 95% confidence intervals, systematic observation checklists.',
     standards: ['EU EOM methodology', 'OSCE/ODIHR guidelines'],
   },
   {
-    icon: BarChart3,
+    icon: AreaChart,
     name: 'Peace Pulse Analytics',
     description: 'Continental conflict indicators, regional comparison charts, cross-border analysis, and advanced trend reporting.',
     standards: ['Global Peace Index metrics', 'Fragile States Index'],
   },
   {
-    icon: Radio,
+    icon: Antenna,
     name: 'Communication Hub',
     description: 'Coordination channels, broadcast center, escalation management, and field reporting for multi-stakeholder coordination.',
     standards: ['Humanitarian cluster system', 'IASC protocols'],
   },
   {
-    icon: MessageSquare,
+    icon: MessageCircleMore,
     name: 'Community Platform',
     description: 'Social feeds, chatrooms, direct messaging, content creation tools, and community-driven proposals system.',
     standards: ['Do No Harm principle', 'Conflict-sensitive design'],
   },
   {
-    icon: Gamepad2,
+    icon: Flame,
     name: 'Gamification & Engagement',
     description: 'Points, badges, weekly challenges, leaderboards, and reward store to sustain citizen participation.',
     standards: ['Behavioral science frameworks'],
@@ -57,10 +57,10 @@ const modules = [
 ];
 
 const techSpecs = [
-  { icon: Globe, label: 'Multi-language', detail: 'English, French, Swahili, Arabic, Portuguese + more' },
+  { icon: Earth, label: 'Multi-language', detail: 'English, French, Swahili, Arabic, Portuguese + more' },
   { icon: Smartphone, label: 'Mobile-first PWA', detail: 'Offline capable with local caching & sync' },
   { icon: Lock, label: 'Security', detail: 'RLS policies, encrypted reports, anonymous submissions' },
-  { icon: Wifi, label: 'Low-bandwidth', detail: 'Optimised for connectivity-constrained regions' },
+  { icon: WifiHigh, label: 'Low-bandwidth', detail: 'Optimised for connectivity-constrained regions' },
 ];
 
 export default function PlatformArchitectureSection() {
