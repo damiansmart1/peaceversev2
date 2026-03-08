@@ -125,8 +125,9 @@ export default {
         'neon-gold': '0 0 5px theme(colors.gold.DEFAULT), 0 0 20px theme(colors.gold.DEFAULT)',
       },
       fontFamily: {
-        sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+        sans: ['Space Grotesk', 'system-ui', 'sans-serif'],
         display: ['Playfair Display', 'Georgia', 'serif'],
+        body: ['DM Sans', 'system-ui', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
       },
       fontSize: {
