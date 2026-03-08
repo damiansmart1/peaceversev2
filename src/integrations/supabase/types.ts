@@ -4477,6 +4477,81 @@ export type Database = {
         }
         Relationships: []
       }
+      policy_bookmarks: {
+        Row: {
+          bookmark_type: string | null
+          color: string | null
+          created_at: string | null
+          document_id: string
+          id: string
+          note: string | null
+          section_index: number
+          section_title: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          bookmark_type?: string | null
+          color?: string | null
+          created_at?: string | null
+          document_id: string
+          id?: string
+          note?: string | null
+          section_index: number
+          section_title?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          bookmark_type?: string | null
+          color?: string | null
+          created_at?: string | null
+          document_id?: string
+          id?: string
+          note?: string | null
+          section_index?: number
+          section_title?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      policy_reading_progress: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          document_id: string
+          id: string
+          last_section_index: number | null
+          sections_read: number[] | null
+          total_sections: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          document_id: string
+          id?: string
+          last_section_index?: number | null
+          sections_read?: number[] | null
+          total_sections?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          document_id?: string
+          id?: string
+          last_section_index?: number | null
+          sections_read?: number[] | null
+          total_sections?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       poll_analytics: {
         Row: {
           created_at: string | null
