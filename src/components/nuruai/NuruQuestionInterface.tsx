@@ -82,7 +82,9 @@ const QUICK_ACTIONS = [
 ];
 
 const NuruQuestionInterface = () => {
-  const [selectedDocId, setSelectedDocId] = useState('');
+  const [selectedDocIds, setSelectedDocIds] = useState<string[]>([]);
+  const selectedDocId = selectedDocIds[0] || '';
+  const setSelectedDocId = (id: string) => setSelectedDocIds(id && id !== 'none' ? [id] : []);
   const [question, setQuestion] = useState('');
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(true);
@@ -106,6 +108,8 @@ const NuruQuestionInterface = () => {
   const [isListening, setIsListening] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [showShortcutsDialog, setShowShortcutsDialog] = useState(false);
+  const [showExportDialog, setShowExportDialog] = useState(false);
+  const [exportFormat, setExportFormat] = useState('pdf');
   const [isDragOver, setIsDragOver] = useState(false);
   const [pinnedConversations, setPinnedConversations] = useState<Set<string>>(() => {
     try { return new Set(JSON.parse(localStorage.getItem('nuru_pinned') || '[]')); } catch { return new Set(); }
@@ -412,19 +416,93 @@ const NuruQuestionInterface = () => {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const handleExportConversation = () => {
+  const handleExportConversation = (fmt?: string) => {
     if (!chatMessages || chatMessages.length === 0) return;
     const conv = conversations?.find(c => c.id === activeConversationId);
-    const content = chatMessages.map(m => `## ${m.role === 'user' ? 'You' : 'NuruAI'}\n${m.content}\n`).join('\n---\n\n');
-    const header = `# ${conv?.title || 'Conversation'}\nExported: ${new Date().toISOString()}\n\n---\n\n`;
-    const blob = new Blob([header + content], { type: 'text/markdown' });
+    const title = conv?.title || 'NuruAI Conversation';
+    const dateStr = format(new Date(), 'yyyy-MM-dd-HHmm');
+    const selectedFormat = fmt || exportFormat;
+
+    if (selectedFormat === 'json') {
+      const jsonData = {
+        title,
+        exportedAt: new Date().toISOString(),
+        messageCount: chatMessages.length,
+        messages: chatMessages.map(m => ({
+          role: m.role, content: m.content, timestamp: m.created_at,
+          model: m.model_used || undefined, processingTime: m.processing_time_ms || undefined,
+        })),
+      };
+      downloadBlob(new Blob([JSON.stringify(jsonData, null, 2)], { type: 'application/json' }), `nuru-chat-${dateStr}.json`);
+    } else if (selectedFormat === 'csv') {
+      const rows = [['Role', 'Content', 'Timestamp', 'Model'].join(',')];
+      chatMessages.forEach(m => {
+        rows.push([m.role, `"${m.content.replace(/"/g, '""')}"`, m.created_at, m.model_used || ''].join(','));
+      });
+      downloadBlob(new Blob([rows.join('\n')], { type: 'text/csv' }), `nuru-chat-${dateStr}.csv`);
+    } else if (selectedFormat === 'word') {
+      const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+        <head><meta charset="utf-8"><title>${title}</title>
+        <style>body{font-family:Calibri,sans-serif;margin:40px;color:#333}h1{color:#074F98;font-size:20px;border-bottom:2px solid #074F98;padding-bottom:8px}
+        .user{background:#f0f4f8;padding:12px;border-radius:8px;margin:8px 0;border-left:4px solid #275432}
+        .assistant{background:#fafbfc;padding:12px;border-radius:8px;margin:8px 0;border-left:4px solid #074F98}
+        .meta{color:#888;font-size:10px}.footer{margin-top:30px;border-top:1px solid #ccc;padding-top:10px;font-size:9px;color:#999}</style></head>
+        <body><p class="meta">PEACEVERSE — NuruAI Civic Intelligence | Exported: ${new Date().toLocaleDateString()}</p>
+        <h1>${title}</h1>
+        ${chatMessages.map(m => `<div class="${m.role}"><p class="meta"><strong>${m.role === 'user' ? '👤 You' : '🤖 NuruAI'}</strong> · ${m.created_at ? format(new Date(m.created_at), 'MMM d, yyyy HH:mm') : ''}</p><p>${m.content.replace(/\n/g, '<br>')}</p></div>`).join('')}
+        <div class="footer">PeaceVerse — NuruAI Civic Intelligence Platform</div></body></html>`;
+      downloadBlob(new Blob([html], { type: 'application/msword' }), `nuru-chat-${dateStr}.doc`);
+    } else if (selectedFormat === 'pdf') {
+      import('jspdf').then(({ jsPDF }) => {
+        import('jspdf-autotable').then((autoTableMod) => {
+          const pdf = new jsPDF('p', 'mm', 'a4');
+          const autoTable = autoTableMod.default;
+          pdf.setFontSize(8); pdf.setTextColor(120);
+          pdf.text('PEACEVERSE — NuruAI Civic Intelligence | Conversation Export', 14, 12);
+          pdf.text(`Generated: ${new Date().toISOString().split('T')[0]}`, 14, 17);
+          pdf.setDrawColor(200); pdf.line(14, 19, 196, 19);
+          pdf.setFontSize(14); pdf.setTextColor(30);
+          pdf.text(title, 14, 28);
+          pdf.setFontSize(9); pdf.setTextColor(80);
+          pdf.text(`${chatMessages.length} messages`, 14, 34);
+
+          const rows = chatMessages.map(m => [
+            m.role === 'user' ? 'You' : 'NuruAI',
+            m.content.substring(0, 2000),
+            m.created_at ? format(new Date(m.created_at), 'MMM d HH:mm') : '',
+          ]);
+          autoTable(pdf, {
+            startY: 38, head: [['Speaker', 'Message', 'Time']], body: rows,
+            theme: 'grid', headStyles: { fillColor: [7, 79, 152], fontSize: 8 },
+            bodyStyles: { fontSize: 7, cellPadding: 3 },
+            columnStyles: { 0: { cellWidth: 18 }, 1: { cellWidth: 145 }, 2: { cellWidth: 23 } },
+            margin: { left: 14, right: 14 },
+          });
+          const pageCount = pdf.getNumberOfPages();
+          for (let i = 1; i <= pageCount; i++) {
+            pdf.setPage(i); pdf.setFontSize(7); pdf.setTextColor(150);
+            pdf.text(`PeaceVerse — NuruAI | Page ${i} of ${pageCount}`, 14, 290);
+          }
+          pdf.save(`nuru-chat-${dateStr}.pdf`);
+        });
+      });
+    } else {
+      // Markdown fallback
+      const content = chatMessages.map(m => `## ${m.role === 'user' ? 'You' : 'NuruAI'}\n${m.content}\n`).join('\n---\n\n');
+      const header = `# ${title}\nExported: ${new Date().toISOString()}\n\n---\n\n`;
+      downloadBlob(new Blob([header + content], { type: 'text/markdown' }), `nuru-chat-${dateStr}.md`);
+    }
+
+    toast.success(`Conversation exported as ${selectedFormat.toUpperCase()}`);
+    setShowExportDialog(false);
+  };
+
+  const downloadBlob = (blob: Blob, filename: string) => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url;
-    a.download = `nuru-chat-${format(new Date(), 'yyyy-MM-dd-HHmm')}.md`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success('Conversation exported');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
   };
 
   const handleShareConversation = useCallback(() => {
@@ -564,9 +642,9 @@ const NuruQuestionInterface = () => {
               </div>
             </div>
 
-            {/* Document Context */}
+            {/* Document Context — Multi-select */}
             <div className="px-3 pb-2">
-              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-1.5">Context Document</p>
+              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-1.5">Context Documents</p>
               <Select value={selectedDocId} onValueChange={setSelectedDocId}>
                 <SelectTrigger className="h-8 text-xs rounded-lg bg-background/50">
                   <FileText className="h-3 w-3 mr-1 text-muted-foreground shrink-0" />
@@ -581,6 +659,34 @@ const NuruQuestionInterface = () => {
                   ))}
                 </SelectContent>
               </Select>
+              {/* Additional document chips */}
+              {selectedDocIds.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-1.5">
+                  {selectedDocIds.map(id => {
+                    const doc = documents?.find(d => d.id === id);
+                    return doc ? (
+                      <Badge key={id} variant="secondary" className="text-[8px] gap-1 pr-0.5">
+                        <FileText className="h-2 w-2" />
+                        <span className="truncate max-w-[80px]">{doc.title}</span>
+                        <button onClick={() => setSelectedDocIds(prev => prev.filter(i => i !== id))} className="ml-0.5 p-0.5 rounded hover:bg-muted">
+                          <X className="h-2 w-2" />
+                        </button>
+                      </Badge>
+                    ) : null;
+                  })}
+                </div>
+              )}
+              {selectedDocIds.length > 0 && documents && documents.length > selectedDocIds.length && (
+                <button
+                  className="text-[9px] text-primary/60 hover:text-primary mt-1 flex items-center gap-1"
+                  onClick={() => {
+                    const nextDoc = documents.find(d => !selectedDocIds.includes(d.id));
+                    if (nextDoc) setSelectedDocIds(prev => [...prev, nextDoc.id]);
+                  }}
+                >
+                  <Plus className="h-2.5 w-2.5" /> Add another document
+                </button>
+              )}
             </div>
 
             <Separator className="opacity-30" />
@@ -679,9 +785,10 @@ const NuruQuestionInterface = () => {
             </div>
           </div>
           <div className="flex items-center gap-1.5">
-            {selectedDoc && (
-              <Badge variant="outline" className="text-[9px] gap-1 font-normal max-w-[140px] truncate hidden sm:flex">
-                <FileText className="h-2.5 w-2.5 shrink-0" />{selectedDoc.title}
+            {selectedDocIds.length > 0 && (
+              <Badge variant="outline" className="text-[9px] gap-1 font-normal max-w-[160px] truncate hidden sm:flex">
+                <FileText className="h-2.5 w-2.5 shrink-0" />
+                {selectedDocIds.length === 1 ? selectedDoc?.title : `${selectedDocIds.length} documents`}
               </Badge>
             )}
             <Badge className="text-[9px] gap-1 font-semibold hidden sm:flex bg-primary text-primary-foreground border-primary/50" variant="outline">
@@ -703,8 +810,8 @@ const NuruQuestionInterface = () => {
                     <Button variant="ghost" size="sm" className="h-7 w-7 p-0"><MoreHorizontal className="h-4 w-4" /></Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuItem onClick={handleExportConversation} className="text-xs gap-2">
-                      <Download className="h-3.5 w-3.5" /> Export as Markdown
+                    <DropdownMenuItem onClick={() => setShowExportDialog(true)} className="text-xs gap-2">
+                      <Download className="h-3.5 w-3.5" /> Export conversation
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={handleShareConversation} className="text-xs gap-2">
                       <Share2 className="h-3.5 w-3.5" /> Share conversation
@@ -1244,6 +1351,53 @@ const NuruQuestionInterface = () => {
                 toast.error('Failed to submit feedback');
               }
             }}>Submit Feedback</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Conversation Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-sm flex items-center gap-2">
+              <Download className="h-4 w-4 text-primary" /> Export Conversation
+            </DialogTitle>
+            <DialogDescription className="text-[11px]">
+              Download this conversation in your preferred format
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-[11px] font-medium text-muted-foreground">Export Format</label>
+              <Select value={exportFormat} onValueChange={setExportFormat}>
+                <SelectTrigger className="h-9 text-xs mt-1.5"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pdf" className="text-xs">📄 PDF — Professional formatted report</SelectItem>
+                  <SelectItem value="word" className="text-xs">📝 Word (.doc) — Editable document</SelectItem>
+                  <SelectItem value="markdown" className="text-xs">📋 Markdown — Plain text with formatting</SelectItem>
+                  <SelectItem value="json" className="text-xs">🔧 JSON — Structured data with metadata</SelectItem>
+                  <SelectItem value="csv" className="text-xs">📊 CSV — Spreadsheet-compatible</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="p-3 rounded-lg bg-muted/30 border border-border/10">
+              <p className="text-[10px] text-muted-foreground">
+                {exportFormat === 'pdf' && 'Generates a branded PDF with speaker columns, timestamps, and PeaceVerse headers.'}
+                {exportFormat === 'word' && 'Creates a styled Word document with formatted Q&A pairs for institutional sharing.'}
+                {exportFormat === 'markdown' && 'Clean markdown with headers per speaker — ideal for documentation.'}
+                {exportFormat === 'json' && 'Full JSON export including metadata, model info, and processing times.'}
+                {exportFormat === 'csv' && 'Tabular format with Role, Content, Timestamp, and Model columns.'}
+              </p>
+            </div>
+            <div className="text-[10px] text-muted-foreground flex items-center gap-1.5">
+              <MessageSquareText className="h-3 w-3" /> {chatMessages?.length || 0} messages will be exported
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" size="sm" className="text-xs" onClick={() => setShowExportDialog(false)}>Cancel</Button>
+            <Button size="sm" className="text-xs gap-1.5" onClick={() => handleExportConversation()}>
+              <Download className="h-3 w-3" /> Download {exportFormat.toUpperCase()}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
