@@ -239,9 +239,7 @@ export function useUploadDocumentFile() {
         console.error('Server-side extraction error:', extractError);
         const text = await extractTextFromFile(file);
         if (text && text.length > 50) {
-          await supabase.functions.invoke('nuru-ai-chat', {
-            body: { action: 'parse_document', text, documentId: doc.id, fileName: file.name, fileType: file.type },
-          });
+          await invokeNuruAI({ action: 'parse_document', text, documentId: doc.id, fileName: file.name, fileType: file.type });
         } else {
           await sb.from('civic_documents').update({
             processing_status: 'text_extraction_failed',
