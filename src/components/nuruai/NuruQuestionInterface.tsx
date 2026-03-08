@@ -29,6 +29,9 @@ import {
   useDeleteConversation, useRenameConversation, useClearConversation,
   extractTextFromAttachment, type ChatAttachment,
 } from '@/hooks/useNuruAI';
+import { useSubmitAIFeedback } from '@/hooks/useNuruGovernance';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/AuthContext';
 import { format, isToday, isYesterday, isThisWeek, isThisMonth } from 'date-fns';
 import { toast } from 'sonner';
