@@ -765,6 +765,37 @@ Respond as JSON:
       });
     }
 
+    // ===== ACTION: SIMPLE CHAT (legacy / Policy Explorer) =====
+    if (action === 'simple_chat') {
+      const userMessage = message || question || '';
+      if (!userMessage) throw new Error('Message is required');
+
+      let documentContext = '';
+      let doc: any = null;
+      if (documentId) {
+        const { data } = await supabase.from('civic_documents').select('*').eq('id', documentId).single();
+        doc = data;
+        documentContext = doc ? (doc.original_text || doc.summary || doc.description || '') : '';
+      }
+
+      const constitution = await fetchConstitution(supabase, doc?.country || null);
+      const systemPrompt = buildChatSystemPrompt(doc, documentContext, constitution);
+
+      const aiMessages = [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userMessage },
+      ];
+
+      const content = await callAI(LOVABLE_API_KEY, aiMessages, 0.1);
+      const processingTime = Date.now() - startTime;
+
+      await logAudit(supabase, userId, 'simple_chat', 'nuru_chat', undefined, { processingTime, documentId });
+
+      return new Response(JSON.stringify({ response: content, processingTime }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     throw new Error(`Unknown action: ${action}`);
   } catch (error) {
     console.error('NuruAI error:', error);
