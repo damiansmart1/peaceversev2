@@ -681,15 +681,58 @@ export function useToggleBookmark() {
 // ========== Review & Analytics Hooks ==========
 
 export function useReviewClaim() {
+  const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ claimText, documentId }: { claimText: string; documentId?: string }) => {
+    mutationFn: async ({ claimText, documentId, claimSource, claimSourceUrl }: {
+      claimText: string; documentId?: string; claimSource?: string; claimSourceUrl?: string;
+    }) => {
       const { data, error } = await supabase.functions.invoke('nuru-ai-chat', {
-        body: { action: 'review_claim', claimText, documentId },
+        body: { action: 'review_claim', claimText, documentId, claimSource, claimSourceUrl },
       });
-      if (error) throw error;
+      if (error) throw new Error(error?.message || JSON.stringify(error));
+      if (data?.error) throw new Error(data.error);
       return data;
     },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['claim-review-history'] });
+    },
     onError: (e: any) => toast.error(e.message || 'Claim review failed'),
+  });
+}
+
+export function useBatchReviewClaims() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ claims, documentId }: { claims: (string | { text: string; source?: string; sourceUrl?: string })[]; documentId?: string }) => {
+      const { data, error } = await supabase.functions.invoke('nuru-ai-chat', {
+        body: { action: 'batch_review_claims', claims, documentId },
+      });
+      if (error) throw new Error(error?.message || JSON.stringify(error));
+      if (data?.error) throw new Error(data.error);
+      return data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['claim-review-history'] });
+    },
+    onError: (e: any) => toast.error(e.message || 'Batch review failed'),
+  });
+}
+
+export function useToggleClaimPublic() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ reviewId, isPublic }: { reviewId: string; isPublic: boolean }) => {
+      const { data, error } = await supabase.functions.invoke('nuru-ai-chat', {
+        body: { action: 'toggle_claim_public', reviewId, isPublic },
+      });
+      if (error) throw new Error(error?.message || JSON.stringify(error));
+      return data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['claim-review-history'] });
+      toast.success('Sharing settings updated');
+    },
+    onError: (e: any) => toast.error(e.message || 'Failed to update sharing'),
   });
 }
 
