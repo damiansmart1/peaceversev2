@@ -138,7 +138,9 @@ serve(async (req) => {
 
   try {
     const body = await req.json();
-    const { action, documentId, question, claimText, conversationId, messages: chatMessages, stream: useStream } = body;
+    const { action: rawAction, documentId, question, claimText, conversationId, messages: chatMessages, stream: useStream, message } = body;
+    // Infer action from payload if not explicitly provided
+    const action = rawAction || (message ? 'simple_chat' : (question ? 'ask' : undefined));
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY not configured');
 
