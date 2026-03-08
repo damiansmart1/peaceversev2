@@ -29,7 +29,7 @@ const NuruClaimReview = () => {
 
   const handleReview = () => {
     if (!claimText.trim()) return;
-    reviewClaim.mutate({ claimText, documentId: selectedDocId || undefined }, { onSuccess: (data) => setResult(data) });
+    reviewClaim.mutate({ claimText, documentId: (selectedDocId && selectedDocId !== 'none') ? selectedDocId : undefined }, { onSuccess: (data) => setResult(data) });
   };
 
   const statusInfo = result ? statusConfig[result.status] || statusConfig.needs_context : null;
