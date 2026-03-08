@@ -19,11 +19,14 @@ interface PolicyCompareViewProps {
 }
 
 const parseSections = (doc: CivicDocument) => {
-  if (doc.parsed_sections && Array.isArray(doc.parsed_sections)) {
-    return doc.parsed_sections.map((s: any) => ({
-      title: s.title || s.heading || 'Section',
-      content: s.content || s.text || '',
-    }));
+  if (doc.parsed_sections && Array.isArray(doc.parsed_sections) && doc.parsed_sections.length > 0) {
+    const mapped = doc.parsed_sections
+      .filter((s: any) => (s.content || s.text) && (s.content || s.text).length > 20)
+      .map((s: any) => ({
+        title: s.title || s.heading || 'Section',
+        content: s.content || s.text || '',
+      }));
+    if (mapped.length > 0) return mapped;
   }
   if (doc.original_text) {
     return doc.original_text.split(/\n\n+/).filter((p: string) => p.trim().length > 50)
