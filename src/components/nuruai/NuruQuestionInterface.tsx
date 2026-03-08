@@ -511,29 +511,11 @@ const NuruQuestionInterface = () => {
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
-                    if (!activeConversationId && user) {
-                      // Auto-create conversation on first message
-                      const doc = documents?.find(d => d.id === selectedDocId);
+                    if (!activeConversationId && user && question.trim()) {
+                      const msg = question;
                       createConversation.mutate(
                         { documentId: selectedDocId || undefined, title: question.substring(0, 60) || 'New Chat' },
-                        {
-                          onSuccess: (conv) => {
-                            setActiveConversationId(conv.id);
-                            // Send will be triggered after state update
-                            setTimeout(async () => {
-                              setIsStreaming(true);
-                              setStreamingContent('');
-                              const msg = question;
-                              setQuestion('');
-                              try {
-                                await streamChat(conv.id, msg, (delta) => setStreamingContent(prev => prev + delta), () => { setIsStreaming(false); setStreamingContent(''); });
-                              } catch (err: any) {
-                                setIsStreaming(false); setStreamingContent('');
-                                toast.error(err.message || 'Failed');
-                              }
-                            }, 100);
-                          }
-                        }
+                        { onSuccess: (conv) => { setActiveConversationId(conv.id); setTimeout(() => handleSendMessage(msg, conv.id), 100); } }
                       );
                       return;
                     }
