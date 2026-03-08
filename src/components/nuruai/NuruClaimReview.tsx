@@ -421,7 +421,7 @@ function FactCheckResultCard({ result, statusInfo, onCopyShareLink, onCopySchema
           </div>
           <div className="flex items-center gap-1">
             {result.shareToken && (
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onCopyShareLink(result.shareToken)} title="Copy share link">
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onCopyShareLink(result.shareToken, result.isPublic ?? false)} title="Copy share link">
                 <Share2 className="h-4 w-4" />
               </Button>
             )}
