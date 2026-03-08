@@ -119,18 +119,24 @@ serve(async (req) => {
   }
 
   try {
-    const { documentId, fileUrl, fileName, fileType } = await req.json();
-    if (!documentId) throw new Error('Document ID required');
+    const { documentId, fileUrl, fileName, fileType, extractOnly } = await req.json();
+    
+    // extractOnly mode: just extract text and return it without needing a documentId
+    const isExtractOnly = extractOnly === true || !documentId;
+    
+    if (!isExtractOnly && !documentId) throw new Error('Document ID required');
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY not configured');
 
     const supabase = getSupabase();
 
-    // Update status
-    await supabase.from('civic_documents').update({
-      processing_status: 'extracting_text',
-    }).eq('id', documentId);
+    // Update status only when linked to a document
+    if (!isExtractOnly) {
+      await supabase.from('civic_documents').update({
+        processing_status: 'extracting_text',
+      }).eq('id', documentId);
+    }
 
     let extractedText = '';
     let extractionMethod = 'unknown';
