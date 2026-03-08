@@ -181,17 +181,24 @@ export function useUploadDocumentFile() {
       const { data: { publicUrl } } = supabase.storage.from('nuru-documents').getPublicUrl(filePath);
       await sb.from('civic_documents').update({ file_url: publicUrl, processing_status: 'uploaded' }).eq('id', doc.id);
 
-      // Extract text from file
-      const text = await extractTextFromFile(file);
-      if (text && text.length > 50) {
-        await supabase.functions.invoke('nuru-ai-chat', {
-          body: { action: 'parse_document', text, documentId: doc.id, fileName: file.name, fileType: file.type },
-        });
-      } else {
-        await sb.from('civic_documents').update({
-          processing_status: 'text_extraction_failed',
-          processing_error: 'Could not extract text. Please paste the text content manually via the text upload tab.',
-        }).eq('id', doc.id);
+      // Server-side text extraction (robust: pdf-parse + Vision OCR fallback)
+      const { data: extractResult, error: extractError } = await supabase.functions.invoke('extract-document-text', {
+        body: { documentId: doc.id, fileUrl: publicUrl, fileName: file.name, fileType: file.type },
+      });
+      if (extractError) {
+        console.error('Server-side extraction error:', extractError);
+        // Fallback: try client-side extraction
+        const text = await extractTextFromFile(file);
+        if (text && text.length > 50) {
+          await supabase.functions.invoke('nuru-ai-chat', {
+            body: { action: 'parse_document', text, documentId: doc.id, fileName: file.name, fileType: file.type },
+          });
+        } else {
+          await sb.from('civic_documents').update({
+            processing_status: 'text_extraction_failed',
+            processing_error: 'Could not extract text. Please paste the text content manually via the text upload tab.',
+          }).eq('id', doc.id);
+        }
       }
 
       return doc;
