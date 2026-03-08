@@ -528,20 +528,10 @@ const NuruQuestionInterface = () => {
               <Button
                 onClick={() => {
                   if (!activeConversationId && user && question.trim()) {
+                    const msg = question;
                     createConversation.mutate(
                       { documentId: selectedDocId || undefined, title: question.substring(0, 60) || 'New Chat' },
-                      {
-                        onSuccess: (conv) => {
-                          setActiveConversationId(conv.id);
-                          setTimeout(async () => {
-                            setIsStreaming(true); setStreamingContent('');
-                            const msg = question; setQuestion('');
-                            try {
-                              await streamChat(conv.id, msg, (d) => setStreamingContent(p => p + d), () => { setIsStreaming(false); setStreamingContent(''); });
-                            } catch (err: any) { setIsStreaming(false); setStreamingContent(''); toast.error(err.message || 'Failed'); }
-                          }, 100);
-                        }
-                      }
+                      { onSuccess: (conv) => { setActiveConversationId(conv.id); setTimeout(() => handleSendMessage(msg, conv.id), 100); } }
                     );
                     return;
                   }
