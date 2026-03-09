@@ -124,6 +124,7 @@ const NuruAI = () => {
               {activeTab === 'analytics' && <NuruAnalyticsDashboard />}
               {activeTab === 'transparency' && <NuruCivicTransparency />}
               {activeTab === 'governance' && <NuruGovernancePortal />}
+              {activeTab === 'blueprint' && <NuruSystemBlueprint />}
             </motion.div>
           </AnimatePresence>
         </div>
