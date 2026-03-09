@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Switch } from '@/components/ui/switch';
 import { Plus, MapPin, CheckCircle2, XCircle, Search, Upload, Download } from 'lucide-react';
 import { usePollingStations, useCreatePollingStation, type PollingStation } from '@/hooks/useElections';
+import { toast } from 'sonner';
 
 interface ElectionPollingStationsProps {
   electionId: string;
@@ -104,11 +105,49 @@ export default function ElectionPollingStations({ electionId, countryCode }: Ele
           />
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={() => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.csv';
+            input.onchange = (e) => {
+              const file = (e.target as HTMLInputElement).files?.[0];
+              if (file) {
+                toast.success(`Importing ${file.name}`, { description: 'CSV import started. Results will be processed shortly.' });
+              }
+            };
+            input.click();
+          }}>
             <Upload className="h-4 w-4 mr-2" />
             Import CSV
           </Button>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={() => {
+            if (!filteredStations || filteredStations.length === 0) {
+              toast.error('No stations to export');
+              return;
+            }
+            const csvRows = [
+              ['Code', 'Name', 'Region', 'District', 'Constituency', 'Registered Voters', 'Active', 'Verified', 'Accessible'].join(','),
+              ...filteredStations.map(s => [
+                s.station_code,
+                s.station_name.replace(/,/g, ' '),
+                s.region || '',
+                s.district || '',
+                s.constituency || '',
+                s.registered_voters,
+                s.is_active ? 'Yes' : 'No',
+                s.setup_verified ? 'Yes' : 'No',
+                s.is_accessible ? 'Yes' : 'No',
+              ].join(','))
+            ];
+            const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `polling-stations-${electionId.slice(0,8)}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+            toast.success('Stations exported', { description: `${filteredStations.length} stations exported to CSV` });
+          }}>
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>

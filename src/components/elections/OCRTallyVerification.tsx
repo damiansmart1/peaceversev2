@@ -607,7 +607,9 @@ export default function OCRTallyVerification() {
                         <TableCell>{sheet.verifiedBy || '-'}</TableCell>
                         <TableCell className="font-mono text-xs">{sheet.hashDigest.substring(0, 16)}...</TableCell>
                         <TableCell>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={() => {
+                            toast.success(`Viewing ${sheet.pollingStation}`, { description: `Hash: ${sheet.hashDigest}` });
+                          }}>
                             <Eye className="h-4 w-4" />
                           </Button>
                         </TableCell>

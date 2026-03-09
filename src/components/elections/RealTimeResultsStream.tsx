@@ -328,11 +328,33 @@ const RealTimeResultsStream: React.FC = () => {
                 </CardDescription>
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => {
+                  const el = document.documentElement;
+                  if (!document.fullscreenElement) {
+                    el.requestFullscreen?.().catch(() => {
+                      toast({ title: 'Fullscreen not available', description: 'Your browser may not support fullscreen mode' });
+                    });
+                  } else {
+                    document.exitFullscreen?.();
+                  }
+                }}>
                   <Maximize2 className="h-4 w-4 mr-1" />
                   Fullscreen
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => {
+                  const csvRows = [
+                    ['Candidate', 'Party', 'Votes', 'Percentage', 'Stations Reporting'].join(','),
+                    ...aggregatedResults.map(r => [r.candidate, r.party, r.votes, r.percentage.toFixed(1), r.stationsReporting].join(','))
+                  ];
+                  const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `election-results-live-${new Date().toISOString().slice(0,10)}.csv`;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                  toast({ title: 'Results exported', description: 'CSV file downloaded successfully' });
+                }}>
                   <Download className="h-4 w-4 mr-1" />
                   Export
                 </Button>

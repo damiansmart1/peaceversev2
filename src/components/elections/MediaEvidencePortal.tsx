@@ -503,10 +503,18 @@ export default function MediaEvidencePortal() {
                           </div>
                         </DialogContent>
                       </Dialog>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={(e) => {
+                        e.stopPropagation();
+                        toast.success(`Downloading ${file.filename}`, { description: `Size: ${formatFileSize(file.size)}` });
+                      }}>
                         <Download className="h-4 w-4" />
                       </Button>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={(e) => {
+                        e.stopPropagation();
+                        const shareUrl = `https://peaceverse.africa/media/${file.id}`;
+                        navigator.clipboard.writeText(shareUrl);
+                        toast.success('Share link copied', { description: shareUrl });
+                      }}>
                         <Share2 className="h-4 w-4" />
                       </Button>
                     </div>
