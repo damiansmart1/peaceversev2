@@ -2705,6 +2705,143 @@ export type Database = {
           },
         ]
       }
+      election_media_access_log: {
+        Row: {
+          action: string
+          api_token_id: string | null
+          created_at: string | null
+          id: string
+          ip_address: unknown
+          media_id: string | null
+          status: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          api_token_id?: string | null
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown
+          media_id?: string | null
+          status?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          api_token_id?: string | null
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown
+          media_id?: string | null
+          status?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "election_media_access_log_media_id_fkey"
+            columns: ["media_id"]
+            isOneToOne: false
+            referencedRelation: "election_media_evidence"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      election_media_evidence: {
+        Row: {
+          access_level: string | null
+          captured_at: string | null
+          created_at: string | null
+          device_info: string | null
+          duration_seconds: number | null
+          election_id: string | null
+          file_size: number | null
+          file_type: string | null
+          file_url: string
+          filename: string
+          gps_latitude: number | null
+          gps_longitude: number | null
+          hash_digest: string
+          id: string
+          incident_id: string | null
+          metadata: Json | null
+          polling_station_id: string | null
+          status: string | null
+          thumbnail_url: string | null
+          updated_at: string | null
+          uploaded_by: string | null
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          access_level?: string | null
+          captured_at?: string | null
+          created_at?: string | null
+          device_info?: string | null
+          duration_seconds?: number | null
+          election_id?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          file_url: string
+          filename: string
+          gps_latitude?: number | null
+          gps_longitude?: number | null
+          hash_digest: string
+          id?: string
+          incident_id?: string | null
+          metadata?: Json | null
+          polling_station_id?: string | null
+          status?: string | null
+          thumbnail_url?: string | null
+          updated_at?: string | null
+          uploaded_by?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          access_level?: string | null
+          captured_at?: string | null
+          created_at?: string | null
+          device_info?: string | null
+          duration_seconds?: number | null
+          election_id?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          file_url?: string
+          filename?: string
+          gps_latitude?: number | null
+          gps_longitude?: number | null
+          hash_digest?: string
+          id?: string
+          incident_id?: string | null
+          metadata?: Json | null
+          polling_station_id?: string | null
+          status?: string | null
+          thumbnail_url?: string | null
+          updated_at?: string | null
+          uploaded_by?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "election_media_evidence_election_id_fkey"
+            columns: ["election_id"]
+            isOneToOne: false
+            referencedRelation: "elections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "election_media_evidence_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "election_incidents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       election_media_tokens: {
         Row: {
           contact_email: string | null
@@ -2840,6 +2977,77 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "election_observers_election_id_fkey"
+            columns: ["election_id"]
+            isOneToOne: false
+            referencedRelation: "elections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      election_ocr_tally_sheets: {
+        Row: {
+          anomalies: string[] | null
+          created_at: string | null
+          election_id: string | null
+          extracted_results: Json | null
+          hash_digest: string | null
+          id: string
+          image_url: string
+          metadata: Json | null
+          ocr_confidence: number | null
+          polling_station_id: string | null
+          registered_voters: number | null
+          status: string | null
+          total_votes: number | null
+          turnout_percent: number | null
+          updated_at: string | null
+          uploaded_by: string | null
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          anomalies?: string[] | null
+          created_at?: string | null
+          election_id?: string | null
+          extracted_results?: Json | null
+          hash_digest?: string | null
+          id?: string
+          image_url: string
+          metadata?: Json | null
+          ocr_confidence?: number | null
+          polling_station_id?: string | null
+          registered_voters?: number | null
+          status?: string | null
+          total_votes?: number | null
+          turnout_percent?: number | null
+          updated_at?: string | null
+          uploaded_by?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          anomalies?: string[] | null
+          created_at?: string | null
+          election_id?: string | null
+          extracted_results?: Json | null
+          hash_digest?: string | null
+          id?: string
+          image_url?: string
+          metadata?: Json | null
+          ocr_confidence?: number | null
+          polling_station_id?: string | null
+          registered_voters?: number | null
+          status?: string | null
+          total_votes?: number | null
+          turnout_percent?: number | null
+          updated_at?: string | null
+          uploaded_by?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "election_ocr_tally_sheets_election_id_fkey"
             columns: ["election_id"]
             isOneToOne: false
             referencedRelation: "elections"
@@ -7589,6 +7797,13 @@ export type Database = {
       }
       geomfromewkt: { Args: { "": string }; Returns: unknown }
       gettransactionid: { Args: never; Returns: unknown }
+      has_any_role: {
+        Args: {
+          _roles: Database["public"]["Enums"]["app_role"][]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -7609,6 +7824,7 @@ export type Database = {
         Args: { _election_id: string; _user_id: string }
         Returns: boolean
       }
+      is_election_stakeholder: { Args: { _user_id: string }; Returns: boolean }
       longtransactionsenabled: { Args: never; Returns: boolean }
       populate_geometry_columns:
         | { Args: { tbl_oid: unknown; use_typmod?: boolean }; Returns: number }
