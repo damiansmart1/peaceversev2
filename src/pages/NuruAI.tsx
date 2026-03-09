@@ -12,6 +12,7 @@ import NuruKnowledgeGraph from '@/components/nuruai/NuruKnowledgeGraph';
 import NuruPolicyExplorer from '@/components/nuruai/NuruPolicyExplorer';
 import NuruInstitutionalPortal from '@/components/nuruai/NuruInstitutionalPortal';
 import NuruCivicTransparency from '@/components/nuruai/NuruCivicTransparency';
+import NuruSystemBlueprint from '@/components/nuruai/NuruSystemBlueprint';
 
 const tabItems = [
   { value: 'questions', label: 'AI Chat', icon: MessageSquareText, desc: 'Ask policy questions' },
@@ -24,6 +25,7 @@ const tabItems = [
   { value: 'analytics', label: 'Analytics', icon: BarChart3, desc: 'Usage insights' },
   { value: 'transparency', label: 'Transparency', icon: Globe, desc: 'Public impact' },
   { value: 'governance', label: 'Governance', icon: Shield, desc: 'AI transparency' },
+  { value: 'blueprint', label: 'Blueprint', icon: FileText, desc: 'System documentation' },
 ];
 
 const NuruAI = () => {
