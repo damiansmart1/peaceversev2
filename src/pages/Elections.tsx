@@ -52,6 +52,9 @@ import USSDElectionReporting from '@/components/elections/USSDElectionReporting'
 import BlockchainAuditTrail from '@/components/elections/BlockchainAuditTrail';
 import BiometricObserverAuth from '@/components/elections/BiometricObserverAuth';
 import RealTimeResultsStream from '@/components/elections/RealTimeResultsStream';
+import OCRTallyVerification from '@/components/elections/OCRTallyVerification';
+import ElectionCommandCenter from '@/components/elections/ElectionCommandCenter';
+import MediaEvidencePortal from '@/components/elections/MediaEvidencePortal';
 
 const STATUS_COLORS: Record<ElectionStatus, string> = {
   draft: 'bg-muted text-muted-foreground',
@@ -316,6 +319,18 @@ export default function Elections() {
                   <TabsTrigger value="biometric" className="gap-1">
                     <Fingerprint className="h-4 w-4" />
                     <span className="hidden sm:inline">Biometric</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="ocr" className="gap-1">
+                    <Camera className="h-4 w-4" />
+                    <span className="hidden sm:inline">OCR</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="command" className="gap-1">
+                    <Activity className="h-4 w-4" />
+                    <span className="hidden sm:inline">Command</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="media" className="gap-1">
+                    <FileText className="h-4 w-4" />
+                    <span className="hidden sm:inline">Media</span>
                   </TabsTrigger>
                 </>
               )}
@@ -610,6 +625,18 @@ export default function Elections() {
 
               <TabsContent value="biometric">
                 <BiometricObserverAuth />
+              </TabsContent>
+
+              <TabsContent value="ocr">
+                <OCRTallyVerification />
+              </TabsContent>
+
+              <TabsContent value="command">
+                <ElectionCommandCenter />
+              </TabsContent>
+
+              <TabsContent value="media">
+                <MediaEvidencePortal />
               </TabsContent>
             </>
           )}
