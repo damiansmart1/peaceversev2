@@ -2341,6 +2341,181 @@ export type Database = {
           },
         ]
       }
+      election_blockchain_anchors: {
+        Row: {
+          anchor_chain: string | null
+          anchor_status: string
+          anchor_tx_hash: string | null
+          block_number: number
+          created_at: string | null
+          data_hash: string
+          election_id: string
+          entity_id: string
+          entity_type: string
+          id: string
+          merkle_root: string | null
+          metadata: Json | null
+          previous_hash: string | null
+        }
+        Insert: {
+          anchor_chain?: string | null
+          anchor_status?: string
+          anchor_tx_hash?: string | null
+          block_number?: number
+          created_at?: string | null
+          data_hash: string
+          election_id: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          merkle_root?: string | null
+          metadata?: Json | null
+          previous_hash?: string | null
+        }
+        Update: {
+          anchor_chain?: string | null
+          anchor_status?: string
+          anchor_tx_hash?: string | null
+          block_number?: number
+          created_at?: string | null
+          data_hash?: string
+          election_id?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          merkle_root?: string | null
+          metadata?: Json | null
+          previous_hash?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "election_blockchain_anchors_election_id_fkey"
+            columns: ["election_id"]
+            isOneToOne: false
+            referencedRelation: "elections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      election_escalation_events: {
+        Row: {
+          acknowledged_at: string | null
+          assigned_to: string | null
+          context_data: Json | null
+          created_at: string | null
+          election_id: string
+          escalation_level: number
+          id: string
+          incident_id: string | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          rule_id: string | null
+          status: string
+          triggered_by: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          assigned_to?: string | null
+          context_data?: Json | null
+          created_at?: string | null
+          election_id: string
+          escalation_level?: number
+          id?: string
+          incident_id?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          rule_id?: string | null
+          status?: string
+          triggered_by?: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          assigned_to?: string | null
+          context_data?: Json | null
+          created_at?: string | null
+          election_id?: string
+          escalation_level?: number
+          id?: string
+          incident_id?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          rule_id?: string | null
+          status?: string
+          triggered_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "election_escalation_events_election_id_fkey"
+            columns: ["election_id"]
+            isOneToOne: false
+            referencedRelation: "elections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "election_escalation_events_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "election_escalation_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      election_escalation_rules: {
+        Row: {
+          auto_escalate_minutes: number | null
+          created_at: string | null
+          election_id: string
+          escalation_level: number
+          id: string
+          is_active: boolean | null
+          notify_channels: string[] | null
+          notify_roles: string[] | null
+          response_deadline_minutes: number | null
+          rule_name: string
+          trigger_conditions: Json
+          trigger_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          auto_escalate_minutes?: number | null
+          created_at?: string | null
+          election_id: string
+          escalation_level?: number
+          id?: string
+          is_active?: boolean | null
+          notify_channels?: string[] | null
+          notify_roles?: string[] | null
+          response_deadline_minutes?: number | null
+          rule_name: string
+          trigger_conditions?: Json
+          trigger_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          auto_escalate_minutes?: number | null
+          created_at?: string | null
+          election_id?: string
+          escalation_level?: number
+          id?: string
+          is_active?: boolean | null
+          notify_channels?: string[] | null
+          notify_roles?: string[] | null
+          response_deadline_minutes?: number | null
+          rule_name?: string
+          trigger_conditions?: Json
+          trigger_type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "election_escalation_rules_election_id_fkey"
+            columns: ["election_id"]
+            isOneToOne: false
+            referencedRelation: "elections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       election_incident_categories: {
         Row: {
           created_at: string | null
@@ -2526,6 +2701,59 @@ export type Database = {
             columns: ["polling_station_id"]
             isOneToOne: false
             referencedRelation: "polling_stations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      election_media_tokens: {
+        Row: {
+          contact_email: string | null
+          created_at: string | null
+          election_id: string
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+          last_used_at: string | null
+          organization_name: string
+          permissions: string[] | null
+          rate_limit_per_minute: number | null
+          token_hash: string
+          token_prefix: string
+        }
+        Insert: {
+          contact_email?: string | null
+          created_at?: string | null
+          election_id: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_used_at?: string | null
+          organization_name: string
+          permissions?: string[] | null
+          rate_limit_per_minute?: number | null
+          token_hash: string
+          token_prefix: string
+        }
+        Update: {
+          contact_email?: string | null
+          created_at?: string | null
+          election_id?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_used_at?: string | null
+          organization_name?: string
+          permissions?: string[] | null
+          rate_limit_per_minute?: number | null
+          token_hash?: string
+          token_prefix?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "election_media_tokens_election_id_fkey"
+            columns: ["election_id"]
+            isOneToOne: false
+            referencedRelation: "elections"
             referencedColumns: ["id"]
           },
         ]
@@ -4122,6 +4350,53 @@ export type Database = {
           },
         ]
       }
+      observer_biometric_credentials: {
+        Row: {
+          credential_id: string
+          credential_type: string
+          device_name: string | null
+          id: string
+          is_active: boolean | null
+          last_used_at: string | null
+          observer_id: string
+          public_key: string
+          registered_at: string | null
+          sign_count: number | null
+        }
+        Insert: {
+          credential_id: string
+          credential_type?: string
+          device_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_used_at?: string | null
+          observer_id: string
+          public_key: string
+          registered_at?: string | null
+          sign_count?: number | null
+        }
+        Update: {
+          credential_id?: string
+          credential_type?: string
+          device_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_used_at?: string | null
+          observer_id?: string
+          public_key?: string
+          registered_at?: string | null
+          sign_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "observer_biometric_credentials_observer_id_fkey"
+            columns: ["observer_id"]
+            isOneToOne: false
+            referencedRelation: "election_observers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       observer_check_ins: {
         Row: {
           accuracy_meters: number | null
@@ -4177,6 +4452,80 @@ export type Database = {
           {
             foreignKeyName: "observer_check_ins_polling_station_id_fkey"
             columns: ["polling_station_id"]
+            isOneToOne: false
+            referencedRelation: "polling_stations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      observer_deployment_logs: {
+        Row: {
+          arrived_at: string | null
+          created_at: string | null
+          departed_at: string | null
+          deployment_type: string
+          election_id: string
+          from_station_id: string | null
+          id: string
+          observer_id: string
+          ordered_by: string | null
+          reason: string | null
+          status: string
+          to_station_id: string | null
+        }
+        Insert: {
+          arrived_at?: string | null
+          created_at?: string | null
+          departed_at?: string | null
+          deployment_type: string
+          election_id: string
+          from_station_id?: string | null
+          id?: string
+          observer_id: string
+          ordered_by?: string | null
+          reason?: string | null
+          status?: string
+          to_station_id?: string | null
+        }
+        Update: {
+          arrived_at?: string | null
+          created_at?: string | null
+          departed_at?: string | null
+          deployment_type?: string
+          election_id?: string
+          from_station_id?: string | null
+          id?: string
+          observer_id?: string
+          ordered_by?: string | null
+          reason?: string | null
+          status?: string
+          to_station_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "observer_deployment_logs_election_id_fkey"
+            columns: ["election_id"]
+            isOneToOne: false
+            referencedRelation: "elections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "observer_deployment_logs_from_station_id_fkey"
+            columns: ["from_station_id"]
+            isOneToOne: false
+            referencedRelation: "polling_stations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "observer_deployment_logs_observer_id_fkey"
+            columns: ["observer_id"]
+            isOneToOne: false
+            referencedRelation: "election_observers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "observer_deployment_logs_to_station_id_fkey"
+            columns: ["to_station_id"]
             isOneToOne: false
             referencedRelation: "polling_stations"
             referencedColumns: ["id"]
@@ -4257,6 +4606,94 @@ export type Database = {
           valid_until?: string | null
         }
         Relationships: []
+      }
+      ocr_tally_verifications: {
+        Row: {
+          ai_confidence: number | null
+          created_at: string | null
+          discrepancies: Json | null
+          election_id: string
+          extracted_data: Json | null
+          id: string
+          image_url: string
+          manual_data: Json | null
+          match_score: number | null
+          notes: string | null
+          ocr_status: string
+          polling_station_id: string | null
+          processing_time_ms: number | null
+          result_id: string | null
+          updated_at: string | null
+          uploaded_by: string
+          verification_status: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          ai_confidence?: number | null
+          created_at?: string | null
+          discrepancies?: Json | null
+          election_id: string
+          extracted_data?: Json | null
+          id?: string
+          image_url: string
+          manual_data?: Json | null
+          match_score?: number | null
+          notes?: string | null
+          ocr_status?: string
+          polling_station_id?: string | null
+          processing_time_ms?: number | null
+          result_id?: string | null
+          updated_at?: string | null
+          uploaded_by: string
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          ai_confidence?: number | null
+          created_at?: string | null
+          discrepancies?: Json | null
+          election_id?: string
+          extracted_data?: Json | null
+          id?: string
+          image_url?: string
+          manual_data?: Json | null
+          match_score?: number | null
+          notes?: string | null
+          ocr_status?: string
+          polling_station_id?: string | null
+          processing_time_ms?: number | null
+          result_id?: string | null
+          updated_at?: string | null
+          uploaded_by?: string
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ocr_tally_verifications_election_id_fkey"
+            columns: ["election_id"]
+            isOneToOne: false
+            referencedRelation: "elections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ocr_tally_verifications_polling_station_id_fkey"
+            columns: ["polling_station_id"]
+            isOneToOne: false
+            referencedRelation: "polling_stations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ocr_tally_verifications_result_id_fkey"
+            columns: ["result_id"]
+            isOneToOne: false
+            referencedRelation: "election_results"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       offline_report_queue: {
         Row: {

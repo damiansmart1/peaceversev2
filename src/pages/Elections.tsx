@@ -29,6 +29,11 @@ import {
   RefreshCw,
   Activity,
   Zap,
+  Radio,
+  Link2,
+  Fingerprint,
+  Smartphone,
+  Camera,
 } from 'lucide-react';
 import { useElections, useAllElectionIncidents, useElectionStats, type Election, type ElectionStatus } from '@/hooks/useElections';
 import { useElectionDemo } from '@/hooks/useElectionDemo';
@@ -41,6 +46,12 @@ import ElectionVerificationQueue from '@/components/elections/ElectionVerificati
 import ElectionAdvancedExport from '@/components/elections/ElectionAdvancedExport';
 import ElectionDetailView from '@/components/elections/ElectionDetailView';
 import { useUserRoles } from '@/hooks/useRoleCheck';
+
+// Advanced Election Components
+import USSDElectionReporting from '@/components/elections/USSDElectionReporting';
+import BlockchainAuditTrail from '@/components/elections/BlockchainAuditTrail';
+import BiometricObserverAuth from '@/components/elections/BiometricObserverAuth';
+import RealTimeResultsStream from '@/components/elections/RealTimeResultsStream';
 
 const STATUS_COLORS: Record<ElectionStatus, string> = {
   draft: 'bg-muted text-muted-foreground',
@@ -266,32 +277,50 @@ export default function Elections() {
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full max-w-2xl grid-cols-3 md:grid-cols-5 mb-6">
-            <TabsTrigger value="overview" className="gap-1">
-              <Vote className="h-4 w-4" />
-              <span className="hidden sm:inline">Elections</span>
-            </TabsTrigger>
-            <TabsTrigger value="incidents" className="gap-1">
-              <AlertTriangle className="h-4 w-4" />
-              <span className="hidden sm:inline">Incidents</span>
-            </TabsTrigger>
-            <TabsTrigger value="report" className="gap-1">
-              <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline">Report</span>
-            </TabsTrigger>
-            {hasElevatedAccess && (
-              <>
-                <TabsTrigger value="verification" className="gap-1">
-                  <Shield className="h-4 w-4" />
-                  <span className="hidden sm:inline">Verify</span>
-                </TabsTrigger>
-                <TabsTrigger value="analytics" className="gap-1">
-                  <BarChart3 className="h-4 w-4" />
-                  <span className="hidden sm:inline">Analytics</span>
-                </TabsTrigger>
-              </>
-            )}
-          </TabsList>
+          <div className="overflow-x-auto mb-6">
+            <TabsList className="inline-flex min-w-max">
+              <TabsTrigger value="overview" className="gap-1">
+                <Vote className="h-4 w-4" />
+                <span className="hidden sm:inline">Elections</span>
+              </TabsTrigger>
+              <TabsTrigger value="incidents" className="gap-1">
+                <AlertTriangle className="h-4 w-4" />
+                <span className="hidden sm:inline">Incidents</span>
+              </TabsTrigger>
+              <TabsTrigger value="report" className="gap-1">
+                <Plus className="h-4 w-4" />
+                <span className="hidden sm:inline">Report</span>
+              </TabsTrigger>
+              {hasElevatedAccess && (
+                <>
+                  <TabsTrigger value="verification" className="gap-1">
+                    <Shield className="h-4 w-4" />
+                    <span className="hidden sm:inline">Verify</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="analytics" className="gap-1">
+                    <BarChart3 className="h-4 w-4" />
+                    <span className="hidden sm:inline">Analytics</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="live-results" className="gap-1">
+                    <Radio className="h-4 w-4" />
+                    <span className="hidden sm:inline">Live</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="ussd-sms" className="gap-1">
+                    <Smartphone className="h-4 w-4" />
+                    <span className="hidden sm:inline">USSD/SMS</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="blockchain" className="gap-1">
+                    <Link2 className="h-4 w-4" />
+                    <span className="hidden sm:inline">Audit</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="biometric" className="gap-1">
+                    <Fingerprint className="h-4 w-4" />
+                    <span className="hidden sm:inline">Biometric</span>
+                  </TabsTrigger>
+                </>
+              )}
+            </TabsList>
+          </div>
 
           <TabsContent value="overview" className="space-y-6">
             {/* Filters */}
@@ -565,6 +594,22 @@ export default function Elections() {
                     <p className="text-muted-foreground">Create or seed elections to view analytics</p>
                   </Card>
                 )}
+              </TabsContent>
+
+              <TabsContent value="live-results">
+                <RealTimeResultsStream />
+              </TabsContent>
+
+              <TabsContent value="ussd-sms">
+                <USSDElectionReporting />
+              </TabsContent>
+
+              <TabsContent value="blockchain">
+                <BlockchainAuditTrail />
+              </TabsContent>
+
+              <TabsContent value="biometric">
+                <BiometricObserverAuth />
               </TabsContent>
             </>
           )}
