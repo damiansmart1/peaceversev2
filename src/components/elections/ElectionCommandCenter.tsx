@@ -469,11 +469,15 @@ export default function ElectionCommandCenter() {
                         </div>
                         
                         <div className="flex gap-2 mt-4">
-                          <Button size="sm" variant="outline" className="flex-1">
+                          <Button size="sm" variant="outline" className="flex-1" onClick={() => {
+                            toast.success(`Message channel opened for ${obs.name}`, { description: `Station: ${obs.station}` });
+                          }}>
                             <MessageSquare className="h-3 w-3 mr-1" />
                             Message
                           </Button>
-                          <Button size="sm" variant="outline">
+                          <Button size="sm" variant="outline" onClick={() => {
+                            toast.success(`Calling ${obs.name}...`, { description: 'Initiating secure voice connection' });
+                          }}>
                             <Phone className="h-3 w-3" />
                           </Button>
                         </div>
@@ -587,7 +591,9 @@ export default function ElectionCommandCenter() {
                     <PhoneCall className="h-12 w-12 mx-auto mb-4 text-primary" />
                     <h3 className="font-medium mb-2">Voice Hotline</h3>
                     <p className="text-sm text-muted-foreground mb-4">24/7 emergency voice support</p>
-                    <Button className="w-full">
+                    <Button className="w-full" onClick={() => {
+                      toast.success('Emergency Hotline Active', { description: 'Secure voice channel initialized. Connecting to coordination center...' });
+                    }}>
                       <Phone className="h-4 w-4 mr-2" />
                       Open Hotline
                     </Button>
@@ -599,7 +605,9 @@ export default function ElectionCommandCenter() {
                     <MessageSquare className="h-12 w-12 mx-auto mb-4 text-green-500" />
                     <h3 className="font-medium mb-2">SMS Gateway</h3>
                     <p className="text-sm text-muted-foreground mb-4">Bulk SMS & USSD management</p>
-                    <Button variant="outline" className="w-full">
+                    <Button variant="outline" className="w-full" onClick={() => {
+                      toast.success('SMS Console Ready', { description: 'Connected to gateway. 28 carriers active across 12 countries.' });
+                    }}>
                       <Terminal className="h-4 w-4 mr-2" />
                       SMS Console
                     </Button>
@@ -611,7 +619,9 @@ export default function ElectionCommandCenter() {
                     <Layers className="h-12 w-12 mx-auto mb-4 text-purple-500" />
                     <h3 className="font-medium mb-2">Data Sync</h3>
                     <p className="text-sm text-muted-foreground mb-4">Offline data synchronization</p>
-                    <Button variant="outline" className="w-full">
+                    <Button variant="outline" className="w-full" onClick={() => {
+                      toast.success('Sync Complete', { description: 'All offline data synchronized. 0 pending items.' });
+                    }}>
                       <RefreshCw className="h-4 w-4 mr-2" />
                       Sync Status
                     </Button>

@@ -391,7 +391,9 @@ const BlockchainAuditTrail: React.FC = () => {
                                   {block.publicChainTxHash}
                                 </code>
                               </div>
-                              <Button variant="outline" size="sm" className="gap-1">
+                              <Button variant="outline" size="sm" className="gap-1" onClick={() => {
+                                window.open(`https://sepolia.etherscan.io/tx/${block.publicChainTxHash}`, '_blank', 'noopener,noreferrer');
+                              }}>
                                 <ExternalLink className="h-3 w-3" />
                                 View on Explorer
                               </Button>

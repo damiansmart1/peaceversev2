@@ -111,7 +111,30 @@ export default function ElectionIncidentsManager() {
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Refresh
               </Button>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => {
+                if (!filteredIncidents || filteredIncidents.length === 0) return;
+                const csvRows = [
+                  ['Code', 'Election', 'Title', 'Category', 'Severity', 'Location', 'Status', 'Verification', 'Date'].join(','),
+                  ...filteredIncidents.map((i: any) => [
+                    i.incident_code,
+                    (i.elections?.name || 'Unknown').replace(/,/g, ' '),
+                    i.title.replace(/,/g, ' '),
+                    i.category,
+                    i.severity,
+                    (i.region || i.elections?.country_name || '').replace(/,/g, ' '),
+                    i.status,
+                    i.verification_status,
+                    format(new Date(i.created_at), 'yyyy-MM-dd HH:mm'),
+                  ].join(','))
+                ];
+                const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `election-incidents-${format(new Date(), 'yyyy-MM-dd')}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+              }}>
                 <Download className="h-4 w-4 mr-2" />
                 Export
               </Button>
