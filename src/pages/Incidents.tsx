@@ -7,6 +7,7 @@ import InteractiveHeatmap from '@/components/InteractiveHeatmap';
 import { ReportSubmissionForm } from '@/components/ReportSubmissionForm';
 import { ReportTracker } from '@/components/ReportTracker';
 import { IncidentTimeline } from '@/components/IncidentTimeline';
+import NewsIntelligenceDashboard from '@/components/NewsIntelligenceDashboard';
 import { useIncidentNotifications } from '@/hooks/useIncidentNotifications';
 import SectionImageBanner from '@/components/SectionImageBanner';
 import Navigation from '@/components/Navigation';
@@ -17,7 +18,7 @@ import incidentReporting from "@/assets/incident-reporting.jpg";
 export default function Incidents() {
   const { t } = useTranslationContext();
   const { locationPermission } = useIncidentNotifications(50);
-  const [activeTab, setActiveTab] = useState('tracking');
+  const [activeTab, setActiveTab] = useState('intelligence');
 
   const handleSubmitReport = () => {
     setActiveTab('report');
@@ -59,7 +60,11 @@ export default function Incidents() {
         <IncidentAnalyticsDashboard />
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6 md:mt-8">
-          <TabsList className="grid w-full max-w-3xl grid-cols-4 h-auto">
+          <TabsList className="grid w-full max-w-4xl grid-cols-5 h-auto">
+            <TabsTrigger value="intelligence" className="text-xs sm:text-sm py-2 px-2">
+              <span className="hidden sm:inline">AI Intelligence</span>
+              <span className="sm:hidden">Intel</span>
+            </TabsTrigger>
             <TabsTrigger value="tracking" className="text-xs sm:text-sm py-2 px-2">
               <span className="hidden sm:inline">{t('incidents.tabs.trackingMap')}</span>
               <span className="sm:hidden">{t('incidents.tabs.map')}</span>
@@ -74,6 +79,10 @@ export default function Incidents() {
             </TabsTrigger>
             <TabsTrigger value="timeline" className="text-xs sm:text-sm py-2 px-2">{t('incidents.tabs.timeline')}</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="intelligence" className="mt-6">
+            <NewsIntelligenceDashboard />
+          </TabsContent>
 
           <TabsContent value="tracking" className="mt-6">
             <Card className="p-6">

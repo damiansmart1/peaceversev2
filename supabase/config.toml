@@ -65,3 +65,6 @@ verify_jwt = false
 
 [functions.seed-nuru-demo]
 verify_jwt = false
+
+[functions.news-intelligence-scanner]
+verify_jwt = false

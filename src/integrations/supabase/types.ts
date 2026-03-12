@@ -4146,6 +4146,305 @@ export type Database = {
           },
         ]
       }
+      news_intelligence_articles: {
+        Row: {
+          actors: string[] | null
+          categories: string[] | null
+          country_codes: string[] | null
+          created_at: string | null
+          credibility_tier: string | null
+          duplicate_cluster_id: string | null
+          external_id: string | null
+          full_content: string | null
+          gdelt_event_id: string | null
+          id: string
+          image_url: string | null
+          language: string | null
+          published_at: string | null
+          regions: string[] | null
+          scan_batch_id: string
+          source_domain: string | null
+          source_name: string
+          source_url: string
+          summary: string | null
+          title: string
+          tone_score: number | null
+        }
+        Insert: {
+          actors?: string[] | null
+          categories?: string[] | null
+          country_codes?: string[] | null
+          created_at?: string | null
+          credibility_tier?: string | null
+          duplicate_cluster_id?: string | null
+          external_id?: string | null
+          full_content?: string | null
+          gdelt_event_id?: string | null
+          id?: string
+          image_url?: string | null
+          language?: string | null
+          published_at?: string | null
+          regions?: string[] | null
+          scan_batch_id: string
+          source_domain?: string | null
+          source_name: string
+          source_url: string
+          summary?: string | null
+          title: string
+          tone_score?: number | null
+        }
+        Update: {
+          actors?: string[] | null
+          categories?: string[] | null
+          country_codes?: string[] | null
+          created_at?: string | null
+          credibility_tier?: string | null
+          duplicate_cluster_id?: string | null
+          external_id?: string | null
+          full_content?: string | null
+          gdelt_event_id?: string | null
+          id?: string
+          image_url?: string | null
+          language?: string | null
+          published_at?: string | null
+          regions?: string[] | null
+          scan_batch_id?: string
+          source_domain?: string | null
+          source_name?: string
+          source_url?: string
+          summary?: string | null
+          title?: string
+          tone_score?: number | null
+        }
+        Relationships: []
+      }
+      news_intelligence_reports: {
+        Row: {
+          actors_involved: Json | null
+          affected_countries: string[] | null
+          affected_regions: string[] | null
+          ai_confidence: number | null
+          ai_model_used: string | null
+          category: string
+          created_at: string | null
+          credibility_methodology: Json | null
+          credibility_score: number | null
+          cross_reference_summary: string | null
+          detailed_analysis: string | null
+          estimated_people_affected: number | null
+          id: string
+          key_facts: Json | null
+          location_latitude: number | null
+          location_longitude: number | null
+          location_name: string | null
+          published_report_id: string | null
+          recommended_actions: Json | null
+          review_notes: string | null
+          review_status: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          scan_batch_id: string | null
+          severity_level: string | null
+          source_articles: string[] | null
+          source_count: number | null
+          source_names: string[] | null
+          source_urls: string[] | null
+          summary: string
+          tags: string[] | null
+          timeline_events: Json | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          actors_involved?: Json | null
+          affected_countries?: string[] | null
+          affected_regions?: string[] | null
+          ai_confidence?: number | null
+          ai_model_used?: string | null
+          category: string
+          created_at?: string | null
+          credibility_methodology?: Json | null
+          credibility_score?: number | null
+          cross_reference_summary?: string | null
+          detailed_analysis?: string | null
+          estimated_people_affected?: number | null
+          id?: string
+          key_facts?: Json | null
+          location_latitude?: number | null
+          location_longitude?: number | null
+          location_name?: string | null
+          published_report_id?: string | null
+          recommended_actions?: Json | null
+          review_notes?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          scan_batch_id?: string | null
+          severity_level?: string | null
+          source_articles?: string[] | null
+          source_count?: number | null
+          source_names?: string[] | null
+          source_urls?: string[] | null
+          summary: string
+          tags?: string[] | null
+          timeline_events?: Json | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          actors_involved?: Json | null
+          affected_countries?: string[] | null
+          affected_regions?: string[] | null
+          ai_confidence?: number | null
+          ai_model_used?: string | null
+          category?: string
+          created_at?: string | null
+          credibility_methodology?: Json | null
+          credibility_score?: number | null
+          cross_reference_summary?: string | null
+          detailed_analysis?: string | null
+          estimated_people_affected?: number | null
+          id?: string
+          key_facts?: Json | null
+          location_latitude?: number | null
+          location_longitude?: number | null
+          location_name?: string | null
+          published_report_id?: string | null
+          recommended_actions?: Json | null
+          review_notes?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          scan_batch_id?: string | null
+          severity_level?: string | null
+          source_articles?: string[] | null
+          source_count?: number | null
+          source_names?: string[] | null
+          source_urls?: string[] | null
+          summary?: string
+          tags?: string[] | null
+          timeline_events?: Json | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "news_intelligence_reports_scan_batch_id_fkey"
+            columns: ["scan_batch_id"]
+            isOneToOne: false
+            referencedRelation: "news_scan_batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      news_scan_batches: {
+        Row: {
+          articles_found: number | null
+          articles_processed: number | null
+          clusters_identified: number | null
+          completed_at: string | null
+          error_message: string | null
+          geographic_focus: string[] | null
+          id: string
+          metadata: Json | null
+          reports_generated: number | null
+          scan_type: string
+          search_queries: string[] | null
+          started_at: string | null
+          status: string
+          trigger_user_id: string | null
+        }
+        Insert: {
+          articles_found?: number | null
+          articles_processed?: number | null
+          clusters_identified?: number | null
+          completed_at?: string | null
+          error_message?: string | null
+          geographic_focus?: string[] | null
+          id?: string
+          metadata?: Json | null
+          reports_generated?: number | null
+          scan_type?: string
+          search_queries?: string[] | null
+          started_at?: string | null
+          status?: string
+          trigger_user_id?: string | null
+        }
+        Update: {
+          articles_found?: number | null
+          articles_processed?: number | null
+          clusters_identified?: number | null
+          completed_at?: string | null
+          error_message?: string | null
+          geographic_focus?: string[] | null
+          id?: string
+          metadata?: Json | null
+          reports_generated?: number | null
+          scan_type?: string
+          search_queries?: string[] | null
+          started_at?: string | null
+          status?: string
+          trigger_user_id?: string | null
+        }
+        Relationships: []
+      }
+      news_source_registry: {
+        Row: {
+          accurate_reports: number | null
+          bias_rating: string | null
+          country: string | null
+          created_at: string | null
+          credibility_score: number | null
+          domain: string
+          fact_check_record: Json | null
+          false_reports: number | null
+          id: string
+          is_primary_source: boolean | null
+          last_scanned_at: string | null
+          name: string
+          notes: string | null
+          source_type: string | null
+          total_articles_scanned: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          accurate_reports?: number | null
+          bias_rating?: string | null
+          country?: string | null
+          created_at?: string | null
+          credibility_score?: number | null
+          domain: string
+          fact_check_record?: Json | null
+          false_reports?: number | null
+          id?: string
+          is_primary_source?: boolean | null
+          last_scanned_at?: string | null
+          name: string
+          notes?: string | null
+          source_type?: string | null
+          total_articles_scanned?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          accurate_reports?: number | null
+          bias_rating?: string | null
+          country?: string | null
+          created_at?: string | null
+          credibility_score?: number | null
+          domain?: string
+          fact_check_record?: Json | null
+          false_reports?: number | null
+          id?: string
+          is_primary_source?: boolean | null
+          last_scanned_at?: string | null
+          name?: string
+          notes?: string | null
+          source_type?: string | null
+          total_articles_scanned?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
