@@ -18,7 +18,7 @@ import incidentReporting from "@/assets/incident-reporting.jpg";
 export default function Incidents() {
   const { t } = useTranslationContext();
   const { locationPermission } = useIncidentNotifications(50);
-  const [activeTab, setActiveTab] = useState('tracking');
+  const [activeTab, setActiveTab] = useState('intelligence');
 
   const handleSubmitReport = () => {
     setActiveTab('report');
