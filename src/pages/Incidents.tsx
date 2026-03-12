@@ -7,6 +7,7 @@ import InteractiveHeatmap from '@/components/InteractiveHeatmap';
 import { ReportSubmissionForm } from '@/components/ReportSubmissionForm';
 import { ReportTracker } from '@/components/ReportTracker';
 import { IncidentTimeline } from '@/components/IncidentTimeline';
+import NewsIntelligenceDashboard from '@/components/NewsIntelligenceDashboard';
 import { useIncidentNotifications } from '@/hooks/useIncidentNotifications';
 import SectionImageBanner from '@/components/SectionImageBanner';
 import Navigation from '@/components/Navigation';
