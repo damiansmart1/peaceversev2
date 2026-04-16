@@ -99,7 +99,18 @@ async function fetchGdeltArticles(query: string, mode: string = 'artlist', maxRe
 
     const response = await fetch(`${GDELT_DOC_API}?${params.toString()}`);
     if (!response.ok) {
+      if (response.status === 429) {
+        console.warn('GDELT rate limited, waiting 3s...');
+        await new Promise(r => setTimeout(r, 3000));
+        // Retry once
+        const retry = await fetch(`${GDELT_DOC_API}?${params.toString()}`);
+        if (retry.ok) {
+          const data = await retry.json();
+          return data?.articles || [];
+        }
+      }
       console.error(`GDELT API error: ${response.status}`);
+      await response.text(); // consume body
       return [];
     }
 
@@ -276,25 +287,26 @@ serve(async (req) => {
     let totalArticlesFound = 0;
     let allArticles: GdeltArticle[] = [];
 
-    // Phase 1: Fetch articles from GDELT for each query
-    const queries = customQueries || SCAN_QUERIES;
-    const africaQueries = queries.map(q => `${q} (${AFRICA_PRIORITY_COUNTRIES.slice(0, 8).join(' OR ')})`);
-    const globalQueries = queries.slice(0, 5); // Fewer global queries
+    // Phase 1: Fetch articles from GDELT — simple queries, well-spaced to avoid 429s
+    const simpleQueries = [
+      { q: 'conflict Africa', max: 75 },
+      { q: 'crisis humanitarian Africa', max: 50 },
+      { q: 'election violence protest', max: 50 },
+    ];
 
-    console.log(`Scanning ${africaQueries.length} Africa-priority + ${globalQueries.length} global queries...`);
+    // Allow custom queries to override
+    const finalQueries = customQueries 
+      ? customQueries.map(q => ({ q, max: 50 }))
+      : simpleQueries;
 
-    // Fetch Africa-priority articles
-    for (const query of africaQueries) {
-      const articles = await fetchGdeltArticles(query, 'artlist', 30);
+    console.log(`Scanning ${finalQueries.length} queries (rate-limit safe)...`);
+
+    for (const { q, max } of finalQueries) {
+      const articles = await fetchGdeltArticles(q, 'artlist', max);
       allArticles.push(...articles);
       totalArticlesFound += articles.length;
-    }
-
-    // Fetch global articles
-    for (const query of globalQueries) {
-      const articles = await fetchGdeltArticles(query, 'artlist', 20);
-      allArticles.push(...articles);
-      totalArticlesFound += articles.length;
+      // 2s pause between GDELT calls
+      await new Promise(r => setTimeout(r, 2000));
     }
 
     console.log(`Found ${totalArticlesFound} total articles. Deduplicating...`);
