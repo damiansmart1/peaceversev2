@@ -4,7 +4,7 @@ const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
 
 // Global state for singleton pattern
 let loaderInstance: Loader | null = null;
-let loadPromise: Promise<typeof google> | null = null;
+let loadPromise: Promise<any> | null = null;
 let isLoaded = false;
 
 // Initialize loader immediately if key exists
@@ -20,7 +20,7 @@ const initLoader = () => {
 };
 
 // Preload Google Maps API - call this early in app lifecycle
-export const preloadGoogleMaps = (): Promise<typeof google | null> => {
+export const preloadGoogleMaps = (): Promise<any> => {
   // Already loaded successfully
   if (isLoaded && window.google?.maps) {
     return Promise.resolve(window.google);
@@ -59,7 +59,7 @@ export const isGoogleMapsReady = (): boolean => {
 };
 
 // Get the Google Maps instance synchronously if available
-export const getGoogleMaps = (): typeof google | null => {
+export const getGoogleMaps = (): any => {
   if (isLoaded && window.google?.maps) {
     return window.google;
   }

@@ -34,9 +34,9 @@ export const ActiveHotspotsMap = memo(() => {
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
 
   const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<google.maps.Map | null>(null);
-  const markersRef = useRef<google.maps.Marker[]>([]);
-  const circlesRef = useRef<google.maps.Circle[]>([]);
+  const mapInstanceRef = useRef<any>(null);
+  const markersRef = useRef<any[]>([]);
+  const circlesRef = useRef<any[]>([]);
 
   useEffect(() => {
     const fetchHotspots = async () => {
