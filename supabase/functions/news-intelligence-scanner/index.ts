@@ -287,25 +287,29 @@ serve(async (req) => {
     let totalArticlesFound = 0;
     let allArticles: GdeltArticle[] = [];
 
-    // Phase 1: Fetch articles from GDELT for each query
+    // Phase 1: Fetch articles from GDELT — use fewer, combined queries to avoid rate limits
     const queries = customQueries || SCAN_QUERIES;
-    const africaQueries = queries.map(q => `${q} (${AFRICA_PRIORITY_COUNTRIES.slice(0, 8).join(' OR ')})`);
-    const globalQueries = queries.slice(0, 5); // Fewer global queries
+    // Combine queries into 3 broad ones for Africa + 2 global to minimize API calls
+    const africaBatch1 = queries.slice(0, 4).join(' OR ');
+    const africaBatch2 = queries.slice(4, 7).join(' OR ');
+    const africaBatch3 = queries.slice(7).join(' OR ');
+    const africaCountryFilter = AFRICA_PRIORITY_COUNTRIES.slice(0, 6).join(' OR ');
 
-    console.log(`Scanning ${africaQueries.length} Africa-priority + ${globalQueries.length} global queries...`);
+    const combinedQueries = [
+      { q: `(${africaBatch1}) (${africaCountryFilter})`, max: 50 },
+      { q: `(${africaBatch2}) (${africaCountryFilter})`, max: 40 },
+      { q: `(${africaBatch3}) (${africaCountryFilter})`, max: 30 },
+      { q: queries.slice(0, 3).join(' OR '), max: 30 },
+    ];
 
-    // Fetch Africa-priority articles
-    for (const query of africaQueries) {
-      const articles = await fetchGdeltArticles(query, 'artlist', 30);
+    console.log(`Scanning ${combinedQueries.length} combined queries (rate-limit safe)...`);
+
+    for (const { q, max } of combinedQueries) {
+      const articles = await fetchGdeltArticles(q, 'artlist', max);
       allArticles.push(...articles);
       totalArticlesFound += articles.length;
-    }
-
-    // Fetch global articles
-    for (const query of globalQueries) {
-      const articles = await fetchGdeltArticles(query, 'artlist', 20);
-      allArticles.push(...articles);
-      totalArticlesFound += articles.length;
+      // Pause between GDELT calls to respect rate limits
+      await new Promise(r => setTimeout(r, 1500));
     }
 
     console.log(`Found ${totalArticlesFound} total articles. Deduplicating...`);
