@@ -99,7 +99,18 @@ async function fetchGdeltArticles(query: string, mode: string = 'artlist', maxRe
 
     const response = await fetch(`${GDELT_DOC_API}?${params.toString()}`);
     if (!response.ok) {
+      if (response.status === 429) {
+        console.warn('GDELT rate limited, waiting 3s...');
+        await new Promise(r => setTimeout(r, 3000));
+        // Retry once
+        const retry = await fetch(`${GDELT_DOC_API}?${params.toString()}`);
+        if (retry.ok) {
+          const data = await retry.json();
+          return data?.articles || [];
+        }
+      }
       console.error(`GDELT API error: ${response.status}`);
+      await response.text(); // consume body
       return [];
     }
 
