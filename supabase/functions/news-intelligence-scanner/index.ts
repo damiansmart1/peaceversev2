@@ -287,29 +287,26 @@ serve(async (req) => {
     let totalArticlesFound = 0;
     let allArticles: GdeltArticle[] = [];
 
-    // Phase 1: Fetch articles from GDELT — use fewer, combined queries to avoid rate limits
-    const queries = customQueries || SCAN_QUERIES;
-    // Combine queries into 3 broad ones for Africa + 2 global to minimize API calls
-    const africaBatch1 = queries.slice(0, 4).join(' OR ');
-    const africaBatch2 = queries.slice(4, 7).join(' OR ');
-    const africaBatch3 = queries.slice(7).join(' OR ');
-    const africaCountryFilter = AFRICA_PRIORITY_COUNTRIES.slice(0, 6).join(' OR ');
-
-    const combinedQueries = [
-      { q: `(${africaBatch1}) (${africaCountryFilter})`, max: 50 },
-      { q: `(${africaBatch2}) (${africaCountryFilter})`, max: 40 },
-      { q: `(${africaBatch3}) (${africaCountryFilter})`, max: 30 },
-      { q: queries.slice(0, 3).join(' OR '), max: 30 },
+    // Phase 1: Fetch articles from GDELT — simple queries, well-spaced to avoid 429s
+    const simpleQueries = [
+      { q: 'conflict Africa', max: 75 },
+      { q: 'crisis humanitarian Africa', max: 50 },
+      { q: 'election violence protest', max: 50 },
     ];
 
-    console.log(`Scanning ${combinedQueries.length} combined queries (rate-limit safe)...`);
+    // Allow custom queries to override
+    const finalQueries = customQueries 
+      ? customQueries.map(q => ({ q, max: 50 }))
+      : simpleQueries;
 
-    for (const { q, max } of combinedQueries) {
+    console.log(`Scanning ${finalQueries.length} queries (rate-limit safe)...`);
+
+    for (const { q, max } of finalQueries) {
       const articles = await fetchGdeltArticles(q, 'artlist', max);
       allArticles.push(...articles);
       totalArticlesFound += articles.length;
-      // Pause between GDELT calls to respect rate limits
-      await new Promise(r => setTimeout(r, 1500));
+      // 2s pause between GDELT calls
+      await new Promise(r => setTimeout(r, 2000));
     }
 
     console.log(`Found ${totalArticlesFound} total articles. Deduplicating...`);
