@@ -25,10 +25,12 @@ const statusLabels: Record<string, string> = {
 const GovernmentResponsePanel = ({ proposalId, deadline, currentStatus = 'awaiting' }: Props) => {
   const { data: responses = [] } = useProposalResponses(proposalId);
   const submit = useSubmitResponse();
-  const { hasRole: isGov } = useRoleCheck('government');
-  const { hasRole: isAdmin } = useRoleCheck('admin');
-  const { hasRole: isPartner } = useRoleCheck('partner');
-  const canRespond = isGov || isAdmin || isPartner;
+  const { data: govCheck } = useRoleCheck('government');
+  const { data: adminCheck } = useRoleCheck('admin');
+  const { data: partnerCheck } = useRoleCheck('partner');
+  const isGov = govCheck?.hasRole;
+  const isPartner = partnerCheck?.hasRole;
+  const canRespond = isGov || adminCheck?.hasRole || isPartner;
 
   const [status, setStatus] = useState('received');
   const [text, setText] = useState('');
