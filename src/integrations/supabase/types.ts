@@ -602,6 +602,44 @@ export type Database = {
           },
         ]
       }
+      assembly_participants: {
+        Row: {
+          assembly_id: string
+          contribution_summary: string | null
+          demographic_data: Json | null
+          id: string
+          registered_at: string | null
+          registration_status: string | null
+          user_id: string
+        }
+        Insert: {
+          assembly_id: string
+          contribution_summary?: string | null
+          demographic_data?: Json | null
+          id?: string
+          registered_at?: string | null
+          registration_status?: string | null
+          user_id: string
+        }
+        Update: {
+          assembly_id?: string
+          contribution_summary?: string | null
+          demographic_data?: Json | null
+          id?: string
+          registered_at?: string | null
+          registration_status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assembly_participants_assembly_id_fkey"
+            columns: ["assembly_id"]
+            isOneToOne: false
+            referencedRelation: "citizen_assemblies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       broadcast_acknowledgments: {
         Row: {
           acknowledged_at: string | null
@@ -962,6 +1000,86 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      citizen_assemblies: {
+        Row: {
+          co_host_partner_id: string | null
+          created_at: string | null
+          created_by: string
+          description: string
+          host_organization: string | null
+          id: string
+          location: string | null
+          max_participants: number | null
+          meeting_format: string | null
+          meeting_url: string | null
+          outcomes_summary: string | null
+          participant_selection_method: string | null
+          proposal_id: string | null
+          recording_url: string | null
+          required_demographics: Json | null
+          scheduled_end: string
+          scheduled_start: string
+          status: string | null
+          title: string
+          topic: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          co_host_partner_id?: string | null
+          created_at?: string | null
+          created_by: string
+          description: string
+          host_organization?: string | null
+          id?: string
+          location?: string | null
+          max_participants?: number | null
+          meeting_format?: string | null
+          meeting_url?: string | null
+          outcomes_summary?: string | null
+          participant_selection_method?: string | null
+          proposal_id?: string | null
+          recording_url?: string | null
+          required_demographics?: Json | null
+          scheduled_end: string
+          scheduled_start: string
+          status?: string | null
+          title: string
+          topic?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          co_host_partner_id?: string | null
+          created_at?: string | null
+          created_by?: string
+          description?: string
+          host_organization?: string | null
+          id?: string
+          location?: string | null
+          max_participants?: number | null
+          meeting_format?: string | null
+          meeting_url?: string | null
+          outcomes_summary?: string | null
+          participant_selection_method?: string | null
+          proposal_id?: string | null
+          recording_url?: string | null
+          required_demographics?: Json | null
+          scheduled_end?: string
+          scheduled_start?: string
+          status?: string | null
+          title?: string
+          topic?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "citizen_assemblies_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       citizen_reports: {
         Row: {
@@ -5922,6 +6040,243 @@ export type Database = {
         }
         Relationships: []
       }
+      proposal_advanced_votes: {
+        Row: {
+          approval_selections: string[] | null
+          created_at: string | null
+          id: string
+          ip_hash: string | null
+          is_verified: boolean | null
+          previous_hash: string | null
+          proposal_id: string
+          quadratic_allocation: Json | null
+          ranked_choices: Json | null
+          region: string | null
+          user_id: string
+          verification_method: string | null
+          vote_hash: string
+          voting_method: string
+          weight: number | null
+        }
+        Insert: {
+          approval_selections?: string[] | null
+          created_at?: string | null
+          id?: string
+          ip_hash?: string | null
+          is_verified?: boolean | null
+          previous_hash?: string | null
+          proposal_id: string
+          quadratic_allocation?: Json | null
+          ranked_choices?: Json | null
+          region?: string | null
+          user_id: string
+          verification_method?: string | null
+          vote_hash: string
+          voting_method: string
+          weight?: number | null
+        }
+        Update: {
+          approval_selections?: string[] | null
+          created_at?: string | null
+          id?: string
+          ip_hash?: string | null
+          is_verified?: boolean | null
+          previous_hash?: string | null
+          proposal_id?: string
+          quadratic_allocation?: Json | null
+          ranked_choices?: Json | null
+          region?: string | null
+          user_id?: string
+          verification_method?: string | null
+          vote_hash?: string
+          voting_method?: string
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_advanced_votes_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proposal_amendments: {
+        Row: {
+          created_at: string | null
+          diff_summary: string
+          id: string
+          oppose_count: number | null
+          proposal_id: string
+          proposed_by: string
+          proposed_description: string | null
+          proposed_title: string | null
+          rationale: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string | null
+          support_count: number | null
+          version_number: number
+        }
+        Insert: {
+          created_at?: string | null
+          diff_summary: string
+          id?: string
+          oppose_count?: number | null
+          proposal_id: string
+          proposed_by: string
+          proposed_description?: string | null
+          proposed_title?: string | null
+          rationale?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          support_count?: number | null
+          version_number: number
+        }
+        Update: {
+          created_at?: string | null
+          diff_summary?: string
+          id?: string
+          oppose_count?: number | null
+          proposal_id?: string
+          proposed_by?: string
+          proposed_description?: string | null
+          proposed_title?: string | null
+          rationale?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          support_count?: number | null
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_amendments_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proposal_arguments: {
+        Row: {
+          ai_summary: string | null
+          body: string
+          created_at: string | null
+          display_anonymous: boolean | null
+          downvotes: number | null
+          evidence_urls: string[] | null
+          id: string
+          is_pinned: boolean | null
+          parent_argument_id: string | null
+          proposal_id: string
+          stance: string
+          title: string
+          updated_at: string | null
+          upvotes: number | null
+          user_id: string
+        }
+        Insert: {
+          ai_summary?: string | null
+          body: string
+          created_at?: string | null
+          display_anonymous?: boolean | null
+          downvotes?: number | null
+          evidence_urls?: string[] | null
+          id?: string
+          is_pinned?: boolean | null
+          parent_argument_id?: string | null
+          proposal_id: string
+          stance: string
+          title: string
+          updated_at?: string | null
+          upvotes?: number | null
+          user_id: string
+        }
+        Update: {
+          ai_summary?: string | null
+          body?: string
+          created_at?: string | null
+          display_anonymous?: boolean | null
+          downvotes?: number | null
+          evidence_urls?: string[] | null
+          id?: string
+          is_pinned?: boolean | null
+          parent_argument_id?: string | null
+          proposal_id?: string
+          stance?: string
+          title?: string
+          updated_at?: string | null
+          upvotes?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_arguments_parent_argument_id_fkey"
+            columns: ["parent_argument_id"]
+            isOneToOne: false
+            referencedRelation: "proposal_arguments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proposal_arguments_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proposal_audit_log: {
+        Row: {
+          actor_id: string | null
+          actor_role: string | null
+          block_number: number
+          created_at: string | null
+          event_data: Json | null
+          event_hash: string
+          event_type: string
+          id: string
+          previous_hash: string | null
+          proposal_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          actor_role?: string | null
+          block_number?: number
+          created_at?: string | null
+          event_data?: Json | null
+          event_hash: string
+          event_type: string
+          id?: string
+          previous_hash?: string | null
+          proposal_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          actor_role?: string | null
+          block_number?: number
+          created_at?: string | null
+          event_data?: Json | null
+          event_hash?: string
+          event_type?: string
+          id?: string
+          previous_hash?: string | null
+          proposal_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_audit_log_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       proposal_comments: {
         Row: {
           body: string
@@ -5979,6 +6334,150 @@ export type Database = {
           },
         ]
       }
+      proposal_embed_views: {
+        Row: {
+          embed_token: string
+          id: string
+          proposal_id: string
+          referrer_domain: string | null
+          viewed_at: string | null
+          viewer_country: string | null
+        }
+        Insert: {
+          embed_token: string
+          id?: string
+          proposal_id: string
+          referrer_domain?: string | null
+          viewed_at?: string | null
+          viewer_country?: string | null
+        }
+        Update: {
+          embed_token?: string
+          id?: string
+          proposal_id?: string
+          referrer_domain?: string | null
+          viewed_at?: string | null
+          viewer_country?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_embed_views_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proposal_responses: {
+        Row: {
+          action_deadline: string | null
+          action_plan: string | null
+          created_at: string | null
+          evidence_urls: string[] | null
+          id: string
+          is_official: boolean | null
+          proposal_id: string
+          responder_id: string
+          responder_organization: string | null
+          responder_role: string
+          response_text: string
+          status: string
+        }
+        Insert: {
+          action_deadline?: string | null
+          action_plan?: string | null
+          created_at?: string | null
+          evidence_urls?: string[] | null
+          id?: string
+          is_official?: boolean | null
+          proposal_id: string
+          responder_id: string
+          responder_organization?: string | null
+          responder_role: string
+          response_text: string
+          status: string
+        }
+        Update: {
+          action_deadline?: string | null
+          action_plan?: string | null
+          created_at?: string | null
+          evidence_urls?: string[] | null
+          id?: string
+          is_official?: boolean | null
+          proposal_id?: string
+          responder_id?: string
+          responder_organization?: string | null
+          responder_role?: string
+          response_text?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_responses_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proposal_sponsorships: {
+        Row: {
+          amount_contributed: number | null
+          created_at: string | null
+          currency: string | null
+          disclosure_text: string
+          ends_at: string | null
+          id: string
+          is_active: boolean | null
+          partner_id: string
+          partner_logo_url: string | null
+          partner_name: string
+          proposal_id: string
+          sponsorship_type: string | null
+          starts_at: string | null
+        }
+        Insert: {
+          amount_contributed?: number | null
+          created_at?: string | null
+          currency?: string | null
+          disclosure_text: string
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          partner_id: string
+          partner_logo_url?: string | null
+          partner_name: string
+          proposal_id: string
+          sponsorship_type?: string | null
+          starts_at?: string | null
+        }
+        Update: {
+          amount_contributed?: number | null
+          created_at?: string | null
+          currency?: string | null
+          disclosure_text?: string
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          partner_id?: string
+          partner_logo_url?: string | null
+          partner_name?: string
+          proposal_id?: string
+          sponsorship_type?: string | null
+          starts_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_sponsorships_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       proposal_votes: {
         Row: {
           created_at: string
@@ -6014,14 +6513,78 @@ export type Database = {
           },
         ]
       }
+      proposal_webhooks: {
+        Row: {
+          created_at: string | null
+          endpoint_url: string
+          event_types: string[]
+          failure_count: number | null
+          id: string
+          is_active: boolean | null
+          last_triggered_at: string | null
+          partner_id: string
+          proposal_id: string | null
+          secret_token: string
+        }
+        Insert: {
+          created_at?: string | null
+          endpoint_url: string
+          event_types: string[]
+          failure_count?: number | null
+          id?: string
+          is_active?: boolean | null
+          last_triggered_at?: string | null
+          partner_id: string
+          proposal_id?: string | null
+          secret_token: string
+        }
+        Update: {
+          created_at?: string | null
+          endpoint_url?: string
+          event_types?: string[]
+          failure_count?: number | null
+          id?: string
+          is_active?: boolean | null
+          last_triggered_at?: string | null
+          partner_id?: string
+          proposal_id?: string | null
+          secret_token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_webhooks_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       proposals: {
         Row: {
+          action_taken_summary: string | null
           category: string
           created_at: string
           creator_id: string
           description: string
+          embed_token: string | null
+          embed_views: number | null
           ends_at: string | null
+          iap2_level: string | null
           id: string
+          integrity_hash: string | null
+          jurisdiction: string | null
+          official_responder_id: string | null
+          official_response: string | null
+          official_response_at: string | null
+          quadratic_credits: number | null
+          region_weight: Json | null
+          response_required_by: string | null
+          response_status: string | null
+          sdg_indicators: string[] | null
+          sponsor_disclosure: string | null
+          sponsor_logo_url: string | null
+          sponsor_partner_id: string | null
           stage: string | null
           status: string
           tags: string[] | null
@@ -6031,14 +6594,33 @@ export type Database = {
           votes_abstain: number
           votes_against: number
           votes_for: number
+          voting_method: string | null
+          voting_options: Json | null
         }
         Insert: {
+          action_taken_summary?: string | null
           category: string
           created_at?: string
           creator_id: string
           description: string
+          embed_token?: string | null
+          embed_views?: number | null
           ends_at?: string | null
+          iap2_level?: string | null
           id?: string
+          integrity_hash?: string | null
+          jurisdiction?: string | null
+          official_responder_id?: string | null
+          official_response?: string | null
+          official_response_at?: string | null
+          quadratic_credits?: number | null
+          region_weight?: Json | null
+          response_required_by?: string | null
+          response_status?: string | null
+          sdg_indicators?: string[] | null
+          sponsor_disclosure?: string | null
+          sponsor_logo_url?: string | null
+          sponsor_partner_id?: string | null
           stage?: string | null
           status?: string
           tags?: string[] | null
@@ -6048,14 +6630,33 @@ export type Database = {
           votes_abstain?: number
           votes_against?: number
           votes_for?: number
+          voting_method?: string | null
+          voting_options?: Json | null
         }
         Update: {
+          action_taken_summary?: string | null
           category?: string
           created_at?: string
           creator_id?: string
           description?: string
+          embed_token?: string | null
+          embed_views?: number | null
           ends_at?: string | null
+          iap2_level?: string | null
           id?: string
+          integrity_hash?: string | null
+          jurisdiction?: string | null
+          official_responder_id?: string | null
+          official_response?: string | null
+          official_response_at?: string | null
+          quadratic_credits?: number | null
+          region_weight?: Json | null
+          response_required_by?: string | null
+          response_status?: string | null
+          sdg_indicators?: string[] | null
+          sponsor_disclosure?: string | null
+          sponsor_logo_url?: string | null
+          sponsor_partner_id?: string | null
           stage?: string | null
           status?: string
           tags?: string[] | null
@@ -6065,6 +6666,8 @@ export type Database = {
           votes_abstain?: number
           votes_against?: number
           votes_for?: number
+          voting_method?: string | null
+          voting_options?: Json | null
         }
         Relationships: []
       }
@@ -6718,6 +7321,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      sdg16_indicators: {
+        Row: {
+          data_source: string | null
+          description: string | null
+          id: string
+          indicator_code: string
+          indicator_name: string
+          jurisdiction: string | null
+          last_updated: string | null
+          measurement_period: string | null
+          metric_value: number | null
+        }
+        Insert: {
+          data_source?: string | null
+          description?: string | null
+          id?: string
+          indicator_code: string
+          indicator_name: string
+          jurisdiction?: string | null
+          last_updated?: string | null
+          measurement_period?: string | null
+          metric_value?: number | null
+        }
+        Update: {
+          data_source?: string | null
+          description?: string | null
+          id?: string
+          indicator_code?: string
+          indicator_name?: string
+          jurisdiction?: string | null
+          last_updated?: string | null
+          measurement_period?: string | null
+          metric_value?: number | null
+        }
+        Relationships: []
       }
       sms_broadcasts: {
         Row: {

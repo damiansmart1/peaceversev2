@@ -6,9 +6,15 @@ import ProposalComments from '@/components/ProposalComments';
 import ProposalShareButtons from '@/components/ProposalShareButtons';
 import ProposalPolls from '@/components/ProposalPolls';
 import ProposalReportDownload from '@/components/ProposalReportDownload';
+import DeliberationHub from '@/components/proposals/DeliberationHub';
+import GovernmentResponsePanel from '@/components/proposals/GovernmentResponsePanel';
+import AdvancedVotingPanel from '@/components/proposals/AdvancedVotingPanel';
+import CitizenAssemblyPanel from '@/components/proposals/CitizenAssemblyPanel';
+import SponsorshipBanner from '@/components/proposals/SponsorshipBanner';
+import EmbedShareTools from '@/components/proposals/EmbedShareTools';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Users } from 'lucide-react';
+import { ArrowLeft, Users, Globe2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -78,11 +84,18 @@ const ProposalDetail = () => {
                 <Users className="w-4 h-4" />
                 <span>{totalVotes} total votes</span>
               </div>
+              {(proposal as any).iap2_level && (
+                <Badge variant="outline" className="gap-1">
+                  <Globe2 className="w-3 h-3" />IAP2: {(proposal as any).iap2_level}
+                </Badge>
+              )}
               <span>
                 Created {formatDistanceToNow(new Date(proposal.created_at), { addSuffix: true })}
               </span>
             </div>
           </div>
+
+          <SponsorshipBanner proposalId={proposal.id} />
 
           <div className="p-6 bg-card border border-border rounded-lg">
             <h2 className="text-xl font-semibold mb-4">Description</h2>
@@ -96,7 +109,32 @@ const ProposalDetail = () => {
             abstainCount={proposal.votes_abstain || 0}
           />
 
+          {(proposal as any).voting_method && (proposal as any).voting_method !== 'simple' && (
+            <AdvancedVotingPanel
+              proposalId={proposal.id}
+              method={(proposal as any).voting_method}
+              options={(proposal as any).voting_options || []}
+              quadraticCredits={(proposal as any).quadratic_credits}
+            />
+          )}
+
+          <GovernmentResponsePanel
+            proposalId={proposal.id}
+            deadline={(proposal as any).response_required_by}
+            currentStatus={(proposal as any).response_status}
+          />
+
+          <DeliberationHub proposalId={proposal.id} />
+
+          <CitizenAssemblyPanel proposalId={proposal.id} />
+
           <ProposalPolls proposalId={proposal.id} />
+
+          <EmbedShareTools
+            proposalId={proposal.id}
+            embedToken={(proposal as any).embed_token}
+            title={proposal.title}
+          />
 
           <div className="border-t pt-6">
             <h3 className="text-lg font-semibold mb-4">Download Reports</h3>
