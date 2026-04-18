@@ -854,6 +854,29 @@
   }
 
   /* Mobile-safe bottom padding so bottom nav doesn't cover content */
-  .has-mobile-nav { padding-bottom: 4.5rem; }
+  .has-mobile-nav { padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px)); }
   @media (min-width: 1024px) { .has-mobile-nav { padding-bottom: 0; } }
+
+  /* Global mobile bottom padding applied to <body> so EVERY page clears the fixed mobile nav */
+  @media (max-width: 1023px) {
+    body { padding-bottom: calc(4.25rem + env(safe-area-inset-bottom, 0px)); }
+  }
+
+  /* Safe-area helpers */
+  .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .pt-safe { padding-top: env(safe-area-inset-top, 0px); }
+
+  /* Larger tap targets on mobile (WCAG 2.5.5 minimum 44x44) */
+  @media (max-width: 767px) {
+    button, a[role="button"], .tap-target { min-height: 44px; }
+  }
+
+  /* Tame motion on mobile to feel calmer & save battery */
+  @media (max-width: 767px) {
+    .animate-float, .animate-glow-pulse, .animate-shimmer { animation: none !important; }
+  }
+
+  /* Hide-on-mobile / desktop-only helpers used in calm institutional layout */
+  .mobile-hide { @apply hidden sm:block; }
+  .mobile-only { @apply block sm:hidden; }
 }

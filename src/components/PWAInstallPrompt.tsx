@@ -97,7 +97,7 @@ const PWAInstallPrompt = () => {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 50 }}
-          className="fixed bottom-4 left-4 right-4 z-50 md:left-auto md:right-4 md:max-w-sm"
+          className="fixed bottom-[5.5rem] lg:bottom-4 left-3 right-3 lg:left-auto lg:right-4 z-50 lg:max-w-sm"
         >
           <Card className="bg-card/95 backdrop-blur-sm border-primary/20 shadow-lg">
             <CardContent className="pt-4">
@@ -169,7 +169,7 @@ const PWAInstallPrompt = () => {
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 50 }}
-        className="fixed bottom-4 left-4 right-4 z-50 md:left-auto md:right-4 md:max-w-sm"
+        className="fixed bottom-[5.5rem] lg:bottom-4 left-3 right-3 lg:left-auto lg:right-4 z-50 lg:max-w-sm"
       >
         <Card className="bg-card/95 backdrop-blur-sm border-primary/20 shadow-lg">
           <CardContent className="pt-4">
