@@ -12,6 +12,7 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import OfflineIndicator from "@/components/OfflineIndicator";
 import SkipNavigation from "@/components/SkipNavigation";
 import QuickActionFAB from "@/components/QuickActionFAB";
+import MobileBottomNav from "@/components/MobileBottomNav";
 import OnboardingTour from "@/components/OnboardingTour";
 import AccessibilityMenu from "@/components/AccessibilityMenu";
 import VoiceCommands from "@/components/VoiceCommands";
@@ -154,6 +155,7 @@ const App = () => (
                   </Routes>
                   <OnboardingTour />
                   <QuickActionFAB />
+                  <MobileBottomNav />
                   <PWAInstallPrompt />
                   </BrowserRouter>
                 </TooltipProvider>

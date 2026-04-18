@@ -23,36 +23,13 @@ interface AdminSidebarProps {
 const menuItems = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutGrid, singleItem: true },
   {
-    id: 'users-management', label: 'Users & Roles', icon: UsersRound,
-    children: [
-      { id: 'users', label: 'Users' },
-      { id: 'roles', label: 'Role Management' },
-      { id: 'feature-access', label: 'Feature Access' },
-    ],
-  },
-  {
-    id: 'content', label: 'Content', icon: FolderKanban,
-    children: [
-      { id: 'cms', label: 'Website Content (CMS)' },
-      { id: 'content', label: 'Stories & Posts' },
-      { id: 'moderation', label: 'Moderation Queue' },
-    ],
-  },
-  {
-    id: 'peace-intelligence', label: 'Peace Intelligence', icon: Siren,
+    id: 'operations', label: 'Operations', icon: Siren,
     children: [
       { id: 'incidents', label: 'Incident Reports' },
       { id: 'incident-timeline', label: 'Timeline Tracker' },
       { id: 'elections', label: 'Election Monitoring' },
       { id: 'safe-spaces', label: 'Safe Spaces' },
-      { id: 'peace-metrics', label: 'Peace Metrics' },
-      { id: 'nuru-ai', label: 'NuruAI Civic Intel' },
-      { id: 'constitutions', label: 'Constitutions' },
-    ],
-  },
-  {
-    id: 'communication', label: 'Communication', icon: Antenna,
-    children: [
+      { id: 'moderation', label: 'Moderation Queue' },
       { id: 'comm-hub', label: 'Communication Hub' },
       { id: 'broadcasts', label: 'Broadcasts' },
       { id: 'ocha-docs', label: 'OCHA Documents' },
@@ -60,20 +37,33 @@ const menuItems = [
     ],
   },
   {
-    id: 'engagement', label: 'Engagement', icon: MessageCircleMore,
+    id: 'intelligence', label: 'Intelligence', icon: BrainCircuit,
     children: [
-      { id: 'proposals', label: 'Proposals' },
-      { id: 'challenges', label: 'Challenges' },
-      { id: 'gamification', label: 'Gamification' },
+      { id: 'peace-metrics', label: 'Peace Metrics' },
+      { id: 'nuru-ai', label: 'NuruAI Civic Intel' },
+      { id: 'constitutions', label: 'Constitutions' },
+      { id: 'ai-analytics', label: 'AI Analytics' },
+      { id: 'api-analytics', label: 'API Usage' },
     ],
   },
   {
-    id: 'configuration', label: 'Configuration', icon: Sliders,
+    id: 'engagement', label: 'Engagement', icon: MessageCircleMore,
     children: [
-      { id: 'ai-analytics', label: 'AI Analytics' },
-      { id: 'api-analytics', label: 'API Usage' },
-      { id: 'integrations', label: 'Integrations' },
+      { id: 'cms', label: 'Website Content (CMS)' },
+      { id: 'content', label: 'Stories & Posts' },
+      { id: 'proposals', label: 'Proposals' },
+      { id: 'challenges', label: 'Challenges' },
+      { id: 'gamification', label: 'Gamification' },
       { id: 'sponsors', label: 'Sponsors' },
+    ],
+  },
+  {
+    id: 'system', label: 'System', icon: Sliders,
+    children: [
+      { id: 'users', label: 'Users' },
+      { id: 'roles', label: 'Role Management' },
+      { id: 'feature-access', label: 'Feature Access' },
+      { id: 'integrations', label: 'Integrations' },
       { id: 'settings', label: 'System Settings' },
     ],
   },
@@ -82,7 +72,7 @@ const menuItems = [
 export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarProps) {
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
-  const [openGroups, setOpenGroups] = useState<string[]>(['engagement', 'configuration', 'peace-intelligence']);
+  const [openGroups, setOpenGroups] = useState<string[]>(['operations', 'intelligence', 'engagement', 'system']);
   const navigate = useNavigate();
 
   const toggleGroup = (groupId: string) => {
