@@ -69,33 +69,36 @@ const CommunicationHub: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
+    <div className="space-y-6 has-mobile-nav">
+      {/* Calm institutional header */}
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
+        initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between"
+        className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"
       >
-        <div>
-          <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-            <Shield className="h-8 w-8 text-primary" />
-            OCHA Communication Center
+        <div className="space-y-1.5 min-w-0">
+          <p className="eyebrow flex items-center gap-2">
+            <Shield className="h-3 w-3" />
+            OCHA Coordination
+          </p>
+          <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">
+            Communication Center
           </h1>
-          <p className="text-muted-foreground mt-1">
-            UN-grade inter-agency coordination and emergency communication system
+          <p className="text-sm text-muted-foreground max-w-2xl">
+            UN-grade inter-agency coordination and emergency communication.
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/30">
-            <span className="w-2 h-2 rounded-full bg-green-500 mr-2 animate-pulse" />
-            System Operational
-          </Badge>
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="pill pill-success">
+            <span className="live-dot" />
+            Operational
+          </span>
           {isAdmin && (
             <Button
               variant="outline"
+              size="sm"
               onClick={() => seedDemo.mutate('reset')}
               disabled={seedDemo.isPending}
-              title="Populate the communication hub with demo data"
             >
               {seedDemo.isPending ? 'Seeding…' : 'Seed Demo Data'}
             </Button>
@@ -104,75 +107,48 @@ const CommunicationHub: React.FC = () => {
       </motion.div>
 
       {isAdmin && !channelsLoading && (channels?.length || 0) === 0 && (
-        <div className="rounded-lg border bg-card p-4 text-sm text-muted-foreground">
-          No communication data found yet. Click <span className="font-medium text-foreground">Seed Demo Data</span> to populate channels, messages, broadcasts, documents, and reports.
+        <div className="surface-quiet p-4 text-sm text-muted-foreground">
+          No communication data yet. Click <span className="font-medium text-foreground">Seed Demo Data</span> to populate channels, messages, broadcasts, documents, and reports.
         </div>
       )}
 
-      {/* Stats Overview */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        {tabs.map((tab, index) => (
-          <motion.div
-            key={tab.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-          >
-            <Card 
-              className={`cursor-pointer transition-all hover:shadow-md ${
-                activeTab === tab.id ? 'ring-2 ring-primary bg-primary/5' : ''
-              }`}
-              onClick={() => setActiveTab(tab.id)}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <tab.icon className={`h-5 w-5 ${activeTab === tab.id ? 'text-primary' : 'text-muted-foreground'}`} />
-                  {tab.badge && (
-                    <Badge variant="destructive" className="text-xs animate-pulse">
-                      {tab.badge}
-                    </Badge>
-                  )}
-                </div>
-                <h3 className="font-semibold text-sm">{tab.label}</h3>
-                <p className="text-xs text-muted-foreground line-clamp-1">{tab.description}</p>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
-
-      {/* Main Content Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid grid-cols-5 w-full bg-muted/50">
+      {/* Main Content Tabs — primary nav, no duplicate stat cards above */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-5">
+        <TabsList className="w-full grid grid-cols-5 h-auto bg-muted/40 p-1">
           {tabs.map((tab) => (
-            <TabsTrigger 
-              key={tab.id} 
+            <TabsTrigger
+              key={tab.id}
               value={tab.id}
-              className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2 px-2 text-xs sm:text-sm data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
             >
-              <tab.icon className="h-4 w-4" />
-              <span className="hidden md:inline">{tab.label}</span>
+              <tab.icon className="h-4 w-4 shrink-0" />
+              <span className="truncate">{tab.label.replace(' Center', '').replace(' Hub', '')}</span>
+              {tab.badge && (
+                <Badge variant="destructive" className="hidden sm:inline-flex text-[9px] px-1 py-0 h-4">
+                  {tab.badge}
+                </Badge>
+              )}
             </TabsTrigger>
           ))}
         </TabsList>
 
-        <TabsContent value="coordination" className="space-y-4">
+        <TabsContent value="coordination" className="space-y-4 mt-0">
           <CoordinationChannels />
         </TabsContent>
 
-        <TabsContent value="broadcast" className="space-y-4">
+        <TabsContent value="broadcast" className="space-y-4 mt-0">
           <BroadcastCenter />
         </TabsContent>
 
-        <TabsContent value="documents" className="space-y-4">
+        <TabsContent value="documents" className="space-y-4 mt-0">
           <OCHADocumentCenter />
         </TabsContent>
 
-        <TabsContent value="field" className="space-y-4">
+        <TabsContent value="field" className="space-y-4 mt-0">
           <FieldReportingCenter />
         </TabsContent>
 
-        <TabsContent value="escalation" className="space-y-4">
+        <TabsContent value="escalation" className="space-y-4 mt-0">
           <EscalationManager />
         </TabsContent>
       </Tabs>
