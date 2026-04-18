@@ -810,4 +810,45 @@
   .card-hover:hover {
     box-shadow: 0 0 30px hsl(44 75% 57% / 0.15), 0 10px 40px hsl(0 0% 0% / 0.1);
   }
+
+  /* ============================================================
+     Calmer Institutional Layer (Phase 1 refresh)
+     ============================================================ */
+
+  /* Standard section vertical rhythm — calmer & more consistent */
+  .section-y { @apply py-10 sm:py-14 lg:py-20; }
+  .section-y-sm { @apply py-6 sm:py-10 lg:py-14; }
+
+  /* Restrained surface — replaces ad-hoc ring-2 / heavy shadows */
+  .surface-quiet {
+    @apply bg-card border border-border/60 rounded-lg;
+  }
+  .surface-quiet-active {
+    @apply bg-card border border-primary/40 rounded-lg ring-1 ring-primary/20;
+  }
+
+  /* Small uppercase eyebrow label for institutional sections */
+  .eyebrow {
+    @apply text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground;
+  }
+
+  /* Status pill — neutral by default; semantic only when explicit */
+  .pill {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium
+           bg-muted text-muted-foreground border border-border/60;
+  }
+  .pill-success { @apply bg-success/10 text-success border-success/30; }
+  .pill-warning { @apply bg-warning/10 text-warning border-warning/30; }
+  .pill-destructive { @apply bg-destructive/10 text-destructive border-destructive/30; }
+  .pill-primary { @apply bg-primary/10 text-primary border-primary/30; }
+
+  /* Reserve pulse for true live alerts only */
+  .live-dot {
+    @apply inline-block w-1.5 h-1.5 rounded-full bg-success;
+    animation: pulse-recording 1.6s ease-in-out infinite;
+  }
+
+  /* Mobile-safe bottom padding so bottom nav doesn't cover content */
+  .has-mobile-nav { padding-bottom: 4.5rem; }
+  @media (min-width: 1024px) { .has-mobile-nav { padding-bottom: 0; } }
 }
