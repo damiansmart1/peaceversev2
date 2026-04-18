@@ -37,7 +37,7 @@ const MobileBottomNav = () => {
 
   return (
     <nav
-      className="fixed bottom-0 inset-x-0 z-40 lg:hidden bg-card/95 backdrop-blur-xl border-t border-border/60"
+      className="fixed bottom-0 inset-x-0 z-40 lg:hidden bg-card/95 backdrop-blur-xl border-t border-border/60 pb-safe shadow-[0_-4px_20px_-8px_rgba(0,0,0,0.08)]"
       aria-label="Primary mobile navigation"
     >
       <div className="grid grid-cols-5 max-w-md mx-auto">

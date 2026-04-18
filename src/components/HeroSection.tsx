@@ -42,7 +42,7 @@ const HeroSection = () => {
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 0.5], [1, 1.1]);
-  return <section ref={containerRef} className="relative min-h-[100svh] flex items-center justify-center overflow-hidden bg-background">
+  return <section ref={containerRef} className="relative min-h-[88svh] sm:min-h-[100svh] flex items-center justify-center overflow-hidden bg-background">
       {/* Background Image with Parallax */}
       <motion.div className="absolute inset-0 z-0" style={{
       scale
@@ -53,8 +53,8 @@ const HeroSection = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-transparent to-secondary/20" />
       </motion.div>
 
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden z-[1]">
+      {/* Animated Background Elements - reduced on mobile for performance & calm */}
+      <div className="absolute inset-0 overflow-hidden z-[1] hidden sm:block">
         {/* Gold accent orb */}
         <motion.div className="absolute -top-[15%] -left-[5%] w-[500px] h-[500px] rounded-full" style={{
         background: 'radial-gradient(circle, hsl(44 75% 57% / 0.2) 0%, transparent 60%)'
@@ -163,12 +163,12 @@ const HeroSection = () => {
       </div>
 
       {/* Content */}
-      <motion.div className="relative z-10 container mx-auto px-4 sm:px-6 pt-24 sm:pt-28 pb-16 sm:pb-20" style={{
+      <motion.div className="relative z-10 container mx-auto px-4 sm:px-6 pt-20 sm:pt-28 pb-10 sm:pb-20" style={{
       y,
       opacity
     }}>
         <div className="max-w-6xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
             {/* Left Content */}
             <motion.div initial={{
             opacity: 0,
@@ -199,7 +199,7 @@ const HeroSection = () => {
               </motion.div>
 
               {/* Main Heading */}
-              <h1 className="text-4xl xs:text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 sm:mb-8 leading-[1.05] tracking-tight">
+              <h1 className="text-[2.25rem] xs:text-5xl sm:text-6xl lg:text-7xl font-bold mb-5 sm:mb-8 leading-[1.05] tracking-tight">
                 <motion.span initial={{
                 opacity: 0,
                 y: 25
@@ -236,7 +236,7 @@ const HeroSection = () => {
               </h1>
               
               {/* Subtitle */}
-              <motion.p className="text-lg sm:text-xl text-muted-foreground mb-8 sm:mb-10 max-w-lg leading-relaxed" initial={{
+              <motion.p className="text-base sm:text-xl text-muted-foreground mb-6 sm:mb-10 max-w-lg leading-relaxed" initial={{
               opacity: 0
             }} animate={{
               opacity: 1
@@ -340,8 +340,8 @@ const HeroSection = () => {
       {/* Bottom Gradient Fade */}
       <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-background via-background/80 to-transparent z-10" />
 
-      {/* Scroll Indicator */}
-      <motion.div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20" initial={{
+      {/* Scroll Indicator - desktop only to avoid clutter on mobile */}
+      <motion.div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 hidden sm:block" initial={{
       opacity: 0
     }} animate={{
       opacity: 1

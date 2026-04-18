@@ -132,21 +132,21 @@ const Navigation = () => {
     }} transition={{
       duration: 0.5,
       ease: "easeOut"
-    }} className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled ? 'bg-card/95 backdrop-blur-xl border-b border-gold/20 shadow-warm' : 'bg-transparent'}`}>
-        {/* Gold accent line at bottom */}
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gold/40 to-transparent" />
+    }} className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled ? 'bg-card/95 backdrop-blur-xl border-b border-border/60 shadow-sm' : 'bg-transparent'}`}>
+        {/* Gold accent line - desktop only to reduce mobile visual noise */}
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gold/40 to-transparent hidden lg:block" />
         
         <div className="container mx-auto px-3 sm:px-4">
-          <div className="flex items-center justify-between h-16 sm:h-18">
+          <div className="flex items-center justify-between h-14 sm:h-18">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-3 group relative">
+            <Link to="/" className="flex items-center gap-2 sm:gap-3 group relative">
               <motion.div whileHover={{
               scale: 1.05
             }} whileTap={{
               scale: 0.95
             }} className="relative">
-                <div className="absolute inset-0 bg-gold/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <img src={peaceverselogo} alt="PeaceVerse Logo" className="h-10 sm:h-12 w-auto relative z-10" />
+                <div className="absolute inset-0 bg-gold/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 hidden sm:block" />
+                <img src={peaceverselogo} alt="PeaceVerse Logo" className="h-8 sm:h-12 w-auto relative z-10" />
               </motion.div>
               <div className="hidden sm:block">
                 <span className="text-lg font-bold text-primary">Peace</span>
@@ -251,7 +251,7 @@ const Navigation = () => {
                     <Menu className="w-5 h-5" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="right" className="w-[85vw] max-w-sm bg-card/98 backdrop-blur-xl border-l border-gold/20 z-[60]">
+                <SheetContent side="right" className="w-[88vw] max-w-sm bg-card/98 backdrop-blur-xl border-l border-border/60 z-[60] overflow-y-auto">
                   <div className="flex items-center justify-between mb-8">
                     <div className="flex items-center gap-2">
                       <img src={peaceverselogo} alt="PeaceVerse Logo" className="h-8 w-auto" />
