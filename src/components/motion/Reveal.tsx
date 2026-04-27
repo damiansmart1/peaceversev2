@@ -12,7 +12,7 @@ interface RevealProps {
   distance?: number;
   /** Respect prefers-reduced-motion */
   once?: boolean;
-  as?: keyof JSX.IntrinsicElements;
+  as?: "div" | "section" | "article" | "aside" | "header" | "footer" | "main" | "nav";
 }
 
 /**
@@ -71,9 +71,10 @@ export const Reveal = ({
     }
   })();
 
+  const Component = Tag as any;
   return (
-    <Tag
-      ref={ref as any}
+    <Component
+      ref={ref}
       className={cn(className)}
       style={{
         opacity: visible || reduced ? 1 : 0,
@@ -85,7 +86,7 @@ export const Reveal = ({
       }}
     >
       {children}
-    </Tag>
+    </Component>
   );
 };
 

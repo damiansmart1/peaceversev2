@@ -5,7 +5,7 @@ import { Reveal } from "@/components/motion/Reveal";
 interface SectionImageBannerProps {
   image: string;
   alt: string;
-  title: string;
+  title?: string;
   subtitle?: string;
   /** Additional content rendered below subtitle (badges, CTAs) */
   children?: ReactNode;
@@ -53,9 +53,11 @@ const SectionImageBanner = ({
         <div className="absolute inset-0 bg-gradient-to-r from-background/40 via-transparent to-transparent" />
 
         <div className="relative h-full flex flex-col justify-end p-4 sm:p-6 md:p-8">
-          <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight text-foreground mb-1 sm:mb-2 line-clamp-2">
-            {title}
-          </h1>
+          {title && (
+            <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight text-foreground mb-1 sm:mb-2 line-clamp-2">
+              {title}
+            </h1>
+          )}
           {subtitle && (
             <p className="text-xs sm:text-sm md:text-base text-muted-foreground max-w-2xl line-clamp-2">
               {subtitle}
