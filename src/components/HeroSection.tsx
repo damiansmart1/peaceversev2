@@ -4,6 +4,7 @@ import heroImage from "@/assets/hero-image.jpg";
 import { useNavigate } from "react-router-dom";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
+import { CoachMark } from "@/components/coach/CoachMark";
 const unscr2250Pillars = [{
   name: "Participation",
   icon: UsersRound,
@@ -256,13 +257,22 @@ const HeroSection = () => {
             }} transition={{
               delay: 0.8
             }}>
-                <Button size="lg" className="relative overflow-hidden group h-12 sm:h-14 px-6 sm:px-8 rounded-xl text-sm sm:text-base font-semibold bg-primary hover:bg-primary-dark text-primary-foreground shadow-peace" onClick={() => navigate('/incidents')}>
-                  <div className="absolute inset-0 bg-gradient-to-r from-gold/20 to-secondary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <span className="relative z-10 flex items-center gap-2">
-                    Report Incident
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </span>
-                </Button>
+                <CoachMark
+                  id="hero-report-cta"
+                  title="Start here"
+                  description="Tap Report Incident to share what's happening on the ground. Our team verifies and routes every report."
+                  side="bottom"
+                  align="start"
+                  delay={1800}
+                >
+                  <Button size="lg" className="relative overflow-hidden group h-12 sm:h-14 px-6 sm:px-8 rounded-xl text-sm sm:text-base font-semibold bg-primary hover:bg-primary-dark text-primary-foreground shadow-peace transition-transform active:scale-[0.98]" onClick={() => navigate('/incidents')}>
+                    <div className="absolute inset-0 bg-gradient-to-r from-gold/20 to-secondary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <span className="relative z-10 flex items-center gap-2">
+                      Report Incident
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </span>
+                  </Button>
+                </CoachMark>
                 <Button variant="outline" size="lg" className="h-12 sm:h-14 px-6 sm:px-8 rounded-xl text-sm sm:text-base font-semibold border-border bg-card/50 hover:bg-card hover:border-gold/50 text-foreground transition-all" onClick={() => navigate('/peace-pulse')}>
                   <Play className="w-4 h-4 mr-2" />
                   Explore Dashboard
