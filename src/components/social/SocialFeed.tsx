@@ -17,6 +17,8 @@ import { EmojiReactions } from './EmojiReactions';
 import { FollowButton } from './FollowButton';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { FeedSkeleton } from '@/components/skeletons/FeedSkeleton';
+import EmptyState, { Sparkles as SparklesIcon } from '@/components/EmptyState';
 
 interface SocialFeedProps {
   userId?: string;
@@ -253,31 +255,22 @@ export const SocialFeed = ({ userId, showAll = true }: SocialFeedProps) => {
   };
 
   if (isLoading) {
-    return (
-      <div className="space-y-4">
-        {[1, 2, 3].map(i => (
-          <Card key={i} className="animate-pulse">
-            <CardHeader className="flex flex-row items-center gap-4">
-              <div className="h-12 w-12 rounded-full bg-muted" />
-              <div className="space-y-2 flex-1">
-                <div className="h-4 w-32 bg-muted rounded" />
-                <div className="h-3 w-24 bg-muted rounded" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="h-64 bg-muted rounded-lg" />
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    );
+    return <FeedSkeleton count={3} />;
   }
 
   if (!posts || posts.length === 0) {
     return (
-      <Card className="p-12 text-center">
-        <p className="text-muted-foreground">No posts yet. Be the first to share!</p>
-      </Card>
+      <EmptyState
+        variant="feed"
+        icon={SparklesIcon}
+        title="The feed is quiet — for now"
+        description="Be the first to share a story, photo, or update with the community. Every post builds the platform."
+        actionLabel="Create your first post"
+        onAction={() => {
+          // Scroll up to QuickPostCreator if present
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+      />
     );
   }
 
