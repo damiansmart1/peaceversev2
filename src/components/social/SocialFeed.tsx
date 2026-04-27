@@ -19,6 +19,7 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { FeedSkeleton } from '@/components/skeletons/FeedSkeleton';
 import EmptyState, { Sparkles as SparklesIcon } from '@/components/EmptyState';
+import { HeartBurst } from './HeartBurst';
 
 interface SocialFeedProps {
   userId?: string;
