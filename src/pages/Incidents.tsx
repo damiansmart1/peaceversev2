@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Card } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollableTabsList } from '@/components/ui/scrollable-tabs';
 import { Button } from '@/components/ui/button';
 import { IncidentAnalyticsDashboard } from '@/components/IncidentAnalyticsDashboard';
 import InteractiveHeatmap from '@/components/InteractiveHeatmap';
@@ -60,25 +61,23 @@ export default function Incidents() {
         <IncidentAnalyticsDashboard />
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6 md:mt-8">
-          <TabsList className="grid w-full max-w-4xl grid-cols-5 h-auto">
-            <TabsTrigger value="intelligence" className="text-xs sm:text-sm py-2 px-2">
-              <span className="hidden sm:inline">AI Intelligence</span>
-              <span className="sm:hidden">Intel</span>
+          <ScrollableTabsList className="bg-muted/50 p-1 rounded-lg">
+            <TabsTrigger value="intelligence" className="text-xs sm:text-sm py-2 px-3 whitespace-nowrap">
+              AI Intelligence
             </TabsTrigger>
-            <TabsTrigger value="tracking" className="text-xs sm:text-sm py-2 px-2">
-              <span className="hidden sm:inline">{t('incidents.tabs.trackingMap')}</span>
-              <span className="sm:hidden">{t('incidents.tabs.map')}</span>
+            <TabsTrigger value="tracking" className="text-xs sm:text-sm py-2 px-3 whitespace-nowrap">
+              {t('incidents.tabs.trackingMap')}
             </TabsTrigger>
-            <TabsTrigger value="myreports" className="text-xs sm:text-sm py-2 px-2">
-              <span className="hidden sm:inline">{t('incidents.tabs.myReports')}</span>
-              <span className="sm:hidden">{t('incidents.tabs.reports')}</span>
+            <TabsTrigger value="myreports" className="text-xs sm:text-sm py-2 px-3 whitespace-nowrap">
+              {t('incidents.tabs.myReports')}
             </TabsTrigger>
-            <TabsTrigger value="report" className="text-xs sm:text-sm py-2 px-2">
-              <span className="hidden sm:inline">{t('incidents.tabs.submitReport')}</span>
-              <span className="sm:hidden">{t('incidents.tabs.submit')}</span>
+            <TabsTrigger value="report" className="text-xs sm:text-sm py-2 px-3 whitespace-nowrap">
+              {t('incidents.tabs.submitReport')}
             </TabsTrigger>
-            <TabsTrigger value="timeline" className="text-xs sm:text-sm py-2 px-2">{t('incidents.tabs.timeline')}</TabsTrigger>
-          </TabsList>
+            <TabsTrigger value="timeline" className="text-xs sm:text-sm py-2 px-3 whitespace-nowrap">
+              {t('incidents.tabs.timeline')}
+            </TabsTrigger>
+          </ScrollableTabsList>
 
           <TabsContent value="intelligence" className="mt-6">
             <NewsIntelligenceDashboard />
