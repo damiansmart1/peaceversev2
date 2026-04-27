@@ -395,11 +395,12 @@ export const SocialFeed = ({ userId, showAll = true }: SocialFeedProps) => {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleLike(post)}
-                        className={cn("h-8 px-2 sm:px-3", post.isLiked && "text-red-500")}
+                        className={cn("relative h-8 px-2 sm:px-3 transition-transform active:scale-95", post.isLiked && "text-red-500")}
                         disabled={likeMutation.isPending}
                       >
-                        <Heart className={cn("h-4 w-4 sm:h-5 sm:w-5", post.isLiked && "fill-current")} />
-                        <span className="ml-1 text-xs sm:text-sm">{post.likesCount}</span>
+                        <Heart className={cn("h-4 w-4 sm:h-5 sm:w-5 transition-transform", post.isLiked && "fill-current scale-110")} />
+                        <span className="ml-1 text-xs sm:text-sm tabular-nums">{post.likesCount}</span>
+                        <HeartBurst active={post.isLiked} />
                       </Button>
                       <Button 
                         variant="ghost" 
