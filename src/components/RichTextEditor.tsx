@@ -5,9 +5,6 @@ import TextAlign from '@tiptap/extension-text-align';
 import Highlight from '@tiptap/extension-highlight';
 import { TextStyle } from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
-import BulletList from '@tiptap/extension-bullet-list';
-import OrderedList from '@tiptap/extension-ordered-list';
-import ListItem from '@tiptap/extension-list-item';
 import { Button } from '@/components/ui/button';
 import { 
   Bold, 
@@ -50,21 +47,13 @@ export default function RichTextEditor({
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        bulletList: false,
-        orderedList: false,
-        listItem: false,
-      }),
-      BulletList.configure({
-        HTMLAttributes: {
-          class: 'list-disc ml-4',
+        bulletList: {
+          HTMLAttributes: { class: 'list-disc ml-4' },
+        },
+        orderedList: {
+          HTMLAttributes: { class: 'list-decimal ml-4' },
         },
       }),
-      OrderedList.configure({
-        HTMLAttributes: {
-          class: 'list-decimal ml-4',
-        },
-      }),
-      ListItem,
       Underline,
       TextAlign.configure({
         types: ['heading', 'paragraph', 'listItem'],
