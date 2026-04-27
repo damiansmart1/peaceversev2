@@ -20,6 +20,7 @@ import EnhancedKeyboardNav from "@/components/EnhancedKeyboardNav";
 import FocusManager from "@/components/FocusManager";
 import GlobalAlertBanner from "@/components/GlobalAlertBanner";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
+import PageTransition from "@/components/motion/PageTransition";
 import { RealtimeSyncProvider } from "@/components/RealtimeSyncProvider";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -86,6 +87,7 @@ const App = () => (
                   <EnhancedKeyboardNav />
                   <AccessibilityMenu />
                   <VoiceCommands />
+                  <PageTransition>
                   <Routes>
                     <Route path="/" element={<Index />} />
                     <Route path="/auth" element={<Auth />} />
@@ -153,6 +155,7 @@ const App = () => (
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>
+                  </PageTransition>
                   <OnboardingTour />
                   <QuickActionFAB />
                   <MobileBottomNav />
