@@ -21,6 +21,9 @@ import { PrivacySettings } from './PrivacySettings';
 import { ContentCreator } from './ContentCreator';
 import { UserSearch } from './UserSearch';
 import { QuickPostCreator } from './QuickPostCreator';
+import { StoriesRail } from './StoriesRail';
+import { PresenceDot } from './PresenceDot';
+import { Reveal } from '@/components/motion/Reveal';
 import { Link } from 'react-router-dom';
 
 export const SocialHub = () => {
@@ -76,6 +79,7 @@ export const SocialHub = () => {
                   Welcome back, <span className="text-primary">{firstName}</span>! 👋
                 </h2>
                 <p className="text-muted-foreground">Connect, share, and earn with our community</p>
+                <PresenceDot count={Math.floor(Math.random() * 40) + 12} label="creators online" className="mt-2" />
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" onClick={() => setActiveTab('settings')}>
@@ -89,6 +93,10 @@ export const SocialHub = () => {
           </CardContent>
         </Card>
       </motion.div>
+
+      <Reveal from="bottom" delay={80}>
+        <StoriesRail onCreate={() => setShowContentCreator(true)} />
+      </Reveal>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-4 md:grid-cols-7 mb-6 h-auto p-1">
