@@ -313,10 +313,16 @@ serve(async (req) => {
         },
         async flush() {
           const processingTime = Date.now() - startTime;
+
+          // Extract citations + confidence from response
+          const { sources, confidence, cleanContent } = extractCitationsAndConfidence(fullContent, doc, documentContext);
+
           await supabase.from('nuru_messages').insert({
             conversation_id: conversationId,
             role: 'assistant',
-            content: fullContent,
+            content: cleanContent,
+            sources,
+            confidence,
             model_used: modelUsed,
             processing_time_ms: processingTime,
           });
