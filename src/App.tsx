@@ -54,6 +54,7 @@ import Elections from "./pages/Elections";
 import NuruAI from "./pages/NuruAI";
 import FactCheck from "./pages/FactCheck";
 import ProposalEmbed from "./pages/ProposalEmbed";
+import NuruShare from "./pages/NuruShare";
 
 // Preload Google Maps API on app startup for faster map loading
 import '@/hooks/useGoogleMapsPreloader';
@@ -150,6 +151,7 @@ const App = () => (
                       </ProtectedRoute>
                     } />
                     <Route path="/nuru-ai" element={<NuruAI />} />
+                    <Route path="/nuru/share/:token" element={<NuruShare />} />
                     <Route path="/fact-check/:token" element={<FactCheck />} />
                     <Route path="/embed/proposal/:token" element={<ProposalEmbed />} />
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

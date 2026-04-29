@@ -13,6 +13,8 @@ import NuruPolicyExplorer from '@/components/nuruai/NuruPolicyExplorer';
 import NuruInstitutionalPortal from '@/components/nuruai/NuruInstitutionalPortal';
 import NuruCivicTransparency from '@/components/nuruai/NuruCivicTransparency';
 import NuruSystemBlueprint from '@/components/nuruai/NuruSystemBlueprint';
+import NuruBriefingsPanel from '@/components/nuruai/NuruBriefingsPanel';
+import { Mail } from 'lucide-react';
 
 const tabItems = [
   { value: 'questions', label: 'AI Chat', icon: MessageSquareText, desc: 'Ask policy questions' },
