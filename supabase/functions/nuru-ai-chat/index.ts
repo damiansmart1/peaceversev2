@@ -1226,5 +1226,74 @@ For substantive questions, always include:
 6. **Strategic Questions** — advanced follow-ups
 
 Always end with:
-> **💡 Key Takeaway**: [One powerful, memorable sentence summarizing the most important insight]`;
+> **💡 Key Takeaway**: [One powerful, memorable sentence summarizing the most important insight]
+
+---
+## CITATION & CONFIDENCE PROTOCOL (MANDATORY)
+
+After your Key Takeaway, append two **machine-readable** blocks on their own lines, exactly as shown:
+
+\`\`\`citations
+[1] "<exact ≤180-char quote from the source document>" — <section or paragraph hint if visible>
+[2] "<exact ≤180-char quote>" — <section hint>
+\`\`\`
+
+\`\`\`confidence
+{"level": "high|medium|low", "score": 0.0-1.0, "reason": "<one short sentence>"}
+\`\`\`
+
+**Rules**:
+- Use bracketed numbers \`[1]\`, \`[2]\` inline in your prose to cite each source. Every factual claim that comes from the document MUST carry a citation marker.
+- Quotes inside the \`citations\` block must be VERBATIM from the document — never paraphrase.
+- \`high\` (0.85-1.0) only when exact quotes directly answer the question. \`medium\` (0.5-0.84) when answer is supported by partial/indirect evidence. \`low\` (<0.5) when the document barely addresses it.
+- If no document is provided, emit only the confidence block with \`{"level":"low","score":0.2,"reason":"No source document"}\` and skip the citations block.`;
+}
+
+// ===== CITATION + CONFIDENCE PARSER =====
+function extractCitationsAndConfidence(
+  fullContent: string,
+  doc: any,
+  documentContext: string
+): { sources: any[]; confidence: number | null; cleanContent: string } {
+  const sources: any[] = [];
+  let confidence: number | null = null;
+  let cleanContent = fullContent;
+
+  const citationsMatch = fullContent.match(/```citations\s*\n([\s\S]*?)```/);
+  if (citationsMatch) {
+    const block = citationsMatch[1];
+    const lines = block.split('\n').filter(l => l.trim());
+    for (const line of lines) {
+      const m = line.match(/^\[(\d+)\]\s*"([^"]+)"\s*(?:—|--|-)?\s*(.*)$/);
+      if (m) {
+        const quote = m[2].trim();
+        let snippetIdx = -1;
+        if (documentContext) {
+          const needle = quote.substring(0, Math.min(40, quote.length)).toLowerCase();
+          snippetIdx = documentContext.toLowerCase().indexOf(needle);
+        }
+        sources.push({
+          id: parseInt(m[1], 10),
+          quote,
+          section: m[3].trim() || null,
+          documentId: doc?.id || null,
+          documentTitle: doc?.title || null,
+          charOffset: snippetIdx >= 0 ? snippetIdx : null,
+        });
+      }
+    }
+    cleanContent = cleanContent.replace(citationsMatch[0], '').trim();
+  }
+
+  const confMatch = fullContent.match(/```confidence\s*\n([\s\S]*?)```/);
+  if (confMatch) {
+    try {
+      const obj = JSON.parse(confMatch[1].trim());
+      if (typeof obj.score === 'number') confidence = Math.max(0, Math.min(1, obj.score));
+      sources.push({ _meta: true, level: obj.level || null, reason: obj.reason || null });
+    } catch {}
+    cleanContent = cleanContent.replace(confMatch[0], '').trim();
+  }
+
+  return { sources, confidence, cleanContent };
 }
