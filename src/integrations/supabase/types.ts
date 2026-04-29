@@ -4698,6 +4698,92 @@ export type Database = {
         }
         Relationships: []
       }
+      nuru_briefing_digests: {
+        Row: {
+          briefing_id: string | null
+          content: string
+          generated_at: string | null
+          id: string
+          key_findings: Json | null
+          read_at: string | null
+          source_documents: Json | null
+          summary: string | null
+          user_id: string | null
+        }
+        Insert: {
+          briefing_id?: string | null
+          content: string
+          generated_at?: string | null
+          id?: string
+          key_findings?: Json | null
+          read_at?: string | null
+          source_documents?: Json | null
+          summary?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          briefing_id?: string | null
+          content?: string
+          generated_at?: string | null
+          id?: string
+          key_findings?: Json | null
+          read_at?: string | null
+          source_documents?: Json | null
+          summary?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nuru_briefing_digests_briefing_id_fkey"
+            columns: ["briefing_id"]
+            isOneToOne: false
+            referencedRelation: "nuru_briefings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nuru_briefings: {
+        Row: {
+          countries: string[] | null
+          created_at: string | null
+          document_ids: string[] | null
+          frequency: string
+          id: string
+          is_active: boolean | null
+          last_generated_at: string | null
+          title: string
+          topics: string[] | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          countries?: string[] | null
+          created_at?: string | null
+          document_ids?: string[] | null
+          frequency?: string
+          id?: string
+          is_active?: boolean | null
+          last_generated_at?: string | null
+          title: string
+          topics?: string[] | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          countries?: string[] | null
+          created_at?: string | null
+          document_ids?: string[] | null
+          frequency?: string
+          id?: string
+          is_active?: boolean | null
+          last_generated_at?: string | null
+          title?: string
+          topics?: string[] | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       nuru_conversations: {
         Row: {
           created_at: string | null
@@ -4706,6 +4792,8 @@ export type Database = {
           is_shared: boolean | null
           last_message_at: string | null
           message_count: number | null
+          share_token: string | null
+          share_view_count: number | null
           shared_at: string | null
           title: string | null
           updated_at: string | null
@@ -4718,6 +4806,8 @@ export type Database = {
           is_shared?: boolean | null
           last_message_at?: string | null
           message_count?: number | null
+          share_token?: string | null
+          share_view_count?: number | null
           shared_at?: string | null
           title?: string | null
           updated_at?: string | null
@@ -4730,6 +4820,8 @@ export type Database = {
           is_shared?: boolean | null
           last_message_at?: string | null
           message_count?: number | null
+          share_token?: string | null
+          share_view_count?: number | null
           shared_at?: string | null
           title?: string | null
           updated_at?: string | null
