@@ -1063,6 +1063,84 @@ Respond as JSON:
       });
     }
 
+    // ===== ACTION: SHARE CONVERSATION =====
+    if (action === 'share_conversation') {
+      if (!conversationId) throw new Error('Conversation ID required');
+      if (!userId) throw new Error('Authentication required');
+
+      // Verify ownership
+      const { data: conv } = await supabase
+        .from('nuru_conversations')
+        .select('id, user_id, share_token')
+        .eq('id', conversationId)
+        .single();
+      if (!conv || conv.user_id !== userId) throw new Error('Conversation not found or access denied');
+
+      const shareToken = conv.share_token || crypto.randomUUID().replace(/-/g, '').slice(0, 16);
+      const { error: updateError } = await supabase
+        .from('nuru_conversations')
+        .update({
+          is_shared: true,
+          share_token: shareToken,
+          shared_at: new Date().toISOString(),
+        })
+        .eq('id', conversationId);
+      if (updateError) throw new Error(updateError.message);
+
+      await logAudit(supabase, userId, 'conversation_shared', 'nuru_conversation', conversationId, { shareToken });
+
+      return new Response(JSON.stringify({ success: true, shareToken, shareUrl: `/nuru/share/${shareToken}` }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // ===== ACTION: UNSHARE CONVERSATION =====
+    if (action === 'unshare_conversation') {
+      if (!conversationId) throw new Error('Conversation ID required');
+      if (!userId) throw new Error('Authentication required');
+
+      const { error: updateError } = await supabase
+        .from('nuru_conversations')
+        .update({ is_shared: false })
+        .eq('id', conversationId)
+        .eq('user_id', userId);
+      if (updateError) throw new Error(updateError.message);
+
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // ===== ACTION: GET SHARED CONVERSATION (public) =====
+    if (action === 'get_shared_conversation') {
+      const { shareToken } = body;
+      if (!shareToken) throw new Error('Share token required');
+
+      const { data: conv, error: convErr } = await supabase
+        .from('nuru_conversations')
+        .select('id, title, created_at, last_message_at, share_view_count, civic_documents(title, document_type, country)')
+        .eq('share_token', shareToken)
+        .eq('is_shared', true)
+        .single();
+      if (convErr || !conv) throw new Error('Shared conversation not found');
+
+      const { data: messages } = await supabase
+        .from('nuru_messages')
+        .select('id, role, content, sources, confidence, created_at')
+        .eq('conversation_id', conv.id)
+        .order('created_at', { ascending: true });
+
+      // Bump view count async
+      supabase.from('nuru_conversations')
+        .update({ share_view_count: (conv.share_view_count || 0) + 1 })
+        .eq('id', conv.id)
+        .then(() => {});
+
+      return new Response(JSON.stringify({ success: true, conversation: conv, messages: messages || [] }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     throw new Error(`Unknown action: ${action}`);
   } catch (error) {
     console.error('NuruAI error:', error);
