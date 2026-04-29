@@ -313,10 +313,16 @@ serve(async (req) => {
         },
         async flush() {
           const processingTime = Date.now() - startTime;
+
+          // Extract citations + confidence from response
+          const { sources, confidence, cleanContent } = extractCitationsAndConfidence(fullContent, doc, documentContext);
+
           await supabase.from('nuru_messages').insert({
             conversation_id: conversationId,
             role: 'assistant',
-            content: fullContent,
+            content: cleanContent,
+            sources,
+            confidence,
             model_used: modelUsed,
             processing_time_ms: processingTime,
           });
@@ -1057,6 +1063,84 @@ Respond as JSON:
       });
     }
 
+    // ===== ACTION: SHARE CONVERSATION =====
+    if (action === 'share_conversation') {
+      if (!conversationId) throw new Error('Conversation ID required');
+      if (!userId) throw new Error('Authentication required');
+
+      // Verify ownership
+      const { data: conv } = await supabase
+        .from('nuru_conversations')
+        .select('id, user_id, share_token')
+        .eq('id', conversationId)
+        .single();
+      if (!conv || conv.user_id !== userId) throw new Error('Conversation not found or access denied');
+
+      const shareToken = conv.share_token || crypto.randomUUID().replace(/-/g, '').slice(0, 16);
+      const { error: updateError } = await supabase
+        .from('nuru_conversations')
+        .update({
+          is_shared: true,
+          share_token: shareToken,
+          shared_at: new Date().toISOString(),
+        })
+        .eq('id', conversationId);
+      if (updateError) throw new Error(updateError.message);
+
+      await logAudit(supabase, userId, 'conversation_shared', 'nuru_conversation', conversationId, { shareToken });
+
+      return new Response(JSON.stringify({ success: true, shareToken, shareUrl: `/nuru/share/${shareToken}` }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // ===== ACTION: UNSHARE CONVERSATION =====
+    if (action === 'unshare_conversation') {
+      if (!conversationId) throw new Error('Conversation ID required');
+      if (!userId) throw new Error('Authentication required');
+
+      const { error: updateError } = await supabase
+        .from('nuru_conversations')
+        .update({ is_shared: false })
+        .eq('id', conversationId)
+        .eq('user_id', userId);
+      if (updateError) throw new Error(updateError.message);
+
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // ===== ACTION: GET SHARED CONVERSATION (public) =====
+    if (action === 'get_shared_conversation') {
+      const { shareToken } = body;
+      if (!shareToken) throw new Error('Share token required');
+
+      const { data: conv, error: convErr } = await supabase
+        .from('nuru_conversations')
+        .select('id, title, created_at, last_message_at, share_view_count, civic_documents(title, document_type, country)')
+        .eq('share_token', shareToken)
+        .eq('is_shared', true)
+        .single();
+      if (convErr || !conv) throw new Error('Shared conversation not found');
+
+      const { data: messages } = await supabase
+        .from('nuru_messages')
+        .select('id, role, content, sources, confidence, created_at')
+        .eq('conversation_id', conv.id)
+        .order('created_at', { ascending: true });
+
+      // Bump view count async
+      supabase.from('nuru_conversations')
+        .update({ share_view_count: (conv.share_view_count || 0) + 1 })
+        .eq('id', conv.id)
+        .then(() => {});
+
+      return new Response(JSON.stringify({ success: true, conversation: conv, messages: messages || [] }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     throw new Error(`Unknown action: ${action}`);
   } catch (error) {
     console.error('NuruAI error:', error);
@@ -1142,5 +1226,74 @@ For substantive questions, always include:
 6. **Strategic Questions** — advanced follow-ups
 
 Always end with:
-> **💡 Key Takeaway**: [One powerful, memorable sentence summarizing the most important insight]`;
+> **💡 Key Takeaway**: [One powerful, memorable sentence summarizing the most important insight]
+
+---
+## CITATION & CONFIDENCE PROTOCOL (MANDATORY)
+
+After your Key Takeaway, append two **machine-readable** blocks on their own lines, exactly as shown:
+
+\`\`\`citations
+[1] "<exact ≤180-char quote from the source document>" — <section or paragraph hint if visible>
+[2] "<exact ≤180-char quote>" — <section hint>
+\`\`\`
+
+\`\`\`confidence
+{"level": "high|medium|low", "score": 0.0-1.0, "reason": "<one short sentence>"}
+\`\`\`
+
+**Rules**:
+- Use bracketed numbers \`[1]\`, \`[2]\` inline in your prose to cite each source. Every factual claim that comes from the document MUST carry a citation marker.
+- Quotes inside the \`citations\` block must be VERBATIM from the document — never paraphrase.
+- \`high\` (0.85-1.0) only when exact quotes directly answer the question. \`medium\` (0.5-0.84) when answer is supported by partial/indirect evidence. \`low\` (<0.5) when the document barely addresses it.
+- If no document is provided, emit only the confidence block with \`{"level":"low","score":0.2,"reason":"No source document"}\` and skip the citations block.`;
+}
+
+// ===== CITATION + CONFIDENCE PARSER =====
+function extractCitationsAndConfidence(
+  fullContent: string,
+  doc: any,
+  documentContext: string
+): { sources: any[]; confidence: number | null; cleanContent: string } {
+  const sources: any[] = [];
+  let confidence: number | null = null;
+  let cleanContent = fullContent;
+
+  const citationsMatch = fullContent.match(/```citations\s*\n([\s\S]*?)```/);
+  if (citationsMatch) {
+    const block = citationsMatch[1];
+    const lines = block.split('\n').filter(l => l.trim());
+    for (const line of lines) {
+      const m = line.match(/^\[(\d+)\]\s*"([^"]+)"\s*(?:—|--|-)?\s*(.*)$/);
+      if (m) {
+        const quote = m[2].trim();
+        let snippetIdx = -1;
+        if (documentContext) {
+          const needle = quote.substring(0, Math.min(40, quote.length)).toLowerCase();
+          snippetIdx = documentContext.toLowerCase().indexOf(needle);
+        }
+        sources.push({
+          id: parseInt(m[1], 10),
+          quote,
+          section: m[3].trim() || null,
+          documentId: doc?.id || null,
+          documentTitle: doc?.title || null,
+          charOffset: snippetIdx >= 0 ? snippetIdx : null,
+        });
+      }
+    }
+    cleanContent = cleanContent.replace(citationsMatch[0], '').trim();
+  }
+
+  const confMatch = fullContent.match(/```confidence\s*\n([\s\S]*?)```/);
+  if (confMatch) {
+    try {
+      const obj = JSON.parse(confMatch[1].trim());
+      if (typeof obj.score === 'number') confidence = Math.max(0, Math.min(1, obj.score));
+      sources.push({ _meta: true, level: obj.level || null, reason: obj.reason || null });
+    } catch {}
+    cleanContent = cleanContent.replace(confMatch[0], '').trim();
+  }
+
+  return { sources, confidence, cleanContent };
 }
