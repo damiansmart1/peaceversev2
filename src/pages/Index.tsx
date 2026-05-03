@@ -1,4 +1,4 @@
-import HeroSection from "@/components/HeroSection";
+import SimpleHero from "@/components/SimpleHero";
 import Navigation from "@/components/Navigation";
 import SponsorsCarousel from "@/components/SponsorsCarousel";
 import AfricaMap from "@/components/AfricaMap";
@@ -75,7 +75,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
       <Navigation />
-      <HeroSection />
+      <SimpleHero />
 
       {/* International Frameworks Alignment Section */}
       <section className="py-24 bg-gradient-to-b from-muted/50 via-background to-background relative overflow-hidden">

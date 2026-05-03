@@ -2,7 +2,10 @@ import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Menu, X, UsersRound, Landmark, BadgeCheck, ShieldHalf, Earth, HeartHandshake, CircleUserRound, Power, Bolt, Compass, CircleHelp, Siren, Unplug, Wand2, Antenna, Flame, AudioLines, Award, OctagonAlert, Plug, Sparkles, ShieldHalf as ShieldIcon, Heart, MapPin as MapIcon, Volume2, MessageCircleMore, BrainCircuit } from "lucide-react";
+import { Menu, X, CircleUserRound, Power, Bolt, Compass, CircleHelp, Sparkles } from "lucide-react";
+import HubMenu from "@/components/nav/HubMenu";
+import HubMobileList from "@/components/nav/HubMobileList";
+import { HUBS } from "@/lib/hubs";
 import peaceverselogo from "@/assets/peaceverse-logo.png";
 import GlobalSearch from '@/components/GlobalSearch';
 import KeyboardShortcuts from '@/components/KeyboardShortcuts';
@@ -61,66 +64,8 @@ const Navigation = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-  // Get accessible features based on user role
-  const { features: accessibleFeatures, isLoading: featuresLoading } = useAccessibleFeatures();
-
-  // Map feature keys to navigation items
-  const featureNavMap: Record<string, { path: string; label: string; icon: React.ElementType }> = {
-    'incidents': { path: '/incidents', label: t('nav.incidents'), icon: Siren },
-    'community': { path: '/community', label: t('nav.community'), icon: UsersRound },
-    'peace-pulse': { path: '/peace-pulse', label: t('nav.peacePulse'), icon: Earth },
-    'proposals': { path: '/proposals', label: t('nav.pollsProposals'), icon: Landmark },
-    'safety': { path: '/safety', label: t('nav.safetyPortal'), icon: ShieldHalf },
-    'radio': { path: '/radio', label: 'Peace Radio', icon: Antenna },
-    'challenges': { path: '/challenges', label: t('nav.challenges'), icon: Flame },
-    'voice': { path: '/voice', label: 'Voice Stories', icon: AudioLines },
-    'verification': { path: '/verification', label: t('nav.verification'), icon: BadgeCheck },
-    'integrations': { path: '/integrations', label: 'Integrations', icon: Unplug },
-    'early-warning': { path: '/dashboard/early-warning', label: t('nav.earlyWarning'), icon: OctagonAlert },
-    'communication': { path: '/communication', label: 'Communication Hub', icon: MessageCircleMore },
-    'elections': { path: '/elections', label: 'Election Monitoring', icon: Landmark },
-    'nuru-ai': { path: '/nuru-ai', label: 'NuruAI', icon: BrainCircuit },
-  };
-
-  // Build navigation items based on accessible features
-  const navItems = useMemo(() => {
-    const items: { path: string; label: string; icon: React.ElementType }[] = [
-      { path: '/about', label: t('nav.about'), icon: Compass },
-    ];
-
-    // Add dashboard if logged in
-    if (user && !isAnonymous) {
-      items.push({ path: '/dashboard', label: t('nav.dashboard'), icon: CircleUserRound });
-    }
-
-    // Add feature-based items only if accessible
-    accessibleFeatures.forEach(featureKey => {
-      const navItem = featureNavMap[featureKey];
-      if (navItem) {
-        // Special handling for role-restricted features
-        if (featureKey === 'verification') {
-          if (roleStrings.includes('verifier') || roleStrings.includes('admin') || roleStrings.includes('government')) {
-            items.push(navItem);
-          }
-        } else if (featureKey === 'early-warning' || featureKey === 'integrations') {
-          if (roleStrings.includes('admin') || roleStrings.includes('government') || roleStrings.includes('partner')) {
-            items.push(navItem);
-          }
-        } else if (featureKey === 'communication') {
-          if (roleStrings.includes('admin') || roleStrings.includes('government') || roleStrings.includes('partner') || roleStrings.includes('verifier')) {
-            items.push(navItem);
-          }
-        } else if (featureKey === 'elections') {
-          // Elections is available to all users for public reporting
-          items.push(navItem);
-        } else {
-          items.push(navItem);
-        }
-      }
-    });
-
-    return items.sort((a, b) => a.label.localeCompare(b.label));
-  }, [accessibleFeatures, user, isAnonymous, roleStrings, t]);
+  // 4-hub simplified navigation. All previous routes remain available
+  // inside their hub dropdown — nothing was deleted.
   return <>
       <KeyboardShortcuts onSearchOpen={() => setSearchOpen(true)} />
       <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
@@ -154,41 +99,39 @@ const Navigation = () => {
               </div>
             </Link>
 
-            {/* Desktop Navigation - Horizontally Scrollable */}
-            <div className="hidden lg:flex items-center flex-1 px-2 overflow-hidden">
-              <ScrollArea className="w-full h-auto">
-                <div className="flex items-center gap-0.5 pb-1">
-                  {navItems.map((item, index) => {
-                  const Icon = item.icon;
-                  const isActive = location.pathname === item.path;
-                  return <motion.div key={item.path} initial={{
-                    opacity: 0,
-                    y: -20
-                  }} animate={{
-                    opacity: 1,
-                    y: 0
-                  }} transition={{
-                    delay: index * 0.05
-                  }}>
-                        <Link to={item.path}>
-                          <Button variant="ghost" size="sm" className={`relative flex items-center gap-1 px-2 py-1.5 h-8 rounded-md transition-all duration-300 group overflow-hidden whitespace-nowrap flex-shrink-0 text-xs ${isActive ? 'text-primary bg-primary/10' : 'text-foreground/70 hover:text-foreground hover:bg-muted/50'}`}>
-                            {/* Active indicator */}
-                            {isActive && <motion.div layoutId="navIndicator" className="absolute inset-0 bg-gradient-to-r from-primary/15 via-gold/10 to-secondary/15 rounded-md" transition={{
-                          type: "spring",
-                          bounce: 0.2,
-                          duration: 0.6
-                        }} />}
-                            <Icon className={`w-3.5 h-3.5 relative z-10 transition-colors flex-shrink-0 ${isActive ? 'text-primary' : 'text-gold/70 group-hover:text-gold'}`} />
-                            <span className="font-medium relative z-10 hidden 2xl:inline">{item.label}</span>
-                            
-                            {/* Hover underline */}
-                            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gold group-hover:w-3/4 transition-all duration-300" />
-                          </Button>
-                        </Link>
-                      </motion.div>;
-                })}
-                </div>
-              </ScrollArea>
+            {/* Desktop Navigation — 4 hubs + About + Dashboard */}
+            <div className="hidden lg:flex items-center justify-center flex-1 px-2">
+              <div className="flex items-center gap-1">
+                {HUBS.map((hub) => (
+                  <HubMenu
+                    key={hub.key}
+                    hub={hub}
+                    isActive={location.pathname === hub.primaryPath}
+                  />
+                ))}
+                <Link to="/about">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={`flex items-center gap-1.5 px-3 py-1.5 h-9 rounded-md text-sm font-medium ${location.pathname === '/about' ? 'text-primary bg-primary/10' : 'text-foreground/80 hover:text-foreground hover:bg-muted/50'}`}
+                  >
+                    <Compass className="w-4 h-4" />
+                    About
+                  </Button>
+                </Link>
+                {user && !isAnonymous && (
+                  <Link to="/dashboard">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={`flex items-center gap-1.5 px-3 py-1.5 h-9 rounded-md text-sm font-medium ${location.pathname === '/dashboard' ? 'text-primary bg-primary/10' : 'text-foreground/80 hover:text-foreground hover:bg-muted/50'}`}
+                    >
+                      <CircleUserRound className="w-4 h-4" />
+                      Dashboard
+                    </Button>
+                  </Link>
+                )}
+              </div>
             </div>
 
             {/* Right Side Actions */}
@@ -268,28 +211,27 @@ const Navigation = () => {
                   </div>
                   
                   <div className="space-y-1">
-                    {navItems.map((item, index) => {
-                    const Icon = item.icon;
-                    const isActive = location.pathname === item.path;
-                    return <motion.div key={item.path} initial={{
-                      opacity: 0,
-                      x: 20
-                    }} animate={{
-                      opacity: 1,
-                      x: 0
-                    }} transition={{
-                      delay: index * 0.05
-                    }}>
-                          <SheetClose asChild>
-                            <Button variant="ghost" asChild className={`w-full justify-start gap-3 h-12 rounded-lg text-left ${isActive ? 'bg-primary/10 text-primary border border-primary/20' : 'text-foreground/70 hover:text-foreground hover:bg-muted/50'}`}>
-                              <Link to={item.path}>
-                                <Icon className={`w-5 h-5 ${isActive ? 'text-primary' : 'text-gold/70'}`} />
-                                <span className="font-medium">{item.label}</span>
-                              </Link>
-                            </Button>
-                          </SheetClose>
-                        </motion.div>;
-                  })}
+                    <SheetClose asChild>
+                      <Link to="/about" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-foreground/80 hover:bg-muted/50">
+                        <Compass className="w-5 h-5 text-gold/70" />
+                        About
+                      </Link>
+                    </SheetClose>
+                    {user && !isAnonymous && (
+                      <SheetClose asChild>
+                        <Link to="/dashboard" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-foreground/80 hover:bg-muted/50">
+                          <CircleUserRound className="w-5 h-5 text-gold/70" />
+                          My Dashboard
+                        </Link>
+                      </SheetClose>
+                    )}
+                    <div className="pt-2">
+                      <SheetClose asChild>
+                        <div>
+                          <HubMobileList />
+                        </div>
+                      </SheetClose>
+                    </div>
                   </div>
                   
                   <div className="mt-8 pt-6 border-t border-border/30 space-y-4">
