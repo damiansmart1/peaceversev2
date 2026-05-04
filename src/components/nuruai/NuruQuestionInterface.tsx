@@ -32,6 +32,7 @@ import {
 import { useSubmitAIFeedback } from '@/hooks/useNuruGovernance';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/AuthContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { format, isToday, isYesterday, isThisWeek, isThisMonth } from 'date-fns';
 import { toast } from 'sonner';
 import {
@@ -87,7 +88,8 @@ const NuruQuestionInterface = () => {
   const setSelectedDocId = (id: string) => setSelectedDocIds(id && id !== 'none' ? [id] : []);
   const [question, setQuestion] = useState('');
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
-  const [leftSidebarOpen, setLeftSidebarOpen] = useState(true);
+  const isMobile = useIsMobile();
+  const [leftSidebarOpen, setLeftSidebarOpen] = useState(false);
   const [rightSidebarOpen, setRightSidebarOpen] = useState(false);
   const [streamingContent, setStreamingContent] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
@@ -146,6 +148,12 @@ const NuruQuestionInterface = () => {
   useEffect(() => {
     if (settings.autoScroll) messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages, streamingContent, settings.autoScroll]);
+
+  // Default left sidebar open on desktop, closed on mobile
+  useEffect(() => {
+    setLeftSidebarOpen(!isMobile);
+    if (isMobile) setRightSidebarOpen(false);
+  }, [isMobile]);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -573,7 +581,7 @@ const NuruQuestionInterface = () => {
 
   return (
     <div
-      className="flex h-[calc(100vh-240px)] rounded-2xl border border-primary/10 overflow-hidden bg-gradient-to-br from-primary/[0.02] via-card/30 to-secondary/[0.03] backdrop-blur-sm shadow-xl shadow-primary/[0.06] relative"
+      className="flex h-[calc(100vh-180px)] sm:h-[calc(100vh-240px)] rounded-xl sm:rounded-2xl border border-primary/10 overflow-hidden bg-gradient-to-br from-primary/[0.02] via-card/30 to-secondary/[0.03] backdrop-blur-sm shadow-xl shadow-primary/[0.06] relative"
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -608,13 +616,23 @@ const NuruQuestionInterface = () => {
 
       {/* ===== LEFT SIDEBAR: Conversations ===== */}
       <AnimatePresence>
+        {leftSidebarOpen && isMobile && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setLeftSidebarOpen(false)}
+            className="absolute inset-0 z-30 bg-background/60 backdrop-blur-sm md:hidden"
+          />
+        )}
         {leftSidebarOpen && (
           <motion.div
-            initial={{ width: 0, opacity: 0 }}
-            animate={{ width: 300, opacity: 1 }}
-            exit={{ width: 0, opacity: 0 }}
+            initial={isMobile ? { x: -320, opacity: 0 } : { width: 0, opacity: 0 }}
+            animate={isMobile ? { x: 0, opacity: 1 } : { width: 300, opacity: 1 }}
+            exit={isMobile ? { x: -320, opacity: 0 } : { width: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="border-r border-primary/10 bg-gradient-to-b from-card/90 via-card/60 to-primary/[0.03] backdrop-blur-md flex flex-col overflow-hidden"
+            style={isMobile ? { width: 'min(85vw, 320px)' } : undefined}
+            className={`border-r border-primary/10 bg-gradient-to-b from-card/95 via-card/85 to-primary/[0.05] backdrop-blur-md flex flex-col overflow-hidden ${isMobile ? 'absolute inset-y-0 left-0 z-40 shadow-2xl' : ''}`}
           >
             {/* New Chat Button */}
             <div className="p-3 border-b border-border/20">
@@ -713,7 +731,7 @@ const NuruQuestionInterface = () => {
                           isPinned={pinnedConversations.has(c.id)}
                           isEditing={editingConvId === c.id}
                           editTitle={editTitle}
-                          onSelect={() => setActiveConversationId(c.id)}
+                          onSelect={() => { setActiveConversationId(c.id); if (isMobile) setLeftSidebarOpen(false); }}
                           onPin={() => togglePin(c.id)}
                           onStartEdit={() => { setEditingConvId(c.id); setEditTitle(c.title || ''); }}
                           onSaveEdit={() => handleRename(c.id)}
@@ -1006,7 +1024,7 @@ const NuruQuestionInterface = () => {
         </AnimatePresence>
 
         {/* Input */}
-        <div className="border-t border-border/20 p-4 bg-gradient-to-t from-card/40 to-transparent backdrop-blur-sm">
+        <div className="border-t border-border/20 p-2 sm:p-4 bg-gradient-to-t from-card/40 to-transparent backdrop-blur-sm">
           <div className="max-w-3xl mx-auto">
             <div className="relative flex items-end gap-2 rounded-2xl border border-border/30 bg-background/70 backdrop-blur-md p-2 focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/10 focus-within:shadow-lg focus-within:shadow-primary/5 transition-all">
               {/* Attach button */}
@@ -1089,8 +1107,8 @@ const NuruQuestionInterface = () => {
               )}
             </div>
             <div className="flex items-center justify-between mt-1.5 px-1">
-              <p className="text-[9px] text-muted-foreground/30">
-                NuruAI grounds answers in source documents · Enter to send · Shift+Enter for new line · Esc to stop
+              <p className="text-[9px] text-muted-foreground/30 truncate">
+                <span className="hidden sm:inline">NuruAI grounds answers in source documents · </span>Enter to send<span className="hidden sm:inline"> · Shift+Enter for new line · Esc to stop</span>
               </p>
               <div className="flex items-center gap-2">
                 {attachments.length > 0 && (
@@ -1104,13 +1122,23 @@ const NuruQuestionInterface = () => {
 
       {/* ===== RIGHT SIDEBAR: Settings ===== */}
       <AnimatePresence>
+        {rightSidebarOpen && isMobile && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setRightSidebarOpen(false)}
+            className="absolute inset-0 z-30 bg-background/60 backdrop-blur-sm md:hidden"
+          />
+        )}
         {rightSidebarOpen && (
           <motion.div
-            initial={{ width: 0, opacity: 0 }}
-            animate={{ width: 300, opacity: 1 }}
-            exit={{ width: 0, opacity: 0 }}
+            initial={isMobile ? { x: 320, opacity: 0 } : { width: 0, opacity: 0 }}
+            animate={isMobile ? { x: 0, opacity: 1 } : { width: 300, opacity: 1 }}
+            exit={isMobile ? { x: 320, opacity: 0 } : { width: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="border-l border-border/20 bg-gradient-to-b from-card/80 to-card/40 backdrop-blur-md flex flex-col overflow-hidden"
+            style={isMobile ? { width: 'min(85vw, 320px)' } : undefined}
+            className={`border-l border-border/20 bg-gradient-to-b from-card/95 to-card/85 backdrop-blur-md flex flex-col overflow-hidden ${isMobile ? 'absolute inset-y-0 right-0 z-40 shadow-2xl' : ''}`}
           >
             <div className="h-12 border-b border-border/30 flex items-center justify-between px-4">
               <div className="flex items-center gap-2">
