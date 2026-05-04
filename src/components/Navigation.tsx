@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Menu, X, CircleUserRound, Power, Bolt, Compass, CircleHelp, Sparkles } from "lucide-react";
+import { Menu, X, CircleUserRound, Power, Bolt, Info, CircleHelp, Sparkles } from "lucide-react";
 import HubMenu from "@/components/nav/HubMenu";
 import HubMobileList from "@/components/nav/HubMobileList";
 import { HUBS } from "@/lib/hubs";
