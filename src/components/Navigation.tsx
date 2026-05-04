@@ -115,7 +115,7 @@ const Navigation = () => {
                     size="sm"
                     className={`flex items-center gap-1.5 px-3 py-1.5 h-9 rounded-md text-sm font-medium ${location.pathname === '/about' ? 'text-primary bg-primary/10' : 'text-foreground/80 hover:text-foreground hover:bg-muted/50'}`}
                   >
-                    <Compass className="w-4 h-4" />
+                    <Info className="w-4 h-4" />
                     About
                   </Button>
                 </Link>
@@ -213,7 +213,7 @@ const Navigation = () => {
                   <div className="space-y-1">
                     <SheetClose asChild>
                       <Link to="/about" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-foreground/80 hover:bg-muted/50">
-                        <Compass className="w-5 h-5 text-gold/70" />
+                        <Info className="w-5 h-5 text-gold/70" />
                         About
                       </Link>
                     </SheetClose>
