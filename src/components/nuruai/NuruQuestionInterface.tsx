@@ -1107,8 +1107,8 @@ const NuruQuestionInterface = () => {
               )}
             </div>
             <div className="flex items-center justify-between mt-1.5 px-1">
-              <p className="text-[9px] text-muted-foreground/30">
-                NuruAI grounds answers in source documents · Enter to send · Shift+Enter for new line · Esc to stop
+              <p className="text-[9px] text-muted-foreground/30 truncate">
+                <span className="hidden sm:inline">NuruAI grounds answers in source documents · </span>Enter to send<span className="hidden sm:inline"> · Shift+Enter for new line · Esc to stop</span>
               </p>
               <div className="flex items-center gap-2">
                 {attachments.length > 0 && (
