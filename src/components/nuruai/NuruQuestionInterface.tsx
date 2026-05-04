@@ -1122,13 +1122,23 @@ const NuruQuestionInterface = () => {
 
       {/* ===== RIGHT SIDEBAR: Settings ===== */}
       <AnimatePresence>
+        {rightSidebarOpen && isMobile && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setRightSidebarOpen(false)}
+            className="absolute inset-0 z-30 bg-background/60 backdrop-blur-sm md:hidden"
+          />
+        )}
         {rightSidebarOpen && (
           <motion.div
-            initial={{ width: 0, opacity: 0 }}
-            animate={{ width: 300, opacity: 1 }}
-            exit={{ width: 0, opacity: 0 }}
+            initial={isMobile ? { x: 320, opacity: 0 } : { width: 0, opacity: 0 }}
+            animate={isMobile ? { x: 0, opacity: 1 } : { width: 300, opacity: 1 }}
+            exit={isMobile ? { x: 320, opacity: 0 } : { width: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="border-l border-border/20 bg-gradient-to-b from-card/80 to-card/40 backdrop-blur-md flex flex-col overflow-hidden"
+            style={isMobile ? { width: 'min(85vw, 320px)' } : undefined}
+            className={`border-l border-border/20 bg-gradient-to-b from-card/95 to-card/85 backdrop-blur-md flex flex-col overflow-hidden ${isMobile ? 'absolute inset-y-0 right-0 z-40 shadow-2xl' : ''}`}
           >
             <div className="h-12 border-b border-border/30 flex items-center justify-between px-4">
               <div className="flex items-center gap-2">
