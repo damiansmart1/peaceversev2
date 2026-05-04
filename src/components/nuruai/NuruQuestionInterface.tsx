@@ -616,13 +616,24 @@ const NuruQuestionInterface = () => {
 
       {/* ===== LEFT SIDEBAR: Conversations ===== */}
       <AnimatePresence>
+        {leftSidebarOpen && isMobile && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setLeftSidebarOpen(false)}
+            className="absolute inset-0 z-30 bg-background/60 backdrop-blur-sm md:hidden"
+          />
+        )}
         {leftSidebarOpen && (
           <motion.div
-            initial={{ width: 0, opacity: 0 }}
-            animate={{ width: 300, opacity: 1 }}
-            exit={{ width: 0, opacity: 0 }}
+            initial={isMobile ? { x: -320, opacity: 0 } : { width: 0, opacity: 0 }}
+            animate={isMobile ? { x: 0, opacity: 1 } : { width: 300, opacity: 1 }}
+            exit={isMobile ? { x: -320, opacity: 0 } : { width: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="border-r border-primary/10 bg-gradient-to-b from-card/90 via-card/60 to-primary/[0.03] backdrop-blur-md flex flex-col overflow-hidden"
+            style={isMobile ? { width: 'min(85vw, 320px)' } : undefined}
+            className={`border-r border-primary/10 bg-gradient-to-b from-card/95 via-card/85 to-primary/[0.05] backdrop-blur-md flex flex-col overflow-hidden ${isMobile ? 'absolute inset-y-0 left-0 z-40 shadow-2xl' : ''}`}
+          >
           >
             {/* New Chat Button */}
             <div className="p-3 border-b border-border/20">
