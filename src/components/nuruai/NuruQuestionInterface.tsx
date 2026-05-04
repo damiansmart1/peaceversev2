@@ -149,6 +149,12 @@ const NuruQuestionInterface = () => {
     if (settings.autoScroll) messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages, streamingContent, settings.autoScroll]);
 
+  // Default left sidebar open on desktop, closed on mobile
+  useEffect(() => {
+    setLeftSidebarOpen(!isMobile);
+    if (isMobile) setRightSidebarOpen(false);
+  }, [isMobile]);
+
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
