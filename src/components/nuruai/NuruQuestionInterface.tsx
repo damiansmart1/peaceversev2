@@ -731,7 +731,7 @@ const NuruQuestionInterface = () => {
                           isPinned={pinnedConversations.has(c.id)}
                           isEditing={editingConvId === c.id}
                           editTitle={editTitle}
-                          onSelect={() => setActiveConversationId(c.id)}
+                          onSelect={() => { setActiveConversationId(c.id); if (isMobile) setLeftSidebarOpen(false); }}
                           onPin={() => togglePin(c.id)}
                           onStartEdit={() => { setEditingConvId(c.id); setEditTitle(c.title || ''); }}
                           onSaveEdit={() => handleRename(c.id)}
