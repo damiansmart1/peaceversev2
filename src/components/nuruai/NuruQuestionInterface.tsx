@@ -1024,7 +1024,7 @@ const NuruQuestionInterface = () => {
         </AnimatePresence>
 
         {/* Input */}
-        <div className="border-t border-border/20 p-4 bg-gradient-to-t from-card/40 to-transparent backdrop-blur-sm">
+        <div className="border-t border-border/20 p-2 sm:p-4 bg-gradient-to-t from-card/40 to-transparent backdrop-blur-sm">
           <div className="max-w-3xl mx-auto">
             <div className="relative flex items-end gap-2 rounded-2xl border border-border/30 bg-background/70 backdrop-blur-md p-2 focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/10 focus-within:shadow-lg focus-within:shadow-primary/5 transition-all">
               {/* Attach button */}
