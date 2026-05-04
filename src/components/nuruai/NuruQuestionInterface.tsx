@@ -581,7 +581,7 @@ const NuruQuestionInterface = () => {
 
   return (
     <div
-      className="flex h-[calc(100vh-240px)] rounded-2xl border border-primary/10 overflow-hidden bg-gradient-to-br from-primary/[0.02] via-card/30 to-secondary/[0.03] backdrop-blur-sm shadow-xl shadow-primary/[0.06] relative"
+      className="flex h-[calc(100vh-180px)] sm:h-[calc(100vh-240px)] rounded-xl sm:rounded-2xl border border-primary/10 overflow-hidden bg-gradient-to-br from-primary/[0.02] via-card/30 to-secondary/[0.03] backdrop-blur-sm shadow-xl shadow-primary/[0.06] relative"
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
