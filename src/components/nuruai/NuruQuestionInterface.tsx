@@ -88,7 +88,8 @@ const NuruQuestionInterface = () => {
   const setSelectedDocId = (id: string) => setSelectedDocIds(id && id !== 'none' ? [id] : []);
   const [question, setQuestion] = useState('');
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
-  const [leftSidebarOpen, setLeftSidebarOpen] = useState(true);
+  const isMobile = useIsMobile();
+  const [leftSidebarOpen, setLeftSidebarOpen] = useState(false);
   const [rightSidebarOpen, setRightSidebarOpen] = useState(false);
   const [streamingContent, setStreamingContent] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
