@@ -535,6 +535,7 @@ Format response as JSON:
         .from('nuru_conversations')
         .select('*, civic_documents(*)')
         .eq('id', conversationId)
+        .eq('user_id', userId)
         .single();
 
       if (!conv) throw new Error('Conversation not found');
