@@ -141,7 +141,8 @@ const APIKeysManager = () => {
       toast.success('API key created successfully');
     },
     onError: (error) => {
-      toast.error('Failed to create API key: ' + error.message);
+      console.error('API key creation error:', error);
+      toast.error('Failed to create API key. Please try again.');
     }
   });
 
