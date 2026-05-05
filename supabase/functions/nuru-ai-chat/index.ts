@@ -248,6 +248,11 @@ serve(async (req) => {
       const { data: { user } } = await supabase.auth.getUser(token);
       userId = user?.id || null;
     }
+    if (!userId) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     const startTime = Date.now();
 
