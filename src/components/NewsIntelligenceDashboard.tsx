@@ -118,21 +118,21 @@ function ReportDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogHeader>
-          <div className="flex items-center gap-2">
-            <BrainCircuit className="h-5 w-5 text-primary" />
-            <DialogTitle className="text-lg">AI Intelligence Report</DialogTitle>
+      <DialogContent className="max-w-3xl w-[calc(100vw-1rem)] sm:w-full max-h-[92vh] sm:max-h-[90vh] overflow-hidden flex flex-col p-4 sm:p-6 gap-3">
+        <DialogHeader className="pr-6">
+          <div className="flex items-center gap-2 min-w-0">
+            <BrainCircuit className="h-5 w-5 text-primary shrink-0" />
+            <DialogTitle className="text-base sm:text-lg truncate">AI Intelligence Report</DialogTitle>
           </div>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 pr-4">
+        <ScrollArea className="flex-1 min-h-0 -mr-2 pr-2 sm:pr-4">
           <div className="space-y-4">
             {/* Header */}
-            <div className="flex items-start gap-4">
+            <div className="flex items-start gap-3 sm:gap-4">
               <CredibilityMeter score={report.credibility_score} size="lg" />
-              <div className="flex-1">
-                <h3 className="font-bold text-lg">{report.title}</h3>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-bold text-base sm:text-lg break-words">{report.title}</h3>
                 <div className="flex items-center gap-2 mt-1 flex-wrap">
                   <Badge className={severityColors[report.severity_level]}>{report.severity_level}</Badge>
                   <Badge variant="outline">{report.category.replace(/_/g, ' ')}</Badge>
