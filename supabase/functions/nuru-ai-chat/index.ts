@@ -248,6 +248,11 @@ serve(async (req) => {
       const { data: { user } } = await supabase.auth.getUser(token);
       userId = user?.id || null;
     }
+    if (!userId) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     const startTime = Date.now();
 
@@ -259,6 +264,7 @@ serve(async (req) => {
         .from('nuru_conversations')
         .select('*, civic_documents(*)')
         .eq('id', conversationId)
+        .eq('user_id', userId)
         .single();
 
       if (!conv) throw new Error('Conversation not found');
@@ -529,6 +535,7 @@ Format response as JSON:
         .from('nuru_conversations')
         .select('*, civic_documents(*)')
         .eq('id', conversationId)
+        .eq('user_id', userId)
         .single();
 
       if (!conv) throw new Error('Conversation not found');
