@@ -269,11 +269,11 @@ function ReportDetailDialog({
                       href={url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-sm text-primary hover:underline"
+                      className="flex items-center gap-2 text-sm text-primary hover:underline min-w-0"
                     >
                       <ExternalLink className="h-3 w-3 shrink-0" />
-                      <span className="font-medium">{report.source_names?.[i] || 'Source'}</span>
-                      <span className="text-xs text-muted-foreground truncate">{url}</span>
+                      <span className="font-medium shrink-0">{report.source_names?.[i] || 'Source'}</span>
+                      <span className="text-xs text-muted-foreground truncate min-w-0">{url}</span>
                     </a>
                   ))}
                 </div>
