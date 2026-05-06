@@ -126,7 +126,7 @@ function ReportDetailDialog({
         </DialogHeader>
 
         <div className="min-h-0 overflow-x-auto overflow-y-auto overscroll-contain touch-pan-x touch-pan-y rounded-md pr-2 sm:pr-4 pb-2 [scrollbar-gutter:stable]">
-          <div className="min-w-full w-max max-w-[42rem] sm:w-full sm:max-w-none space-y-4">
+          <div className="w-[42rem] max-w-none sm:w-full space-y-4">
             {/* Header */}
             <div className="flex items-start gap-3 sm:gap-4">
               <CredibilityMeter score={report.credibility_score} size="lg" />
