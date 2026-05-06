@@ -117,7 +117,7 @@ function ReportDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-3xl w-[calc(100vw-1rem)] sm:w-full h-[calc(100dvh-1rem)] sm:h-[min(90dvh,760px)] overflow-hidden flex flex-col p-4 sm:p-6 gap-3">
+      <DialogContent className="max-w-3xl max-w-[calc(100vw-1rem)] w-[calc(100vw-1rem)] sm:w-full h-[calc(100dvh-1rem)] sm:h-[min(90dvh,760px)] overflow-hidden [grid-template-rows:auto_minmax(0,1fr)] p-4 sm:p-6 gap-3">
         <DialogHeader className="pr-6">
           <div className="flex items-center gap-2 min-w-0">
             <BrainCircuit className="h-5 w-5 text-primary shrink-0" />
@@ -125,8 +125,8 @@ function ReportDetailDialog({
           </div>
         </DialogHeader>
 
-        <div className="flex-1 min-h-0 overflow-auto overscroll-contain touch-pan-x touch-pan-y rounded-md pr-2 sm:pr-4 pb-2">
-          <div className="min-w-[42rem] sm:min-w-0 space-y-4">
+        <div className="min-h-0 overflow-x-auto overflow-y-auto overscroll-contain touch-pan-x touch-pan-y rounded-md pr-2 sm:pr-4 pb-2 [scrollbar-gutter:stable]">
+          <div className="min-w-full w-max max-w-[42rem] sm:w-full sm:max-w-none space-y-4">
             {/* Header */}
             <div className="flex items-start gap-3 sm:gap-4">
               <CredibilityMeter score={report.credibility_score} size="lg" />
