@@ -19,7 +19,7 @@ const SMSIntegrationSection = () => {
   const [demoMessage, setDemoMessage] = useState('');
 
   // Fetch USSD logs from database
-  const { data: ussdLogs, isLoading: logsLoading, refetch: refetchLogs } = useQuery({
+  const { data: ussdLogs, isLoading: logsLoading, refetch: refetchLogs, dataUpdatedAt } = useQuery({
     queryKey: ['ussd-logs'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -27,13 +27,12 @@ const SMSIntegrationSection = () => {
         .select('*')
         .order('created_at', { ascending: false })
         .limit(50);
-      
       if (error) throw error;
       return data || [];
-    }
+    },
+    refetchInterval: 15000,
   });
 
-  // Fetch USSD sessions
   const { data: ussdSessions, isLoading: sessionsLoading, refetch: refetchSessions } = useQuery({
     queryKey: ['ussd-sessions'],
     queryFn: async () => {
@@ -42,11 +41,19 @@ const SMSIntegrationSection = () => {
         .select('*')
         .order('created_at', { ascending: false })
         .limit(20);
-      
       if (error) throw error;
       return data || [];
-    }
+    },
+    refetchInterval: 30000,
   });
+
+  const COUNTRY_NAMES: Record<string, string> = {
+    KE: 'Kenya', NG: 'Nigeria', ET: 'Ethiopia', GH: 'Ghana', ZA: 'South Africa',
+    TZ: 'Tanzania', UG: 'Uganda', RW: 'Rwanda', SN: 'Senegal', CI: "Côte d'Ivoire",
+    CM: 'Cameroon', SD: 'Sudan', SO: 'Somalia', ZM: 'Zambia', ZW: 'Zimbabwe',
+    MW: 'Malawi', BI: 'Burundi', CD: 'DR Congo', MZ: 'Mozambique', BF: 'Burkina Faso',
+    ML: 'Mali', NE: 'Niger', EG: 'Egypt', MA: 'Morocco', TN: 'Tunisia', DZ: 'Algeria',
+  };
 
   // Calculate stats from logs
   const stats = {
