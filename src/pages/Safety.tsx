@@ -5,10 +5,11 @@ import SafetyProtectionSection from '@/components/SafetyProtectionSection';
 import CommunityTrustSection from '@/components/CommunityTrustSection';
 import OfflineAccessSection from '@/components/OfflineAccessSection';
 import { SafetyResourceLibrary } from '@/components/SafetyResourceLibrary';
+import SMSIntegrationSection from '@/components/SMSIntegrationSection';
 import { useTranslationContext } from '@/components/TranslationProvider';
 import SectionImageBanner from '@/components/SectionImageBanner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ShieldHalf, OctagonAlert, UsersRound, WifiHigh, BookMarked } from 'lucide-react';
+import { ShieldHalf, OctagonAlert, UsersRound, WifiHigh, BookMarked, Smartphone } from 'lucide-react';
 import safetyProtection from "@/assets/safety-protection.jpg";
 
 const Safety = () => {
@@ -29,7 +30,7 @@ const Safety = () => {
         </div>
         
         <Tabs defaultValue="moderation" className="max-w-6xl mx-auto">
-          <TabsList className="grid w-full grid-cols-5 mb-6 sm:mb-8 h-auto p-1">
+          <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 mb-6 sm:mb-8 h-auto p-1 gap-1">
             <TabsTrigger value="moderation" className="gap-1 sm:gap-2 text-xs sm:text-sm py-2 px-1 sm:px-3 flex-col sm:flex-row h-auto">
               <ShieldHalf className="w-4 h-4 shrink-0" />
               <span className="hidden xs:inline truncate">{t('safety.moderation')}</span>
@@ -45,6 +46,10 @@ const Safety = () => {
             <TabsTrigger value="offline" className="gap-1 sm:gap-2 text-xs sm:text-sm py-2 px-1 sm:px-3 flex-col sm:flex-row h-auto">
               <WifiHigh className="w-4 h-4 shrink-0" />
               <span className="hidden xs:inline truncate">{t('safety.offline')}</span>
+            </TabsTrigger>
+            <TabsTrigger value="sms" className="gap-1 sm:gap-2 text-xs sm:text-sm py-2 px-1 sm:px-3 flex-col sm:flex-row h-auto">
+              <Smartphone className="w-4 h-4 shrink-0" />
+              <span className="hidden xs:inline truncate">SMS / USSD</span>
             </TabsTrigger>
             <TabsTrigger value="resources" className="gap-1 sm:gap-2 text-xs sm:text-sm py-2 px-1 sm:px-3 flex-col sm:flex-row h-auto">
               <BookMarked className="w-4 h-4 shrink-0" />
@@ -66,6 +71,10 @@ const Safety = () => {
 
           <TabsContent value="offline">
             <OfflineAccessSection />
+          </TabsContent>
+
+          <TabsContent value="sms">
+            <SMSIntegrationSection />
           </TabsContent>
 
           <TabsContent value="resources">

@@ -19,7 +19,7 @@ const SMSIntegrationSection = () => {
   const [demoMessage, setDemoMessage] = useState('');
 
   // Fetch USSD logs from database
-  const { data: ussdLogs, isLoading: logsLoading, refetch: refetchLogs } = useQuery({
+  const { data: ussdLogs, isLoading: logsLoading, refetch: refetchLogs, dataUpdatedAt } = useQuery({
     queryKey: ['ussd-logs'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -27,13 +27,12 @@ const SMSIntegrationSection = () => {
         .select('*')
         .order('created_at', { ascending: false })
         .limit(50);
-      
       if (error) throw error;
       return data || [];
-    }
+    },
+    refetchInterval: 15000,
   });
 
-  // Fetch USSD sessions
   const { data: ussdSessions, isLoading: sessionsLoading, refetch: refetchSessions } = useQuery({
     queryKey: ['ussd-sessions'],
     queryFn: async () => {
@@ -42,11 +41,19 @@ const SMSIntegrationSection = () => {
         .select('*')
         .order('created_at', { ascending: false })
         .limit(20);
-      
       if (error) throw error;
       return data || [];
-    }
+    },
+    refetchInterval: 30000,
   });
+
+  const COUNTRY_NAMES: Record<string, string> = {
+    KE: 'Kenya', NG: 'Nigeria', ET: 'Ethiopia', GH: 'Ghana', ZA: 'South Africa',
+    TZ: 'Tanzania', UG: 'Uganda', RW: 'Rwanda', SN: 'Senegal', CI: "Côte d'Ivoire",
+    CM: 'Cameroon', SD: 'Sudan', SO: 'Somalia', ZM: 'Zambia', ZW: 'Zimbabwe',
+    MW: 'Malawi', BI: 'Burundi', CD: 'DR Congo', MZ: 'Mozambique', BF: 'Burkina Faso',
+    ML: 'Mali', NE: 'Niger', EG: 'Egypt', MA: 'Morocco', TN: 'Tunisia', DZ: 'Algeria',
+  };
 
   // Calculate stats from logs
   const stats = {
@@ -190,17 +197,22 @@ const SMSIntegrationSection = () => {
                     Real-time interactions from users across Africa
                   </CardDescription>
                 </div>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => {
-                    refetchLogs();
-                    refetchSessions();
-                  }}
-                >
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  Refresh
-                </Button>
+                <div className="flex items-center gap-2">
+                  <span className="hidden sm:inline text-xs text-muted-foreground">
+                    Auto-refresh · {dataUpdatedAt ? format(new Date(dataUpdatedAt), 'HH:mm:ss') : '—'}
+                  </span>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => {
+                      refetchLogs();
+                      refetchSessions();
+                    }}
+                  >
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Refresh
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
@@ -268,20 +280,29 @@ const SMSIntegrationSection = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                 {Object.entries(
                   (ussdLogs || []).reduce((acc: Record<string, number>, log: any) => {
                     acc[log.country_code] = (acc[log.country_code] || 0) + 1;
                     return acc;
                   }, {})
-                ).sort((a, b) => b[1] - a[1]).map(([country, count]) => (
-                  <div key={country} className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border border-border/50">
-                    <Badge variant="outline" className="font-mono">
-                      {country}
-                    </Badge>
-                    <span className="font-bold text-primary">{count as number}</span>
-                  </div>
-                ))}
+                ).sort((a, b) => (b[1] as number) - (a[1] as number)).map(([country, count]) => {
+                  const total = ussdLogs?.length || 1;
+                  const pct = Math.round(((count as number) / total) * 100);
+                  return (
+                    <div key={country} className="p-3 rounded-lg bg-muted/50 border border-border/50 space-y-1.5">
+                      <div className="flex items-center justify-between gap-2">
+                        <Badge variant="outline" className="font-mono shrink-0">{country}</Badge>
+                        <span className="font-bold text-primary text-sm">{count as number}</span>
+                      </div>
+                      <p className="text-xs font-medium truncate">{COUNTRY_NAMES[country] || 'Unknown'}</p>
+                      <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                        <div className="h-full bg-primary rounded-full" style={{ width: `${pct}%` }} />
+                      </div>
+                      <p className="text-[10px] text-muted-foreground">{pct}% of activity</p>
+                    </div>
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
