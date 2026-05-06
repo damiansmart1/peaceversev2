@@ -5,7 +5,6 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
@@ -118,7 +117,7 @@ function ReportDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-3xl w-[calc(100vw-1rem)] sm:w-full max-h-[92vh] sm:max-h-[90vh] overflow-hidden flex flex-col p-4 sm:p-6 gap-3">
+      <DialogContent className="max-w-3xl w-[calc(100vw-1rem)] sm:w-full h-[calc(100dvh-1rem)] sm:h-[min(90dvh,760px)] overflow-hidden flex flex-col p-4 sm:p-6 gap-3">
         <DialogHeader className="pr-6">
           <div className="flex items-center gap-2 min-w-0">
             <BrainCircuit className="h-5 w-5 text-primary shrink-0" />
@@ -126,8 +125,8 @@ function ReportDetailDialog({
           </div>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 min-h-0 -mr-2 pr-2 sm:pr-4">
-          <div className="space-y-4">
+        <div className="flex-1 min-h-0 overflow-auto overscroll-contain touch-pan-x touch-pan-y rounded-md pr-2 sm:pr-4 pb-2">
+          <div className="min-w-[42rem] sm:min-w-0 space-y-4">
             {/* Header */}
             <div className="flex items-start gap-3 sm:gap-4">
               <CredibilityMeter score={report.credibility_score} size="lg" />
@@ -354,7 +353,7 @@ function ReportDetailDialog({
               </>
             )}
           </div>
-        </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   );
