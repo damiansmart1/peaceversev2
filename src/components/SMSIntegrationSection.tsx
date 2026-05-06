@@ -197,17 +197,22 @@ const SMSIntegrationSection = () => {
                     Real-time interactions from users across Africa
                   </CardDescription>
                 </div>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => {
-                    refetchLogs();
-                    refetchSessions();
-                  }}
-                >
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  Refresh
-                </Button>
+                <div className="flex items-center gap-2">
+                  <span className="hidden sm:inline text-xs text-muted-foreground">
+                    Auto-refresh · {dataUpdatedAt ? format(new Date(dataUpdatedAt), 'HH:mm:ss') : '—'}
+                  </span>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => {
+                      refetchLogs();
+                      refetchSessions();
+                    }}
+                  >
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Refresh
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
@@ -275,20 +280,29 @@ const SMSIntegrationSection = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                 {Object.entries(
                   (ussdLogs || []).reduce((acc: Record<string, number>, log: any) => {
                     acc[log.country_code] = (acc[log.country_code] || 0) + 1;
                     return acc;
                   }, {})
-                ).sort((a, b) => b[1] - a[1]).map(([country, count]) => (
-                  <div key={country} className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border border-border/50">
-                    <Badge variant="outline" className="font-mono">
-                      {country}
-                    </Badge>
-                    <span className="font-bold text-primary">{count as number}</span>
-                  </div>
-                ))}
+                ).sort((a, b) => (b[1] as number) - (a[1] as number)).map(([country, count]) => {
+                  const total = ussdLogs?.length || 1;
+                  const pct = Math.round(((count as number) / total) * 100);
+                  return (
+                    <div key={country} className="p-3 rounded-lg bg-muted/50 border border-border/50 space-y-1.5">
+                      <div className="flex items-center justify-between gap-2">
+                        <Badge variant="outline" className="font-mono shrink-0">{country}</Badge>
+                        <span className="font-bold text-primary text-sm">{count as number}</span>
+                      </div>
+                      <p className="text-xs font-medium truncate">{COUNTRY_NAMES[country] || 'Unknown'}</p>
+                      <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                        <div className="h-full bg-primary rounded-full" style={{ width: `${pct}%` }} />
+                      </div>
+                      <p className="text-[10px] text-muted-foreground">{pct}% of activity</p>
+                    </div>
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
