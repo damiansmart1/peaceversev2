@@ -226,11 +226,7 @@ const Navigation = () => {
                       </SheetClose>
                     )}
                     <div className="pt-2">
-                      <SheetClose asChild>
-                        <div>
-                          <HubMobileList />
-                        </div>
-                      </SheetClose>
+                      <HubMobileList />
                     </div>
                   </div>
                   
