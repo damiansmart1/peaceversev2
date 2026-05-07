@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Home, Siren, Eye, Megaphone, Sparkles } from "lucide-react";
+import { Home, Siren, Eye, Megaphone, Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdminCheck } from "@/hooks/useAdminCheck";
@@ -58,7 +58,7 @@ const MobileBottomNav = () => {
       >
         <div className="grid grid-cols-5 max-w-md mx-auto">
           <NavBtn to="/" label="Home" icon={Home} />
-          <NavBtn to="/peace-pulse" label="Watch" icon={Eye} />
+          <NavBtn to="/peace-pulse" label="Monitor" icon={Eye} />
 
           {/* Center FAB-style Report button */}
           <button
@@ -74,7 +74,7 @@ const MobileBottomNav = () => {
             </span>
           </button>
 
-          <NavBtn to="/community" label="Act" icon={Megaphone} />
+          <NavBtn to="/community" label="Community" icon={Megaphone} />
 
           <Sheet>
             <SheetTrigger asChild>
@@ -82,7 +82,7 @@ const MobileBottomNav = () => {
                 className="flex flex-col items-center justify-center gap-0.5 py-2 min-h-[3.5rem] text-muted-foreground hover:text-foreground transition-colors"
                 aria-label="More"
               >
-                <Sparkles className="h-[18px] w-[18px] text-gold" />
+                <Menu className="h-[18px] w-[18px]" />
                 <span className="text-[10px] font-medium leading-none">More</span>
               </button>
             </SheetTrigger>
