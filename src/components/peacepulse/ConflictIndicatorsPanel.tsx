@@ -1,7 +1,10 @@
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import { 
   AlertTriangle, 
   Shield, 
@@ -153,8 +156,10 @@ const getProgressColor = (value: number, isRisk: boolean = false) => {
 
 const ConflictIndicatorsPanel = ({ countryCode = 'all', countryName = 'All Countries' }: ConflictIndicatorsPanelProps) => {
   const indicators = generateIndicators(countryCode);
-  
+  const [selected, setSelected] = useState<IndicatorData | null>(null);
+
   const categories = Array.from(new Set(indicators.map(i => i.category)));
+  const isRiskIndicator = (n: string) => /risk|stress|need|alert/i.test(n);
   
   return (
     <Card className="border-border bg-card/80 backdrop-blur-sm">
@@ -216,16 +221,13 @@ const ConflictIndicatorsPanel = ({ countryCode = 'all', countryName = 'All Count
                           </div>
                           <div>
                             <h5 className="font-medium text-sm">{indicator.name}</h5>
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger className="text-xs text-muted-foreground hover:text-foreground cursor-help">
-                                  View details
-                                </TooltipTrigger>
-                                <TooltipContent className="max-w-xs">
-                                  <p>{indicator.description}</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
+                            <button
+                              type="button"
+                              onClick={() => setSelected(indicator)}
+                              className="text-xs text-primary hover:underline cursor-pointer text-left"
+                            >
+                              View details
+                            </button>
                           </div>
                         </div>
                         <div className="text-right">
@@ -259,6 +261,66 @@ const ConflictIndicatorsPanel = ({ countryCode = 'all', countryName = 'All Count
           </div>
         ))}
       </CardContent>
+
+      <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
+        <DialogContent className="max-w-md">
+          {selected && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <span className="p-2 rounded-md bg-primary/10" style={{ color: selected.color }}>
+                    {selected.icon}
+                  </span>
+                  {selected.name}
+                </DialogTitle>
+                <DialogDescription>
+                  {selected.category} indicator • {countryName}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="flex items-end justify-between">
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide">Current value</p>
+                    <p className={`text-4xl font-bold ${getValueColor(selected.value, isRiskIndicator(selected.name))}`}>
+                      {selected.value}
+                      <span className="text-lg text-muted-foreground">/100</span>
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide">Trend</p>
+                    <div className="flex items-center justify-end gap-1">
+                      <TrendIcon trend={selected.trend} value={selected.trendValue} />
+                      <span className="text-sm font-medium capitalize">
+                        {selected.trend} {selected.trendValue}%
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div className="relative h-2 rounded-full bg-muted overflow-hidden">
+                  <div
+                    className={`absolute left-0 top-0 h-full rounded-full ${getProgressColor(selected.value, isRiskIndicator(selected.name))}`}
+                    style={{ width: `${selected.value}%` }}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <h4 className="text-sm font-semibold">About this indicator</h4>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{selected.description}</p>
+                </div>
+                <div className="rounded-lg border border-border bg-muted/30 p-3 space-y-2">
+                  <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Methodology</h4>
+                  <p className="text-xs text-muted-foreground">
+                    Aligned with UN OCHA Early Warning Framework and Global Peace Index methodology. Values are
+                    composite scores derived from real-time citizen reports, verified incidents, and partner data feeds.
+                  </p>
+                </div>
+                <div className="flex justify-end">
+                  <Button variant="outline" size="sm" onClick={() => setSelected(null)}>Close</Button>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };
