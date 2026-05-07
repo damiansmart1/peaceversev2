@@ -156,8 +156,10 @@ const getProgressColor = (value: number, isRisk: boolean = false) => {
 
 const ConflictIndicatorsPanel = ({ countryCode = 'all', countryName = 'All Countries' }: ConflictIndicatorsPanelProps) => {
   const indicators = generateIndicators(countryCode);
-  
+  const [selected, setSelected] = useState<IndicatorData | null>(null);
+
   const categories = Array.from(new Set(indicators.map(i => i.category)));
+  const isRiskIndicator = (n: string) => /risk|stress|need|alert/i.test(n);
   
   return (
     <Card className="border-border bg-card/80 backdrop-blur-sm">
