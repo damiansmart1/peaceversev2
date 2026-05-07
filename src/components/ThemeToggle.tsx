@@ -32,7 +32,7 @@ export default function ThemeToggle() {
           </motion.div>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-[120px]">
+      <DropdownMenuContent align="end" className="min-w-[120px] z-[80]">
         <DropdownMenuItem
           onClick={() => setTheme("light")}
           className={theme === "light" ? "bg-primary/10 text-primary" : ""}
