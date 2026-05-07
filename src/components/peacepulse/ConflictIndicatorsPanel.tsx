@@ -221,16 +221,13 @@ const ConflictIndicatorsPanel = ({ countryCode = 'all', countryName = 'All Count
                           </div>
                           <div>
                             <h5 className="font-medium text-sm">{indicator.name}</h5>
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger className="text-xs text-muted-foreground hover:text-foreground cursor-help">
-                                  View details
-                                </TooltipTrigger>
-                                <TooltipContent className="max-w-xs">
-                                  <p>{indicator.description}</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
+                            <button
+                              type="button"
+                              onClick={() => setSelected(indicator)}
+                              className="text-xs text-primary hover:underline cursor-pointer text-left"
+                            >
+                              View details
+                            </button>
                           </div>
                         </div>
                         <div className="text-right">
