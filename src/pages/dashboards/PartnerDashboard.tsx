@@ -365,14 +365,14 @@ const PartnerDashboard = () => {
 
           {/* Main Content Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="bg-card/80 backdrop-blur-sm border border-border/50 p-1 rounded-xl w-full overflow-x-auto flex flex-nowrap md:grid md:grid-cols-8 gap-1">
+            <TabsList className="bg-card/80 backdrop-blur-sm border border-border/50 p-1 rounded-xl w-full overflow-x-auto flex flex-nowrap md:grid md:grid-cols-12 gap-1">
               <TabsTrigger value="overview" className="gap-2 shrink-0 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all">
                 <Activity className="w-4 h-4" />
                 <span className="hidden lg:inline">Overview</span>
               </TabsTrigger>
               <TabsTrigger value="live" className="gap-2 shrink-0 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all">
                 <Radio className="w-4 h-4" />
-                <span className="hidden lg:inline">Live Feed</span>
+                <span className="hidden lg:inline">Live</span>
               </TabsTrigger>
               <TabsTrigger value="heatmap" className="gap-2 shrink-0 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all">
                 <Map className="w-4 h-4" />
@@ -386,9 +386,25 @@ const PartnerDashboard = () => {
                 <Analytics className="w-4 h-4" />
                 <span className="hidden lg:inline">Advanced</span>
               </TabsTrigger>
+              <TabsTrigger value="briefings" className="gap-2 shrink-0 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all">
+                <Brain className="w-4 h-4" />
+                <span className="hidden lg:inline">Briefings</span>
+              </TabsTrigger>
               <TabsTrigger value="watchlist" className="gap-2 shrink-0 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all">
                 <Bookmark className="w-4 h-4" />
                 <span className="hidden lg:inline">Watchlist</span>
+              </TabsTrigger>
+              <TabsTrigger value="workspace" className="gap-2 shrink-0 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all">
+                <StickyNote className="w-4 h-4" />
+                <span className="hidden lg:inline">Workspace</span>
+              </TabsTrigger>
+              <TabsTrigger value="impact" className="gap-2 shrink-0 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all">
+                <HeartHandshake className="w-4 h-4" />
+                <span className="hidden lg:inline">Impact</span>
+              </TabsTrigger>
+              <TabsTrigger value="api" className="gap-2 shrink-0 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all">
+                <Code2 className="w-4 h-4" />
+                <span className="hidden lg:inline">API</span>
               </TabsTrigger>
               <TabsTrigger value="incidents" className="gap-2 shrink-0 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all">
                 <FileText className="w-4 h-4" />
