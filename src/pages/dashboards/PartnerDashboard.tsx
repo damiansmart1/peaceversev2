@@ -20,6 +20,10 @@ import { PartnerAdvancedAnalytics } from '@/components/partner/PartnerAdvancedAn
 import { PartnerSavedFilters } from '@/components/partner/PartnerSavedFilters';
 import { PartnerAuditLog } from '@/components/partner/PartnerAuditLog';
 import { PartnerIncidentHeatmap } from '@/components/partner/PartnerIncidentHeatmap';
+import { PartnerIntelligenceBriefings } from '@/components/partner/PartnerIntelligenceBriefings';
+import { PartnerCollaboration } from '@/components/partner/PartnerCollaboration';
+import { PartnerApiConsole } from '@/components/partner/PartnerApiConsole';
+import { PartnerImpactTracker } from '@/components/partner/PartnerImpactTracker';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, subDays, subMonths } from 'date-fns';
@@ -54,6 +58,10 @@ import {
   Bookmark,
   Map,
   History,
+  HeartHandshake,
+  Code2,
+  StickyNote,
+  Brain,
   TrendingUp as Analytics
 } from 'lucide-react';
 import { toast } from 'sonner';
