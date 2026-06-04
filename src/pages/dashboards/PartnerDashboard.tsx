@@ -556,9 +556,33 @@ const PartnerDashboard = () => {
               <PartnerAdvancedAnalytics />
             </TabsContent>
 
+            {/* Intelligence Briefings Tab */}
+            <TabsContent value="briefings" className="mt-6">
+              <PartnerIntelligenceBriefings
+                analytics={analytics}
+                dateRange={dateRange}
+                countryFilter={countryFilter}
+              />
+            </TabsContent>
+
             {/* Watchlist Tab */}
             <TabsContent value="watchlist" className="mt-6">
               <PartnerWatchlist />
+            </TabsContent>
+
+            {/* Workspace (Collaboration) Tab */}
+            <TabsContent value="workspace" className="mt-6">
+              <PartnerCollaboration />
+            </TabsContent>
+
+            {/* Impact Tracker Tab */}
+            <TabsContent value="impact" className="mt-6">
+              <PartnerImpactTracker />
+            </TabsContent>
+
+            {/* API & Webhooks Console Tab */}
+            <TabsContent value="api" className="mt-6">
+              <PartnerApiConsole />
             </TabsContent>
 
             {/* Incidents Tab */}
