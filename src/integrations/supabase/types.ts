@@ -5469,6 +5469,162 @@ export type Database = {
           },
         ]
       }
+      partner_interventions: {
+        Row: {
+          beneficiaries_reached: number | null
+          beneficiaries_target: number | null
+          budget_usd: number | null
+          country: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          donor: string | null
+          end_date: string | null
+          id: string
+          organization_name: string
+          outcome_summary: string | null
+          programme_name: string
+          region: string | null
+          sdg_alignment: string[] | null
+          spent_usd: number | null
+          start_date: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          beneficiaries_reached?: number | null
+          beneficiaries_target?: number | null
+          budget_usd?: number | null
+          country?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          donor?: string | null
+          end_date?: string | null
+          id?: string
+          organization_name: string
+          outcome_summary?: string | null
+          programme_name: string
+          region?: string | null
+          sdg_alignment?: string[] | null
+          spent_usd?: number | null
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          beneficiaries_reached?: number | null
+          beneficiaries_target?: number | null
+          budget_usd?: number | null
+          country?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          donor?: string | null
+          end_date?: string | null
+          id?: string
+          organization_name?: string
+          outcome_summary?: string | null
+          programme_name?: string
+          region?: string | null
+          sdg_alignment?: string[] | null
+          spent_usd?: number | null
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      partner_notes: {
+        Row: {
+          body: string | null
+          created_at: string
+          created_by: string
+          id: string
+          is_pinned: boolean | null
+          organization_name: string | null
+          related_incident_id: string | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          is_pinned?: boolean | null
+          organization_name?: string | null
+          related_incident_id?: string | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          is_pinned?: boolean | null
+          organization_name?: string | null
+          related_incident_id?: string | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      partner_tasks: {
+        Row: {
+          assigned_to: string | null
+          completed_at: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          due_date: string | null
+          id: string
+          organization_name: string | null
+          priority: string
+          related_hotspot_id: string | null
+          related_incident_id: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          completed_at?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          organization_name?: string | null
+          priority?: string
+          related_hotspot_id?: string | null
+          related_incident_id?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          organization_name?: string | null
+          priority?: string
+          related_hotspot_id?: string | null
+          related_incident_id?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       partnership_inquiries: {
         Row: {
           contact_email: string
