@@ -24,6 +24,7 @@ import { PartnerIntelligenceBriefings } from '@/components/partner/PartnerIntell
 import { PartnerCollaboration } from '@/components/partner/PartnerCollaboration';
 import { PartnerApiConsole } from '@/components/partner/PartnerApiConsole';
 import { PartnerImpactTracker } from '@/components/partner/PartnerImpactTracker';
+import PartnerAboutSection from '@/components/partner/PartnerAboutSection';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, subDays, subMonths } from 'date-fns';
@@ -179,7 +180,7 @@ const PartnerDashboard = () => {
           <DashboardHeroBanner
             icon={<Shield className="h-8 w-8 text-primary" />}
             title="Partner Analytics Dashboard"
-            subtitle="Comprehensive incident monitoring and analysis platform"
+            subtitle="Comprehensive early warning, intelligence, and impact monitoring for institutional partners across Africa"
             onRefresh={handleRefresh}
             isRefreshing={isRefetching}
             actions={
@@ -417,7 +418,8 @@ const PartnerDashboard = () => {
             </TabsList>
 
             {/* Overview Tab */}
-            <TabsContent value="overview" className="mt-6">
+            <TabsContent value="overview" className="mt-6 space-y-6">
+              <PartnerAboutSection />
               {analytics && <PartnerAnalyticsCharts data={analytics} />}
             </TabsContent>
 
