@@ -418,7 +418,8 @@ const PartnerDashboard = () => {
             </TabsList>
 
             {/* Overview Tab */}
-            <TabsContent value="overview" className="mt-6">
+            <TabsContent value="overview" className="mt-6 space-y-6">
+              <PartnerAboutSection />
               {analytics && <PartnerAnalyticsCharts data={analytics} />}
             </TabsContent>
 
