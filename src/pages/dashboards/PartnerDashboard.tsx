@@ -180,7 +180,7 @@ const PartnerDashboard = () => {
           <DashboardHeroBanner
             icon={<Shield className="h-8 w-8 text-primary" />}
             title="Partner Analytics Dashboard"
-            subtitle="Comprehensive incident monitoring and analysis platform"
+            subtitle="Comprehensive early warning, intelligence, and impact monitoring for institutional partners across Africa"
             onRefresh={handleRefresh}
             isRefreshing={isRefetching}
             actions={
