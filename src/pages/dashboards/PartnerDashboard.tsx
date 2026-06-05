@@ -24,6 +24,7 @@ import { PartnerIntelligenceBriefings } from '@/components/partner/PartnerIntell
 import { PartnerCollaboration } from '@/components/partner/PartnerCollaboration';
 import { PartnerApiConsole } from '@/components/partner/PartnerApiConsole';
 import { PartnerImpactTracker } from '@/components/partner/PartnerImpactTracker';
+import PartnerAboutSection from '@/components/partner/PartnerAboutSection';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, subDays, subMonths } from 'date-fns';
