@@ -2,10 +2,11 @@ import { useState } from 'react';
 import Navigation from '@/components/Navigation';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Siren, TrendingUp, BellRing, Network, UsersRound, ShieldCheck, Activity, FileDown, MapPinned } from 'lucide-react';
+import { Siren, TrendingUp, BellRing, Network, UsersRound, ShieldCheck, Activity, FileDown, MapPinned, LayoutDashboard } from 'lucide-react';
 import RiskDashboard from '@/components/early-warning/RiskDashboard';
 import PredictiveHotspotMap from '@/components/early-warning/PredictiveHotspotMap';
 import AlertSystem from '@/components/early-warning/AlertSystem';
+import AlertsCommandCenter from '@/components/early-warning/AlertsCommandCenter';
 import LiveActivityFeed from '@/components/LiveActivityFeed';
 import CountrySelector, { getCountryName } from '@/components/early-warning/CountrySelector';
 import ReportingCenter from '@/components/early-warning/ReportingCenter';
@@ -70,8 +71,15 @@ const EarlyWarningDashboard = () => {
       <div className="container mx-auto px-4 py-8 -mt-8 relative z-10">
         <div className="max-w-7xl mx-auto space-y-8">
           
-          <Tabs defaultValue="risk" className="w-full">
-            <TabsList className="grid w-full grid-cols-4 mb-8 bg-card/80 backdrop-blur-sm border border-border shadow-lg p-1.5 rounded-xl">
+          <Tabs defaultValue="command" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 mb-8 bg-card/80 backdrop-blur-sm border border-border shadow-lg p-1.5 rounded-xl gap-1">
+              <TabsTrigger
+                value="command"
+                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md rounded-lg transition-all duration-300 font-medium"
+              >
+                <LayoutDashboard className="w-4 h-4 mr-2" />
+                Command Center
+              </TabsTrigger>
               <TabsTrigger 
                 value="risk" 
                 className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md rounded-lg transition-all duration-300 font-medium"
@@ -101,6 +109,10 @@ const EarlyWarningDashboard = () => {
                 {t('earlyWarning.tabs.reports')}
               </TabsTrigger>
             </TabsList>
+
+            <TabsContent value="command" className="animate-fade-in">
+              <AlertsCommandCenter selectedCountry={selectedCountry} />
+            </TabsContent>
 
             <TabsContent value="risk" className="animate-fade-in">
               <RiskDashboard selectedCountry={selectedCountry} />
