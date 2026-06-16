@@ -2,11 +2,12 @@ import { useState } from 'react';
 import Navigation from '@/components/Navigation';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Siren, TrendingUp, BellRing, Network, UsersRound, ShieldCheck, Activity, FileDown, MapPinned, LayoutDashboard } from 'lucide-react';
+import { Siren, TrendingUp, BellRing, Network, UsersRound, ShieldCheck, Activity, FileDown, MapPinned, LayoutDashboard, Megaphone } from 'lucide-react';
 import RiskDashboard from '@/components/early-warning/RiskDashboard';
 import PredictiveHotspotMap from '@/components/early-warning/PredictiveHotspotMap';
 import AlertSystem from '@/components/early-warning/AlertSystem';
 import AlertsCommandCenter from '@/components/early-warning/AlertsCommandCenter';
+import AlertRoutingConsole from '@/components/early-warning/AlertRoutingConsole';
 import LiveActivityFeed from '@/components/LiveActivityFeed';
 import CountrySelector, { getCountryName } from '@/components/early-warning/CountrySelector';
 import ReportingCenter from '@/components/early-warning/ReportingCenter';
@@ -72,7 +73,7 @@ const EarlyWarningDashboard = () => {
         <div className="max-w-7xl mx-auto space-y-8">
           
           <Tabs defaultValue="command" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 mb-8 bg-card/80 backdrop-blur-sm border border-border shadow-lg p-1.5 rounded-xl gap-1">
+            <TabsList className="grid w-full grid-cols-2 md:grid-cols-6 mb-8 bg-card/80 backdrop-blur-sm border border-border shadow-lg p-1.5 rounded-xl gap-1">
               <TabsTrigger
                 value="command"
                 className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md rounded-lg transition-all duration-300 font-medium"
@@ -101,6 +102,13 @@ const EarlyWarningDashboard = () => {
                 <BellRing className="w-4 h-4 mr-2" />
                 {t('earlyWarning.tabs.alerts')}
               </TabsTrigger>
+              <TabsTrigger
+                value="routing"
+                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md rounded-lg transition-all duration-300 font-medium"
+              >
+                <Megaphone className="w-4 h-4 mr-2" />
+                Routing
+              </TabsTrigger>
               <TabsTrigger 
                 value="reports"
                 className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md rounded-lg transition-all duration-300 font-medium"
@@ -124,6 +132,10 @@ const EarlyWarningDashboard = () => {
 
             <TabsContent value="alerts" className="animate-fade-in">
               <AlertSystem selectedCountry={selectedCountry} />
+            </TabsContent>
+
+            <TabsContent value="routing" className="animate-fade-in">
+              <AlertRoutingConsole />
             </TabsContent>
 
             <TabsContent value="reports" className="animate-fade-in">
