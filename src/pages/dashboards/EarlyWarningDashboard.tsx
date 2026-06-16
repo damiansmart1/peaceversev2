@@ -134,6 +134,10 @@ const EarlyWarningDashboard = () => {
               <AlertSystem selectedCountry={selectedCountry} />
             </TabsContent>
 
+            <TabsContent value="routing" className="animate-fade-in">
+              <AlertRoutingConsole />
+            </TabsContent>
+
             <TabsContent value="reports" className="animate-fade-in">
               <ReportingCenter selectedCountry={selectedCountry} />
             </TabsContent>
