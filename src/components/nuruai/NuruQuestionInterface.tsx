@@ -358,10 +358,18 @@ const NuruQuestionInterface = () => {
     setStreamingContent('');
     setLastUserMessage(msg);
 
-    // Build attachment context
-    const attachmentContext = attachments
-      .map(a => a.extractedText ? `[File: ${a.name}]\n${a.extractedText.substring(0, 15000)}` : `[File: ${a.name} - binary, no text extracted]`)
-      .join('\n\n');
+    // Build attachment context — labelled per-file so the model can cross-reference
+    const withText = attachments.filter(a => a.extractedText);
+    const withoutText = attachments.filter(a => !a.extractedText);
+    const attachmentContext = [
+      withText.length > 1
+        ? `The user has attached ${withText.length} documents for you to analyse together. Compare, cross-reference, and cite each by its file name.`
+        : '',
+      ...withText.map((a, i) => `=== DOCUMENT ${i + 1}: ${a.name} (${a.type || 'file'}) ===\n${a.extractedText!.substring(0, 25000)}`),
+      withoutText.length
+        ? `\nAlso attached (no extractable text): ${withoutText.map(a => a.name).join(', ')}`
+        : '',
+    ].filter(Boolean).join('\n\n');
 
     // Clear attachments after sending
     attachments.forEach(a => { if (a.previewUrl) URL.revokeObjectURL(a.previewUrl); });
