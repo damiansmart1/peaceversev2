@@ -1063,7 +1063,7 @@ const NuruQuestionInterface = () => {
                     <Paperclip className="h-4 w-4" />
                   </button>
                 </TooltipTrigger>
-                <TooltipContent className="text-xs">Attach files (PDF, DOCX, images...)</TooltipContent>
+                <TooltipContent className="text-xs">Attach up to 10 files (PDF, DOCX, images, scans) — parsed with OCR when needed</TooltipContent>
               </Tooltip>
 
               <textarea
