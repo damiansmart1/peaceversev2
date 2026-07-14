@@ -216,7 +216,6 @@ serve(async (req) => {
         }
       }
     }
-    // ---- Other document types: try Vision API directly ----
     // ---- IMAGES: send directly to Vision API ----
     else if (mime.startsWith('image/') || /\.(png|jpe?g|webp|gif|bmp)$/i.test(lowerName)) {
       try {
