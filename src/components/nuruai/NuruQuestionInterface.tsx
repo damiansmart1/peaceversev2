@@ -228,40 +228,53 @@ const NuruQuestionInterface = () => {
     toast.info('Generation stopped');
   }, [abortStream]);
 
-  // File attachment handling
+  // File attachment handling — supports batch upload; each file extracted via the
+  // extract-document-text edge function (pdf-parse, DOCX-XML, Vision OCR fallback).
   const handleFileSelect = useCallback(async (files: FileList | null) => {
     if (!files || files.length === 0) return;
     setIsExtractingText(true);
-    const newAttachments: ChatAttachment[] = [];
 
+    // Seed placeholders immediately so the user sees per-file progress
+    const incoming: ChatAttachment[] = [];
     for (const file of Array.from(files)) {
       if (file.size > 20 * 1024 * 1024) {
         toast.error(`${file.name} is too large (max 20MB)`);
         continue;
       }
-
-      const attachment: ChatAttachment = {
-        file,
-        name: file.name,
-        type: file.type,
-        size: file.size,
-      };
-
-      // Create preview for images
-      if (file.type.startsWith('image/')) {
-        attachment.previewUrl = URL.createObjectURL(file);
-      }
-
-      // Extract text from text-based files
-      const extractedText = await extractTextFromAttachment(file);
-      if (extractedText) {
-        attachment.extractedText = extractedText;
-      }
-
-      newAttachments.push(attachment);
+      const att: ChatAttachment = { file, name: file.name, type: file.type, size: file.size };
+      if (file.type.startsWith('image/')) att.previewUrl = URL.createObjectURL(file);
+      incoming.push(att);
     }
+    if (incoming.length === 0) { setIsExtractingText(false); return; }
 
-    setAttachments(prev => [...prev, ...newAttachments].slice(0, 5)); // Max 5 attachments
+    setAttachments(prev => [...prev, ...incoming].slice(0, 10)); // Max 10 attachments
+
+    // Extract in parallel — dramatically faster for multi-doc uploads
+    const results = await Promise.all(
+      incoming.map(async (att) => {
+        try {
+          const text = await extractTextFromAttachment(att.file);
+          return { name: att.name, text };
+        } catch {
+          return { name: att.name, text: null as string | null };
+        }
+      })
+    );
+
+    setAttachments(prev => prev.map(a => {
+      const r = results.find(x => x.name === a.name);
+      if (r && r.text) return { ...a, extractedText: r.text };
+      return a;
+    }));
+
+    const successCount = results.filter(r => r.text).length;
+    const failCount = results.length - successCount;
+    if (successCount > 0) {
+      toast.success(`Extracted text from ${successCount} file${successCount > 1 ? 's' : ''}`);
+    }
+    if (failCount > 0) {
+      toast.warning(`${failCount} file${failCount > 1 ? 's' : ''} could not be parsed — image/scanned content may still be sent as-is.`);
+    }
     setIsExtractingText(false);
   }, []);
 
@@ -345,10 +358,18 @@ const NuruQuestionInterface = () => {
     setStreamingContent('');
     setLastUserMessage(msg);
 
-    // Build attachment context
-    const attachmentContext = attachments
-      .map(a => a.extractedText ? `[File: ${a.name}]\n${a.extractedText.substring(0, 15000)}` : `[File: ${a.name} - binary, no text extracted]`)
-      .join('\n\n');
+    // Build attachment context — labelled per-file so the model can cross-reference
+    const withText = attachments.filter(a => a.extractedText);
+    const withoutText = attachments.filter(a => !a.extractedText);
+    const attachmentContext = [
+      withText.length > 1
+        ? `The user has attached ${withText.length} documents for you to analyse together. Compare, cross-reference, and cite each by its file name.`
+        : '',
+      ...withText.map((a, i) => `=== DOCUMENT ${i + 1}: ${a.name} (${a.type || 'file'}) ===\n${a.extractedText!.substring(0, 25000)}`),
+      withoutText.length
+        ? `\nAlso attached (no extractable text): ${withoutText.map(a => a.name).join(', ')}`
+        : '',
+    ].filter(Boolean).join('\n\n');
 
     // Clear attachments after sending
     attachments.forEach(a => { if (a.previewUrl) URL.revokeObjectURL(a.previewUrl); });
@@ -1005,8 +1026,12 @@ const NuruQuestionInterface = () => {
                       <File className="h-4 w-4 text-muted-foreground shrink-0" />
                     )}
                     <span className="truncate max-w-[120px] text-muted-foreground">{att.name}</span>
-                    <span className="text-[9px] text-muted-foreground/50">
-                      {att.extractedText ? `${(att.extractedText.length / 1000).toFixed(1)}k chars` : att.type.startsWith('image/') ? 'image' : 'binary'}
+                    <span className={`text-[9px] ${att.extractedText ? 'text-primary/70' : isExtractingText ? 'text-muted-foreground/60' : 'text-amber-600/70'}`}>
+                      {att.extractedText
+                        ? `${(att.extractedText.length / 1000).toFixed(1)}k chars`
+                        : isExtractingText
+                          ? 'extracting…'
+                          : att.type.startsWith('image/') ? 'image (OCR pending)' : 'no text'}
                     </span>
                     <button onClick={() => removeAttachment(i)} className="opacity-50 group-hover:opacity-100 transition-opacity">
                       <XCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-destructive" />
@@ -1038,7 +1063,7 @@ const NuruQuestionInterface = () => {
                     <Paperclip className="h-4 w-4" />
                   </button>
                 </TooltipTrigger>
-                <TooltipContent className="text-xs">Attach files (PDF, DOCX, images...)</TooltipContent>
+                <TooltipContent className="text-xs">Attach up to 10 files (PDF, DOCX, images, scans) — parsed with OCR when needed</TooltipContent>
               </Tooltip>
 
               <textarea

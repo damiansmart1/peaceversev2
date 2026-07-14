@@ -119,11 +119,11 @@ serve(async (req) => {
   }
 
   try {
-    const { documentId, fileUrl, fileName, fileType, extractOnly } = await req.json();
-    
+    const { documentId, fileUrl, fileBase64, fileName, fileType, extractOnly } = await req.json();
+
     // extractOnly mode: just extract text and return it without needing a documentId
     const isExtractOnly = extractOnly === true || !documentId;
-    
+
     if (!isExtractOnly && !documentId) throw new Error('Document ID required');
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
@@ -142,7 +142,7 @@ serve(async (req) => {
     let extractionMethod = 'unknown';
     let fileBytes: Uint8Array;
 
-    // Download the file
+    // Load the file — either from a URL or an inline base64 payload
     if (fileUrl) {
       console.log('Downloading file from:', fileUrl);
       const response = await fetch(fileUrl);
@@ -150,8 +150,15 @@ serve(async (req) => {
       const buffer = await response.arrayBuffer();
       fileBytes = new Uint8Array(buffer);
       console.log(`File downloaded: ${fileBytes.length} bytes`);
+    } else if (fileBase64) {
+      const b64 = String(fileBase64).includes(',') ? String(fileBase64).split(',')[1] : String(fileBase64);
+      const bin = atob(b64);
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      fileBytes = bytes;
+      console.log(`Inline file received: ${fileBytes.length} bytes`);
     } else {
-      throw new Error('No file URL provided');
+      throw new Error('No file URL or base64 payload provided');
     }
 
     const lowerName = (fileName || '').toLowerCase();
@@ -207,6 +214,17 @@ serve(async (req) => {
         } catch (e) {
           console.error('DOCX Vision fallback failed:', e);
         }
+      }
+    }
+    // ---- IMAGES: send directly to Vision API ----
+    else if (mime.startsWith('image/') || /\.(png|jpe?g|webp|gif|bmp)$/i.test(lowerName)) {
+      try {
+        extractedText = await extractWithVisionApi(LOVABLE_API_KEY, fileBytes, mime || 'image/png');
+        extractionMethod = 'vision_image';
+      } catch (e) {
+        console.error('Vision API image extraction failed:', e);
+        extractedText = '';
+        extractionMethod = 'vision_image_failed';
       }
     }
     // ---- Other document types: try Vision API directly ----

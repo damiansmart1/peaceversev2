@@ -260,7 +260,8 @@ export function useUploadDocumentFile() {
 
 async function extractTextFromFile(file: File): Promise<string | null> {
   try {
-    if (file.type === 'text/plain' || file.type === 'text/csv' || 
+    // Fast path: plain text formats extracted directly in the browser
+    if (file.type === 'text/plain' || file.type === 'text/csv' ||
         file.name.endsWith('.txt') || file.name.endsWith('.csv') ||
         file.name.endsWith('.rtf') || file.name.endsWith('.md')) {
       const raw = await file.text();
@@ -270,6 +271,37 @@ async function extractTextFromFile(file: File): Promise<string | null> {
       return raw.length > 10 ? raw : null;
     }
 
+    // Everything else (PDF, DOCX, images, unknown) → robust edge-function extraction
+    // (pdf-parse for PDFs, XML for DOCX, Vision OCR fallback for scans/images)
+    if (file.size <= 15 * 1024 * 1024) {
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const bytes = new Uint8Array(arrayBuffer);
+        let binary = '';
+        const chunk = 0x8000;
+        for (let i = 0; i < bytes.length; i += chunk) {
+          binary += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + chunk)) as any);
+        }
+        const base64 = btoa(binary);
+
+        const { data, error } = await supabase.functions.invoke('extract-document-text', {
+          body: {
+            extractOnly: true,
+            fileBase64: base64,
+            fileName: file.name,
+            fileType: file.type,
+          },
+        });
+        if (!error && data?.text && typeof data.text === 'string' && data.text.length > 50) {
+          return data.text as string;
+        }
+        if (error) console.warn('extract-document-text edge error:', error);
+      } catch (edgeErr) {
+        console.warn('Edge extraction failed, falling back to local heuristic:', edgeErr);
+      }
+    }
+
+    // Local fallback (best-effort) if edge extraction is unavailable or file is huge
     const arrayBuffer = await file.arrayBuffer();
     const uint8Array = new Uint8Array(arrayBuffer);
 
