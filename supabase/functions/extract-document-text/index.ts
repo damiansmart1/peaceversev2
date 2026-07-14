@@ -217,6 +217,18 @@ serve(async (req) => {
       }
     }
     // ---- Other document types: try Vision API directly ----
+    // ---- IMAGES: send directly to Vision API ----
+    else if (mime.startsWith('image/') || /\.(png|jpe?g|webp|gif|bmp)$/i.test(lowerName)) {
+      try {
+        extractedText = await extractWithVisionApi(LOVABLE_API_KEY, fileBytes, mime || 'image/png');
+        extractionMethod = 'vision_image';
+      } catch (e) {
+        console.error('Vision API image extraction failed:', e);
+        extractedText = '';
+        extractionMethod = 'vision_image_failed';
+      }
+    }
+    // ---- Other document types: try Vision API directly ----
     else {
       console.log('Unknown file type, trying Vision API...');
       try {
