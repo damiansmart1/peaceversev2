@@ -228,40 +228,53 @@ const NuruQuestionInterface = () => {
     toast.info('Generation stopped');
   }, [abortStream]);
 
-  // File attachment handling
+  // File attachment handling — supports batch upload; each file extracted via the
+  // extract-document-text edge function (pdf-parse, DOCX-XML, Vision OCR fallback).
   const handleFileSelect = useCallback(async (files: FileList | null) => {
     if (!files || files.length === 0) return;
     setIsExtractingText(true);
-    const newAttachments: ChatAttachment[] = [];
 
+    // Seed placeholders immediately so the user sees per-file progress
+    const incoming: ChatAttachment[] = [];
     for (const file of Array.from(files)) {
       if (file.size > 20 * 1024 * 1024) {
         toast.error(`${file.name} is too large (max 20MB)`);
         continue;
       }
-
-      const attachment: ChatAttachment = {
-        file,
-        name: file.name,
-        type: file.type,
-        size: file.size,
-      };
-
-      // Create preview for images
-      if (file.type.startsWith('image/')) {
-        attachment.previewUrl = URL.createObjectURL(file);
-      }
-
-      // Extract text from text-based files
-      const extractedText = await extractTextFromAttachment(file);
-      if (extractedText) {
-        attachment.extractedText = extractedText;
-      }
-
-      newAttachments.push(attachment);
+      const att: ChatAttachment = { file, name: file.name, type: file.type, size: file.size };
+      if (file.type.startsWith('image/')) att.previewUrl = URL.createObjectURL(file);
+      incoming.push(att);
     }
+    if (incoming.length === 0) { setIsExtractingText(false); return; }
 
-    setAttachments(prev => [...prev, ...newAttachments].slice(0, 5)); // Max 5 attachments
+    setAttachments(prev => [...prev, ...incoming].slice(0, 10)); // Max 10 attachments
+
+    // Extract in parallel — dramatically faster for multi-doc uploads
+    const results = await Promise.all(
+      incoming.map(async (att) => {
+        try {
+          const text = await extractTextFromAttachment(att.file);
+          return { name: att.name, text };
+        } catch {
+          return { name: att.name, text: null as string | null };
+        }
+      })
+    );
+
+    setAttachments(prev => prev.map(a => {
+      const r = results.find(x => x.name === a.name);
+      if (r && r.text) return { ...a, extractedText: r.text };
+      return a;
+    }));
+
+    const successCount = results.filter(r => r.text).length;
+    const failCount = results.length - successCount;
+    if (successCount > 0) {
+      toast.success(`Extracted text from ${successCount} file${successCount > 1 ? 's' : ''}`);
+    }
+    if (failCount > 0) {
+      toast.warning(`${failCount} file${failCount > 1 ? 's' : ''} could not be parsed — image/scanned content may still be sent as-is.`);
+    }
     setIsExtractingText(false);
   }, []);
 
