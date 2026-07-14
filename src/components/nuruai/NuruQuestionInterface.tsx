@@ -1026,8 +1026,12 @@ const NuruQuestionInterface = () => {
                       <File className="h-4 w-4 text-muted-foreground shrink-0" />
                     )}
                     <span className="truncate max-w-[120px] text-muted-foreground">{att.name}</span>
-                    <span className="text-[9px] text-muted-foreground/50">
-                      {att.extractedText ? `${(att.extractedText.length / 1000).toFixed(1)}k chars` : att.type.startsWith('image/') ? 'image' : 'binary'}
+                    <span className={`text-[9px] ${att.extractedText ? 'text-primary/70' : isExtractingText ? 'text-muted-foreground/60' : 'text-amber-600/70'}`}>
+                      {att.extractedText
+                        ? `${(att.extractedText.length / 1000).toFixed(1)}k chars`
+                        : isExtractingText
+                          ? 'extracting…'
+                          : att.type.startsWith('image/') ? 'image (OCR pending)' : 'no text'}
                     </span>
                     <button onClick={() => removeAttachment(i)} className="opacity-50 group-hover:opacity-100 transition-opacity">
                       <XCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-destructive" />
