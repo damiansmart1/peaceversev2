@@ -4868,6 +4868,471 @@ export type Database = {
           },
         ]
       }
+      mel_forms: {
+        Row: {
+          allow_offline: boolean
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_active: boolean
+          is_public: boolean
+          linked_indicator_id: string | null
+          org_id: string
+          phase: string
+          project_id: string
+          public_token: string | null
+          questions: Json
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          allow_offline?: boolean
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_public?: boolean
+          linked_indicator_id?: string | null
+          org_id: string
+          phase?: string
+          project_id: string
+          public_token?: string | null
+          questions?: Json
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          allow_offline?: boolean
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_public?: boolean
+          linked_indicator_id?: string | null
+          org_id?: string
+          phase?: string
+          project_id?: string
+          public_token?: string | null
+          questions?: Json
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mel_forms_linked_indicator_id_fkey"
+            columns: ["linked_indicator_id"]
+            isOneToOne: false
+            referencedRelation: "mel_indicators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mel_forms_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "mel_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mel_forms_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "mel_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mel_indicator_measurements: {
+        Row: {
+          created_at: string
+          disaggregation_data: Json
+          id: string
+          indicator_id: string
+          measured_on: string
+          measured_value: number
+          notes: string | null
+          org_id: string
+          period_label: string
+          phase: string | null
+          recorded_by: string
+        }
+        Insert: {
+          created_at?: string
+          disaggregation_data?: Json
+          id?: string
+          indicator_id: string
+          measured_on?: string
+          measured_value: number
+          notes?: string | null
+          org_id: string
+          period_label: string
+          phase?: string | null
+          recorded_by?: string
+        }
+        Update: {
+          created_at?: string
+          disaggregation_data?: Json
+          id?: string
+          indicator_id?: string
+          measured_on?: string
+          measured_value?: number
+          notes?: string | null
+          org_id?: string
+          period_label?: string
+          phase?: string | null
+          recorded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mel_indicator_measurements_indicator_id_fkey"
+            columns: ["indicator_id"]
+            isOneToOne: false
+            referencedRelation: "mel_indicators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mel_indicator_measurements_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "mel_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mel_indicators: {
+        Row: {
+          baseline_value: number | null
+          code: string | null
+          created_at: string
+          created_by: string
+          current_value: number | null
+          data_source: string | null
+          definition: string | null
+          disaggregation: string[] | null
+          frequency: string | null
+          id: string
+          indicator_type: Database["public"]["Enums"]["mel_indicator_type"]
+          name: string
+          org_id: string
+          project_id: string
+          sdg_alignment: string[] | null
+          target_value: number | null
+          unit: string | null
+          updated_at: string
+        }
+        Insert: {
+          baseline_value?: number | null
+          code?: string | null
+          created_at?: string
+          created_by?: string
+          current_value?: number | null
+          data_source?: string | null
+          definition?: string | null
+          disaggregation?: string[] | null
+          frequency?: string | null
+          id?: string
+          indicator_type?: Database["public"]["Enums"]["mel_indicator_type"]
+          name: string
+          org_id: string
+          project_id: string
+          sdg_alignment?: string[] | null
+          target_value?: number | null
+          unit?: string | null
+          updated_at?: string
+        }
+        Update: {
+          baseline_value?: number | null
+          code?: string | null
+          created_at?: string
+          created_by?: string
+          current_value?: number | null
+          data_source?: string | null
+          definition?: string | null
+          disaggregation?: string[] | null
+          frequency?: string | null
+          id?: string
+          indicator_type?: Database["public"]["Enums"]["mel_indicator_type"]
+          name?: string
+          org_id?: string
+          project_id?: string
+          sdg_alignment?: string[] | null
+          target_value?: number | null
+          unit?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mel_indicators_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "mel_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mel_indicators_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "mel_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mel_org_members: {
+        Row: {
+          created_at: string
+          id: string
+          invited_by: string | null
+          is_active: boolean
+          org_id: string
+          org_role: Database["public"]["Enums"]["mel_org_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invited_by?: string | null
+          is_active?: boolean
+          org_id: string
+          org_role?: Database["public"]["Enums"]["mel_org_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invited_by?: string | null
+          is_active?: boolean
+          org_id?: string
+          org_role?: Database["public"]["Enums"]["mel_org_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mel_org_members_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "mel_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mel_organizations: {
+        Row: {
+          billing_status: string
+          contact_email: string | null
+          country_code: string | null
+          created_at: string
+          created_by: string
+          id: string
+          logo_url: string | null
+          name: string
+          org_type: string
+          plan: Database["public"]["Enums"]["mel_plan"]
+          project_limit: number
+          seat_limit: number
+          slug: string
+          submission_limit: number
+          trial_ends_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          billing_status?: string
+          contact_email?: string | null
+          country_code?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          logo_url?: string | null
+          name: string
+          org_type?: string
+          plan?: Database["public"]["Enums"]["mel_plan"]
+          project_limit?: number
+          seat_limit?: number
+          slug: string
+          submission_limit?: number
+          trial_ends_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          billing_status?: string
+          contact_email?: string | null
+          country_code?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          logo_url?: string | null
+          name?: string
+          org_type?: string
+          plan?: Database["public"]["Enums"]["mel_plan"]
+          project_limit?: number
+          seat_limit?: number
+          slug?: string
+          submission_limit?: number
+          trial_ends_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      mel_projects: {
+        Row: {
+          budget_amount: number | null
+          budget_currency: string | null
+          code: string | null
+          country_code: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          donor: string | null
+          end_date: string | null
+          id: string
+          locations: string[] | null
+          name: string
+          org_id: string
+          reached_beneficiaries: number
+          start_date: string | null
+          status: Database["public"]["Enums"]["mel_project_status"]
+          target_beneficiaries: number | null
+          theory_of_change: string | null
+          updated_at: string
+        }
+        Insert: {
+          budget_amount?: number | null
+          budget_currency?: string | null
+          code?: string | null
+          country_code?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          donor?: string | null
+          end_date?: string | null
+          id?: string
+          locations?: string[] | null
+          name: string
+          org_id: string
+          reached_beneficiaries?: number
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["mel_project_status"]
+          target_beneficiaries?: number | null
+          theory_of_change?: string | null
+          updated_at?: string
+        }
+        Update: {
+          budget_amount?: number | null
+          budget_currency?: string | null
+          code?: string | null
+          country_code?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          donor?: string | null
+          end_date?: string | null
+          id?: string
+          locations?: string[] | null
+          name?: string
+          org_id?: string
+          reached_beneficiaries?: number
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["mel_project_status"]
+          target_beneficiaries?: number | null
+          theory_of_change?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mel_projects_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "mel_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mel_submissions: {
+        Row: {
+          answers: Json
+          channel: string
+          collected_at: string
+          collected_offline: boolean
+          created_at: string
+          form_id: string
+          id: string
+          latitude: number | null
+          location_name: string | null
+          longitude: number | null
+          org_id: string
+          project_id: string
+          respondent_age_group: string | null
+          respondent_gender: string | null
+          status: Database["public"]["Enums"]["mel_submission_status"]
+          submitted_by: string | null
+          synced_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          answers?: Json
+          channel?: string
+          collected_at?: string
+          collected_offline?: boolean
+          created_at?: string
+          form_id: string
+          id?: string
+          latitude?: number | null
+          location_name?: string | null
+          longitude?: number | null
+          org_id: string
+          project_id: string
+          respondent_age_group?: string | null
+          respondent_gender?: string | null
+          status?: Database["public"]["Enums"]["mel_submission_status"]
+          submitted_by?: string | null
+          synced_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          answers?: Json
+          channel?: string
+          collected_at?: string
+          collected_offline?: boolean
+          created_at?: string
+          form_id?: string
+          id?: string
+          latitude?: number | null
+          location_name?: string | null
+          longitude?: number | null
+          org_id?: string
+          project_id?: string
+          respondent_age_group?: string | null
+          respondent_gender?: string | null
+          status?: Database["public"]["Enums"]["mel_submission_status"]
+          submitted_by?: string | null
+          synced_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mel_submissions_form_id_fkey"
+            columns: ["form_id"]
+            isOneToOne: false
+            referencedRelation: "mel_forms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mel_submissions_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "mel_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mel_submissions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "mel_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       message_acknowledgments: {
         Row: {
           acknowledged_at: string | null
@@ -9655,6 +10120,14 @@ export type Database = {
         Args: { _case_id: string; _user_id: string }
         Returns: boolean
       }
+      is_mel_manager: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_mel_member: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: boolean
+      }
       longtransactionsenabled: { Args: never; Returns: boolean }
       populate_geometry_columns:
         | { Args: { tbl_oid: unknown; use_typmod?: boolean }; Returns: number }
@@ -10411,6 +10884,22 @@ export type Database = {
         | "cancelled"
         | "postponed"
       mediation_visibility: "all_members" | "mediators_only" | "parties_only"
+      mel_indicator_type: "impact" | "outcome" | "output" | "activity" | "input"
+      mel_org_role:
+        | "owner"
+        | "admin"
+        | "mel_manager"
+        | "field_officer"
+        | "viewer"
+      mel_plan: "free" | "starter" | "professional" | "enterprise"
+      mel_project_status:
+        | "design"
+        | "baseline"
+        | "implementation"
+        | "midline"
+        | "endline"
+        | "closed"
+      mel_submission_status: "pending" | "verified" | "flagged" | "rejected"
       observer_role:
         | "domestic_observer"
         | "international_observer"
@@ -10684,6 +11173,24 @@ export const Constants = {
         "postponed",
       ],
       mediation_visibility: ["all_members", "mediators_only", "parties_only"],
+      mel_indicator_type: ["impact", "outcome", "output", "activity", "input"],
+      mel_org_role: [
+        "owner",
+        "admin",
+        "mel_manager",
+        "field_officer",
+        "viewer",
+      ],
+      mel_plan: ["free", "starter", "professional", "enterprise"],
+      mel_project_status: [
+        "design",
+        "baseline",
+        "implementation",
+        "midline",
+        "endline",
+        "closed",
+      ],
+      mel_submission_status: ["pending", "verified", "flagged", "rejected"],
       observer_role: [
         "domestic_observer",
         "international_observer",
