@@ -55,6 +55,8 @@ import NuruAI from "./pages/NuruAI";
 import FactCheck from "./pages/FactCheck";
 import ProposalEmbed from "./pages/ProposalEmbed";
 import NuruShare from "./pages/NuruShare";
+import Mediation from "./pages/Mediation";
+import MediationCase from "./pages/MediationCase";
 
 // Preload Google Maps API on app startup for faster map loading
 import '@/hooks/useGoogleMapsPreloader';
@@ -148,6 +150,16 @@ const App = () => (
                     <Route path="/communication" element={
                       <ProtectedRoute requiredRole={["admin", "government", "partner", "verifier"]}>
                         <Communication />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/mediation" element={
+                      <ProtectedRoute requireAuth>
+                        <Mediation />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/mediation/:caseId" element={
+                      <ProtectedRoute requireAuth>
+                        <MediationCase />
                       </ProtectedRoute>
                     } />
                     <Route path="/nuru-ai" element={<NuruAI />} />

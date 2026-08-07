@@ -4232,6 +4232,1107 @@ export type Database = {
           },
         ]
       }
+      mediation_agreement_clauses: {
+        Row: {
+          agreement_id: string
+          case_id: string
+          clause_number: string | null
+          clause_text: string | null
+          completion_percent: number
+          created_at: string
+          due_date: string | null
+          id: string
+          responsible_party_id: string | null
+          status: Database["public"]["Enums"]["mediation_clause_status"]
+          title: string
+          updated_at: string
+          verification_note: string | null
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          agreement_id: string
+          case_id: string
+          clause_number?: string | null
+          clause_text?: string | null
+          completion_percent?: number
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          responsible_party_id?: string | null
+          status?: Database["public"]["Enums"]["mediation_clause_status"]
+          title: string
+          updated_at?: string
+          verification_note?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          agreement_id?: string
+          case_id?: string
+          clause_number?: string | null
+          clause_text?: string | null
+          completion_percent?: number
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          responsible_party_id?: string | null
+          status?: Database["public"]["Enums"]["mediation_clause_status"]
+          title?: string
+          updated_at?: string
+          verification_note?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mediation_agreement_clauses_agreement_id_fkey"
+            columns: ["agreement_id"]
+            isOneToOne: false
+            referencedRelation: "mediation_agreements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mediation_agreement_clauses_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "mediation_cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mediation_agreement_clauses_responsible_party_id_fkey"
+            columns: ["responsible_party_id"]
+            isOneToOne: false
+            referencedRelation: "mediation_parties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mediation_agreements: {
+        Row: {
+          agreement_type: string
+          case_id: string
+          compliance_percent: number
+          content: string | null
+          created_at: string
+          created_by: string
+          effective_date: string | null
+          id: string
+          review_date: string | null
+          status: Database["public"]["Enums"]["mediation_agreement_status"]
+          title: string
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          agreement_type?: string
+          case_id: string
+          compliance_percent?: number
+          content?: string | null
+          created_at?: string
+          created_by?: string
+          effective_date?: string | null
+          id?: string
+          review_date?: string | null
+          status?: Database["public"]["Enums"]["mediation_agreement_status"]
+          title: string
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          agreement_type?: string
+          case_id?: string
+          compliance_percent?: number
+          content?: string | null
+          created_at?: string
+          created_by?: string
+          effective_date?: string | null
+          id?: string
+          review_date?: string | null
+          status?: Database["public"]["Enums"]["mediation_agreement_status"]
+          title?: string
+          updated_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mediation_agreements_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "mediation_cases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mediation_case_members: {
+        Row: {
+          added_by: string | null
+          case_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          member_role: Database["public"]["Enums"]["mediation_member_role"]
+          organization: string | null
+          user_id: string
+        }
+        Insert: {
+          added_by?: string | null
+          case_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          member_role?: Database["public"]["Enums"]["mediation_member_role"]
+          organization?: string | null
+          user_id: string
+        }
+        Update: {
+          added_by?: string | null
+          case_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          member_role?: Database["public"]["Enums"]["mediation_member_role"]
+          organization?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mediation_case_members_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "mediation_cases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mediation_cases: {
+        Row: {
+          affected_population: number | null
+          case_ref: string
+          closed_at: string | null
+          confidentiality: Database["public"]["Enums"]["mediation_confidentiality"]
+          conflict_type: string | null
+          country_code: string | null
+          created_at: string
+          created_by: string
+          id: string
+          is_public: boolean
+          latitude: number | null
+          lead_mediator_id: string | null
+          location_name: string | null
+          longitude: number | null
+          metadata: Json
+          organization: string | null
+          progress_percent: number
+          region: string | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["mediation_case_status"]
+          summary: string | null
+          tags: string[] | null
+          target_resolution_date: string | null
+          title: string
+          trust_index: number | null
+          updated_at: string
+        }
+        Insert: {
+          affected_population?: number | null
+          case_ref: string
+          closed_at?: string | null
+          confidentiality?: Database["public"]["Enums"]["mediation_confidentiality"]
+          conflict_type?: string | null
+          country_code?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          is_public?: boolean
+          latitude?: number | null
+          lead_mediator_id?: string | null
+          location_name?: string | null
+          longitude?: number | null
+          metadata?: Json
+          organization?: string | null
+          progress_percent?: number
+          region?: string | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["mediation_case_status"]
+          summary?: string | null
+          tags?: string[] | null
+          target_resolution_date?: string | null
+          title: string
+          trust_index?: number | null
+          updated_at?: string
+        }
+        Update: {
+          affected_population?: number | null
+          case_ref?: string
+          closed_at?: string | null
+          confidentiality?: Database["public"]["Enums"]["mediation_confidentiality"]
+          conflict_type?: string | null
+          country_code?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          is_public?: boolean
+          latitude?: number | null
+          lead_mediator_id?: string | null
+          location_name?: string | null
+          longitude?: number | null
+          metadata?: Json
+          organization?: string | null
+          progress_percent?: number
+          region?: string | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["mediation_case_status"]
+          summary?: string | null
+          tags?: string[] | null
+          target_resolution_date?: string | null
+          title?: string
+          trust_index?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      mediation_dialogue_entries: {
+        Row: {
+          attachments: Json
+          author_id: string
+          author_name: string | null
+          case_id: string
+          content: string
+          created_at: string
+          entry_type: Database["public"]["Enums"]["mediation_entry_type"]
+          id: string
+          is_flagged: boolean
+          party_id: string | null
+          session_id: string | null
+          updated_at: string
+          visibility: Database["public"]["Enums"]["mediation_visibility"]
+        }
+        Insert: {
+          attachments?: Json
+          author_id?: string
+          author_name?: string | null
+          case_id: string
+          content: string
+          created_at?: string
+          entry_type?: Database["public"]["Enums"]["mediation_entry_type"]
+          id?: string
+          is_flagged?: boolean
+          party_id?: string | null
+          session_id?: string | null
+          updated_at?: string
+          visibility?: Database["public"]["Enums"]["mediation_visibility"]
+        }
+        Update: {
+          attachments?: Json
+          author_id?: string
+          author_name?: string | null
+          case_id?: string
+          content?: string
+          created_at?: string
+          entry_type?: Database["public"]["Enums"]["mediation_entry_type"]
+          id?: string
+          is_flagged?: boolean
+          party_id?: string | null
+          session_id?: string | null
+          updated_at?: string
+          visibility?: Database["public"]["Enums"]["mediation_visibility"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mediation_dialogue_entries_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "mediation_cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mediation_dialogue_entries_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "mediation_parties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mediation_dialogue_entries_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "mediation_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mediation_documents: {
+        Row: {
+          case_id: string
+          created_at: string
+          description: string | null
+          doc_type: string
+          file_url: string | null
+          id: string
+          title: string
+          uploaded_by: string
+          visibility: Database["public"]["Enums"]["mediation_visibility"]
+        }
+        Insert: {
+          case_id: string
+          created_at?: string
+          description?: string | null
+          doc_type?: string
+          file_url?: string | null
+          id?: string
+          title: string
+          uploaded_by?: string
+          visibility?: Database["public"]["Enums"]["mediation_visibility"]
+        }
+        Update: {
+          case_id?: string
+          created_at?: string
+          description?: string | null
+          doc_type?: string
+          file_url?: string | null
+          id?: string
+          title?: string
+          uploaded_by?: string
+          visibility?: Database["public"]["Enums"]["mediation_visibility"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mediation_documents_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "mediation_cases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mediation_milestones: {
+        Row: {
+          case_id: string
+          completed_at: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          due_date: string | null
+          id: string
+          order_index: number
+          phase: Database["public"]["Enums"]["mediation_case_status"] | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          case_id: string
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          order_index?: number
+          phase?: Database["public"]["Enums"]["mediation_case_status"] | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          case_id?: string
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          order_index?: number
+          phase?: Database["public"]["Enums"]["mediation_case_status"] | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mediation_milestones_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "mediation_cases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mediation_parties: {
+        Row: {
+          case_id: string
+          color_token: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          created_by: string
+          engagement_status: string
+          id: string
+          interests: string[] | null
+          is_signatory: boolean
+          party_name: string
+          party_type: Database["public"]["Enums"]["mediation_party_type"]
+          position_summary: string | null
+          red_lines: string[] | null
+          representative_name: string | null
+          representative_title: string | null
+          trust_level: number | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          case_id: string
+          color_token?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by?: string
+          engagement_status?: string
+          id?: string
+          interests?: string[] | null
+          is_signatory?: boolean
+          party_name: string
+          party_type?: Database["public"]["Enums"]["mediation_party_type"]
+          position_summary?: string | null
+          red_lines?: string[] | null
+          representative_name?: string | null
+          representative_title?: string | null
+          trust_level?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          case_id?: string
+          color_token?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by?: string
+          engagement_status?: string
+          id?: string
+          interests?: string[] | null
+          is_signatory?: boolean
+          party_name?: string
+          party_type?: Database["public"]["Enums"]["mediation_party_type"]
+          position_summary?: string | null
+          red_lines?: string[] | null
+          representative_name?: string | null
+          representative_title?: string | null
+          trust_level?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mediation_parties_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "mediation_cases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mediation_sessions: {
+        Row: {
+          agenda: string | null
+          attendee_party_ids: string[] | null
+          case_id: string
+          climate_rating: number | null
+          created_at: string
+          created_by: string
+          duration_minutes: number | null
+          facilitator_id: string | null
+          id: string
+          location_name: string | null
+          minutes: string | null
+          modality: string
+          next_steps: string | null
+          outcomes: string | null
+          scheduled_at: string | null
+          session_number: number
+          status: Database["public"]["Enums"]["mediation_session_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          agenda?: string | null
+          attendee_party_ids?: string[] | null
+          case_id: string
+          climate_rating?: number | null
+          created_at?: string
+          created_by?: string
+          duration_minutes?: number | null
+          facilitator_id?: string | null
+          id?: string
+          location_name?: string | null
+          minutes?: string | null
+          modality?: string
+          next_steps?: string | null
+          outcomes?: string | null
+          scheduled_at?: string | null
+          session_number?: number
+          status?: Database["public"]["Enums"]["mediation_session_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          agenda?: string | null
+          attendee_party_ids?: string[] | null
+          case_id?: string
+          climate_rating?: number | null
+          created_at?: string
+          created_by?: string
+          duration_minutes?: number | null
+          facilitator_id?: string | null
+          id?: string
+          location_name?: string | null
+          minutes?: string | null
+          modality?: string
+          next_steps?: string | null
+          outcomes?: string | null
+          scheduled_at?: string | null
+          session_number?: number
+          status?: Database["public"]["Enums"]["mediation_session_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mediation_sessions_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "mediation_cases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mediation_signatures: {
+        Row: {
+          agreement_id: string
+          case_id: string
+          id: string
+          notes: string | null
+          party_id: string | null
+          signatory_name: string
+          signatory_title: string | null
+          signature_hash: string | null
+          signed_at: string
+          signed_by: string | null
+        }
+        Insert: {
+          agreement_id: string
+          case_id: string
+          id?: string
+          notes?: string | null
+          party_id?: string | null
+          signatory_name: string
+          signatory_title?: string | null
+          signature_hash?: string | null
+          signed_at?: string
+          signed_by?: string | null
+        }
+        Update: {
+          agreement_id?: string
+          case_id?: string
+          id?: string
+          notes?: string | null
+          party_id?: string | null
+          signatory_name?: string
+          signatory_title?: string | null
+          signature_hash?: string | null
+          signed_at?: string
+          signed_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mediation_signatures_agreement_id_fkey"
+            columns: ["agreement_id"]
+            isOneToOne: false
+            referencedRelation: "mediation_agreements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mediation_signatures_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "mediation_cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mediation_signatures_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "mediation_parties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mel_forms: {
+        Row: {
+          allow_offline: boolean
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_active: boolean
+          is_public: boolean
+          linked_indicator_id: string | null
+          org_id: string
+          phase: string
+          project_id: string
+          public_token: string | null
+          questions: Json
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          allow_offline?: boolean
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_public?: boolean
+          linked_indicator_id?: string | null
+          org_id: string
+          phase?: string
+          project_id: string
+          public_token?: string | null
+          questions?: Json
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          allow_offline?: boolean
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_public?: boolean
+          linked_indicator_id?: string | null
+          org_id?: string
+          phase?: string
+          project_id?: string
+          public_token?: string | null
+          questions?: Json
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mel_forms_linked_indicator_id_fkey"
+            columns: ["linked_indicator_id"]
+            isOneToOne: false
+            referencedRelation: "mel_indicators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mel_forms_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "mel_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mel_forms_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "mel_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mel_indicator_measurements: {
+        Row: {
+          created_at: string
+          disaggregation_data: Json
+          id: string
+          indicator_id: string
+          measured_on: string
+          measured_value: number
+          notes: string | null
+          org_id: string
+          period_label: string
+          phase: string | null
+          recorded_by: string
+        }
+        Insert: {
+          created_at?: string
+          disaggregation_data?: Json
+          id?: string
+          indicator_id: string
+          measured_on?: string
+          measured_value: number
+          notes?: string | null
+          org_id: string
+          period_label: string
+          phase?: string | null
+          recorded_by?: string
+        }
+        Update: {
+          created_at?: string
+          disaggregation_data?: Json
+          id?: string
+          indicator_id?: string
+          measured_on?: string
+          measured_value?: number
+          notes?: string | null
+          org_id?: string
+          period_label?: string
+          phase?: string | null
+          recorded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mel_indicator_measurements_indicator_id_fkey"
+            columns: ["indicator_id"]
+            isOneToOne: false
+            referencedRelation: "mel_indicators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mel_indicator_measurements_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "mel_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mel_indicators: {
+        Row: {
+          baseline_value: number | null
+          code: string | null
+          created_at: string
+          created_by: string
+          current_value: number | null
+          data_source: string | null
+          definition: string | null
+          disaggregation: string[] | null
+          frequency: string | null
+          id: string
+          indicator_type: Database["public"]["Enums"]["mel_indicator_type"]
+          name: string
+          org_id: string
+          project_id: string
+          sdg_alignment: string[] | null
+          target_value: number | null
+          unit: string | null
+          updated_at: string
+        }
+        Insert: {
+          baseline_value?: number | null
+          code?: string | null
+          created_at?: string
+          created_by?: string
+          current_value?: number | null
+          data_source?: string | null
+          definition?: string | null
+          disaggregation?: string[] | null
+          frequency?: string | null
+          id?: string
+          indicator_type?: Database["public"]["Enums"]["mel_indicator_type"]
+          name: string
+          org_id: string
+          project_id: string
+          sdg_alignment?: string[] | null
+          target_value?: number | null
+          unit?: string | null
+          updated_at?: string
+        }
+        Update: {
+          baseline_value?: number | null
+          code?: string | null
+          created_at?: string
+          created_by?: string
+          current_value?: number | null
+          data_source?: string | null
+          definition?: string | null
+          disaggregation?: string[] | null
+          frequency?: string | null
+          id?: string
+          indicator_type?: Database["public"]["Enums"]["mel_indicator_type"]
+          name?: string
+          org_id?: string
+          project_id?: string
+          sdg_alignment?: string[] | null
+          target_value?: number | null
+          unit?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mel_indicators_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "mel_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mel_indicators_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "mel_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mel_org_members: {
+        Row: {
+          created_at: string
+          id: string
+          invited_by: string | null
+          is_active: boolean
+          org_id: string
+          org_role: Database["public"]["Enums"]["mel_org_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invited_by?: string | null
+          is_active?: boolean
+          org_id: string
+          org_role?: Database["public"]["Enums"]["mel_org_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invited_by?: string | null
+          is_active?: boolean
+          org_id?: string
+          org_role?: Database["public"]["Enums"]["mel_org_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mel_org_members_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "mel_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mel_organizations: {
+        Row: {
+          billing_status: string
+          contact_email: string | null
+          country_code: string | null
+          created_at: string
+          created_by: string
+          id: string
+          logo_url: string | null
+          name: string
+          org_type: string
+          plan: Database["public"]["Enums"]["mel_plan"]
+          project_limit: number
+          seat_limit: number
+          slug: string
+          submission_limit: number
+          trial_ends_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          billing_status?: string
+          contact_email?: string | null
+          country_code?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          logo_url?: string | null
+          name: string
+          org_type?: string
+          plan?: Database["public"]["Enums"]["mel_plan"]
+          project_limit?: number
+          seat_limit?: number
+          slug: string
+          submission_limit?: number
+          trial_ends_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          billing_status?: string
+          contact_email?: string | null
+          country_code?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          logo_url?: string | null
+          name?: string
+          org_type?: string
+          plan?: Database["public"]["Enums"]["mel_plan"]
+          project_limit?: number
+          seat_limit?: number
+          slug?: string
+          submission_limit?: number
+          trial_ends_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      mel_projects: {
+        Row: {
+          budget_amount: number | null
+          budget_currency: string | null
+          code: string | null
+          country_code: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          donor: string | null
+          end_date: string | null
+          id: string
+          locations: string[] | null
+          name: string
+          org_id: string
+          reached_beneficiaries: number
+          start_date: string | null
+          status: Database["public"]["Enums"]["mel_project_status"]
+          target_beneficiaries: number | null
+          theory_of_change: string | null
+          updated_at: string
+        }
+        Insert: {
+          budget_amount?: number | null
+          budget_currency?: string | null
+          code?: string | null
+          country_code?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          donor?: string | null
+          end_date?: string | null
+          id?: string
+          locations?: string[] | null
+          name: string
+          org_id: string
+          reached_beneficiaries?: number
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["mel_project_status"]
+          target_beneficiaries?: number | null
+          theory_of_change?: string | null
+          updated_at?: string
+        }
+        Update: {
+          budget_amount?: number | null
+          budget_currency?: string | null
+          code?: string | null
+          country_code?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          donor?: string | null
+          end_date?: string | null
+          id?: string
+          locations?: string[] | null
+          name?: string
+          org_id?: string
+          reached_beneficiaries?: number
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["mel_project_status"]
+          target_beneficiaries?: number | null
+          theory_of_change?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mel_projects_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "mel_organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mel_submissions: {
+        Row: {
+          answers: Json
+          channel: string
+          collected_at: string
+          collected_offline: boolean
+          created_at: string
+          form_id: string
+          id: string
+          latitude: number | null
+          location_name: string | null
+          longitude: number | null
+          org_id: string
+          project_id: string
+          respondent_age_group: string | null
+          respondent_gender: string | null
+          status: Database["public"]["Enums"]["mel_submission_status"]
+          submitted_by: string | null
+          synced_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          answers?: Json
+          channel?: string
+          collected_at?: string
+          collected_offline?: boolean
+          created_at?: string
+          form_id: string
+          id?: string
+          latitude?: number | null
+          location_name?: string | null
+          longitude?: number | null
+          org_id: string
+          project_id: string
+          respondent_age_group?: string | null
+          respondent_gender?: string | null
+          status?: Database["public"]["Enums"]["mel_submission_status"]
+          submitted_by?: string | null
+          synced_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          answers?: Json
+          channel?: string
+          collected_at?: string
+          collected_offline?: boolean
+          created_at?: string
+          form_id?: string
+          id?: string
+          latitude?: number | null
+          location_name?: string | null
+          longitude?: number | null
+          org_id?: string
+          project_id?: string
+          respondent_age_group?: string | null
+          respondent_gender?: string | null
+          status?: Database["public"]["Enums"]["mel_submission_status"]
+          submitted_by?: string | null
+          synced_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mel_submissions_form_id_fkey"
+            columns: ["form_id"]
+            isOneToOne: false
+            referencedRelation: "mel_forms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mel_submissions_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "mel_organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mel_submissions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "mel_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       message_acknowledgments: {
         Row: {
           acknowledged_at: string | null
@@ -9011,6 +10112,22 @@ export type Database = {
         Returns: boolean
       }
       is_election_stakeholder: { Args: { _user_id: string }; Returns: boolean }
+      is_mediation_facilitator: {
+        Args: { _case_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_mediation_member: {
+        Args: { _case_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_mel_manager: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_mel_member: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: boolean
+      }
       longtransactionsenabled: { Args: never; Returns: boolean }
       populate_geometry_columns:
         | { Args: { tbl_oid: unknown; use_typmod?: boolean }; Returns: number }
@@ -9705,6 +10822,84 @@ export type Database = {
         | "referendum"
         | "by_election"
         | "primary"
+      mediation_agreement_status:
+        | "draft"
+        | "under_review"
+        | "agreed"
+        | "signed"
+        | "implemented"
+        | "breached"
+        | "void"
+      mediation_case_status:
+        | "intake"
+        | "assessment"
+        | "party_onboarding"
+        | "dialogue"
+        | "negotiation"
+        | "drafting"
+        | "agreement_reached"
+        | "implementation"
+        | "monitoring"
+        | "closed"
+        | "suspended"
+        | "failed"
+      mediation_clause_status:
+        | "pending"
+        | "in_progress"
+        | "complete"
+        | "delayed"
+        | "breached"
+      mediation_confidentiality: "public" | "restricted" | "confidential"
+      mediation_entry_type:
+        | "statement"
+        | "question"
+        | "proposal"
+        | "clarification"
+        | "concern"
+        | "commitment"
+        | "decision"
+        | "caucus_note"
+      mediation_member_role:
+        | "lead_mediator"
+        | "co_mediator"
+        | "rapporteur"
+        | "observer"
+        | "party_representative"
+        | "technical_advisor"
+        | "funder"
+      mediation_party_type:
+        | "community"
+        | "government"
+        | "armed_group"
+        | "political_party"
+        | "business"
+        | "civil_society"
+        | "religious_institution"
+        | "individual"
+        | "other"
+      mediation_session_status:
+        | "scheduled"
+        | "in_progress"
+        | "completed"
+        | "cancelled"
+        | "postponed"
+      mediation_visibility: "all_members" | "mediators_only" | "parties_only"
+      mel_indicator_type: "impact" | "outcome" | "output" | "activity" | "input"
+      mel_org_role:
+        | "owner"
+        | "admin"
+        | "mel_manager"
+        | "field_officer"
+        | "viewer"
+      mel_plan: "free" | "starter" | "professional" | "enterprise"
+      mel_project_status:
+        | "design"
+        | "baseline"
+        | "implementation"
+        | "midline"
+        | "endline"
+        | "closed"
+      mel_submission_status: "pending" | "verified" | "flagged" | "rejected"
       observer_role:
         | "domestic_observer"
         | "international_observer"
@@ -9909,6 +11104,93 @@ export const Constants = {
         "by_election",
         "primary",
       ],
+      mediation_agreement_status: [
+        "draft",
+        "under_review",
+        "agreed",
+        "signed",
+        "implemented",
+        "breached",
+        "void",
+      ],
+      mediation_case_status: [
+        "intake",
+        "assessment",
+        "party_onboarding",
+        "dialogue",
+        "negotiation",
+        "drafting",
+        "agreement_reached",
+        "implementation",
+        "monitoring",
+        "closed",
+        "suspended",
+        "failed",
+      ],
+      mediation_clause_status: [
+        "pending",
+        "in_progress",
+        "complete",
+        "delayed",
+        "breached",
+      ],
+      mediation_confidentiality: ["public", "restricted", "confidential"],
+      mediation_entry_type: [
+        "statement",
+        "question",
+        "proposal",
+        "clarification",
+        "concern",
+        "commitment",
+        "decision",
+        "caucus_note",
+      ],
+      mediation_member_role: [
+        "lead_mediator",
+        "co_mediator",
+        "rapporteur",
+        "observer",
+        "party_representative",
+        "technical_advisor",
+        "funder",
+      ],
+      mediation_party_type: [
+        "community",
+        "government",
+        "armed_group",
+        "political_party",
+        "business",
+        "civil_society",
+        "religious_institution",
+        "individual",
+        "other",
+      ],
+      mediation_session_status: [
+        "scheduled",
+        "in_progress",
+        "completed",
+        "cancelled",
+        "postponed",
+      ],
+      mediation_visibility: ["all_members", "mediators_only", "parties_only"],
+      mel_indicator_type: ["impact", "outcome", "output", "activity", "input"],
+      mel_org_role: [
+        "owner",
+        "admin",
+        "mel_manager",
+        "field_officer",
+        "viewer",
+      ],
+      mel_plan: ["free", "starter", "professional", "enterprise"],
+      mel_project_status: [
+        "design",
+        "baseline",
+        "implementation",
+        "midline",
+        "endline",
+        "closed",
+      ],
+      mel_submission_status: ["pending", "verified", "flagged", "rejected"],
       observer_role: [
         "domestic_observer",
         "international_observer",

@@ -71,6 +71,7 @@ export const HUBS: Hub[] = [
       { path: "/proposals", label: "Proposals & polls", desc: "Shape policy with your vote", featureKey: "proposals" },
       { path: "/challenges", label: "Peace challenges", desc: "Take action, earn recognition", featureKey: "challenges" },
       { path: "/radio", label: "Peace Radio", desc: "Listen, call in, and be heard", featureKey: "radio" },
+      { path: "/mediation", label: "Mediation Suite", desc: "Convene parties, track agreements", roles: ["admin", "government", "partner", "verifier"] },
     ],
   },
   {
