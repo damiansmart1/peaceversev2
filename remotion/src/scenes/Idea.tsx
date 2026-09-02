@@ -24,7 +24,7 @@ export const Idea: React.FC = () => (
           color={`${C.cream}CC`}
         />
         <div style={{ display: "flex", gap: 18, marginTop: 18 }}>
-          <Sequence from={0}>
+          <Sequence from={0} layout="none">
             <div style={{ display: "flex", gap: 18 }}>
               <Pill text="DETECT" delay={110} />
               <Pill text="VERIFY" delay={128} bg={`${C.green}33`} fg="#7FD196" />

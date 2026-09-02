@@ -57,7 +57,7 @@ export const Impact: React.FC = () => (
         <Stat who="For communities" what="Finally being heard." delay={120} accent="#7FD196" />
         <Stat who="For donors" what="Every dollar traced to a life protected." delay={145} accent="#E0A46A" />
       </div>
-      <Sequence from={230}>
+      <Sequence from={230} layout="none">
         <div style={{ marginTop: 44 }}>
           <Line
             text="PeaceVerse does not just collect data. It builds trust. It saves lives."
