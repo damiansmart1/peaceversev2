@@ -2,10 +2,15 @@ import { AbsoluteFill, Sequence, useCurrentFrame, interpolate } from "remotion";
 import { loadFont as loadDisplay } from "@remotion/google-fonts/SpaceGrotesk";
 import { loadFont as loadBody } from "@remotion/google-fonts/DMSans";
 import { Hook } from "./scenes/Hook";
+import { Problem } from "./scenes/Problem";
 import { Idea } from "./scenes/Idea";
 import { Pillar1 } from "./scenes/Pillar1";
+import { Inclusion } from "./scenes/Inclusion";
+import { Languages } from "./scenes/Languages";
 import { Pillar2 } from "./scenes/Pillar2";
+import { Offline } from "./scenes/Offline";
 import { Pillar3 } from "./scenes/Pillar3";
+import { Reports } from "./scenes/Reports";
 import { Pillar4 } from "./scenes/Pillar4";
 import { Impact } from "./scenes/Impact";
 import { Closing } from "./scenes/Closing";
@@ -14,24 +19,39 @@ import { C } from "./theme";
 const display = loadDisplay("normal", { weights: ["500", "700"], subsets: ["latin"] });
 const body = loadBody("normal", { weights: ["400", "500", "700"], subsets: ["latin"] });
 
-const SEGMENTS: { from: number; dur: number; comp: React.FC; tc: string }[] = [
-  { from: 0, dur: 450, comp: Hook, tc: "00:00" },
-  { from: 450, dur: 390, comp: Idea, tc: "00:15" },
-  { from: 840, dur: 510, comp: Pillar1, tc: "00:28" },
-  { from: 1350, dur: 600, comp: Pillar2, tc: "00:45" },
-  { from: 1950, dur: 510, comp: Pillar3, tc: "01:05" },
-  { from: 2460, dur: 480, comp: Pillar4, tc: "01:22" },
-  { from: 2940, dur: 510, comp: Impact, tc: "01:38" },
-  { from: 3450, dur: 150, comp: Closing, tc: "01:55" },
+export const TOTAL = 5400;
+
+const ORDER: { dur: number; comp: React.FC }[] = [
+  { dur: 450, comp: Hook },
+  { dur: 420, comp: Problem },
+  { dur: 330, comp: Idea },
+  { dur: 510, comp: Pillar1 },
+  { dur: 450, comp: Inclusion },
+  { dur: 360, comp: Languages },
+  { dur: 480, comp: Pillar2 },
+  { dur: 420, comp: Offline },
+  { dur: 450, comp: Pillar3 },
+  { dur: 420, comp: Reports },
+  { dur: 420, comp: Pillar4 },
+  { dur: 480, comp: Impact },
+  { dur: 210, comp: Closing },
 ];
+
+let cursor = 0;
+const SEGMENTS = ORDER.map((s) => {
+  const from = cursor;
+  cursor += s.dur;
+  return { ...s, from };
+});
 
 const Chrome: React.FC = () => {
   const f = useCurrentFrame();
-  const progress = f / 3600;
-  const fade = interpolate(f, [0, 20, 3400, 3560], [0, 1, 1, 0], {
+  const progress = f / TOTAL;
+  const fade = interpolate(f, [0, 20, TOTAL - 200, TOTAL - 40], [0, 1, 1, 0], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
+
   return (
     <AbsoluteFill style={{ pointerEvents: "none" }}>
       <div
