@@ -4,6 +4,7 @@ import { loadFont as loadBody } from "@remotion/google-fonts/DMSans";
 import { Hook } from "./scenes/Hook";
 import { Problem } from "./scenes/Problem";
 import { Idea } from "./scenes/Idea";
+import { Rights } from "./scenes/Rights";
 import { Pillar1 } from "./scenes/Pillar1";
 import { Inclusion } from "./scenes/Inclusion";
 import { Languages } from "./scenes/Languages";
@@ -19,12 +20,13 @@ import { C } from "./theme";
 const display = loadDisplay("normal", { weights: ["500", "700"], subsets: ["latin"] });
 const body = loadBody("normal", { weights: ["400", "500", "700"], subsets: ["latin"] });
 
-export const TOTAL = 5400;
+export const TOTAL = 5760;
 
 const ORDER: { dur: number; comp: React.FC }[] = [
   { dur: 450, comp: Hook },
   { dur: 420, comp: Problem },
   { dur: 330, comp: Idea },
+  { dur: 360, comp: Rights },
   { dur: 510, comp: Pillar1 },
   { dur: 450, comp: Inclusion },
   { dur: 360, comp: Languages },

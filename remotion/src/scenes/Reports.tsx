@@ -141,12 +141,13 @@ export const Reports: React.FC = () => (
         <div style={{ width: 760, display: "flex", flexDirection: "column", gap: 22 }}>
           <Eyebrow text="What that looks like in practice" delay={2} />
           <Line
-            text="A district officer wakes up to a two-page brief, not a spreadsheet."
+            text="An Officer In-Charge wakes up to a two-page brief, not a spreadsheet."
             delay={10}
             size={50}
             display
             weight={700}
           />
+
           <Line
             text="A UNHCR protection team sees the corridor at risk before movement begins."
             delay={54}

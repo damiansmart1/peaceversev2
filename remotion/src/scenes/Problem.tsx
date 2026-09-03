@@ -20,30 +20,30 @@ export const Problem: React.FC = () => (
         />
         <div style={{ display: "flex", gap: 24, marginTop: 20 }}>
           <DataCard
-            value="45M+"
-            label="People forcibly displaced across Africa"
-            source="UNHCR Global Trends"
+            value="122.6M"
+            label="People forcibly displaced worldwide by mid-2024 — Africa carries the largest share"
+            source="UNHCR Mid-Year Trends 2024"
             delay={54}
             accent="#E2795E"
           />
           <DataCard
-            value="~38%"
-            label="Of Africans use the internet — most report by basic phone"
-            source="ITU Facts & Figures"
+            value="296"
+            label="Internet shutdowns in 54 countries in 2024 — the worst year ever recorded"
+            source="Access Now #KeepItOn, 2024 report"
             delay={74}
             accent={C.gold}
           />
           <DataCard
-            value="2,000+"
-            label="Languages spoken — most early warning is English or French only"
-            source="UNESCO / AU"
+            value="51%"
+            label="Of all global terrorism deaths in 2024 occurred in the Sahel"
+            source="Global Terrorism Index 2025, IEP"
             delay={94}
             accent="#8FC2F5"
           />
           <DataCard
-            value="$1 : $16"
-            label="Every $1 spent preventing conflict saves about $16 in response"
-            source="UN–World Bank, Pathways for Peace"
+            value="~38%"
+            label="Internet use in Africa — most people still report by basic phone, in local languages"
+            source="ITU Facts & Figures 2024"
             delay={114}
             accent="#7FD196"
           />
@@ -54,29 +54,29 @@ export const Problem: React.FC = () => (
     <Sequence from={210} durationInFrames={210}>
       <AbsoluteFill style={{ padding: "150px 130px 90px", justifyContent: "center", gap: 30 }}>
         <Eyebrow text="What late warning costs" delay={2} color="#E2795E" />
-        <Line text="These are not hypotheticals." delay={8} size={54} display weight={700} />
+        <Line text="These are not hypotheticals — they are the last five years." delay={8} size={54} display weight={700} />
         <div style={{ display: "flex", flexDirection: "column", gap: 26, marginTop: 22 }}>
           <Row
-            left="Kenya 2007–08 post-election violence"
-            right="1,100+ killed · 600,000 displaced — rumours spread faster than facts"
+            left="Sudan, since April 2023"
+            right="12M+ displaced — the world's largest displacement crisis (UNHCR, 2025)"
             delay={40}
             accent="#E2795E"
           />
           <Row
-            left="Sudan, since April 2023"
-            right="12M+ displaced — the world's largest displacement crisis"
+            left="Eastern DRC escalation, 2025"
+            right="Fall of Goma; ~7M internally displaced — alerts outrun by the front line (OCHA / UNHCR)"
             delay={70}
             accent={C.gold}
           />
           <Row
-            left="Karamoja & cross-border pastoral corridors"
-            right="Cattle raids escalate in hours; alerts often travel in days"
+            left="Sahel coup belt, 2020–2023"
+            right="Mali, Guinea, Sudan, Chad, Burkina Faso, Niger, Gabon — democratic transitions interrupted"
             delay={100}
             accent="#8FC2F5"
           />
           <Row
-            left="Lake Chad Basin & Sahel"
-            right="Communities warn each other — but no shared, verified picture"
+            left="Africa's election super-cycle, 2024–2026"
+            right="Contested polls met with shutdowns and disinformation — 21 shutdowns across 15 African countries in 2024 (Access Now)"
             delay={130}
             accent="#7FD196"
           />
@@ -89,5 +89,6 @@ export const Problem: React.FC = () => (
         />
       </AbsoluteFill>
     </Sequence>
+
   </AbsoluteFill>
 );

@@ -7,7 +7,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const args = process.argv.slice(2);
 const stillFrames = args.filter((a) => a.startsWith("--still=")).map((a) => Number(a.split("=")[1]));
 const rangeArg = args.find((a) => a.startsWith("--range="));
-const out = (args.find((a) => a.startsWith("--out=")) || "--out=/mnt/documents/PeaceVerse_Platform_Story.mp4").split("=")[1];
+const out = (args.find((a) => a.startsWith("--out=")) || "--out=/mnt/documents/PeaceVerse_Platform_Story_3min.mp4").split("=")[1];
 
 const bundled = await bundle({
   entryPoint: path.resolve(__dirname, "../src/index.ts"),
