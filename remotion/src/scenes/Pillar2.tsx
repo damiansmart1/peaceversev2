@@ -8,7 +8,7 @@ export const Pillar2: React.FC = () => (
   <AbsoluteFill>
     <Backdrop tone="dark" />
 
-    <Sequence from={0} durationInFrames={300}>
+    <Sequence from={0} durationInFrames={436}>
       <AbsoluteFill style={{ flexDirection: "row", alignItems: "center", padding: "0 110px", gap: 60 }}>
         <div style={{ width: 700, display: "flex", flexDirection: "column", gap: 22 }}>
           <Eyebrow text="Pillar 2 · NuruAI" delay={2} />
@@ -35,7 +35,7 @@ export const Pillar2: React.FC = () => (
       </AbsoluteFill>
     </Sequence>
 
-    <Sequence from={300} durationInFrames={300}>
+    <Sequence from={436} durationInFrames={348}>
       <AbsoluteFill style={{ flexDirection: "row-reverse", alignItems: "center", padding: "0 110px", gap: 60 }}>
         <div style={{ width: 680, display: "flex", flexDirection: "column", gap: 22 }}>
           <Eyebrow text="Verified incident ledger" delay={2} color="#8FC2F5" />

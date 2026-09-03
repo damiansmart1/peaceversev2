@@ -16,28 +16,30 @@ import { Pillar4 } from "./scenes/Pillar4";
 import { Impact } from "./scenes/Impact";
 import { Closing } from "./scenes/Closing";
 import { C } from "./theme";
+import { SCENE_DUR, TOTAL_FRAMES } from "./timing";
 
 const display = loadDisplay("normal", { weights: ["500", "700"], subsets: ["latin"] });
 const body = loadBody("normal", { weights: ["400", "500", "700"], subsets: ["latin"] });
 
-export const TOTAL = 5760;
+export const TOTAL = TOTAL_FRAMES;
 
 const ORDER: { dur: number; comp: React.FC }[] = [
-  { dur: 450, comp: Hook },
-  { dur: 420, comp: Problem },
-  { dur: 330, comp: Idea },
-  { dur: 360, comp: Rights },
-  { dur: 510, comp: Pillar1 },
-  { dur: 450, comp: Inclusion },
-  { dur: 360, comp: Languages },
-  { dur: 480, comp: Pillar2 },
-  { dur: 420, comp: Offline },
-  { dur: 450, comp: Pillar3 },
-  { dur: 420, comp: Reports },
-  { dur: 420, comp: Pillar4 },
-  { dur: 480, comp: Impact },
-  { dur: 210, comp: Closing },
+  { dur: SCENE_DUR.hook, comp: Hook },
+  { dur: SCENE_DUR.problem, comp: Problem },
+  { dur: SCENE_DUR.idea, comp: Idea },
+  { dur: SCENE_DUR.rights, comp: Rights },
+  { dur: SCENE_DUR.pillar1, comp: Pillar1 },
+  { dur: SCENE_DUR.inclusion, comp: Inclusion },
+  { dur: SCENE_DUR.languages, comp: Languages },
+  { dur: SCENE_DUR.pillar2, comp: Pillar2 },
+  { dur: SCENE_DUR.offline, comp: Offline },
+  { dur: SCENE_DUR.pillar3, comp: Pillar3 },
+  { dur: SCENE_DUR.reports, comp: Reports },
+  { dur: SCENE_DUR.pillar4, comp: Pillar4 },
+  { dur: SCENE_DUR.impact, comp: Impact },
+  { dur: SCENE_DUR.closing, comp: Closing },
 ];
+
 
 let cursor = 0;
 const SEGMENTS = ORDER.map((s) => {

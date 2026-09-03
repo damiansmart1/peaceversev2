@@ -55,7 +55,7 @@ export const Languages: React.FC = () => (
   <AbsoluteFill>
     <Backdrop tone="dark" />
 
-    <Sequence from={0} durationInFrames={200}>
+    <Sequence from={0} durationInFrames={223}>
       <AbsoluteFill style={{ padding: "150px 130px 90px", justifyContent: "center", gap: 30 }}>
         <Eyebrow text="No language left behind" delay={2} color="#8FC2F5" />
         <Line
@@ -73,7 +73,7 @@ export const Languages: React.FC = () => (
       </AbsoluteFill>
     </Sequence>
 
-    <Sequence from={200} durationInFrames={160}>
+    <Sequence from={223} durationInFrames={455}>
       <AbsoluteFill style={{ padding: "150px 140px 90px", justifyContent: "center", gap: 26 }}>
         <Eyebrow text="How it works" delay={2} color="#8FC2F5" />
         <Line

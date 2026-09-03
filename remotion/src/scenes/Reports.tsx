@@ -69,7 +69,7 @@ export const Reports: React.FC = () => (
   <AbsoluteFill>
     <Backdrop tone="dark" />
 
-    <Sequence from={0} durationInFrames={230}>
+    <Sequence from={0} durationInFrames={557}>
       <AbsoluteFill style={{ padding: "140px 110px 80px", justifyContent: "center", gap: 30 }}>
         <Eyebrow text="Evidence you can hand to a decision maker" delay={2} color={C.gold} />
         <Line text="One click turns field signals into institutional reporting." delay={8} size={52} display weight={700} />
@@ -136,7 +136,7 @@ export const Reports: React.FC = () => (
       </AbsoluteFill>
     </Sequence>
 
-    <Sequence from={230} durationInFrames={190}>
+    <Sequence from={557} durationInFrames={490}>
       <AbsoluteFill style={{ flexDirection: "row", alignItems: "center", padding: "60px 110px 0", gap: 56 }}>
         <div style={{ width: 760, display: "flex", flexDirection: "column", gap: 22 }}>
           <Eyebrow text="What that looks like in practice" delay={2} />

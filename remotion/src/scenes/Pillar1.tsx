@@ -8,7 +8,7 @@ export const Pillar1: React.FC = () => (
   <AbsoluteFill>
     <Backdrop tone="dark" />
 
-    <Sequence from={0} durationInFrames={250}>
+    <Sequence from={0} durationInFrames={413}>
       <AbsoluteFill style={{ flexDirection: "row", alignItems: "center", padding: "0 110px", gap: 60 }}>
         <div style={{ width: 700, display: "flex", flexDirection: "column", gap: 22 }}>
           <Eyebrow text="Pillar 1 · Report Hub" delay={2} />
@@ -36,7 +36,7 @@ export const Pillar1: React.FC = () => (
       </AbsoluteFill>
     </Sequence>
 
-    <Sequence from={250} durationInFrames={260}>
+    <Sequence from={413} durationInFrames={393}>
       <AbsoluteFill style={{ flexDirection: "row-reverse", alignItems: "center", padding: "0 110px", gap: 60 }}>
         <div style={{ width: 680, display: "flex", flexDirection: "column", gap: 22 }}>
           <Eyebrow text="App · SMS · USSD · Radio" delay={2} color="#7FD196" />

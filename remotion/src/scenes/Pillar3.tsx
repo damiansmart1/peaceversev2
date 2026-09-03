@@ -8,7 +8,7 @@ export const Pillar3: React.FC = () => (
   <AbsoluteFill>
     <Backdrop tone="dark" />
 
-    <Sequence from={0} durationInFrames={280}>
+    <Sequence from={0} durationInFrames={346}>
       <AbsoluteFill style={{ flexDirection: "row", alignItems: "center", padding: "0 110px", gap: 60 }}>
         <div style={{ width: 660, display: "flex", flexDirection: "column", gap: 22 }}>
           <Eyebrow text="Pillar 3 · Alerts Command Center" delay={2} />
@@ -34,7 +34,7 @@ export const Pillar3: React.FC = () => (
       </AbsoluteFill>
     </Sequence>
 
-    <Sequence from={280} durationInFrames={230}>
+    <Sequence from={346} durationInFrames={311}>
       <AbsoluteFill style={{ flexDirection: "row-reverse", alignItems: "center", padding: "0 110px", gap: 60 }}>
         <div style={{ width: 660, display: "flex", flexDirection: "column", gap: 20 }}>
           <Eyebrow text="Peace Pulse analytics" delay={2} color="#7FD196" />
