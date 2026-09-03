@@ -45,7 +45,7 @@ export const Rights: React.FC = () => (
   <AbsoluteFill>
     <Backdrop tone="dark" />
 
-    <Sequence from={0} durationInFrames={190}>
+    <Sequence from={0} durationInFrames={486}>
       <AbsoluteFill style={{ padding: "140px 120px 90px", justifyContent: "center", gap: 30 }}>
         <Eyebrow text="Civic tech for democracy & human rights" delay={2} color={C.gold} />
         <Line
@@ -84,7 +84,7 @@ export const Rights: React.FC = () => (
       </AbsoluteFill>
     </Sequence>
 
-    <Sequence from={190} durationInFrames={170}>
+    <Sequence from={486} durationInFrames={566}>
       <AbsoluteFill style={{ padding: "150px 150px 90px", justifyContent: "center", gap: 28 }}>
         <Eyebrow text="Rights-based by design" delay={2} />
         <Line

@@ -8,7 +8,7 @@ export const Pillar4: React.FC = () => (
   <AbsoluteFill>
     <Backdrop tone="dark" />
 
-    <Sequence from={0} durationInFrames={260}>
+    <Sequence from={0} durationInFrames={351}>
       <AbsoluteFill style={{ flexDirection: "row", alignItems: "center", padding: "0 110px", gap: 60 }}>
         <div style={{ width: 680, display: "flex", flexDirection: "column", gap: 22 }}>
           <Eyebrow text="Pillar 4 · Mediation Suite" delay={2} />
@@ -28,7 +28,7 @@ export const Pillar4: React.FC = () => (
       </AbsoluteFill>
     </Sequence>
 
-    <Sequence from={260} durationInFrames={220}>
+    <Sequence from={351} durationInFrames={264}>
       <AbsoluteFill style={{ flexDirection: "row-reverse", alignItems: "center", padding: "0 110px", gap: 60 }}>
         <div style={{ width: 680, display: "flex", flexDirection: "column", gap: 22 }}>
           <Eyebrow text="Monitoring, Evaluation & Learning" delay={2} color="#8FC2F5" />

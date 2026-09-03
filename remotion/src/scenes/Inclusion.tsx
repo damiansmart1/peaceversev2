@@ -9,7 +9,7 @@ export const Inclusion: React.FC = () => (
   <AbsoluteFill>
     <Backdrop tone="dark" />
 
-    <Sequence from={0} durationInFrames={230}>
+    <Sequence from={0} durationInFrames={367}>
       <AbsoluteFill style={{ flexDirection: "row", alignItems: "center", padding: "60px 110px 0", gap: 56 }}>
         <div style={{ width: 800, display: "flex", flexDirection: "column", gap: 22 }}>
           <Eyebrow text="Designed for those usually left out" delay={2} color="#7FD196" />
@@ -42,7 +42,7 @@ export const Inclusion: React.FC = () => (
       </AbsoluteFill>
     </Sequence>
 
-    <Sequence from={230} durationInFrames={220}>
+    <Sequence from={367} durationInFrames={432}>
       <AbsoluteFill style={{ padding: "150px 130px 90px", justifyContent: "center", gap: 28 }}>
         <Eyebrow text="Barrier → what PeaceVerse does" delay={2} color={C.gold} />
         <div style={{ display: "flex", flexDirection: "column", gap: 26, marginTop: 14 }}>

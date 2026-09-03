@@ -8,7 +8,7 @@ export const Problem: React.FC = () => (
   <AbsoluteFill>
     <Backdrop tone="dark" />
 
-    <Sequence from={0} durationInFrames={210}>
+    <Sequence from={0} durationInFrames={501}>
       <AbsoluteFill style={{ padding: "150px 120px 90px", justifyContent: "center", gap: 34 }}>
         <Eyebrow text="The problem today" delay={2} color="#E2795E" />
         <Line
@@ -51,7 +51,7 @@ export const Problem: React.FC = () => (
       </AbsoluteFill>
     </Sequence>
 
-    <Sequence from={210} durationInFrames={210}>
+    <Sequence from={501} durationInFrames={480}>
       <AbsoluteFill style={{ padding: "150px 130px 90px", justifyContent: "center", gap: 30 }}>
         <Eyebrow text="What late warning costs" delay={2} color="#E2795E" />
         <Line text="These are not hypotheticals — they are the last five years." delay={8} size={54} display weight={700} />

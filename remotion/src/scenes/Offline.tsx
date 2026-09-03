@@ -74,7 +74,7 @@ export const Offline: React.FC = () => (
   <AbsoluteFill>
     <Backdrop tone="dark" />
 
-    <Sequence from={0} durationInFrames={220}>
+    <Sequence from={0} durationInFrames={303}>
       <AbsoluteFill style={{ flexDirection: "row-reverse", alignItems: "center", padding: "60px 110px 0", gap: 56 }}>
         <div style={{ width: 780, display: "flex", flexDirection: "column", gap: 22 }}>
           <Eyebrow text="Built for the last mile" delay={2} color="#7FD196" />
@@ -100,7 +100,7 @@ export const Offline: React.FC = () => (
       </AbsoluteFill>
     </Sequence>
 
-    <Sequence from={220} durationInFrames={200}>
+    <Sequence from={303} durationInFrames={306}>
       <AbsoluteFill style={{ padding: "150px 120px 90px", justifyContent: "center", gap: 34 }}>
         <Eyebrow text="A report from a village with no signal" delay={2} color={C.gold} />
         <Line text="Nothing is lost. Nothing waits for a tower." delay={8} size={52} display weight={700} />

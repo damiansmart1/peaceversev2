@@ -29,7 +29,7 @@ export const Hook: React.FC = () => {
         }}
       />
 
-      <Sequence from={0} durationInFrames={130}>
+      <Sequence from={0} durationInFrames={308}>
         <Beat>
           <Eyebrow text="Northern Kenya · 04:12" delay={4} color={C.gold} />
           <Line text="Imagine a mother in Northern Kenya." delay={12} size={78} display weight={700} />
@@ -48,7 +48,7 @@ export const Hook: React.FC = () => {
         </Beat>
       </Sequence>
 
-      <Sequence from={130} durationInFrames={110}>
+      <Sequence from={308} durationInFrames={153}>
         <Beat>
           <Line
             text="By the time the world finds out,"
@@ -67,7 +67,7 @@ export const Hook: React.FC = () => {
         </Beat>
       </Sequence>
 
-      <Sequence from={240} durationInFrames={210}>
+      <Sequence from={461} durationInFrames={432}>
         <Beat>
           <Line text="Now… imagine the opposite." delay={4} size={54} color={`${C.cream}CC`} />
           <Line
