@@ -228,7 +228,10 @@ const PeacePulse = () => {
               </TabsContent>
 
               <TabsContent value="crossborder" className="space-y-6">
-                <CrossBorderAnalysis selectedCountry={selectedCountry} />
+                <CrossBorderAnalysis
+                  selectedCountry={selectedCountry}
+                  selectedCountryName={getSelectedCountryName()}
+                />
               </TabsContent>
 
               <TabsContent value="alerts" className="space-y-6">

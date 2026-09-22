@@ -22,6 +22,7 @@ import { format } from 'date-fns';
 
 interface CrossBorderAnalysisProps {
   selectedCountry?: string;
+  selectedCountryName?: string;
 }
 
 interface Correlation {
@@ -36,8 +37,9 @@ interface Correlation {
   riskLevel: string;
 }
 
-const CrossBorderAnalysis = ({ selectedCountry = 'all' }: CrossBorderAnalysisProps) => {
+const CrossBorderAnalysis = ({ selectedCountry = 'all', selectedCountryName = 'All African countries' }: CrossBorderAnalysisProps) => {
   const [activeTab, setActiveTab] = useState('correlations');
+  const countryFilter = selectedCountry === 'all' ? null : selectedCountryName;
 
   // Fetch cross-border correlations from database
   const { data: correlations, isLoading: correlationsLoading } = useQuery({
@@ -63,6 +65,27 @@ const CrossBorderAnalysis = ({ selectedCountry = 'all' }: CrossBorderAnalysisPro
     }
   });
 
+  // Current incident records provide an accurate operational fallback while
+  // model-generated correlation, network, and cluster tables are still empty.
+  const { data: incidentSignals, isLoading: incidentsLoading } = useQuery({
+    queryKey: ['cross-border-incident-signals', countryFilter],
+    queryFn: async () => {
+      let query = supabase
+        .from('citizen_reports')
+        .select('id, title, category, severity_level, status, location_country, location_region, location_city, incident_date, created_at, estimated_people_affected')
+        .not('location_country', 'is', null)
+        .order('incident_date', { ascending: false, nullsFirst: false })
+        .limit(250);
+
+      if (countryFilter) query = query.eq('location_country', countryFilter);
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data || [];
+    },
+    refetchInterval: 60_000,
+  });
+
   // Fetch actor networks for cross-border analysis
   const { data: actorNetworks, isLoading: networksLoading } = useQuery({
     queryKey: ['actor-networks', selectedCountry],
@@ -74,7 +97,7 @@ const CrossBorderAnalysis = ({ selectedCountry = 'all' }: CrossBorderAnalysisPro
         .limit(10);
 
       if (selectedCountry !== 'all') {
-        query = query.contains('countries_involved', [selectedCountry]);
+        query = query.contains('countries_involved', [selectedCountryName]);
       }
 
       const { data, error } = await query;
@@ -94,7 +117,7 @@ const CrossBorderAnalysis = ({ selectedCountry = 'all' }: CrossBorderAnalysisPro
         .limit(10);
 
       if (selectedCountry !== 'all') {
-        query = query.contains('countries', [selectedCountry]);
+        query = query.contains('countries', [selectedCountryName]);
       }
 
       const { data, error } = await query;
@@ -124,10 +147,78 @@ const CrossBorderAnalysis = ({ selectedCountry = 'all' }: CrossBorderAnalysisPro
     return 'text-green-500';
   };
 
+  const reports = incidentSignals || [];
+  const reportCount = reports.length;
+  const verifiedCount = reports.filter((report: any) => report.status === 'verified').length;
+  const affectedCount = reports.reduce(
+    (total: number, report: any) => total + (Number(report.estimated_people_affected) || 0),
+    0,
+  );
+  const lastUpdated = reports
+    .map((report: any) => report.incident_date || report.created_at)
+    .filter(Boolean)
+    .sort()
+    .at(-1);
+
+  const derivedClusters = Object.values(
+    reports.reduce((groups: Record<string, any>, report: any) => {
+      const place = report.location_region || report.location_city || report.location_country || 'Unspecified area';
+      const existing = groups[place] || {
+        id: place,
+        cluster_name: place,
+        primary_category: report.category || 'Multiple categories',
+        radius_km: null,
+        incident_count: 0,
+        countries: [] as string[],
+        cluster_risk_score: 0,
+        affected_population: 0,
+        is_expanding: false,
+      };
+      existing.incident_count += 1;
+      existing.affected_population += Number(report.estimated_people_affected) || 0;
+      if (report.location_country && !existing.countries.includes(report.location_country)) {
+        existing.countries.push(report.location_country);
+      }
+      const severityScore: Record<string, number> = { critical: 100, high: 75, medium: 50, low: 25 };
+      existing.cluster_risk_score = Math.max(existing.cluster_risk_score, severityScore[report.severity_level] || 25);
+      existing.is_expanding = existing.incident_count >= 3;
+      groups[place] = existing;
+      return groups;
+    }, {}),
+  ).sort((a: any, b: any) => b.cluster_risk_score - a.cluster_risk_score || b.incident_count - a.incident_count).slice(0, 10);
+
+  const derivedNetworks = Object.values(
+    reports.reduce((groups: Record<string, any>, report: any) => {
+      const category = report.category || 'Unclassified';
+      const existing = groups[category] || {
+        id: category,
+        network_name: `${category.replace(/_/g, ' ')} signal pattern`,
+        network_type: 'observed incident',
+        countries_involved: [] as string[],
+        key_actors: [] as string[],
+        primary_locations: [] as string[],
+        network_threat_level: 'low',
+        last_activity: report.incident_date || report.created_at,
+      };
+      const location = report.location_region || report.location_city;
+      if (report.location_country && !existing.countries_involved.includes(report.location_country)) existing.countries_involved.push(report.location_country);
+      if (location && !existing.primary_locations.includes(location)) existing.primary_locations.push(location);
+      const severityRank: Record<string, number> = { low: 1, medium: 2, high: 3, critical: 4 };
+      if ((severityRank[report.severity_level] || 0) > (severityRank[existing.network_threat_level] || 0)) {
+        existing.network_threat_level = report.severity_level;
+      }
+      groups[category] = existing;
+      return groups;
+    }, {}),
+  ).slice(0, 10);
+
+  const displayedNetworks = actorNetworks?.length ? actorNetworks : derivedNetworks;
+  const displayedClusters = clusters?.length ? clusters : derivedClusters;
+
   return (
     <Card className="border-border bg-card/80 backdrop-blur-sm">
       <CardHeader>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <CardTitle className="flex items-center gap-2">
               <Globe className="w-5 h-5 text-primary" />
@@ -137,15 +228,33 @@ const CrossBorderAnalysis = ({ selectedCountry = 'all' }: CrossBorderAnalysisPro
               Trans-national correlation analysis and threat network mapping
             </CardDescription>
           </div>
-          <Badge variant="outline" className="animate-pulse">
+          <Badge variant="outline" className="w-fit animate-pulse">
             <Zap className="w-3 h-3 mr-1" />
             Live Analysis
           </Badge>
         </div>
       </CardHeader>
       <CardContent>
+        <div className="mb-4 grid grid-cols-2 gap-2 md:grid-cols-4">
+          <div className="rounded-md border border-border bg-muted/20 p-3">
+            <p className="text-xl font-bold text-foreground">{reportCount}</p>
+            <p className="text-xs text-muted-foreground">Incident records</p>
+          </div>
+          <div className="rounded-md border border-border bg-muted/20 p-3">
+            <p className="text-xl font-bold text-foreground">{verifiedCount}</p>
+            <p className="text-xs text-muted-foreground">Verified</p>
+          </div>
+          <div className="rounded-md border border-border bg-muted/20 p-3">
+            <p className="text-xl font-bold text-foreground">{affectedCount.toLocaleString()}</p>
+            <p className="text-xs text-muted-foreground">People affected</p>
+          </div>
+          <div className="rounded-md border border-border bg-muted/20 p-3">
+            <p className="text-sm font-semibold text-foreground">{lastUpdated ? format(new Date(lastUpdated), 'MMM d, yyyy') : 'No dated records'}</p>
+            <p className="text-xs text-muted-foreground">Latest incident</p>
+          </div>
+        </div>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid grid-cols-3 w-full">
+          <TabsList className="grid h-auto grid-cols-1 gap-1 sm:grid-cols-3 w-full">
             <TabsTrigger value="correlations" className="flex items-center gap-2">
               <ArrowRightLeft className="w-4 h-4" />
               Correlations
@@ -161,7 +270,7 @@ const CrossBorderAnalysis = ({ selectedCountry = 'all' }: CrossBorderAnalysisPro
           </TabsList>
 
           <TabsContent value="correlations" className="space-y-4">
-            {correlationsLoading ? (
+            {correlationsLoading || incidentsLoading ? (
               <div className="text-center py-8 text-muted-foreground">Loading correlations...</div>
             ) : correlations && correlations.length > 0 ? (
               <ScrollArea className="h-[400px] pr-4">
@@ -228,19 +337,19 @@ const CrossBorderAnalysis = ({ selectedCountry = 'all' }: CrossBorderAnalysisPro
             ) : (
               <div className="text-center py-12 text-muted-foreground">
                 <Globe className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>No cross-border correlations detected</p>
-                <p className="text-sm mt-1">System continuously monitors for trans-national patterns</p>
+                <p>No validated cross-border correlations detected</p>
+                <p className="text-sm mt-1">Showing only confirmed analytical links—not inferred relationships</p>
               </div>
             )}
           </TabsContent>
 
           <TabsContent value="networks" className="space-y-4">
-            {networksLoading ? (
+            {networksLoading || incidentsLoading ? (
               <div className="text-center py-8 text-muted-foreground">Loading networks...</div>
-            ) : actorNetworks && actorNetworks.length > 0 ? (
+            ) : displayedNetworks.length > 0 ? (
               <ScrollArea className="h-[400px] pr-4">
                 <div className="space-y-3">
-                  {actorNetworks.map((network: any, index: number) => (
+                  {displayedNetworks.map((network: any, index: number) => (
                     <motion.div
                       key={network.id}
                       initial={{ opacity: 0, x: -20 }}
@@ -271,7 +380,7 @@ const CrossBorderAnalysis = ({ selectedCountry = 'all' }: CrossBorderAnalysisPro
                       <div className="grid grid-cols-3 gap-3 text-sm">
                         <div className="flex items-center gap-1">
                           <Users className="w-4 h-4 text-muted-foreground" />
-                          <span>{network.key_actors?.length || 0} Actors</span>
+                          <span>{network.key_actors?.length || 0} Named actors</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <MapPin className="w-4 h-4 text-muted-foreground" />
@@ -289,19 +398,19 @@ const CrossBorderAnalysis = ({ selectedCountry = 'all' }: CrossBorderAnalysisPro
             ) : (
               <div className="text-center py-12 text-muted-foreground">
                 <Network className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>No actor networks identified</p>
-                <p className="text-sm mt-1">Network analysis runs continuously on incoming data</p>
+                <p>No incident patterns identified</p>
+                <p className="text-sm mt-1">Pattern analysis updates as reports are received</p>
               </div>
             )}
           </TabsContent>
 
           <TabsContent value="clusters" className="space-y-4">
-            {clustersLoading ? (
+            {clustersLoading || incidentsLoading ? (
               <div className="text-center py-8 text-muted-foreground">Loading clusters...</div>
-            ) : clusters && clusters.length > 0 ? (
+            ) : displayedClusters.length > 0 ? (
               <ScrollArea className="h-[400px] pr-4">
                 <div className="space-y-3">
-                  {clusters.map((cluster: any, index: number) => (
+                  {displayedClusters.map((cluster: any, index: number) => (
                     <motion.div
                       key={cluster.id}
                       initial={{ opacity: 0, x: -20 }}
@@ -313,7 +422,7 @@ const CrossBorderAnalysis = ({ selectedCountry = 'all' }: CrossBorderAnalysisPro
                         <div>
                           <h4 className="font-semibold">{cluster.cluster_name}</h4>
                           <p className="text-sm text-muted-foreground">
-                            {cluster.primary_category || 'Multiple Categories'} • {cluster.radius_km?.toFixed(0) || 0} km radius
+                            {cluster.primary_category || 'Multiple Categories'}{cluster.radius_km ? ` • ${cluster.radius_km.toFixed(0)} km radius` : ' • Reported area'}
                           </p>
                         </div>
                         <div className="text-right">
@@ -366,8 +475,8 @@ const CrossBorderAnalysis = ({ selectedCountry = 'all' }: CrossBorderAnalysisPro
             ) : (
               <div className="text-center py-12 text-muted-foreground">
                 <MapPin className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>No geographic clusters identified</p>
-                <p className="text-sm mt-1">Cluster detection runs on incident density analysis</p>
+                <p>No geographic incident groups identified</p>
+                <p className="text-sm mt-1">Location grouping updates as reports are received</p>
               </div>
             )}
           </TabsContent>
