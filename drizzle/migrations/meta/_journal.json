@@ -36,6 +36,13 @@
       "when": 1792153491129,
       "tag": "0004_poll_eligibility_ranked_outcomes",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792155916250,
+      "tag": "0005_poll_banners",
+      "breakpoints": true
     }
   ]
 }

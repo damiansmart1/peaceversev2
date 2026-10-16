@@ -7290,6 +7290,7 @@ export type Database = {
       }
       polls: {
         Row: {
+          banner_path: string | null
           category: string
           created_at: string | null
           created_by: string | null
@@ -7318,6 +7319,7 @@ export type Database = {
           visibility: string | null
         }
         Insert: {
+          banner_path?: string | null
           category?: string
           created_at?: string | null
           created_by?: string | null
@@ -7346,6 +7348,7 @@ export type Database = {
           visibility?: string | null
         }
         Update: {
+          banner_path?: string | null
           category?: string
           created_at?: string | null
           created_by?: string | null
