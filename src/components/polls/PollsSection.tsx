@@ -51,14 +51,8 @@ export const PollsSection = () => {
   }, [focused]);
   const focusProps = (key: string) => ({
     onClickCapture: () => { if (focused !== key) setFocused(key); },
-    className: cn('relative transition-all duration-300', focused === key && 'z-50 rounded-2xl ring-2 ring-primary shadow-2xl shadow-primary/30', focused && focused !== key && 'pointer-events-none'),
+    className: cn('relative transition-all duration-300', focused && (focused === key ? 'opacity-0 pointer-events-none' : 'opacity-40 pointer-events-none')),
   });
-  const closeBtn = (key: string) => focused === key && (
-    <button type="button" aria-label={t('common.close')} onClick={(e) => { e.stopPropagation(); setFocused(null); }}
-      className="absolute -top-3 -right-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg">
-      <X className="h-4 w-4" />
-    </button>
-  );
   const { data: polls, isLoading } = usePolls(selectedCategory);
   const { data: featuredPolls } = useFeaturedPolls();
 
@@ -90,12 +84,43 @@ export const PollsSection = () => {
   const activePolls = filteredPolls.filter(p => p.is_active && (!p.ends_at || new Date(p.ends_at) > new Date()));
   const closedPolls = filteredPolls.filter(p => !p.is_active || (p.ends_at && new Date(p.ends_at) <= new Date()));
 
+  const focusableItems: Array<{ key: string; item: PollItem; showFullResults?: boolean }> = [
+    ...groupPolls(featuredPolls || []).map((item) => ({ key: `f-${itemKey(item)}`, item })),
+    ...groupPolls(activePolls).map((item) => ({ key: itemKey(item), item })),
+    ...groupPolls(closedPolls).map((item) => ({ key: itemKey(item), item, showFullResults: true })),
+  ];
+  const focusedItem = focusableItems.find((i) => i.key === focused);
+
   return (
     <div className="space-y-8">
       <AnimatePresence>
         {focused && (
           <motion.div key="focus-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 z-40 bg-background/85 backdrop-blur-md" onClick={() => setFocused(null)} />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {focusedItem && (
+          <motion.div key="focus-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-3 sm:p-6"
+            onClick={() => setFocused(null)}>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.94, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.94, y: 20 }}
+              transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+              className="relative w-full max-w-4xl max-h-[92dvh] overflow-y-auto overscroll-contain rounded-2xl bg-card ring-2 ring-primary/60 shadow-2xl shadow-primary/30"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="sticky top-0 z-10 flex justify-end p-3 pointer-events-none">
+                <button type="button" aria-label={t('common.close')} onClick={() => setFocused(null)}
+                  className="pointer-events-auto flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg">
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              {renderItem(focusedItem.item, { showFullResults: focusedItem.showFullResults })}
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
       {/* Header */}
@@ -127,7 +152,7 @@ export const PollsSection = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
               >
-                {closeBtn('f-'+itemKey(item))}{renderItem(item, { compact: true })}
+                {renderItem(item, { compact: true })}
               </motion.div>
             ))}
           </div>
@@ -258,7 +283,7 @@ export const PollsSection = () => {
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ delay: index * 0.05 }}
                   >
-                    {closeBtn(itemKey(item))}{renderItem(item, {})}
+                    {renderItem(item, {})}
                   </motion.div>
                 ))}
               </AnimatePresence>
@@ -282,7 +307,7 @@ export const PollsSection = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
                 >
-                  {closeBtn(itemKey(item))}{renderItem(item, { showFullResults: true })}
+                  {renderItem(item, { showFullResults: true })}
                 </motion.div>
               ))}
             </div>
