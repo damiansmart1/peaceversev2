@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { participationCopy } from '@/lib/participationCopy';
 
 export type Language = 'en' | 'sw' | 'fr' | 'ar' | 'so' | 'am' | 'es' | 'pt' | 'zh' | 'hi' | 'de';
 
@@ -2711,6 +2712,10 @@ export const useTranslation = () => {
   };
 
   const t = (key: string, fallback?: string): string => {
+    if (key.startsWith('participation.')) {
+      const name = key.slice('participation.'.length);
+      return participationCopy[language]?.[name] || participationCopy.en[name] || fallback || name;
+    }
     // Try to get from current language
     const translation = translations[language]?.[key];
     if (translation) return translation;

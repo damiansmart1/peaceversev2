@@ -10,9 +10,16 @@ export function useParticipationMaterials(kind: 'proposal' | 'poll', id: string)
     return data as Material[];
   }});
   const save = async (drafts: MaterialDraft[]) => {
+    await saveParticipationMaterials(kind, id, drafts);
+    await qc.invalidateQueries({ queryKey: ['participation-materials', kind, id] });
+  };
+  return { ...query, save };
+}
+
+export async function saveParticipationMaterials(kind: 'proposal' | 'poll', id: string, drafts: MaterialDraft[]) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('Sign in to add materials');
-    for (const draft of drafts) {
+    for (const draft of [...drafts]) {
       const validated = materialSchema.parse(draft);
       let path: string | null = null;
       let materialKind = 'link';
@@ -32,7 +39,4 @@ export function useParticipationMaterials(kind: 'proposal' | 'poll', id: string)
       // Remove completed entries so retrying cannot duplicate already saved materials.
       drafts.splice(drafts.indexOf(draft), 1);
     }
-    await qc.invalidateQueries({ queryKey: ['participation-materials', kind, id] });
-  };
-  return { ...query, save };
 }

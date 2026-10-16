@@ -16,6 +16,8 @@ export interface Proposal {
   ends_at: string | null;
   created_at: string;
   updated_at: string;
+  jurisdiction?: string | null;
+  response_required_by?: string | null;
   profiles?: {
     display_name: string | null;
     username: string | null;
@@ -30,7 +32,7 @@ export const useProposals = () => {
       const { data: proposalsData, error: proposalsError } = await supabase
         .from('proposals')
         .select('*')
-        .eq('status', 'published')
+        .in('status', ['published', 'active', 'voting'])
         .order('created_at', { ascending: false });
 
       if (proposalsError) throw proposalsError;
@@ -75,31 +77,26 @@ export const useCreateProposal = () => {
       billProposerName: string;
       parliamentaryStage: string;
       billFileUrl?: string | null;
+      category?: string;
+      jurisdiction?: string;
+      responseRequiredBy?: string;
+      draft?: boolean;
     }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
-
-      // Generate slug
-      const { data: slugData, error: slugError } = await supabase
-        .rpc('generate_proposal_slug', { title: proposal.title });
-
-      if (slugError) throw slugError;
-
-      const attachments = proposal.billFileUrl ? [{ type: 'bill_document', url: proposal.billFileUrl }] : [];
 
       const { data, error } = await supabase
         .from('proposals')
         .insert({
           title: proposal.title,
-          summary: proposal.summary,
-          body: proposal.body,
+          description: proposal.body,
+          category: proposal.category || 'governance',
           tags: proposal.tags,
-          bill_proposer_name: proposal.billProposerName,
-          parliamentary_stage: proposal.parliamentaryStage,
-          attachments,
-          slug: slugData,
-          author_id: user.id,
-          status: 'pending_approval',
+          stage: proposal.parliamentaryStage,
+          jurisdiction: proposal.jurisdiction || null,
+          response_required_by: proposal.responseRequiredBy || null,
+          creator_id: user.id,
+          status: proposal.draft ? 'draft' : 'published',
         })
         .select()
         .single();
@@ -109,7 +106,7 @@ export const useCreateProposal = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['proposals'] });
-      toast.success('Proposal submitted for admin approval');
+      toast.success('Proposal saved');
     },
     onError: (error) => {
       toast.error('Failed to create proposal: ' + error.message);
@@ -157,8 +154,8 @@ export const useVoteProposal = () => {
     }) => {
       const { data: { user } } = await supabase.auth.getUser();
       
-      // Allow anonymous voting by generating a temporary ID
-      const userId = user?.id || null;
+      if (!user || user.is_anonymous) throw new Error('Sign in to participate');
+      const userId = user.id;
 
       // Convert numeric vote value to text format used in database
       const voteText = voteValue === 1 ? 'for' : voteValue === -1 ? 'against' : 'abstain';
@@ -170,7 +167,7 @@ export const useVoteProposal = () => {
           user_id: userId,
           vote: voteText,
           display_anonymous: displayAnonymous || !user,
-        } as any)
+        } as any, { onConflict: 'proposal_id,user_id' })
         .select()
         .single();
 
@@ -180,6 +177,7 @@ export const useVoteProposal = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['proposals'] });
       queryClient.invalidateQueries({ queryKey: ['proposal'] });
+      queryClient.invalidateQueries({ queryKey: ['vote', variables.proposalId] });
       toast.success('Vote recorded');
     },
     onError: (error) => {
