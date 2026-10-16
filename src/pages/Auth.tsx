@@ -64,7 +64,7 @@ export default function Auth() {
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/`,
+        emailRedirectTo: `${window.location.origin}${returnTo}`,
         data: {
           first_name: firstName.trim(),
           last_name: lastName.trim(),
@@ -120,7 +120,7 @@ export default function Auth() {
         title: t('auth.welcomeBack'),
         description: t('auth.signedIn')
       });
-      navigate('/');
+      navigate(returnTo);
     }
   };
   const handleAnonymousSignIn = async () => {
