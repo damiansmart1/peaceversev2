@@ -20,6 +20,9 @@ import { downloadPollResults } from '@/components/polls/PollExtras';
 import { parseDomains, parseInviteEmails } from '@/lib/participation';
 import { BannerPicker, uploadPollBanner } from '@/components/polls/PollBanner';
 import ConfirmDialog from '@/components/ConfirmDialog';
+import SharePopup from '@/components/SharePopup';
+import { Share2, Activity } from 'lucide-react';
+import { PollActivityDialog, CollectionsPanel, OptionsEditor, finaliseOptions, type EditableOption } from './AdminPollsTools';
 
 const isClosed = (p: Poll) => !p.is_active || (!!p.ends_at && new Date(p.ends_at) < new Date());
 const VIS_RANK = { live: 0, after_vote: 1, after_close: 2 } as const;
@@ -84,6 +87,18 @@ export const AdminPollsManager = () => {
   const [q, setQ] = useState('');
   const [editing, setEditing] = useState<Poll | null>(null);
   const [deleting, setDeleting] = useState<Poll | null>(null);
+  const [sharing, setSharing] = useState<Poll | null>(null);
+  const [activity, setActivity] = useState<{ poll: Poll; counts: number[] | null } | null>(null);
+  const openActivity = async (p: Poll) => {
+    let counts: number[] | null = null;
+    try {
+      if (p.results_visibility === 'after_close') {
+        const { data } = await supabase.rpc('poll_results', { _poll_id: p.id });
+        counts = (data as number[] | null) ?? null;
+      } else counts = (p.options || []).map((o: any) => o.votes || 0);
+    } catch { counts = null; }
+    setActivity({ poll: p, counts });
+  };
 
   const stats = useMemo(() => ({
     live: polls.filter((p) => !isClosed(p)).length,
@@ -147,6 +162,7 @@ export const AdminPollsManager = () => {
             <TabsTrigger value="decision">Needs decision ({stats.needsDecision})</TabsTrigger>
             <TabsTrigger value="closed">Closed</TabsTrigger>
             <TabsTrigger value="all">All ({polls.length})</TabsTrigger>
+            <TabsTrigger value="collections">Collections</TabsTrigger>
           </TabsList>
         </Tabs>
         <div className="relative sm:w-64">
@@ -155,7 +171,7 @@ export const AdminPollsManager = () => {
         </div>
       </div>
 
-      {isLoading ? <p className="text-sm text-muted-foreground">Loading polls…</p> : list.length === 0 ? (
+      {tab === 'collections' ? <CollectionsPanel polls={polls} /> : isLoading ? <p className="text-sm text-muted-foreground">Loading polls…</p> : list.length === 0 ? (
         <p className="text-sm text-muted-foreground py-8 text-center">No polls here.</p>
       ) : (
         <div className="space-y-3">
@@ -193,6 +209,8 @@ export const AdminPollsManager = () => {
                         <Power className="h-4 w-4 mr-1" />Close now
                       </Button>
                     )}
+                    <Button size="sm" variant="outline" onClick={() => openActivity(p)}><Activity className="h-4 w-4 mr-1" />Activity</Button>
+                    <Button size="sm" variant="outline" aria-label="Share poll" onClick={() => setSharing(p)}><Share2 className="h-4 w-4" /></Button>
                     <Button size="sm" variant="outline" onClick={() => exportCsv(p)}><Download className="h-4 w-4" /></Button>
                     <Button size="sm" variant="outline" onClick={() => setDeleting(p)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                   </div>
@@ -203,6 +221,8 @@ export const AdminPollsManager = () => {
         </div>
       )}
 
+      {sharing && <SharePopup open onOpenChange={(o: boolean) => !o && setSharing(null)} kind="poll" title={sharing.title} path={`/polls/${sharing.id}`} />}
+      {activity && <PollActivityDialog poll={activity.poll} counts={activity.counts} onClose={() => setActivity(null)} />}
       {editing && <ManagePollDialog poll={editing} onClose={() => setEditing(null)} />}
       <ConfirmDialog
         open={!!deleting}
@@ -231,6 +251,9 @@ const ManagePollDialog = ({ poll, onClose }: { poll: Poll; onClose: () => void }
   const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [bannerPath, setBannerPath] = useState<string | null>(poll.banner_path || null);
   const hasVotes = (poll.total_participants || 0) > 0;
+  const editableAnswers = poll.poll_type !== 'rating' && poll.poll_type !== 'yes_no';
+  const [answers, setAnswers] = useState<EditableOption[]>(() => (poll.options || []).map((o: any) => ({ ...o })));
+  const [answersTouched, setAnswersTouched] = useState(false);
   const minVis = hasVotes ? VIS_RANK[poll.results_visibility || 'live'] : 0;
 
   const { data: inviteList = [], refetch } = useQuery({
@@ -246,7 +269,9 @@ const ManagePollDialog = ({ poll, onClose }: { poll: Poll; onClose: () => void }
     setSaving(true);
     try {
       const newBanner = bannerFile ? await uploadPollBanner(bannerFile) : bannerPath;
+      const newOptions = editableAnswers && answersTouched && !hasVotes ? await finaliseOptions(answers) : null;
       const updates: any = {
+        ...(newOptions ? { options: newOptions } : {}),
         banner_path: newBanner,
         title: title.trim(), description: description.trim() || null, is_active: active,
         ends_at: endsAt ? new Date(endsAt).toISOString() : null,
@@ -284,6 +309,12 @@ const ManagePollDialog = ({ poll, onClose }: { poll: Poll; onClose: () => void }
           <div className="space-y-1.5"><Label>Banner</Label><BannerPicker file={bannerFile} onFile={setBannerFile} existingPath={bannerPath} onClearExisting={() => setBannerPath(null)} /></div>
           <div className="space-y-1.5"><Label>Question</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} /></div>
           <div className="space-y-1.5"><Label>Description</Label><Textarea rows={3} value={description} onChange={(e) => setDescription(e.target.value)} /></div>
+          {editableAnswers && (
+            <div className="space-y-1.5">
+              <Label>Answers</Label>
+              <OptionsEditor options={answers} locked={hasVotes} onChange={(o) => { setAnswers(o); setAnswersTouched(true); }} />
+            </div>
+          )}
           <div className="grid sm:grid-cols-2 gap-3">
             <div className="space-y-1.5"><Label>Closing date</Label><Input type="datetime-local" value={endsAt} onChange={(e) => setEndsAt(e.target.value)} /></div>
             <div className="flex items-center justify-between rounded-md border p-3"><Label>Voting open</Label><Switch checked={active} onCheckedChange={setActive} /></div>
