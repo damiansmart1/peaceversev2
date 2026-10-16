@@ -672,4 +672,89 @@ const PollVoting = ({
   );
 };
 
+const VoteConfirmDialog = ({ poll, open, onOpenChange, pending, comment, isAnonymous, onConfirm, onChange, isPending }: {
+  poll: Poll;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  pending: { selectedOptions: number[]; ratingValue: number } | null;
+  comment: string;
+  isAnonymous: boolean;
+  onConfirm: () => void;
+  onChange: () => void;
+  isPending: boolean;
+}) => {
+  if (!pending) return null;
+  const isRanked = poll.poll_type === 'ranked';
+  const isRating = poll.poll_type === 'rating';
+  const typeLabel = isRating ? 'Your rating' : isRanked ? 'Your ranking' : poll.poll_type === 'multiple_choice' ? 'Your picks' : 'Your choice';
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => { if (!isPending) onOpenChange(o); }}>
+      <DialogContent className="relative max-h-[85dvh] max-w-md overflow-y-auto overflow-x-hidden rounded-2xl border-border/60 bg-card/95 p-0 backdrop-blur-xl">
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-primary via-accent to-secondary" />
+        <DialogHeader className="space-y-1 px-5 pt-5 text-left">
+          <DialogTitle className="font-display text-lg font-semibold leading-snug text-foreground">
+            <TranslatableText text="Confirm your vote" />
+          </DialogTitle>
+          <DialogDescription className="text-sm text-muted-foreground">
+            <TranslatableText text="Check your choices below. You can still change your mind — once submitted, a vote cannot be changed." />
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-2 px-5 py-3">
+          {isRating ? (
+            <div className="flex items-center justify-between rounded-xl border border-primary/40 bg-primary/5 px-3 py-3">
+              <span className="text-sm font-medium text-foreground">{typeLabel}</span>
+              <span className="flex shrink-0 gap-0.5">
+                {Array.from({ length: pending.ratingValue }).map((_, i) => (
+                  <Star key={i} className="h-4 w-4 fill-accent text-accent" />
+                ))}
+              </span>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">{typeLabel}</p>
+              {pending.selectedOptions.map((optIndex, pos) => (
+                <div key={optIndex} className="flex items-center gap-2.5 rounded-xl border border-primary/40 bg-primary/5 px-3 py-2.5">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary text-xs font-bold text-primary-foreground">
+                    {isRanked ? pos + 1 : LETTERS[optIndex]}
+                  </span>
+                  <OptionImage path={poll.options[optIndex]?.image_path} alt={poll.options[optIndex]?.text} className="h-9 w-14" />
+                  <span className="flex-1 break-words text-sm font-medium text-foreground">
+                    <TranslatableText text={poll.options[optIndex]?.text || ''} />
+                  </span>
+                  {isRanked && <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wider text-primary">#{pos + 1}</span>}
+                </div>
+              ))}
+            </div>
+          )}
+          {comment.trim() && (
+            <div className="rounded-xl border border-border/60 bg-background/40 px-3 py-2.5">
+              <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Your comment</p>
+              <p className="mt-1 break-words text-sm text-foreground">{comment}</p>
+            </div>
+          )}
+          <div className="flex items-center gap-2 rounded-xl border border-border/60 bg-background/40 px-3 py-2.5 text-sm text-foreground">
+            <ShieldCheck className="h-4 w-4 shrink-0 text-primary" />
+            {isAnonymous ? <TranslatableText text="Your name will be hidden" /> : <TranslatableText text="Your name will be shown" />}
+          </div>
+        </div>
+        <DialogFooter className="flex-col gap-2 px-5 pb-5 sm:flex-col sm:space-x-0">
+          <Button onClick={onConfirm} disabled={isPending} className="relative h-12 w-full overflow-hidden rounded-xl bg-gradient-to-r from-primary to-secondary text-base font-semibold text-primary-foreground shadow-lg shadow-primary/30">
+            <span aria-hidden className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-primary-foreground/25 to-transparent animate-[shimmer_2.2s_infinite]" />
+            <span className="relative">{isPending ? 'Casting your voice…' : 'Confirm & submit'}</span>
+            <CheckCircle2 className="relative ml-2 h-4 w-4" />
+          </Button>
+          <Button variant="outline" onClick={onChange} disabled={isPending} className="w-full rounded-xl">
+            <PencilLine className="mr-2 h-4 w-4" />
+            <TranslatableText text="Change my choice" />
+          </Button>
+          <p className="text-center text-[11px] text-muted-foreground">
+            <TranslatableText text="Close this window to adjust your comment or privacy setting before you confirm." />
+          </p>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 export default PollCard;
