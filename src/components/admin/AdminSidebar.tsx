@@ -52,6 +52,7 @@ const menuItems = [
       { id: 'cms', label: 'Website Content (CMS)' },
       { id: 'content', label: 'Stories & Posts' },
       { id: 'proposals', label: 'Proposals' },
+      { id: 'polls', label: 'Polls & Decisions' },
       { id: 'challenges', label: 'Challenges' },
       { id: 'gamification', label: 'Gamification' },
       { id: 'sponsors', label: 'Sponsors' },

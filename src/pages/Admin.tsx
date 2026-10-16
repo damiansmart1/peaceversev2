@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
 import { AdminContentManager } from '@/components/admin/AdminContentManager';
 import { AdminProposalsManager } from '@/components/admin/AdminProposalsManager';
+import { AdminPollsManager } from '@/components/admin/AdminPollsManager';
 import { AdminSafeSpacesManager } from '@/components/admin/AdminSafeSpacesManager';
 import { AdminUsersManager } from '@/components/admin/AdminUsersManager';
 import { AdminChallengesManager } from '@/components/admin/AdminChallengesManager';
@@ -70,6 +71,7 @@ const Admin = () => {
       case 'content': return <AdminContentManager />;
       case 'cms': return <AdminCMSManager />;
       case 'proposals': return <AdminProposalsManager />;
+      case 'polls': return <AdminPollsManager />;
       case 'incidents': return <AdminIncidentsManager />;
       case 'incident-timeline': return <AdminIncidentTimelineTracker />;
       case 'safe-spaces': return <AdminSafeSpacesManager />;
