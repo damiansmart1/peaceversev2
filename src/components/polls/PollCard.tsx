@@ -30,7 +30,7 @@ const LETTERS = 'ABCDEFGHIJ';
 
 export const PollCard = ({ poll: rawPoll, showFullResults = false, compact = false }: PollCardProps) => {
   const { user } = useAuth();
-  const { isAdmin } = useAdminCheck();
+  const { data: isAdmin } = useAdminCheck();
   const { data: sealedCounts, isLoading: loadingCounts } = usePollResults(rawPoll);
   const { data: eligible, isLoading: loadingEligible } = usePollEligibility(rawPoll);
   const sealed = rawPoll.results_visibility === 'after_close';
