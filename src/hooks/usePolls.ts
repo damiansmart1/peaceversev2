@@ -15,6 +15,9 @@ export interface Poll {
   id: string;
   title: string;
   proposal_id?: string | null;
+  group_id?: string | null;
+  group_title?: string | null;
+  group_order?: number;
   description: string | null;
   category: string;
   poll_type: 'single_choice' | 'multiple_choice' | 'rating' | 'yes_no';
@@ -221,6 +224,7 @@ export const useCreatePoll = () => {
       endsAt,
       visibility,
       proposalId,
+      group,
     }: {
       title: string;
       description?: string;
@@ -232,6 +236,7 @@ export const useCreatePoll = () => {
       endsAt?: string;
       visibility?: string;
       proposalId?: string;
+      group?: { id: string; title: string; order: number };
     }) => {
       if (!user) throw new Error('Must be logged in to create a poll');
       pollInputSchema.parse({ title, description, options, pollType, visibility });
@@ -249,6 +254,9 @@ export const useCreatePoll = () => {
           ends_at: endsAt || null,
           visibility: visibility || 'public',
           proposal_id: proposalId || null,
+          group_id: group?.id || null,
+          group_title: group?.title || null,
+          group_order: group?.order || 0,
         })
         .select()
         .single();
