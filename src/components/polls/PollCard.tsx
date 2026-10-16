@@ -1,27 +1,16 @@
-import { useState, useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardFooter } from '@/components/ui/card';
+import { useState, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Progress } from '@/components/ui/progress';
 import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Slider } from '@/components/ui/slider';
-import { 
-  Poll, 
-  useUserPollResponse, 
-  useSubmitPollVote 
-} from '@/hooks/usePolls';
+import { Poll, useUserPollResponse, useSubmitPollVote } from '@/hooks/usePolls';
 import { useAuth } from '@/contexts/AuthContext';
-import { 
-  BarChart3, Users, Clock, Share2, MessageSquare, 
-  CheckCircle2, Vote, Star, ThumbsUp, ThumbsDown,
-  TrendingUp, Calendar, Eye, Lock
+import {
+  BarChart3, Users, Clock, Share2, MessageSquare, CheckCircle2, Vote, Star,
+  ThumbsUp, ThumbsDown, TrendingUp, Lock, Sparkles, Zap, Crown, ShieldCheck,
 } from 'lucide-react';
-import { format, formatDistanceToNow, isPast } from 'date-fns';
+import { formatDistanceToNow, isPast } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -34,161 +23,185 @@ interface PollCardProps {
   compact?: boolean;
 }
 
+const LETTERS = 'ABCDEFGHIJ';
+
 export const PollCard = ({ poll, showFullResults = false, compact = false }: PollCardProps) => {
   const { user } = useAuth();
   const { data: userResponse, isLoading: loadingResponse } = useUserPollResponse(poll.id);
   const submitVote = useSubmitPollVote();
-  
+
   const [selectedOptions, setSelectedOptions] = useState<number[]>([]);
   const [ratingValue, setRatingValue] = useState<number>(3);
   const [comment, setComment] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(true);
   const [showComment, setShowComment] = useState(false);
+  const [celebrate, setCelebrate] = useState(false);
 
   const hasVoted = !!userResponse;
   const isPollEnded = poll.ends_at ? isPast(new Date(poll.ends_at)) : false;
   const isPollActive = poll.is_active && !isPollEnded && new Date(poll.starts_at) <= new Date();
-  const canVote = user && !hasVoted && isPollActive && !user.is_anonymous;
+  const canVote = !!user && !hasVoted && isPollActive && !user.is_anonymous;
   const showResults = hasVoted || showFullResults || !isPollActive || poll.settings?.show_results_before_vote;
 
-  const totalVotes = useMemo(() => {
-    return poll.options.reduce((sum, opt) => sum + (opt.votes || 0), 0);
-  }, [poll.options]);
+  const totalVotes = useMemo(() => poll.options.reduce((s, o) => s + (o.votes || 0), 0), [poll.options]);
+
+  useEffect(() => {
+    if (!celebrate) return;
+    const t = setTimeout(() => setCelebrate(false), 1800);
+    return () => clearTimeout(t);
+  }, [celebrate]);
 
   const handleOptionSelect = (index: number) => {
     if (poll.poll_type === 'single_choice' || poll.poll_type === 'yes_no') {
       setSelectedOptions([index]);
     } else {
-      const maxSelections = poll.settings?.max_selections || poll.options.length;
-      if (selectedOptions.includes(index)) {
-        setSelectedOptions(prev => prev.filter(i => i !== index));
-      } else if (selectedOptions.length < maxSelections) {
-        setSelectedOptions(prev => [...prev, index]);
-      }
+      const max = poll.settings?.max_selections || poll.options.length;
+      if (selectedOptions.includes(index)) setSelectedOptions((p) => p.filter((i) => i !== index));
+      else if (selectedOptions.length < max) setSelectedOptions((p) => [...p, index]);
+      else toast.info(`You can pick up to ${max} options`);
     }
   };
 
   const handleSubmit = () => {
     if (!canVote) return;
-
+    const onSuccess = () => setCelebrate(true);
     if (poll.poll_type === 'rating') {
-      submitVote.mutate({
-        pollId: poll.id,
-        selectedOptions: [ratingValue - 1],
-        ratingValue,
-        comment: showComment ? comment : undefined,
-        isAnonymous,
-      });
+      submitVote.mutate(
+        { pollId: poll.id, selectedOptions: [ratingValue - 1], ratingValue, comment: showComment ? comment : undefined, isAnonymous },
+        { onSuccess },
+      );
     } else {
       if (selectedOptions.length === 0) {
         toast.error('Please select at least one option');
         return;
       }
-      submitVote.mutate({
-        pollId: poll.id,
-        selectedOptions,
-        comment: showComment ? comment : undefined,
-        isAnonymous,
-      });
+      submitVote.mutate(
+        { pollId: poll.id, selectedOptions, comment: showComment ? comment : undefined, isAnonymous },
+        { onSuccess },
+      );
     }
   };
 
   const handleShare = async () => {
     const url = `${window.location.origin}/proposals?poll=${poll.id}`;
-    await navigator.clipboard.writeText(url);
-    toast.success('Poll link copied to clipboard!');
+    try {
+      if (navigator.share) await navigator.share({ title: poll.title, url });
+      else {
+        await navigator.clipboard.writeText(url);
+        toast.success('Poll link copied — invite others to add their voice!');
+      }
+    } catch { /* user cancelled */ }
   };
 
-  const getCategoryColor = (category: string) => {
-    const colors: Record<string, string> = {
-      governance: 'bg-blue-500/10 text-blue-600',
-      community: 'bg-green-500/10 text-green-600',
-      safety: 'bg-red-500/10 text-red-600',
-      environment: 'bg-emerald-500/10 text-emerald-600',
-      education: 'bg-purple-500/10 text-purple-600',
-      health: 'bg-pink-500/10 text-pink-600',
-      general: 'bg-gray-500/10 text-gray-600',
-    };
-    return colors[category] || colors.general;
-  };
+  const typeMeta = {
+    yes_no: { icon: ThumbsUp, label: 'Yes / No' },
+    rating: { icon: Star, label: 'Rating' },
+    multiple_choice: { icon: CheckCircle2, label: 'Pick many' },
+    single_choice: { icon: Vote, label: 'Pick one' },
+  }[poll.poll_type] || { icon: Vote, label: 'Poll' };
+  const TypeIcon = typeMeta.icon;
 
-  const getPollTypeIcon = () => {
-    switch (poll.poll_type) {
-      case 'yes_no': return <ThumbsUp className="w-4 h-4" />;
-      case 'rating': return <Star className="w-4 h-4" />;
-      case 'multiple_choice': return <CheckCircle2 className="w-4 h-4" />;
-      default: return <Vote className="w-4 h-4" />;
-    }
-  };
+  const step = hasVoted ? 3 : selectedOptions.length > 0 || poll.poll_type === 'rating' ? 2 : 1;
 
   return (
-    <Card className={cn(
-      "overflow-hidden transition-all hover:shadow-lg",
-      poll.is_featured && "ring-2 ring-primary/20",
-      compact && "p-4"
-    )}>
-      <CardHeader className={cn("space-y-3", compact && "p-0 pb-3")}>
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex-1 space-y-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <Badge variant="outline" className={getCategoryColor(poll.category)}>
-                {poll.category}
-              </Badge>
-              {poll.is_featured && (
-                <Badge className="bg-gradient-to-r from-amber-500 to-orange-500">
-                  <TrendingUp className="w-3 h-3 mr-1" />
-                  Featured
-                </Badge>
-              )}
-              {!isPollActive && (
-                <Badge variant="secondary" className="bg-muted">
-                  <Lock className="w-3 h-3 mr-1" />
-                  Closed
-                </Badge>
-              )}
-            </div>
-            <h3 className="text-lg font-semibold leading-tight break-words"><TranslatableText text={poll.title} /></h3>
-            {poll.description && !compact && (
-              <p className="text-sm text-muted-foreground"><TranslatableText text={poll.description} /></p>
+    <motion.article
+      layout
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -3 }}
+      transition={{ type: 'spring', stiffness: 260, damping: 24 }}
+      className={cn(
+        'group relative overflow-hidden rounded-2xl border border-border/60 bg-card/70 backdrop-blur-xl',
+        'shadow-[0_10px_40px_-20px_hsl(var(--primary)/0.45)] hover:shadow-[0_20px_60px_-24px_hsl(var(--primary)/0.6)] transition-shadow',
+        poll.is_featured && 'border-accent/60',
+      )}
+    >
+      {/* Ambient glow */}
+      <div aria-hidden className="pointer-events-none absolute -top-24 -right-24 h-56 w-56 rounded-full bg-primary/20 blur-3xl opacity-60 group-hover:opacity-90 transition-opacity" />
+      <div aria-hidden className="pointer-events-none absolute -bottom-24 -left-24 h-56 w-56 rounded-full bg-accent/20 blur-3xl opacity-40" />
+      <div aria-hidden className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-primary via-accent to-secondary" />
+
+      <Celebration show={celebrate} />
+
+      <div className={cn('relative space-y-5 p-5 sm:p-6', compact && 'p-4 space-y-4')}>
+        {/* Header */}
+        <header className="space-y-3">
+          <div className="flex flex-wrap items-center gap-2">
+            {isPollActive ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-primary">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+                </span>
+                Live
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                <Lock className="h-3 w-3" /> Closed
+              </span>
+            )}
+            <span className="rounded-full border border-border/70 bg-background/50 px-2.5 py-1 text-[11px] font-medium capitalize text-foreground/80">
+              {poll.category}
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-full border border-border/70 bg-background/50 px-2.5 py-1 text-[11px] font-medium text-foreground/80">
+              <TypeIcon className="h-3 w-3" /> {typeMeta.label}
+            </span>
+            {poll.is_featured && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-accent/20 px-2.5 py-1 text-[11px] font-semibold text-accent-foreground">
+                <Sparkles className="h-3 w-3" /> Featured
+              </span>
             )}
           </div>
-          <div className="flex items-center gap-1">
-            {getPollTypeIcon()}
-          </div>
-        </div>
 
-        <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1">
-            <Users className="w-3 h-3" />
-            {poll.total_participants} voters
-          </span>
-          <span className="flex items-center gap-1">
-            <BarChart3 className="w-3 h-3" />
-            {totalVotes} votes
-          </span>
-          {poll.ends_at && (
-            <span className="flex items-center gap-1">
-              <Clock className="w-3 h-3" />
-              {isPollEnded 
-                ? `Ended ${formatDistanceToNow(new Date(poll.ends_at))} ago`
-                : `Ends ${formatDistanceToNow(new Date(poll.ends_at))}`
-              }
-            </span>
+          <h3 className="font-display text-lg sm:text-xl font-semibold leading-snug break-words text-foreground">
+            <TranslatableText text={poll.title} />
+          </h3>
+          {poll.description && !compact && (
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              <TranslatableText text={poll.description} />
+            </p>
           )}
-        </div>
-      </CardHeader>
 
-      <CardContent className={cn("space-y-4", compact && "p-0")}>
+          {/* Pulse stats */}
+          <div className="grid grid-cols-3 gap-2">
+            <Stat icon={Users} value={poll.total_participants || 0} label="voices" />
+            <Stat icon={BarChart3} value={totalVotes} label="votes" />
+            <Stat
+              icon={Clock}
+              value={poll.ends_at ? formatDistanceToNow(new Date(poll.ends_at)) : '∞'}
+              label={poll.ends_at ? (isPollEnded ? 'ago' : 'left') : 'open'}
+            />
+          </div>
+        </header>
+
         <LearningMaterials kind="poll" id={poll.id} title={poll.title} description={poll.description || ''} proposalId={poll.proposal_id} />
+
+        {/* Journey steps */}
+        {isPollActive && user && !user.is_anonymous && (
+          <ol className="flex items-center gap-2 text-[11px] font-medium" aria-label="Voting progress">
+            {['Learn', 'Choose', 'Counted'].map((s, i) => (
+              <li key={s} className="flex flex-1 items-center gap-2">
+                <span
+                  className={cn(
+                    'flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-[11px] transition-colors',
+                    step > i ? 'border-primary bg-primary text-primary-foreground' : 'border-border text-muted-foreground',
+                  )}
+                >
+                  {step > i + 1 || (hasVoted && i === 2) ? <CheckCircle2 className="h-3.5 w-3.5" /> : i + 1}
+                </span>
+                <span className={cn('truncate', step > i ? 'text-foreground' : 'text-muted-foreground')}>{s}</span>
+                {i < 2 && <span className={cn('h-px flex-1', step > i + 1 ? 'bg-primary' : 'bg-border')} />}
+              </li>
+            ))}
+          </ol>
+        )}
+
         <AnimatePresence mode="wait">
           {showResults && !canVote ? (
-            <PollResults 
-              poll={poll} 
-              userResponse={userResponse} 
-              totalVotes={totalVotes} 
-            />
+            <PollResults key="results" poll={poll} userResponse={userResponse} totalVotes={totalVotes} />
           ) : (
             <PollVoting
+              key="voting"
               poll={poll}
               selectedOptions={selectedOptions}
               ratingValue={ratingValue}
@@ -201,25 +214,17 @@ export const PollCard = ({ poll, showFullResults = false, compact = false }: Pol
         </AnimatePresence>
 
         {canVote && (
-          <div className="space-y-3 pt-2">
-            <div className="flex items-center justify-between">
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border/60 bg-background/40 px-3 py-2">
               <div className="flex items-center gap-2">
-                <Switch
-                  id={`anonymous-${poll.id}`}
-                  checked={isAnonymous}
-                  onCheckedChange={setIsAnonymous}
-                />
-                <Label htmlFor={`anonymous-${poll.id}`} className="text-sm cursor-pointer">
-                  Vote anonymously
+                <Switch id={`anonymous-${poll.id}`} checked={isAnonymous} onCheckedChange={setIsAnonymous} />
+                <Label htmlFor={`anonymous-${poll.id}`} className="flex cursor-pointer items-center gap-1 text-sm">
+                  <ShieldCheck className="h-3.5 w-3.5 text-primary" /> Hide my name
                 </Label>
               </div>
               {poll.settings?.require_comment !== false && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowComment(!showComment)}
-                >
-                  <MessageSquare className="w-4 h-4 mr-1" />
+                <Button variant="ghost" size="sm" onClick={() => setShowComment(!showComment)}>
+                  <MessageSquare className="mr-1 h-4 w-4" />
                   {showComment ? 'Hide' : 'Add'} comment
                 </Button>
               )}
@@ -227,176 +232,185 @@ export const PollCard = ({ poll, showFullResults = false, compact = false }: Pol
 
             <AnimatePresence>
               {showComment && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                >
+                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}>
                   <Textarea
-                    placeholder="Share your thoughts (optional)..."
+                    placeholder="Why did you choose this? Your reasoning helps decision-makers."
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
                     rows={2}
                     maxLength={500}
+                    className="bg-background/60"
                   />
+                  <p className="mt-1 text-right text-[11px] text-muted-foreground">{comment.length}/500</p>
                 </motion.div>
               )}
             </AnimatePresence>
 
-            <Button
-              onClick={handleSubmit}
-              disabled={submitVote.isPending || (poll.poll_type !== 'rating' && selectedOptions.length === 0)}
-              className="w-full"
-            >
-              {submitVote.isPending ? 'Submitting...' : 'Submit Vote'}
-            </Button>
+            <motion.div whileTap={{ scale: 0.97 }}>
+              <Button
+                onClick={handleSubmit}
+                disabled={submitVote.isPending || (poll.poll_type !== 'rating' && selectedOptions.length === 0)}
+                className="relative h-12 w-full overflow-hidden rounded-xl bg-gradient-to-r from-primary to-secondary text-base font-semibold text-primary-foreground shadow-lg shadow-primary/30"
+              >
+                <span aria-hidden className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-primary-foreground/25 to-transparent animate-[shimmer_2.2s_infinite]" />
+                <Zap className="mr-2 h-4 w-4" />
+                {submitVote.isPending ? 'Casting your voice…' : 'Cast my vote'}
+              </Button>
+            </motion.div>
+            <p className="text-center text-[11px] text-muted-foreground">
+              Join {poll.total_participants || 0} {poll.total_participants === 1 ? 'person' : 'people'} shaping this decision
+            </p>
           </div>
         )}
 
         {!user && (
-          <p className="text-sm text-center text-muted-foreground py-2">
-            Sign in to vote in this poll
-          </p>
+          <div className="rounded-xl border border-dashed border-primary/40 bg-primary/5 p-3 text-center text-sm text-foreground">
+            Sign in to add your voice to this poll
+          </div>
         )}
-
         {user?.is_anonymous && (
-          <p className="text-sm text-center text-muted-foreground py-2">
+          <div className="rounded-xl border border-dashed border-primary/40 bg-primary/5 p-3 text-center text-sm text-foreground">
             Create an account to vote in polls
-          </p>
+          </div>
         )}
-      </CardContent>
 
-      <CardFooter className={cn("flex justify-between pt-4", compact && "p-0 pt-3")}>
-        <span className="text-xs text-muted-foreground">
-          Created {formatDistanceToNow(new Date(poll.created_at))} ago
-        </span>
-        <Button variant="ghost" size="sm" onClick={handleShare}>
-          <Share2 className="w-4 h-4 mr-1" />
-          Share
-        </Button>
-      </CardFooter>
-    </Card>
+        <footer className="flex items-center justify-between border-t border-border/50 pt-3">
+          <span className="text-xs text-muted-foreground">Started {formatDistanceToNow(new Date(poll.created_at))} ago</span>
+          <Button variant="ghost" size="sm" onClick={handleShare} className="rounded-full">
+            <Share2 className="mr-1 h-4 w-4" /> Invite
+          </Button>
+        </footer>
+      </div>
+    </motion.article>
   );
 };
 
-// Sub-component for displaying results
-const PollResults = ({ 
-  poll, 
-  userResponse, 
-  totalVotes 
-}: { 
-  poll: Poll; 
-  userResponse: any; 
-  totalVotes: number;
-}) => {
+const Stat = ({ icon: Icon, value, label }: { icon: any; value: string | number; label: string }) => (
+  <div className="rounded-xl border border-border/50 bg-background/40 px-2 py-2 text-center">
+    <div className="flex items-center justify-center gap-1 text-sm font-semibold text-foreground">
+      <Icon className="h-3.5 w-3.5 text-primary" />
+      <span className="truncate">{value}</span>
+    </div>
+    <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
+  </div>
+);
+
+const Celebration = ({ show }: { show: boolean }) => (
+  <AnimatePresence>
+    {show && (
+      <motion.div
+        className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+      >
+        {Array.from({ length: 18 }).map((_, i) => {
+          const angle = (i / 18) * Math.PI * 2;
+          return (
+            <motion.span
+              key={i}
+              className={cn('absolute h-2 w-2 rounded-full', ['bg-primary', 'bg-accent', 'bg-secondary'][i % 3])}
+              initial={{ x: 0, y: 0, scale: 0 }}
+              animate={{ x: Math.cos(angle) * 140, y: Math.sin(angle) * 140, scale: [0, 1.4, 0] }}
+              transition={{ duration: 1.2, ease: 'easeOut' }}
+            />
+          );
+        })}
+        <motion.div
+          initial={{ scale: 0.5, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.8, opacity: 0 }}
+          className="rounded-2xl bg-primary px-5 py-3 text-center font-semibold text-primary-foreground shadow-2xl"
+        >
+          <Sparkles className="mx-auto mb-1 h-5 w-5" />
+          Your voice is counted!
+        </motion.div>
+      </motion.div>
+    )}
+  </AnimatePresence>
+);
+
+const PollResults = ({ poll, userResponse, totalVotes }: { poll: Poll; userResponse: any; totalVotes: number }) => {
+  const maxVotes = Math.max(...poll.options.map((o) => o.votes || 0));
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="space-y-3"
-    >
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-2.5">
       {poll.poll_type === 'rating' ? (
         <RatingResults poll={poll} totalVotes={totalVotes} />
       ) : (
         poll.options.map((option, index) => {
-          const percentage = totalVotes > 0 ? (option.votes / totalVotes) * 100 : 0;
-          const isUserChoice = userResponse?.selected_options?.includes(index);
-          const isWinning = option.votes === Math.max(...poll.options.map(o => o.votes)) && option.votes > 0;
-
+          const pct = totalVotes > 0 ? (option.votes / totalVotes) * 100 : 0;
+          const mine = userResponse?.selected_options?.includes(index);
+          const leading = option.votes === maxVotes && option.votes > 0;
           return (
-            <motion.div
+            <div
               key={index}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="space-y-1"
+              className={cn(
+                'relative overflow-hidden rounded-xl border bg-background/40 px-3 py-3',
+                mine ? 'border-primary' : 'border-border/60',
+              )}
             >
-              <div className="flex justify-between text-sm">
-                <span className={cn(
-                  "flex items-center gap-2",
-                  isUserChoice && "font-medium text-primary",
-                  isWinning && "text-green-600"
-                )}>
-                  {isWinning && <TrendingUp className="w-3 h-3" />}
-                  {option.text}
-                  {isUserChoice && (
-                    <Badge variant="outline" className="text-xs">Your vote</Badge>
+              <motion.div
+                aria-hidden
+                initial={{ width: 0 }}
+                animate={{ width: `${pct}%` }}
+                transition={{ duration: 0.9, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                className={cn(
+                  'absolute inset-y-0 left-0',
+                  leading ? 'bg-gradient-to-r from-primary/35 to-accent/30' : 'bg-primary/12',
+                )}
+              />
+              <div className="relative flex items-center justify-between gap-3 text-sm">
+                <span className="flex min-w-0 items-center gap-2">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-background/80 text-[11px] font-bold text-foreground">
+                    {leading ? <Crown className="h-3.5 w-3.5 text-accent" /> : LETTERS[index]}
+                  </span>
+                  <span className={cn('break-words', mine && 'font-semibold text-primary')}>
+                    <TranslatableText text={option.text} />
+                  </span>
+                  {mine && (
+                    <span className="shrink-0 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold text-primary-foreground">You</span>
                   )}
                 </span>
-                <span className="text-muted-foreground font-mono">
-                  {option.votes} ({percentage.toFixed(1)}%)
+                <span className="shrink-0 text-right">
+                  <span className="font-display text-base font-bold text-foreground">{pct.toFixed(0)}%</span>
+                  <span className="ml-1 text-[11px] text-muted-foreground">{option.votes}</span>
                 </span>
               </div>
-              <div className="relative">
-                <Progress 
-                  value={percentage} 
-                  className="h-3"
-                />
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${percentage}%` }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className={cn(
-                    "absolute inset-0 h-3 rounded-full",
-                    isWinning ? "bg-green-500/20" : "bg-primary/10"
-                  )}
-                />
-              </div>
-            </motion.div>
+            </div>
           );
         })
       )}
 
       {userResponse && (
-        <p className="text-sm text-center text-muted-foreground pt-2">
-          <CheckCircle2 className="w-4 h-4 inline mr-1 text-green-500" />
-          Thank you for voting!
-          {userResponse.is_anonymous && ' (voted anonymously)'}
-        </p>
+        <div className="flex items-center justify-center gap-2 rounded-xl bg-primary/10 p-3 text-sm text-foreground">
+          <CheckCircle2 className="h-4 w-4 text-primary" />
+          You're part of this decision{userResponse.is_anonymous ? ' — your name is hidden' : ''}.
+        </div>
       )}
     </motion.div>
   );
 };
 
-// Rating results visualization
 const RatingResults = ({ poll, totalVotes }: { poll: Poll; totalVotes: number }) => {
   const scale = poll.settings?.rating_scale || 5;
-  const avgRating = totalVotes > 0 
-    ? poll.options.reduce((sum, opt, idx) => sum + (opt.votes * (idx + 1)), 0) / totalVotes
-    : 0;
-
+  const avg = totalVotes > 0 ? poll.options.reduce((s, o, i) => s + o.votes * (i + 1), 0) / totalVotes : 0;
   return (
-    <div className="space-y-4">
-      <div className="text-center">
-        <div className="text-4xl font-bold text-primary">{avgRating.toFixed(1)}</div>
-        <div className="flex justify-center gap-1 mt-2">
-          {Array.from({ length: scale }).map((_, i) => (
-            <Star
-              key={i}
-              className={cn(
-                "w-6 h-6",
-                i < Math.round(avgRating) ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"
-              )}
-            />
-          ))}
-        </div>
-        <p className="text-sm text-muted-foreground mt-1">
-          Based on {totalVotes} ratings
-        </p>
+    <div className="rounded-2xl border border-border/60 bg-background/40 p-5 text-center">
+      <div className="font-display text-5xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+        {avg.toFixed(1)}
       </div>
+      <div className="mt-2 flex justify-center gap-1">
+        {Array.from({ length: scale }).map((_, i) => (
+          <Star key={i} className={cn('h-6 w-6', i < Math.round(avg) ? 'fill-accent text-accent' : 'text-muted-foreground/30')} />
+        ))}
+      </div>
+      <p className="mt-1 text-sm text-muted-foreground">Based on {totalVotes} ratings</p>
     </div>
   );
 };
 
-// Sub-component for voting interface
 const PollVoting = ({
-  poll,
-  selectedOptions,
-  ratingValue,
-  onOptionSelect,
-  onRatingChange,
-  canVote,
-  isLoading,
+  poll, selectedOptions, ratingValue, onOptionSelect, onRatingChange, canVote, isLoading,
 }: {
   poll: Poll;
   selectedOptions: number[];
@@ -407,111 +421,133 @@ const PollVoting = ({
   isLoading: boolean;
 }) => {
   if (isLoading) {
-    return <div className="py-4 text-center text-muted-foreground">Loading...</div>;
+    return (
+      <div className="space-y-2">
+        {[0, 1, 2].map((i) => <div key={i} className="h-12 animate-pulse rounded-xl bg-muted/60" />)}
+      </div>
+    );
   }
 
   if (poll.poll_type === 'rating') {
     const scale = poll.settings?.rating_scale || 5;
     return (
-      <div className="space-y-4 py-4">
-        <div className="flex justify-center gap-2">
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-3 rounded-2xl border border-border/60 bg-background/40 py-5">
+        <div className="flex justify-center gap-1.5 sm:gap-2" role="radiogroup" aria-label="Rating">
           {Array.from({ length: scale }).map((_, i) => (
-            <button
+            <motion.button
               key={i}
+              type="button"
+              role="radio"
+              aria-checked={ratingValue === i + 1}
+              aria-label={`${i + 1} of ${scale}`}
+              whileHover={{ scale: 1.2, rotate: -8 }}
+              whileTap={{ scale: 0.9 }}
               onClick={() => canVote && onRatingChange(i + 1)}
               disabled={!canVote}
-              className="transition-transform hover:scale-110"
             >
-              <Star
-                className={cn(
-                  "w-8 h-8 transition-colors",
-                  i < ratingValue 
-                    ? "fill-amber-400 text-amber-400" 
-                    : "text-muted-foreground/30 hover:text-amber-200"
-                )}
-              />
-            </button>
+              <Star className={cn('h-9 w-9 transition-colors', i < ratingValue ? 'fill-accent text-accent drop-shadow-[0_0_8px_hsl(var(--accent)/0.6)]' : 'text-muted-foreground/30')} />
+            </motion.button>
           ))}
         </div>
-        <p className="text-center text-sm text-muted-foreground">
-          {ratingValue} out of {scale}
-        </p>
-      </div>
+        <p className="text-center text-sm font-medium text-foreground">{ratingValue} / {scale}</p>
+      </motion.div>
     );
   }
 
   if (poll.poll_type === 'yes_no') {
     return (
-      <div className="grid grid-cols-2 gap-3 py-2">
-        {poll.options.map((option, index) => (
-          <Button
-            key={index}
-            variant={selectedOptions.includes(index) ? 'default' : 'outline'}
-            onClick={() => canVote && onOptionSelect(index)}
-            disabled={!canVote}
-            className={cn(
-              "h-16 text-lg",
-              index === 0 && "hover:bg-green-500 hover:text-white",
-              index === 1 && "hover:bg-red-500 hover:text-white",
-              selectedOptions.includes(index) && index === 0 && "bg-green-500 text-white",
-              selectedOptions.includes(index) && index === 1 && "bg-red-500 text-white"
-            )}
-          >
-            {index === 0 ? <ThumbsUp className="w-5 h-5 mr-2" /> : <ThumbsDown className="w-5 h-5 mr-2" />}
-            {option.text}
-          </Button>
-        ))}
-      </div>
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="grid grid-cols-2 gap-3">
+        {poll.options.map((option, index) => {
+          const sel = selectedOptions.includes(index);
+          const Icon = index === 0 ? ThumbsUp : ThumbsDown;
+          return (
+            <motion.button
+              key={index}
+              type="button"
+              aria-pressed={sel}
+              whileHover={canVote ? { y: -2 } : undefined}
+              whileTap={canVote ? { scale: 0.95 } : undefined}
+              onClick={() => canVote && onOptionSelect(index)}
+              disabled={!canVote}
+              className={cn(
+                'flex h-24 flex-col items-center justify-center gap-2 rounded-2xl border-2 text-base font-semibold transition-all disabled:opacity-60',
+                sel
+                  ? index === 0
+                    ? 'border-primary bg-primary text-primary-foreground shadow-lg shadow-primary/30'
+                    : 'border-destructive bg-destructive text-destructive-foreground shadow-lg shadow-destructive/30'
+                  : 'border-border/70 bg-background/40 text-foreground hover:border-primary/50',
+              )}
+            >
+              <motion.span animate={sel ? { scale: [1, 1.35, 1], rotate: [0, -12, 0] } : {}} transition={{ duration: 0.4 }}>
+                <Icon className="h-7 w-7" />
+              </motion.span>
+              <TranslatableText text={option.text} />
+            </motion.button>
+          );
+        })}
+      </motion.div>
     );
   }
 
-  // Single or multiple choice
   const isMultiple = poll.poll_type === 'multiple_choice';
+  const max = poll.settings?.max_selections || poll.options.length;
 
   return (
-    <div className="space-y-2">
-      {poll.options.map((option, index) => (
-        <motion.div
-          key={index}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: index * 0.05 }}
-          onClick={() => canVote && onOptionSelect(index)}
-          className={cn(
-            "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all",
-            selectedOptions.includes(index) 
-              ? "border-primary bg-primary/5" 
-              : "border-border hover:border-primary/50 hover:bg-muted/50",
-            !canVote && "cursor-not-allowed opacity-60"
-          )}
-        >
-          {isMultiple ? (
-            <Checkbox
-              checked={selectedOptions.includes(index)}
-              disabled={!canVote}
-              className="pointer-events-none"
-            />
-          ) : (
-            <div className={cn(
-              "w-4 h-4 rounded-full border-2 flex items-center justify-center",
-              selectedOptions.includes(index) 
-                ? "border-primary bg-primary" 
-                : "border-muted-foreground/30"
-            )}>
-              {selectedOptions.includes(index) && (
-                <div className="w-2 h-2 rounded-full bg-white" />
-              )}
-            </div>
-          )}
-          <span className="flex-1 min-w-0 break-words"><TranslatableText text={option.text} /></span>
-        </motion.div>
-      ))}
-      {isMultiple && poll.settings?.max_selections && (
-        <p className="text-xs text-muted-foreground">
-          Select up to {poll.settings.max_selections} options
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-2">
+      {isMultiple && (
+        <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+          Picked {selectedOptions.length} of {max}
         </p>
       )}
-    </div>
+      {poll.options.map((option, index) => {
+        const sel = selectedOptions.includes(index);
+        return (
+          <motion.button
+            key={index}
+            type="button"
+            role={isMultiple ? 'checkbox' : 'radio'}
+            aria-checked={sel}
+            initial={{ opacity: 0, x: -12 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: index * 0.05 }}
+            whileHover={canVote ? { x: 4 } : undefined}
+            whileTap={canVote ? { scale: 0.98 } : undefined}
+            onClick={() => canVote && onOptionSelect(index)}
+            disabled={!canVote}
+            className={cn(
+              'relative flex w-full items-center gap-3 overflow-hidden rounded-xl border-2 p-3 text-left transition-all',
+              sel
+                ? 'border-primary bg-primary/10 shadow-[0_0_0_4px_hsl(var(--primary)/0.12)]'
+                : 'border-border/60 bg-background/40 hover:border-primary/40',
+              !canVote && 'cursor-not-allowed opacity-60',
+            )}
+          >
+            <span
+              className={cn(
+                'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm font-bold transition-colors',
+                sel ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground',
+              )}
+            >
+              {isMultiple ? (
+                <Checkbox checked={sel} className="pointer-events-none border-current" />
+              ) : sel ? (
+                <CheckCircle2 className="h-4 w-4" />
+              ) : (
+                LETTERS[index]
+              )}
+            </span>
+            <span className="flex-1 break-words text-sm font-medium text-foreground">
+              <TranslatableText text={option.text} />
+            </span>
+            {sel && (
+              <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} className="text-primary">
+                <TrendingUp className="h-4 w-4" />
+              </motion.span>
+            )}
+          </motion.button>
+        );
+      })}
+    </motion.div>
   );
 };
 
