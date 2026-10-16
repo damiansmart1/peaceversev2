@@ -26,6 +26,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Proposals from "./pages/Proposals";
 import ProposalDetail from "./pages/ProposalDetail";
+import PollPage from "./pages/PollPage";
 import Voice from "./pages/Voice";
 import Community from "./pages/Community";
 import Radio from "./pages/Radio";
@@ -103,6 +104,7 @@ const App = () => (
                     <Route path="/about" element={<About />} />
                     <Route path="/proposals" element={<Proposals />} />
                     <Route path="/proposals/:slug" element={<ProposalDetail />} />
+                    <Route path="/polls/:id" element={<PollPage />} />
                     <Route path="/admin" element={
                       <ProtectedRoute requiredRole="admin">
                         <Admin />

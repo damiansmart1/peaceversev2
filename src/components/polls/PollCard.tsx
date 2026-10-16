@@ -20,6 +20,7 @@ import { toast } from 'sonner';
 import LearningMaterials from '@/components/participation/LearningMaterials';
 import TranslatableText from '@/components/TranslatableText';
 import OptionImage from '@/components/polls/OptionImage';
+import SharePopup from '@/components/SharePopup';
 
 interface PollCardProps {
   poll: Poll;
@@ -102,16 +103,8 @@ export const PollCard = ({ poll: rawPoll, showFullResults = false, compact = fal
     }
   };
 
-  const handleShare = async () => {
-    const url = `${window.location.origin}/proposals?poll=${poll.id}`;
-    try {
-      if (navigator.share) await navigator.share({ title: poll.title, url });
-      else {
-        await navigator.clipboard.writeText(url);
-        toast.success('Poll link copied — invite others to add their voice!');
-      }
-    } catch { /* user cancelled */ }
-  };
+  const [shareOpen, setShareOpen] = useState(false);
+  const handleShare = () => setShareOpen(true);
 
   const typeMeta = {
     yes_no: { icon: ThumbsUp, label: 'Yes / No' },
@@ -143,6 +136,7 @@ export const PollCard = ({ poll: rawPoll, showFullResults = false, compact = fal
       <div aria-hidden className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-primary via-accent to-secondary" />
 
       <Celebration show={celebrate} message={celebrateMsg} />
+      <SharePopup open={shareOpen} onOpenChange={setShareOpen} kind="poll" title={poll.title} path={`/polls/${poll.id}`} />
 
       <div className={cn('relative space-y-5 p-5 sm:p-6', compact && 'p-4 space-y-4')}>
         {/* Header */}
