@@ -23,6 +23,7 @@ import TranslatableText from '@/components/TranslatableText';
 import OptionImage from '@/components/polls/OptionImage';
 import SharePopup from '@/components/SharePopup';
 import PollBanner from './PollBanner';
+import { supabase } from '@/lib/supabase-typed';
 
 interface PollCardProps {
   poll: Poll;
@@ -84,8 +85,13 @@ export const PollCard = ({ poll: rawPoll, showFullResults = false, compact = fal
     }
   };
 
+  const track = (event_type: string, metadata: Record<string, unknown> = {}) => {
+    supabase.from('poll_analytics').insert({ poll_id: poll.id, event_type, user_id: user?.id ?? null, metadata }).then(() => {});
+  };
+
   const handleSubmit = () => {
     if (!canVote) return;
+    track('confirm_opened');
     if (poll.poll_type === 'rating') {
       setPendingVote({ selectedOptions: [ratingValue - 1], ratingValue });
       setConfirmOpen(true);
@@ -111,6 +117,7 @@ export const PollCard = ({ poll: rawPoll, showFullResults = false, compact = fal
       },
       {
         onSuccess: () => {
+          track('vote_confirmed', { options: pendingVote.selectedOptions });
           setConfirmOpen(false);
           setPendingVote(null);
           setCelebrateMsg(pickCelebrationMessage(poll.settings?.thank_you_message));
@@ -162,7 +169,7 @@ export const PollCard = ({ poll: rawPoll, showFullResults = false, compact = fal
         comment={showComment ? comment : ''}
         isAnonymous={isAnonymous}
         onConfirm={confirmVote}
-        onChange={() => { setConfirmOpen(false); setPendingVote(null); }}
+        onChange={() => { track('vote_changed'); setConfirmOpen(false); setPendingVote(null); }}
         isPending={submitVote.isPending}
       />
 
