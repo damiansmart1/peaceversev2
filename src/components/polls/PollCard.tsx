@@ -11,9 +11,10 @@ import { useAuth } from '@/contexts/AuthContext';
 import {
   BarChart3, Users, Clock, Share2, MessageSquare, CheckCircle2, Vote, Star,
   ThumbsUp, ThumbsDown, TrendingUp, Lock, Sparkles, Zap, Crown, ShieldCheck, ListOrdered, UserCheck, EyeOff,
+  GripVertical, ChevronUp, ChevronDown,
 } from 'lucide-react';
 import { formatDistanceToNow, isPast } from 'date-fns';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import LearningMaterials from '@/components/participation/LearningMaterials';
@@ -50,6 +51,7 @@ export const PollCard = ({ poll: rawPoll, showFullResults = false, compact = fal
   const [isAnonymous, setIsAnonymous] = useState(true);
   const [showComment, setShowComment] = useState(false);
   const [celebrate, setCelebrate] = useState(false);
+  const [celebrateMsg, setCelebrateMsg] = useState('');
 
   const hasVoted = !!userResponse;
   const isPollEnded = poll.ends_at ? isPast(new Date(poll.ends_at)) : false;
@@ -62,7 +64,7 @@ export const PollCard = ({ poll: rawPoll, showFullResults = false, compact = fal
 
   useEffect(() => {
     if (!celebrate) return;
-    const t = setTimeout(() => setCelebrate(false), 1800);
+    const t = setTimeout(() => setCelebrate(false), 2800);
     return () => clearTimeout(t);
   }, [celebrate]);
 
@@ -79,7 +81,10 @@ export const PollCard = ({ poll: rawPoll, showFullResults = false, compact = fal
 
   const handleSubmit = () => {
     if (!canVote) return;
-    const onSuccess = () => setCelebrate(true);
+    const onSuccess = () => {
+      setCelebrateMsg(pickCelebrationMessage(poll.settings?.thank_you_message));
+      setCelebrate(true);
+    };
     if (poll.poll_type === 'rating') {
       submitVote.mutate(
         { pollId: poll.id, selectedOptions: [ratingValue - 1], ratingValue, comment: showComment ? comment : undefined, isAnonymous },
@@ -137,7 +142,7 @@ export const PollCard = ({ poll: rawPoll, showFullResults = false, compact = fal
       <div aria-hidden className="pointer-events-none absolute -bottom-24 -left-24 h-56 w-56 rounded-full bg-accent/20 blur-3xl opacity-40" />
       <div aria-hidden className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-primary via-accent to-secondary" />
 
-      <Celebration show={celebrate} />
+      <Celebration show={celebrate} message={celebrateMsg} />
 
       <div className={cn('relative space-y-5 p-5 sm:p-6', compact && 'p-4 space-y-4')}>
         {/* Header */}
@@ -238,6 +243,7 @@ export const PollCard = ({ poll: rawPoll, showFullResults = false, compact = fal
               ratingValue={ratingValue}
               onOptionSelect={handleOptionSelect}
               onRatingChange={setRatingValue}
+              onReorder={setSelectedOptions}
               canVote={canVote}
               isLoading={loadingResponse}
             />
@@ -337,35 +343,48 @@ const Stat = ({ icon: Icon, value, label }: { icon: any; value: string | number;
   </div>
 );
 
-const Celebration = ({ show }: { show: boolean }) => (
+const FUN_MESSAGES = [
+  '🎉 Your voice is counted!',
+  '🌍 Democracy just got a little louder!',
+  '🙌 Boom! Your vote is in.',
+  '✨ You just shaped the future.',
+  '🕊️ One more voice for peace!',
+  '🚀 Vote launched — thank you!',
+];
+export const pickCelebrationMessage = (custom?: string | null) =>
+  custom?.trim() || FUN_MESSAGES[Math.floor(Math.random() * FUN_MESSAGES.length)];
+
+const Celebration = ({ show, message }: { show: boolean; message: string }) => (
   <AnimatePresence>
     {show && (
       <motion.div
-        className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center"
+        className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-background/40 backdrop-blur-[2px]"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
       >
-        {Array.from({ length: 18 }).map((_, i) => {
-          const angle = (i / 18) * Math.PI * 2;
+        {Array.from({ length: 28 }).map((_, i) => {
+          const angle = (i / 28) * Math.PI * 2;
+          const dist = 110 + (i % 4) * 25;
           return (
             <motion.span
               key={i}
-              className={cn('absolute h-2 w-2 rounded-full', ['bg-primary', 'bg-accent', 'bg-secondary'][i % 3])}
-              initial={{ x: 0, y: 0, scale: 0 }}
-              animate={{ x: Math.cos(angle) * 140, y: Math.sin(angle) * 140, scale: [0, 1.4, 0] }}
-              transition={{ duration: 1.2, ease: 'easeOut' }}
+              className={cn('absolute rounded-full', i % 2 ? 'h-2 w-2' : 'h-3 w-1.5 rounded-sm', ['bg-primary', 'bg-accent', 'bg-secondary', 'bg-gold'][i % 4])}
+              initial={{ x: 0, y: 0, scale: 0, rotate: 0 }}
+              animate={{ x: Math.cos(angle) * dist, y: Math.sin(angle) * dist + 30, scale: [0, 1.4, 0], rotate: 360 }}
+              transition={{ duration: 1.4, ease: 'easeOut' }}
             />
           );
         })}
         <motion.div
-          initial={{ scale: 0.5, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
+          initial={{ scale: 0.4, opacity: 0, rotate: -6 }}
+          animate={{ scale: [0.4, 1.12, 1], opacity: 1, rotate: 0 }}
           exit={{ scale: 0.8, opacity: 0 }}
-          className="rounded-2xl bg-primary px-5 py-3 text-center font-semibold text-primary-foreground shadow-2xl"
+          transition={{ duration: 0.5 }}
+          className="mx-4 max-w-xs rounded-2xl bg-primary px-5 py-4 text-center font-semibold text-primary-foreground shadow-2xl"
         >
           <Sparkles className="mx-auto mb-1 h-5 w-5" />
-          Your voice is counted!
+          <span className="break-words">{message}</span>
         </motion.div>
       </motion.div>
     )}
@@ -453,7 +472,7 @@ const RatingResults = ({ poll, totalVotes }: { poll: Poll; totalVotes: number })
 };
 
 const PollVoting = ({
-  poll, selectedOptions, ratingValue, onOptionSelect, onRatingChange, canVote, isLoading,
+  poll, selectedOptions, ratingValue, onOptionSelect, onRatingChange, canVote, isLoading, onReorder,
 }: {
   poll: Poll;
   selectedOptions: number[];
@@ -462,6 +481,7 @@ const PollVoting = ({
   onRatingChange: (value: number) => void;
   canVote: boolean;
   isLoading: boolean;
+  onReorder?: (order: number[]) => void;
 }) => {
   if (isLoading) {
     return (
@@ -594,6 +614,37 @@ const PollVoting = ({
           </motion.button>
         );
       })}
+      {isRanked && selectedOptions.length > 1 && canVote && onReorder && (
+        <div className="mt-3 rounded-xl border border-primary/30 bg-primary/5 p-3">
+          <p className="mb-2 flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wider text-primary">
+            <GripVertical className="h-3.5 w-3.5" /> Drag to arrange your ranking
+          </p>
+          <Reorder.Group axis="y" values={selectedOptions} onReorder={onReorder} className="space-y-1.5">
+            {selectedOptions.map((optIndex, pos) => (
+              <Reorder.Item
+                key={optIndex}
+                value={optIndex}
+                whileDrag={{ scale: 1.03, boxShadow: '0 10px 30px hsl(var(--primary) / 0.25)' }}
+                className="flex cursor-grab touch-none items-center gap-2 rounded-lg border border-border/60 bg-card px-2 py-2 active:cursor-grabbing"
+              >
+                <GripVertical className="h-4 w-4 shrink-0 text-muted-foreground" />
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-primary text-xs font-bold text-primary-foreground">{pos + 1}</span>
+                <span className="flex-1 truncate text-sm">{poll.options[optIndex]?.text}</span>
+                <button
+                  type="button" aria-label="Move up" disabled={pos === 0}
+                  onClick={() => { const n = [...selectedOptions]; [n[pos - 1], n[pos]] = [n[pos], n[pos - 1]]; onReorder(n); }}
+                  className="rounded p-1 text-muted-foreground hover:text-foreground disabled:opacity-30"
+                ><ChevronUp className="h-4 w-4" /></button>
+                <button
+                  type="button" aria-label="Move down" disabled={pos === selectedOptions.length - 1}
+                  onClick={() => { const n = [...selectedOptions]; [n[pos + 1], n[pos]] = [n[pos], n[pos + 1]]; onReorder(n); }}
+                  className="rounded p-1 text-muted-foreground hover:text-foreground disabled:opacity-30"
+                ><ChevronDown className="h-4 w-4" /></button>
+              </Reorder.Item>
+            ))}
+          </Reorder.Group>
+        </div>
+      )}
     </motion.div>
   );
 };

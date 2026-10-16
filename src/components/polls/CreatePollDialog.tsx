@@ -221,6 +221,7 @@ export const CreatePollDialog = () => {
         show_results_before_vote: showResultsBeforeVote,
         max_selections: pollType === 'multiple_choice' || pollType === 'ranked' ? maxSelections : undefined,
         rating_scale: pollType === 'rating' ? 5 : undefined,
+        thank_you_message: thankYou.trim().slice(0, 140) || undefined,
       },
       endsAt: endDate?.toISOString(),
       visibility,
@@ -387,6 +388,17 @@ export const CreatePollDialog = () => {
               </AnimatePresence>
             </div>
           )}
+
+          <div className="space-y-2">
+            <Label>Message after voting (optional)</Label>
+            <Input
+              maxLength={140}
+              placeholder="e.g. 🎉 Asante! Your voice just shaped Sauti Stack"
+              value={thankYou}
+              onChange={(e) => setThankYou(e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">Leave empty to show a random fun message.</p>
+          </div>
 
           {/* Multiple choice settings */}
           {(pollType === 'multiple_choice' || pollType === 'ranked') && (
