@@ -44,7 +44,7 @@ import { type MaterialDraft } from '@/lib/participation';
 import { useProposals } from '@/hooks/useProposals';
 import { supabase } from '@/lib/supabase-typed';
 import { OPTION_IMAGE_BUCKET } from '@/components/polls/OptionImage';
-import { ImagePlus, X } from 'lucide-react';
+import { ImagePlus } from 'lucide-react';
 import { useTranslationContext } from '@/components/TranslationProvider';
 
 const POLL_TYPES = [
