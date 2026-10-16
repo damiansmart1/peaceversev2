@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { X, ChevronRight, ChevronLeft, Sparkles, UsersRound, ShieldCheck, Globe2, Radio, Vote, AlertTriangle, Brain, Landmark, BarChart3, FileSearch, Building2, Handshake, MapPin, Megaphone, ClipboardCheck, Gauge } from 'lucide-react';
@@ -234,6 +235,7 @@ export default function OnboardingTour() {
   const [currentStep, setCurrentStep] = useState(0);
   const { data: profile } = useUserProfile();
   const { data: userRoles } = useUserRoles();
+  const location = useLocation();
 
   const firstName = profile?.display_name?.split(' ')[0] || 'Friend';
   const roleKey = useMemo<RoleKey>(
@@ -245,6 +247,8 @@ export default function OnboardingTour() {
   const storageKey = `hasSeenOnboarding:${roleKey}`;
 
   useEffect(() => {
+    // Never cover the sign-in page; the tour belongs on the home page.
+    if (location.pathname === '/auth') return;
     const seen = localStorage.getItem(storageKey);
     if (!seen) {
       const t = setTimeout(() => {
@@ -253,7 +257,7 @@ export default function OnboardingTour() {
       }, 1000);
       return () => clearTimeout(t);
     }
-  }, [storageKey]);
+  }, [storageKey, location.pathname]);
 
   const handleComplete = () => {
     localStorage.setItem(storageKey, 'true');

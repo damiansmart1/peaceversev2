@@ -17,3 +17,6 @@
 - [ ] 10. Public "why I chose this" reasons
 - [ ] 11. Closing-soon reminders
 - [ ] 12. Peace points for voting
+
+# Access
+- [x] Every sign-in (email, guest, email confirmation) lands on the home page; the tour no longer covers the sign-in page

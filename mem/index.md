@@ -9,3 +9,4 @@ PageTransition wraps Routes in App.tsx — page changes fade+lift automatically.
 - [Cinematic motion & primitives system](mem://design/cinematic-motion-primitives) — Reveal, AnimatedCounter, PageTransition, EmptyState, FeedSkeleton, CoachMark, ScrollableTabsList, StoriesRail, PresenceDot, HeartBurst
 - [Calmer institutional system](mem://design/calmer-institutional-system) — Spacing, type scale, card refinements, mobile nav, SectionShell/StatStrip layout primitives
 - [Per-role onboarding](mem://features/per-role-onboarding) — OnboardingTour picks a 5-step tour per primary role (admin>gov>partner>verifier>citizen), keyed per-role in localStorage
+- [Post-login landing](mem://auth/role-based-dashboard-redirection) — Every sign-in (email, guest, email confirmation) lands on the home page; role dashboards are never the landing destination
