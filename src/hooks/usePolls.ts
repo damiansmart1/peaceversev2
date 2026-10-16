@@ -31,6 +31,7 @@ export interface Poll {
     max_selections?: number;
     show_results_before_vote?: boolean;
     require_comment?: boolean;
+    thank_you_message?: string;
     rating_scale?: number;
   };
   created_by: string | null;
