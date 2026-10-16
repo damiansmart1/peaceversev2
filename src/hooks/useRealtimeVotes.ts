@@ -1,73 +1,19 @@
 import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase-typed';
-
-interface VoteCounts {
-  supportCount: number;
-  opposeCount: number;
-  abstainCount: number;
-}
-
-export const useRealtimeVotes = (proposalId: string, initialCounts: VoteCounts) => {
-  const queryClient = useQueryClient();
-  const [voteCounts, setVoteCounts] = useState<VoteCounts>(initialCounts);
-
-  useEffect(() => {
-    setVoteCounts(initialCounts);
-  }, [initialCounts.supportCount, initialCounts.opposeCount, initialCounts.abstainCount]);
-
-  useEffect(() => {
-    if (!proposalId) return;
-
-    console.log('[Realtime Votes] Setting up subscription for proposal:', proposalId);
-
-    const channel = supabase
-      .channel(`proposal-votes-${proposalId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'proposal_votes',
-          filter: `proposal_id=eq.${proposalId}`,
-        },
-        async (payload) => {
-          console.log('[Realtime Votes] Vote change detected:', payload);
-          
-          // Fetch updated vote counts
-          const { data: votes, error } = await supabase
-            .from('proposal_votes')
-            .select('vote')
-            .eq('proposal_id', proposalId);
-
-          if (error) {
-            console.error('[Realtime Votes] Error fetching votes:', error);
-            return;
-          }
-
-          const newCounts = {
-            supportCount: votes?.filter(v => v.vote === 'for').length || 0,
-            opposeCount: votes?.filter(v => v.vote === 'against').length || 0,
-            abstainCount: votes?.filter(v => v.vote === 'abstain').length || 0,
-          };
-
-          console.log('[Realtime Votes] Updated counts:', newCounts);
-          setVoteCounts(newCounts);
-
-          // Invalidate queries to keep everything in sync
-          queryClient.invalidateQueries({ queryKey: ['proposals'] });
-          queryClient.invalidateQueries({ queryKey: ['proposal', proposalId] });
-        }
-      )
-      .subscribe((status) => {
-        console.log('[Realtime Votes] Subscription status:', status);
-      });
-
-    return () => {
-      console.log('[Realtime Votes] Cleaning up subscription');
-      supabase.removeChannel(channel);
-    };
-  }, [proposalId, queryClient]);
-
-  return voteCounts;
+interface VoteCounts { supportCount:number; opposeCount:number; abstainCount:number }
+export const useRealtimeVotes = (proposalId:string, initialCounts:VoteCounts) => {
+ const qc=useQueryClient();
+ const [counts,setCounts]=useState(initialCounts);
+ useEffect(()=>{setCounts(initialCounts);},[initialCounts.supportCount,initialCounts.opposeCount,initialCounts.abstainCount]);
+ useEffect(()=>{
+  if(!proposalId)return;
+  const channel=supabase.channel(`proposal-totals-${proposalId}`).on('postgres_changes',{event:'UPDATE',schema:'public',table:'proposals',filter:`id=eq.${proposalId}`},(payload)=>{
+   const p=payload.new;
+   setCounts({supportCount:p.votes_for || 0,opposeCount:p.votes_against || 0,abstainCount:p.votes_abstain || 0});
+   qc.invalidateQueries({queryKey:['proposals']}); qc.invalidateQueries({queryKey:['proposal',proposalId]});
+  }).subscribe();
+  return ()=>{supabase.removeChannel(channel);};
+ },[proposalId,qc]);
+ return counts;
 };

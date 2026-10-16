@@ -174,7 +174,7 @@ export const useVoteProposal = () => {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['proposals'] });
       queryClient.invalidateQueries({ queryKey: ['proposal'] });
       queryClient.invalidateQueries({ queryKey: ['vote', variables.proposalId] });
