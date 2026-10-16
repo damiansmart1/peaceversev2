@@ -236,6 +236,7 @@ export const useCreatePoll = () => {
       eligibleDomains,
       inviteEmails,
       resultsVisibility,
+      bannerPath,
     }: {
       title: string;
       description?: string;
