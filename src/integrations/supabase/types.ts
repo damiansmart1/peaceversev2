@@ -7100,6 +7100,32 @@ export type Database = {
           },
         ]
       }
+      poll_invites: {
+        Row: {
+          created_at: string
+          email: string
+          poll_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          poll_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          poll_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_invites_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       poll_responses: {
         Row: {
           comment: string | null
@@ -7137,6 +7163,32 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "poll_responses_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      poll_tallies: {
+        Row: {
+          option_index: number
+          poll_id: string
+          votes: number
+        }
+        Insert: {
+          option_index: number
+          poll_id: string
+          votes?: number
+        }
+        Update: {
+          option_index?: number
+          poll_id?: string
+          votes?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_tallies_poll_id_fkey"
             columns: ["poll_id"]
             isOneToOne: false
             referencedRelation: "polls"
@@ -7242,6 +7294,8 @@ export type Database = {
           created_at: string | null
           created_by: string | null
           description: string | null
+          eligibility: string
+          eligible_domains: string[]
           ends_at: string | null
           group_id: string | null
           group_order: number
@@ -7250,8 +7304,11 @@ export type Database = {
           is_active: boolean | null
           is_featured: boolean | null
           options: Json
+          outcome_published_at: string | null
+          outcome_text: string | null
           poll_type: string
           proposal_id: string | null
+          results_visibility: string
           settings: Json | null
           starts_at: string | null
           title: string
@@ -7265,6 +7322,8 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           description?: string | null
+          eligibility?: string
+          eligible_domains?: string[]
           ends_at?: string | null
           group_id?: string | null
           group_order?: number
@@ -7273,8 +7332,11 @@ export type Database = {
           is_active?: boolean | null
           is_featured?: boolean | null
           options?: Json
+          outcome_published_at?: string | null
+          outcome_text?: string | null
           poll_type?: string
           proposal_id?: string | null
+          results_visibility?: string
           settings?: Json | null
           starts_at?: string | null
           title: string
@@ -7288,6 +7350,8 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           description?: string | null
+          eligibility?: string
+          eligible_domains?: string[]
           ends_at?: string | null
           group_id?: string | null
           group_order?: number
@@ -7296,8 +7360,11 @@ export type Database = {
           is_active?: boolean | null
           is_featured?: boolean | null
           options?: Json
+          outcome_published_at?: string | null
+          outcome_text?: string | null
           poll_type?: string
           proposal_id?: string | null
+          results_visibility?: string
           settings?: Json | null
           starts_at?: string | null
           title?: string
@@ -10206,6 +10273,8 @@ export type Database = {
         Returns: boolean
       }
       longtransactionsenabled: { Args: never; Returns: boolean }
+      poll_results: { Args: { _poll_id: string }; Returns: number[] }
+      poll_voter_eligible: { Args: { _poll_id: string }; Returns: boolean }
       populate_geometry_columns:
         | { Args: { tbl_oid: unknown; use_typmod?: boolean }; Returns: number }
         | { Args: { use_typmod?: boolean }; Returns: string }
