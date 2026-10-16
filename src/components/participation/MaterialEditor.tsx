@@ -22,7 +22,7 @@ export default function MaterialEditor({ value, onChange }: { value: MaterialDra
       const validated = materialSchema.parse({ title, context, language: sourceLanguage, url: url || undefined });
       if (file) validateMaterialFile(file);
       if (!file && !url) throw new Error(t('participation.file'));
-      onChange([...value, { ...validated, file }]);
+      onChange([...value, { title: validated.title || title, context: validated.context || '', language: validated.language || sourceLanguage, url: validated.url, file }]);
       setTitle(''); setContext(''); setUrl(''); setFile(undefined);
       const input = document.getElementById(`${id}-file`) as HTMLInputElement | null;
       if (input) input.value = '';

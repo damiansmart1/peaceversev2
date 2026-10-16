@@ -33,7 +33,7 @@ export default function CreateProposalDialog() {
     setBusy(true);
     try {
       const v = schema.parse({title, body, jurisdiction});
-      const proposal = savedId ? {id:savedId} : await create.mutateAsync({ ...v, summary:v.body.slice(0,500), tags:[category], billProposerName:'', parliamentaryStage:'first_reading', category, responseRequiredBy:deadline ? new Date(deadline+'T23:59:59').toISOString() : undefined, draft });
+      const proposal = savedId ? {id:savedId} : await create.mutateAsync({ title:v.title || title, body:v.body || body, jurisdiction:v.jurisdiction, summary:body.slice(0,500), tags:[category], billProposerName:'', parliamentaryStage:'first_reading', category, responseRequiredBy:deadline ? new Date(deadline+'T23:59:59').toISOString() : undefined, draft });
       setSavedId(proposal.id);
       await saveParticipationMaterials('proposal', proposal.id, materials);
       toast.success(t(draft ? 'participation.savedDraft' : 'participation.submitted'));
