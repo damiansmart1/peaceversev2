@@ -20,7 +20,12 @@ export interface Poll {
   group_order?: number;
   description: string | null;
   category: string;
-  poll_type: 'single_choice' | 'multiple_choice' | 'rating' | 'yes_no';
+  poll_type: 'single_choice' | 'multiple_choice' | 'rating' | 'yes_no' | 'ranked';
+  eligibility?: 'everyone' | 'domain' | 'invite';
+  eligible_domains?: string[];
+  results_visibility?: 'live' | 'after_vote' | 'after_close';
+  outcome_text?: string | null;
+  outcome_published_at?: string | null;
   options: PollOption[];
   settings: {
     max_selections?: number;
@@ -175,7 +180,7 @@ export const useSubmitPollVote = () => {
       if (!user || user.is_anonymous) throw new Error('Sign in to participate');
       const { data: current, error: currentError } = await supabase.from('polls').select('*').eq('id', pollId).single();
       if (currentError) throw currentError;
-      validateBallot(selectedOptions, current.options.length, current.poll_type === 'multiple_choice', current.settings?.max_selections || current.options.length);
+      validateBallot(selectedOptions, current.options.length, current.poll_type === 'multiple_choice' || current.poll_type === 'ranked', current.settings?.max_selections || current.options.length);
       if ((comment || '').length > 500) throw new Error('Comment exceeds 500 characters');
 
       const { error } = await supabase.from('poll_responses').insert({
@@ -225,6 +230,10 @@ export const useCreatePoll = () => {
       visibility,
       proposalId,
       group,
+      eligibility,
+      eligibleDomains,
+      inviteEmails,
+      resultsVisibility,
     }: {
       title: string;
       description?: string;
@@ -237,6 +246,10 @@ export const useCreatePoll = () => {
       visibility?: string;
       proposalId?: string;
       group?: { id: string; title: string; order: number };
+      eligibility?: 'everyone' | 'domain' | 'invite';
+      eligibleDomains?: string[];
+      inviteEmails?: string[];
+      resultsVisibility?: 'live' | 'after_vote' | 'after_close';
     }) => {
       if (!user) throw new Error('Must be logged in to create a poll');
       pollInputSchema.parse({ title, description, options, pollType, visibility });
@@ -257,11 +270,18 @@ export const useCreatePoll = () => {
           group_id: group?.id || null,
           group_title: group?.title || null,
           group_order: group?.order || 0,
+          eligibility: eligibility || 'everyone',
+          eligible_domains: eligibleDomains || [],
+          results_visibility: resultsVisibility || 'live',
         })
         .select()
         .single();
 
       if (error) throw error;
+      if (eligibility === 'invite' && inviteEmails?.length) {
+        const { error: invErr } = await supabase.from('poll_invites').insert(inviteEmails.map(email => ({ poll_id: data.id, email })));
+        if (invErr) throw new Error(`Poll created, but the invite list could not be saved: ${invErr.message}`);
+      }
       return data;
     },
     onSuccess: () => {
@@ -343,3 +363,46 @@ function groupResponsesByDay(responses: any[]): { date: string; count: number }[
     .map(([date, count]) => ({ date, count }))
     .sort((a, b) => a.date.localeCompare(b.date));
 }
+
+/** Server-revealed tallies for polls whose results stay hidden until close. null = still hidden. */
+export const usePollResults = (poll: Pick<Poll, 'id' | 'results_visibility' | 'total_participants'>) =>
+  useQuery({
+    queryKey: ['poll-results', poll.id, poll.total_participants],
+    enabled: poll.results_visibility === 'after_close',
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('poll_results', { _poll_id: poll.id });
+      if (error) throw error;
+      return (data as number[] | null) ?? null;
+    },
+  });
+
+export const usePollEligibility = (poll: Pick<Poll, 'id' | 'eligibility'>) => {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ['poll-eligible', poll.id, user?.id],
+    enabled: !!user && !!poll.eligibility && poll.eligibility !== 'everyone',
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('poll_voter_eligible', { _poll_id: poll.id });
+      if (error) throw error;
+      return !!data;
+    },
+  });
+};
+
+export const usePublishPollOutcome = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ pollId, outcome }: { pollId: string; outcome: string }) => {
+      const text = outcome.trim();
+      if (!text || text.length > 2000) throw new Error('Write a decision of 1–2000 characters');
+      const { error } = await supabase.from('polls').update({ outcome_text: text }).eq('id', pollId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['polls'] });
+      queryClient.invalidateQueries({ queryKey: ['featured-polls'] });
+      toast.success('Decision published — everyone who voted has been notified');
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+};

@@ -15,4 +15,17 @@ describe('informed and protected participation', () => {
     expect(() => validateBallot([3],3,false,1)).toThrow();
     expect(() => validateBallot([1],3,false,1)).not.toThrow();
   });
+});import { rankedPoints, parseDomains, parseInviteEmails } from '../src/lib/participation';
+describe('ranked and members-only polls', () => {
+  test('ranked top-3 gives 3, 2, 1 points', () => {
+    expect([0,1,2].map(p => rankedPoints(p, 3))).toEqual([3,2,1]);
+  });
+  test('domains are normalised and invalid ones rejected', () => {
+    expect(parseDomains('@SautiStack.africa, partner.org')).toEqual(['sautistack.africa','partner.org']);
+    expect(() => parseDomains('not a domain')).toThrow();
+  });
+  test('invite emails are de-duplicated and validated', () => {
+    expect(parseInviteEmails('A@x.org, a@x.org\nb@y.org')).toEqual(['a@x.org','b@y.org']);
+    expect(() => parseInviteEmails('bad-email')).toThrow();
+  });
 });

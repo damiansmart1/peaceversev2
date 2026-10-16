@@ -4,11 +4,13 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import { Poll, useUserPollResponse, useSubmitPollVote } from '@/hooks/usePolls';
+import { Poll, useUserPollResponse, useSubmitPollVote, usePollResults, usePollEligibility } from '@/hooks/usePolls';
+import { ReadAloudButton, HiddenResultsNotice, OutcomePanel, DownloadResultsButton } from './PollExtras';
+import { useAdminCheck } from '@/hooks/useAdminCheck';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   BarChart3, Users, Clock, Share2, MessageSquare, CheckCircle2, Vote, Star,
-  ThumbsUp, ThumbsDown, TrendingUp, Lock, Sparkles, Zap, Crown, ShieldCheck,
+  ThumbsUp, ThumbsDown, TrendingUp, Lock, Sparkles, Zap, Crown, ShieldCheck, ListOrdered, UserCheck, EyeOff,
 } from 'lucide-react';
 import { formatDistanceToNow, isPast } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -26,8 +28,19 @@ interface PollCardProps {
 
 const LETTERS = 'ABCDEFGHIJ';
 
-export const PollCard = ({ poll, showFullResults = false, compact = false }: PollCardProps) => {
+export const PollCard = ({ poll: rawPoll, showFullResults = false, compact = false }: PollCardProps) => {
   const { user } = useAuth();
+  const { data: isAdmin } = useAdminCheck();
+  const { data: sealedCounts, isLoading: loadingCounts } = usePollResults(rawPoll);
+  const { data: eligible, isLoading: loadingEligible } = usePollEligibility(rawPoll);
+  const sealed = rawPoll.results_visibility === 'after_close';
+  const resultsHidden = sealed && !loadingCounts && !sealedCounts;
+  const poll = useMemo<Poll>(() => (sealed && sealedCounts
+    ? { ...rawPoll, options: rawPoll.options.map((o, i) => ({ ...o, votes: sealedCounts[i] || 0 })) }
+    : rawPoll), [rawPoll, sealed, sealedCounts]);
+  const restricted = !!poll.eligibility && poll.eligibility !== 'everyone';
+  const isEligible = !restricted || eligible === true;
+  const canManage = !!user && (user.id === poll.created_by || !!isAdmin);
   const { data: userResponse, isLoading: loadingResponse } = useUserPollResponse(poll.id);
   const submitVote = useSubmitPollVote();
 
@@ -41,8 +54,9 @@ export const PollCard = ({ poll, showFullResults = false, compact = false }: Pol
   const hasVoted = !!userResponse;
   const isPollEnded = poll.ends_at ? isPast(new Date(poll.ends_at)) : false;
   const isPollActive = poll.is_active && !isPollEnded && new Date(poll.starts_at) <= new Date();
-  const canVote = !!user && !hasVoted && isPollActive && !user.is_anonymous;
-  const showResults = hasVoted || showFullResults || !isPollActive || poll.settings?.show_results_before_vote;
+  const canVote = !!user && !hasVoted && isPollActive && !user.is_anonymous && isEligible && !loadingEligible;
+  const showResults = hasVoted || showFullResults || !isPollActive
+    || (poll.results_visibility !== 'after_vote' && !sealed && !!poll.settings?.show_results_before_vote);
 
   const totalVotes = useMemo(() => poll.options.reduce((s, o) => s + (o.votes || 0), 0), [poll.options]);
 
@@ -59,7 +73,7 @@ export const PollCard = ({ poll, showFullResults = false, compact = false }: Pol
       const max = poll.settings?.max_selections || poll.options.length;
       if (selectedOptions.includes(index)) setSelectedOptions((p) => p.filter((i) => i !== index));
       else if (selectedOptions.length < max) setSelectedOptions((p) => [...p, index]);
-      else toast.info(`You can pick up to ${max} options`);
+      else toast.info(poll.poll_type === 'ranked' ? `You can rank your top ${max}` : `You can pick up to ${max} options`);
     }
   };
 
@@ -99,6 +113,7 @@ export const PollCard = ({ poll, showFullResults = false, compact = false }: Pol
     rating: { icon: Star, label: 'Rating' },
     multiple_choice: { icon: CheckCircle2, label: 'Pick many' },
     single_choice: { icon: Vote, label: 'Pick one' },
+    ranked: { icon: ListOrdered, label: `Rank top ${poll.settings?.max_selections || poll.options.length}` },
   }[poll.poll_type] || { icon: Vote, label: 'Poll' };
   const TypeIcon = typeMeta.icon;
 
@@ -147,6 +162,16 @@ export const PollCard = ({ poll, showFullResults = false, compact = false }: Pol
             <span className="inline-flex items-center gap-1 rounded-full border border-border/70 bg-background/50 px-2.5 py-1 text-[11px] font-medium text-foreground/80">
               <TypeIcon className="h-3 w-3" /> {typeMeta.label}
             </span>
+            {restricted && (
+              <span className="inline-flex items-center gap-1 rounded-full border border-secondary/60 bg-secondary/15 px-2.5 py-1 text-[11px] font-semibold text-foreground">
+                <UserCheck className="h-3 w-3" /> Members only
+              </span>
+            )}
+            {sealed && isPollActive && (
+              <span className="inline-flex items-center gap-1 rounded-full border border-border/70 bg-background/50 px-2.5 py-1 text-[11px] font-medium text-foreground/80">
+                <EyeOff className="h-3 w-3" /> Sealed results
+              </span>
+            )}
             {poll.is_featured && (
               <span className="inline-flex items-center gap-1 rounded-full bg-accent/20 px-2.5 py-1 text-[11px] font-semibold text-accent-foreground">
                 <Sparkles className="h-3 w-3" /> Featured
@@ -154,9 +179,12 @@ export const PollCard = ({ poll, showFullResults = false, compact = false }: Pol
             )}
           </div>
 
-          <h3 className="font-display text-lg sm:text-xl font-semibold leading-snug break-words text-foreground">
-            <TranslatableText text={poll.title} />
-          </h3>
+          <div className="flex items-start justify-between gap-3">
+            <h3 className="min-w-0 font-display text-lg sm:text-xl font-semibold leading-snug break-words text-foreground">
+              <TranslatableText text={poll.title} />
+            </h3>
+            <ReadAloudButton poll={poll} />
+          </div>
           {poll.description && !compact && (
             <p className="text-sm leading-relaxed text-muted-foreground">
               <TranslatableText text={poll.description} />
@@ -199,7 +227,9 @@ export const PollCard = ({ poll, showFullResults = false, compact = false }: Pol
 
         <AnimatePresence mode="wait">
           {showResults && !canVote ? (
-            <PollResults key="results" poll={poll} userResponse={userResponse} totalVotes={totalVotes} />
+            resultsHidden
+              ? <HiddenResultsNotice key="sealed" poll={poll} hasVoted={hasVoted} />
+              : <PollResults key="results" poll={poll} userResponse={userResponse} totalVotes={totalVotes} />
           ) : (
             <PollVoting
               key="voting"
@@ -264,6 +294,14 @@ export const PollCard = ({ poll, showFullResults = false, compact = false }: Pol
           </div>
         )}
 
+        {user && !user.is_anonymous && restricted && !loadingEligible && !isEligible && isPollActive && !hasVoted && (
+          <div className="rounded-xl border border-dashed border-secondary/60 bg-secondary/10 p-3 text-center text-sm text-foreground">
+            This poll is open to invited members only{poll.eligibility === 'domain' && poll.eligible_domains?.length ? ` (${poll.eligible_domains.map(d => '@' + d).join(', ')} emails)` : ''}.
+          </div>
+        )}
+
+        <OutcomePanel poll={poll} canManage={canManage && (!isPollActive || !!poll.outcome_text)} />
+
         {!user && (
           <div className="rounded-xl border border-dashed border-primary/40 bg-primary/5 p-3 text-center text-sm text-foreground">
             Sign in to add your voice to this poll
@@ -277,9 +315,12 @@ export const PollCard = ({ poll, showFullResults = false, compact = false }: Pol
 
         <footer className="flex items-center justify-between border-t border-border/50 pt-3">
           <span className="text-xs text-muted-foreground">Started {formatDistanceToNow(new Date(poll.created_at))} ago</span>
-          <Button variant="ghost" size="sm" onClick={handleShare} className="rounded-full">
-            <Share2 className="mr-1 h-4 w-4" /> Invite
-          </Button>
+          <div className="flex items-center gap-1">
+            {showResults && !resultsHidden && totalVotes > 0 && <DownloadResultsButton poll={poll} counts={poll.options.map(o => o.votes || 0)} />}
+            <Button variant="ghost" size="sm" onClick={handleShare} className="rounded-full">
+              <Share2 className="mr-1 h-4 w-4" /> Invite
+            </Button>
+          </div>
         </footer>
       </div>
     </motion.article>
@@ -375,7 +416,7 @@ const PollResults = ({ poll, userResponse, totalVotes }: { poll: Poll; userRespo
                 </span>
                 <span className="shrink-0 text-right">
                   <span className="font-display text-base font-bold text-foreground">{pct.toFixed(0)}%</span>
-                  <span className="ml-1 text-[11px] text-muted-foreground">{option.votes}</span>
+                  <span className="ml-1 text-[11px] text-muted-foreground">{option.votes}{poll.poll_type === 'ranked' ? ' pts' : ''}</span>
                 </span>
               </div>
             </div>
@@ -491,14 +532,15 @@ const PollVoting = ({
     );
   }
 
-  const isMultiple = poll.poll_type === 'multiple_choice';
+  const isRanked = poll.poll_type === 'ranked';
+  const isMultiple = poll.poll_type === 'multiple_choice' || isRanked;
   const max = poll.settings?.max_selections || poll.options.length;
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-2">
       {isMultiple && (
         <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-          Picked {selectedOptions.length} of {max}
+          {isRanked ? `Tap in order of preference · ${selectedOptions.length} of ${max} ranked` : `Picked ${selectedOptions.length} of ${max}`}
         </p>
       )}
       {poll.options.map((option, index) => {
@@ -530,7 +572,9 @@ const PollVoting = ({
                 sel ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground',
               )}
             >
-              {isMultiple ? (
+              {isRanked ? (
+                sel ? selectedOptions.indexOf(index) + 1 : LETTERS[index]
+              ) : isMultiple ? (
                 <Checkbox checked={sel} className="pointer-events-none border-current" />
               ) : sel ? (
                 <CheckCircle2 className="h-4 w-4" />

@@ -40,7 +40,7 @@ import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { toast } from 'sonner';
 import MaterialEditor from '@/components/participation/MaterialEditor';
 import { saveParticipationMaterials } from '@/hooks/useParticipationMaterials';
-import { type MaterialDraft } from '@/lib/participation';
+import { type MaterialDraft, parseDomains, parseInviteEmails } from '@/lib/participation';
 import { useProposals } from '@/hooks/useProposals';
 import { supabase } from '@/lib/supabase-typed';
 import { OPTION_IMAGE_BUCKET } from '@/components/polls/OptionImage';
@@ -52,6 +52,7 @@ const POLL_TYPES = [
   { value: 'multiple_choice', label: 'Multiple Choice', icon: CheckCircle2, description: 'Voters can select multiple options' },
   { value: 'yes_no', label: 'Yes / No', icon: ThumbsUp, description: 'Simple yes or no question' },
   { value: 'rating', label: 'Rating Scale', icon: Star, description: 'Star rating from 1 to 5' },
+  { value: 'ranked', label: 'Ranked', icon: GripVertical, description: 'Voters rank their favourites in order' },
 ];
 
 const CATEGORIES = [
@@ -77,6 +78,10 @@ export const CreatePollDialog = () => {
   const { data: proposals = [] } = useProposals();
   const [proposalId, setProposalId] = useState('none');
   const [groupChoice, setGroupChoice] = useState('none');
+  const [eligibility, setEligibility] = useState<'everyone' | 'domain' | 'invite'>('everyone');
+  const [domainsRaw, setDomainsRaw] = useState('');
+  const [invitesRaw, setInvitesRaw] = useState('');
+  const [resultsVisibility, setResultsVisibility] = useState<'live' | 'after_vote' | 'after_close'>('live');
   const [newGroupTitle, setNewGroupTitle] = useState('');
   const { data: allPolls = [] } = usePolls();
   const existingGroups = Array.from(new Map(allPolls.filter(p => p.group_id).map(p => [p.group_id!, { id: p.group_id!, title: p.group_title || p.title, count: allPolls.filter(q => q.group_id === p.group_id).length }])).values());
@@ -113,7 +118,7 @@ export const CreatePollDialog = () => {
     setVisibility('public');
     setShowResultsBeforeVote(false);
     setMaxSelections(3);
-    setMaterials([]); setProposalId('none'); setSavedId(undefined); setGroupChoice('none'); setNewGroupTitle('');
+    setMaterials([]); setProposalId('none'); setSavedId(undefined); setGroupChoice('none'); setNewGroupTitle(''); setEligibility('everyone'); setDomainsRaw(''); setInvitesRaw(''); setResultsVisibility('live');
   };
 
   const handleAddOption = () => {
@@ -180,11 +185,18 @@ export const CreatePollDialog = () => {
       }
     }
 
+    let eligibleDomains: string[] = [];
+    let inviteEmails: string[] = [];
+    try {
+      if (eligibility === 'domain') eligibleDomains = parseDomains(domainsRaw);
+      if (eligibility === 'invite') { inviteEmails = parseInviteEmails(invitesRaw); if (!inviteEmails.length) throw new Error('Add at least one email to invite'); }
+    } catch (e) { toast.error(e instanceof Error ? e.message : 'Check who can vote'); return; }
+
     setSaving(true);
     const uploaded: string[] = [];
     try {
     let imagePaths: (string | null)[] = [];
-    const usesImages = !savedId && (pollType === 'single_choice' || pollType === 'multiple_choice');
+    const usesImages = !savedId && (pollType === 'single_choice' || pollType === 'multiple_choice' || pollType === 'ranked');
     if (usesImages && optionImages.some(Boolean)) {
       const kept = options.map((o, i) => ({ o, f: optionImages[i] })).filter(x => x.o.trim());
       for (const { f } of kept) {
@@ -207,12 +219,13 @@ export const CreatePollDialog = () => {
       optionImages: imagePaths,
       settings: {
         show_results_before_vote: showResultsBeforeVote,
-        max_selections: pollType === 'multiple_choice' ? maxSelections : undefined,
+        max_selections: pollType === 'multiple_choice' || pollType === 'ranked' ? maxSelections : undefined,
         rating_scale: pollType === 'rating' ? 5 : undefined,
       },
       endsAt: endDate?.toISOString(),
       visibility,
       proposalId: proposalId === 'none' ? undefined : proposalId,
+      eligibility, eligibleDomains, inviteEmails, resultsVisibility,
       group: groupChoice === 'none' ? undefined
         : groupChoice === 'new' ? { id: crypto.randomUUID(), title: newGroupTitle.trim() || title.trim(), order: 1 }
         : (() => { const g = existingGroups.find(x => x.id === groupChoice)!; return { id: g.id, title: g.title, order: g.count + 1 }; })(),
@@ -342,7 +355,7 @@ export const CreatePollDialog = () => {
                       disabled={pollType === 'yes_no'}
                       maxLength={100}
                     />
-                    {(pollType === 'single_choice' || pollType === 'multiple_choice') && (
+                    {(pollType === 'single_choice' || pollType === 'multiple_choice' || pollType === 'ranked') && (
                       optionPreviews[index] ? (
                         <div className="relative h-10 w-10 shrink-0">
                           <img src={optionPreviews[index]} alt={`Option ${index + 1} image`} className="h-10 w-10 rounded-md object-cover" />
@@ -376,9 +389,9 @@ export const CreatePollDialog = () => {
           )}
 
           {/* Multiple choice settings */}
-          {pollType === 'multiple_choice' && (
+          {(pollType === 'multiple_choice' || pollType === 'ranked') && (
             <div className="space-y-2">
-              <Label>Maximum selections allowed</Label>
+              <Label>{pollType === 'ranked' ? 'How many places to rank' : 'Maximum selections allowed'}</Label>
               <Select
                 value={maxSelections.toString()}
                 onValueChange={(v) => setMaxSelections(parseInt(v))}
@@ -496,6 +509,34 @@ export const CreatePollDialog = () => {
             <Label>{t('participation.proposal')}</Label>
             <Select value={proposalId} onValueChange={setProposalId} disabled={!!savedId}><SelectTrigger className="min-w-0"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="none">{t('participation.none')}</SelectItem>{proposals.map(p => <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>)}</SelectContent></Select>
           </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2 min-w-0">
+              <Label>Who can vote</Label>
+              <Select value={eligibility} onValueChange={(v) => setEligibility(v as typeof eligibility)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="everyone">Anyone signed in</SelectItem>
+                  <SelectItem value="domain">People with a work email</SelectItem>
+                  <SelectItem value="invite">Invited people only</SelectItem>
+                </SelectContent>
+              </Select>
+              {eligibility === 'domain' && <Input placeholder="sautistack.africa, partner.org" value={domainsRaw} onChange={e => setDomainsRaw(e.target.value)} maxLength={500} />}
+              {eligibility === 'invite' && <Textarea rows={3} placeholder="One email per line or separated by commas" value={invitesRaw} onChange={e => setInvitesRaw(e.target.value)} />}
+            </div>
+            <div className="space-y-2 min-w-0">
+              <Label>When results are shown</Label>
+              <Select value={resultsVisibility} onValueChange={(v) => setResultsVisibility(v as typeof resultsVisibility)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="live">Live, as votes come in</SelectItem>
+                  <SelectItem value="after_vote">After each person votes</SelectItem>
+                  <SelectItem value="after_close">Sealed until the poll closes</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">Sealed results stop early counts from swaying people.</p>
+            </div>
+          </div>
+
           <div className="space-y-2">
             <Label>Add to a poll collection</Label>
             <p className="text-xs text-muted-foreground">Group related questions so people answer them together in one poll.</p>
