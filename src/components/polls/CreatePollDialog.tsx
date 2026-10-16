@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useCreatePoll, Poll } from '@/hooks/usePolls';
+import { useCreatePoll, usePolls, Poll } from '@/hooks/usePolls';
 import {
   Dialog,
   DialogContent,
@@ -76,6 +76,10 @@ export const CreatePollDialog = () => {
   const { t } = useTranslationContext();
   const { data: proposals = [] } = useProposals();
   const [proposalId, setProposalId] = useState('none');
+  const [groupChoice, setGroupChoice] = useState('none');
+  const [newGroupTitle, setNewGroupTitle] = useState('');
+  const { data: allPolls = [] } = usePolls();
+  const existingGroups = Array.from(new Map(allPolls.filter(p => p.group_id).map(p => [p.group_id!, { id: p.group_id!, title: p.group_title || p.title, count: allPolls.filter(q => q.group_id === p.group_id).length }])).values());
   const [materials, setMaterials] = useState<MaterialDraft[]>([]);
   const [savedId, setSavedId] = useState<string>();
   const [saving, setSaving] = useState(false);
@@ -109,7 +113,7 @@ export const CreatePollDialog = () => {
     setVisibility('public');
     setShowResultsBeforeVote(false);
     setMaxSelections(3);
-    setMaterials([]); setProposalId('none'); setSavedId(undefined);
+    setMaterials([]); setProposalId('none'); setSavedId(undefined); setGroupChoice('none'); setNewGroupTitle('');
   };
 
   const handleAddOption = () => {
@@ -209,6 +213,9 @@ export const CreatePollDialog = () => {
       endsAt: endDate?.toISOString(),
       visibility,
       proposalId: proposalId === 'none' ? undefined : proposalId,
+      group: groupChoice === 'none' ? undefined
+        : groupChoice === 'new' ? { id: crypto.randomUUID(), title: newGroupTitle.trim() || title.trim(), order: 1 }
+        : (() => { const g = existingGroups.find(x => x.id === groupChoice)!; return { id: g.id, title: g.title, order: g.count + 1 }; })(),
     });
         setSavedId(poll.id);
         await saveParticipationMaterials('poll', poll.id, materials);
@@ -488,6 +495,19 @@ export const CreatePollDialog = () => {
           <div className="space-y-2">
             <Label>{t('participation.proposal')}</Label>
             <Select value={proposalId} onValueChange={setProposalId} disabled={!!savedId}><SelectTrigger className="min-w-0"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="none">{t('participation.none')}</SelectItem>{proposals.map(p => <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>)}</SelectContent></Select>
+          </div>
+          <div className="space-y-2">
+            <Label>Add to a poll collection</Label>
+            <p className="text-xs text-muted-foreground">Group related questions so people answer them together in one poll.</p>
+            <Select value={groupChoice} onValueChange={setGroupChoice} disabled={!!savedId}>
+              <SelectTrigger className="min-w-0"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Standalone poll</SelectItem>
+                <SelectItem value="new">Start a new collection</SelectItem>
+                {existingGroups.map(g => <SelectItem key={g.id} value={g.id}>{g.title} ({g.count})</SelectItem>)}
+              </SelectContent>
+            </Select>
+            {groupChoice === 'new' && <Input placeholder="Collection name, e.g. Sauti Stack brand vote" maxLength={120} value={newGroupTitle} onChange={e => setNewGroupTitle(e.target.value)} />}
           </div>
           <MaterialEditor value={materials} onChange={setMaterials} />
           {/* Settings */}

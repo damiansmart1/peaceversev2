@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { usePolls, useFeaturedPolls } from '@/hooks/usePolls';
 import { PollCard } from './PollCard';
 import { CreatePollDialog } from './CreatePollDialog';
+import { groupPolls, PollGroupCard, type PollItem } from './PollGroupCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -95,13 +96,13 @@ export const PollsSection = () => {
             <h3 className="font-semibold">{t('polls.featured')}</h3>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {featuredPolls.map((poll) => (
+            {groupPolls(featuredPolls).map((item) => (
               <motion.div
-                key={poll.id}
+                key={itemKey(item)}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
               >
-                <PollCard poll={poll} compact />
+                {renderItem(item, { compact: true })}
               </motion.div>
             ))}
           </div>
@@ -223,15 +224,15 @@ export const PollsSection = () => {
           ) : activePolls.length > 0 ? (
             <div className="grid gap-6 md:grid-cols-2">
               <AnimatePresence mode="popLayout">
-                {activePolls.map((poll, index) => (
+                {groupPolls(activePolls).map((item, index) => (
                   <motion.div
-                    key={poll.id}
+                    key={itemKey(item)}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ delay: index * 0.05 }}
                   >
-                    <PollCard poll={poll} />
+                    {renderItem(item, {})}
                   </motion.div>
                 ))}
               </AnimatePresence>
@@ -247,14 +248,14 @@ export const PollsSection = () => {
         <TabsContent value="closed" className="mt-6">
           {closedPolls.length > 0 ? (
             <div className="grid gap-6 md:grid-cols-2">
-              {closedPolls.map((poll, index) => (
+              {groupPolls(closedPolls).map((item, index) => (
                 <motion.div
-                  key={poll.id}
+                  key={itemKey(item)}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
                 >
-                  <PollCard poll={poll} showFullResults />
+                  {renderItem(item, { showFullResults: true })}
                 </motion.div>
               ))}
             </div>
@@ -269,6 +270,12 @@ export const PollsSection = () => {
     </div>
   );
 };
+
+const itemKey = (i: PollItem) => (i.kind === 'group' ? `g-${i.id}` : i.poll.id);
+const renderItem = (i: PollItem, o: { compact?: boolean; showFullResults?: boolean }) =>
+  i.kind === 'group'
+    ? <PollGroupCard title={i.title} polls={i.polls} {...o} />
+    : <PollCard poll={i.poll} {...o} />;
 
 const PollsLoadingSkeleton = () => (
   <div className="grid gap-6 md:grid-cols-2">
