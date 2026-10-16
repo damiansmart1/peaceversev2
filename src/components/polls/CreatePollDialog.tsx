@@ -42,6 +42,9 @@ import MaterialEditor from '@/components/participation/MaterialEditor';
 import { saveParticipationMaterials } from '@/hooks/useParticipationMaterials';
 import { type MaterialDraft } from '@/lib/participation';
 import { useProposals } from '@/hooks/useProposals';
+import { supabase } from '@/lib/supabase-typed';
+import { OPTION_IMAGE_BUCKET } from '@/components/polls/OptionImage';
+import { ImagePlus, X } from 'lucide-react';
 import { useTranslationContext } from '@/components/TranslationProvider';
 
 const POLL_TYPES = [
@@ -86,6 +89,8 @@ export const CreatePollDialog = () => {
   const [category, setCategory] = useState('general');
   const [pollType, setPollType] = useState<Poll['poll_type']>('single_choice');
   const [options, setOptions] = useState<string[]>(['', '']);
+  const [optionImages, setOptionImages] = useState<(File | undefined)[]>([]);
+  const [optionPreviews, setOptionPreviews] = useState<(string | undefined)[]>([]);
   const [endDate, setEndDate] = useState<Date | undefined>();
   const [visibility, setVisibility] = useState('public');
   
@@ -99,6 +104,7 @@ export const CreatePollDialog = () => {
     setCategory('general');
     setPollType('single_choice');
     setOptions(['', '']);
+    setOptionImages([]); setOptionPreviews([]);
     setEndDate(undefined);
     setVisibility('public');
     setShowResultsBeforeVote(false);
@@ -120,6 +126,18 @@ export const CreatePollDialog = () => {
       return;
     }
     setOptions(options.filter((_, i) => i !== index));
+    setOptionImages(optionImages.filter((_, i) => i !== index));
+    setOptionPreviews(optionPreviews.filter((_, i) => i !== index));
+  };
+
+  const handleOptionImage = (index: number, file?: File) => {
+    if (file) {
+      const ok = ['image/jpeg', 'image/png', 'image/webp'].includes(file.type);
+      if (!ok) { toast.error('Choose a JPG, PNG or WebP image'); return; }
+      if (file.size > 5 * 1024 * 1024) { toast.error('Choose an image smaller than 5 MB'); return; }
+    }
+    const imgs = [...optionImages]; imgs[index] = file; setOptionImages(imgs);
+    const prev = [...optionPreviews]; prev[index] = file ? URL.createObjectURL(file) : undefined; setOptionPreviews(prev);
   };
 
   const handleOptionChange = (index: number, value: string) => {
@@ -159,7 +177,21 @@ export const CreatePollDialog = () => {
     }
 
     setSaving(true);
+    const uploaded: string[] = [];
     try {
+    let imagePaths: (string | null)[] = [];
+    const usesImages = !savedId && (pollType === 'single_choice' || pollType === 'multiple_choice');
+    if (usesImages && optionImages.some(Boolean)) {
+      const kept = options.map((o, i) => ({ o, f: optionImages[i] })).filter(x => x.o.trim());
+      for (const { f } of kept) {
+        if (!f) { imagePaths.push(null); continue; }
+        const ext = f.type === 'image/png' ? 'png' : f.type === 'image/webp' ? 'webp' : 'jpg';
+        const path = `${user!.id}/${crypto.randomUUID()}.${ext}`;
+        const { error } = await supabase.storage.from(OPTION_IMAGE_BUCKET).upload(path, f, { upsert: false, contentType: f.type });
+        if (error) throw new Error(`Image upload failed: ${error.message}`);
+        uploaded.push(path); imagePaths.push(path);
+      }
+    }
     const poll = savedId ? { id: savedId } : await createPoll.mutateAsync({
       title: title.trim(),
       description: description.trim() || undefined,
@@ -168,6 +200,7 @@ export const CreatePollDialog = () => {
       options: pollType === 'rating' 
         ? ['1', '2', '3', '4', '5'] 
         : options.filter(o => o.trim()),
+      optionImages: imagePaths,
       settings: {
         show_results_before_vote: showResultsBeforeVote,
         max_selections: pollType === 'multiple_choice' ? maxSelections : undefined,
@@ -181,7 +214,9 @@ export const CreatePollDialog = () => {
         await saveParticipationMaterials('poll', poll.id, materials);
         resetForm();
         setOpen(false);
-    } catch(e) { toast.error(e instanceof Error ? e.message : t('participation.error')); }
+    } catch(e) {
+      if (uploaded.length && !savedId) await supabase.storage.from(OPTION_IMAGE_BUCKET).remove(uploaded);
+      toast.error(e instanceof Error ? e.message : t('participation.error')); }
     finally { setSaving(false); }
   };
 
@@ -300,6 +335,22 @@ export const CreatePollDialog = () => {
                       disabled={pollType === 'yes_no'}
                       maxLength={100}
                     />
+                    {(pollType === 'single_choice' || pollType === 'multiple_choice') && (
+                      optionPreviews[index] ? (
+                        <div className="relative h-10 w-10 shrink-0">
+                          <img src={optionPreviews[index]} alt={`Option ${index + 1} image`} className="h-10 w-10 rounded-md object-cover" />
+                          <button type="button" aria-label={`Remove image for option ${index + 1}`} onClick={() => handleOptionImage(index)} className="absolute -right-1.5 -top-1.5 rounded-full bg-destructive p-0.5 text-destructive-foreground">
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ) : (
+                        <label className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-md border border-dashed border-border text-muted-foreground hover:border-primary hover:text-primary" title="Add an image to this option">
+                          <ImagePlus className="h-4 w-4" />
+                          <span className="sr-only">Add image to option {index + 1}</span>
+                          <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={(e) => { handleOptionImage(index, e.target.files?.[0]); e.target.value = ''; }} />
+                        </label>
+                      )
+                    )}
                     {pollType !== 'yes_no' && options.length > 2 && (
                       <Button
                         type="button"
