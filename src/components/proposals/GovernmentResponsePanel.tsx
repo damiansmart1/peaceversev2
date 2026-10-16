@@ -9,6 +9,7 @@ import { Landmark, CheckCircle2, Clock, AlertTriangle } from 'lucide-react';
 import { useProposalResponses, useSubmitResponse } from '@/hooks/useWorldClassProposals';
 import { useRoleCheck } from '@/hooks/useRoleCheck';
 import { formatDistanceToNow } from 'date-fns';
+import { useTranslationContext } from '@/components/TranslationProvider';
 
 interface Props { proposalId: string; deadline?: string | null; currentStatus?: string; }
 
@@ -23,6 +24,8 @@ const statusLabels: Record<string, string> = {
 };
 
 const GovernmentResponsePanel = ({ proposalId, deadline, currentStatus = 'awaiting' }: Props) => {
+  const { t } = useTranslationContext();
+  const label = (s: string) => t('participation.'+s);
   const { data: responses = [] } = useProposalResponses(proposalId);
   const submit = useSubmitResponse();
   const { data: govCheck } = useRoleCheck('government');
@@ -37,23 +40,24 @@ const GovernmentResponsePanel = ({ proposalId, deadline, currentStatus = 'awaiti
   const [actionPlan, setActionPlan] = useState('');
   const [org, setOrg] = useState('');
 
-  const overdue = deadline && new Date(deadline) < new Date() && currentStatus === 'awaiting';
+  const actualStatus = responses[0]?.status || currentStatus;
+  const overdue = deadline && new Date(deadline) < new Date() && ['awaiting','received','reviewing'].includes(actualStatus);
 
   return (
-    <Card className="border-amber-500/30">
+    <Card className="border-border">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 flex-wrap">
-          <Landmark className="w-5 h-5 text-amber-600" />
-          Government Response Loop
+          <Landmark className="w-5 h-5 text-primary" />
+          {t('participation.responses')}
           <Badge variant="outline" className="text-xs">OGP Accountability</Badge>
           <Badge className={overdue ? 'bg-red-500' : currentStatus === 'action_taken' ? 'bg-emerald-500' : 'bg-amber-500'}>
-            {statusLabels[currentStatus] || currentStatus}
+            {label(actualStatus)}
           </Badge>
         </CardTitle>
         {deadline && (
           <p className="text-sm text-muted-foreground flex items-center gap-1">
             <Clock className="w-3 h-3" />
-            Response due {formatDistanceToNow(new Date(deadline), { addSuffix: true })}
+            {t('participation.due')} {formatDistanceToNow(new Date(deadline), { addSuffix: true })}
             {overdue && <AlertTriangle className="w-3 h-3 text-red-500 ml-1" />}
           </p>
         )}
@@ -62,12 +66,12 @@ const GovernmentResponsePanel = ({ proposalId, deadline, currentStatus = 'awaiti
         {/* Status pipeline */}
         <div className="flex items-center gap-1 overflow-x-auto pb-2">
           {statusFlow.map((s, i) => {
-            const reached = statusFlow.indexOf(currentStatus) >= i;
+            const reached = statusFlow.indexOf(actualStatus) >= i;
             return (
               <div key={s} className="flex items-center gap-1 shrink-0">
                 <div className={`h-2 w-12 rounded-full ${reached ? 'bg-primary' : 'bg-muted'}`} />
                 <span className={`text-xs ${reached ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
-                  {statusLabels[s]}
+                  {label(s)}
                 </span>
               </div>
             );
@@ -76,12 +80,12 @@ const GovernmentResponsePanel = ({ proposalId, deadline, currentStatus = 'awaiti
 
         {/* Response form (gov/admin/partner only) */}
         {canRespond && (
-          <div className="space-y-3 p-4 bg-amber-500/5 border border-amber-500/20 rounded-lg">
-            <p className="text-sm font-medium">Publish official response</p>
+          <div className="space-y-3 p-4 bg-muted/30 border border-border rounded-lg">
+            <p className="text-sm font-medium">{t('participation.publishResponse')}</p>
             <Select value={status} onValueChange={setStatus}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                {statusFlow.map(s => <SelectItem key={s} value={s}>{statusLabels[s]}</SelectItem>)}
+                {statusFlow.map(s => <SelectItem key={s} value={s}>{label(s)}</SelectItem>)}
               </SelectContent>
             </Select>
             <Input placeholder="Your organization (e.g., Ministry of Justice)" value={org} onChange={e => setOrg(e.target.value)} />
@@ -94,7 +98,7 @@ const GovernmentResponsePanel = ({ proposalId, deadline, currentStatus = 'awaiti
               }, { onSuccess: () => { setText(''); setActionPlan(''); } })}
               disabled={submit.isPending || !text.trim()}
             >
-              <CheckCircle2 className="w-4 h-4 mr-2" />Publish Response
+              <CheckCircle2 className="w-4 h-4 mr-2" />{t('participation.publishResponse')}
             </Button>
           </div>
         )}
@@ -103,14 +107,14 @@ const GovernmentResponsePanel = ({ proposalId, deadline, currentStatus = 'awaiti
         <div className="space-y-2">
           {responses.length === 0 && (
             <p className="text-sm text-muted-foreground text-center py-6">
-              No official response yet.
+              {t('participation.noResponse')}
             </p>
           )}
           {responses.map((r: any) => (
             <div key={r.id} className="p-4 bg-card border rounded-lg">
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
                 <div className="flex items-center gap-2">
-                  <Badge>{statusLabels[r.status] || r.status}</Badge>
+                  <Badge>{label(r.status)}</Badge>
                   <span className="text-sm font-medium">{r.responder_organization || 'Official'}</span>
                 </div>
                 <span className="text-xs text-muted-foreground">
