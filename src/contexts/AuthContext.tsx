@@ -3,7 +3,7 @@ import { User, Session } from '@supabase/supabase-js';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useTranslationContext } from '@/components/TranslationProvider';
-import { clockSkewSeconds, isRefreshStorm } from '@/lib/authHealth';
+import { clockSkewSeconds, correctStoredExpiry, isRefreshStorm } from '@/lib/authHealth';
 
 interface AuthContextType {
   user: User | null;
@@ -51,12 +51,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         // A freshly issued token carries the server's time; a large gap means the device clock is wrong,
         // which makes sign-ins expire instantly and refresh in a loop until the account is rate-limited.
         if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.access_token) {
           const skew = clockSkewSeconds(session.access_token, Date.now());
           if (skew !== null && Math.abs(skew) > 300) warnClock();
+          if (skew !== null && Math.abs(skew) > 60) await correctStoredExpiry(supabase.auth, session, Date.now());
         }
         if (event === 'TOKEN_REFRESHED') {
           const now = Date.now();
