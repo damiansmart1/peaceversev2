@@ -43,6 +43,13 @@
       "when": 1792155916250,
       "tag": "0005_poll_banners",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792162040204,
+      "tag": "0006_harden_open_policies",
+      "breakpoints": true
     }
   ]
 }
