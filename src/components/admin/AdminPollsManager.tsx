@@ -18,6 +18,7 @@ import {
 import type { Poll } from '@/hooks/usePolls';
 import { downloadPollResults } from '@/components/polls/PollExtras';
 import { parseDomains, parseInviteEmails } from '@/lib/participation';
+import { BannerPicker, uploadPollBanner } from '@/components/polls/PollBanner';
 import ConfirmDialog from '@/components/ConfirmDialog';
 
 const isClosed = (p: Poll) => !p.is_active || (!!p.ends_at && new Date(p.ends_at) < new Date());
@@ -227,6 +228,8 @@ const ManagePollDialog = ({ poll, onClose }: { poll: Poll; onClose: () => void }
   const [outcome, setOutcome] = useState(poll.outcome_text || '');
   const [thankYou, setThankYou] = useState(poll.settings?.thank_you_message || '');
   const [saving, setSaving] = useState(false);
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
+  const [bannerPath, setBannerPath] = useState<string | null>(poll.banner_path || null);
   const hasVotes = (poll.total_participants || 0) > 0;
   const minVis = hasVotes ? VIS_RANK[poll.results_visibility || 'live'] : 0;
 
@@ -242,7 +245,9 @@ const ManagePollDialog = ({ poll, onClose }: { poll: Poll; onClose: () => void }
   const save = async () => {
     setSaving(true);
     try {
+      const newBanner = bannerFile ? await uploadPollBanner(bannerFile) : bannerPath;
       const updates: any = {
+        banner_path: newBanner,
         title: title.trim(), description: description.trim() || null, is_active: active,
         ends_at: endsAt ? new Date(endsAt).toISOString() : null,
         results_visibility: visibility, eligibility,
@@ -276,6 +281,7 @@ const ManagePollDialog = ({ poll, onClose }: { poll: Poll; onClose: () => void }
       <DialogContent className="max-w-lg max-h-[90dvh] overflow-y-auto">
         <DialogHeader><DialogTitle>Manage poll</DialogTitle></DialogHeader>
         <div className="space-y-4">
+          <div className="space-y-1.5"><Label>Banner</Label><BannerPicker file={bannerFile} onFile={setBannerFile} existingPath={bannerPath} onClearExisting={() => setBannerPath(null)} /></div>
           <div className="space-y-1.5"><Label>Question</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} /></div>
           <div className="space-y-1.5"><Label>Description</Label><Textarea rows={3} value={description} onChange={(e) => setDescription(e.target.value)} /></div>
           <div className="grid sm:grid-cols-2 gap-3">

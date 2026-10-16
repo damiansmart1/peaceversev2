@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { BannerPicker, uploadPollBanner } from './PollBanner';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -78,6 +79,7 @@ export const CreatePollDialog = () => {
   const { data: proposals = [] } = useProposals();
   const [proposalId, setProposalId] = useState('none');
   const [thankYou, setThankYou] = useState('');
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [groupChoice, setGroupChoice] = useState('none');
   const [eligibility, setEligibility] = useState<'everyone' | 'domain' | 'invite'>('everyone');
   const [domainsRaw, setDomainsRaw] = useState('');
@@ -209,7 +211,10 @@ export const CreatePollDialog = () => {
         uploaded.push(path); imagePaths.push(path);
       }
     }
+    let bannerPath: string | null = null;
+    if (!savedId && bannerFile) { bannerPath = await uploadPollBanner(bannerFile); uploaded.push(bannerPath); }
     const poll = savedId ? { id: savedId } : await createPoll.mutateAsync({
+      bannerPath,
       title: title.trim(),
       description: description.trim() || undefined,
       category,
@@ -389,6 +394,11 @@ export const CreatePollDialog = () => {
               </AnimatePresence>
             </div>
           )}
+
+          <div className="space-y-2">
+            <Label>Banner</Label>
+            <BannerPicker file={bannerFile} onFile={setBannerFile} />
+          </div>
 
           <div className="space-y-2">
             <Label>Message after voting (optional)</Label>

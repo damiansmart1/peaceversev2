@@ -18,6 +18,7 @@ export interface Poll {
   group_id?: string | null;
   group_title?: string | null;
   group_order?: number;
+  banner_path?: string | null;
   description: string | null;
   category: string;
   poll_type: 'single_choice' | 'multiple_choice' | 'rating' | 'yes_no' | 'ranked';
@@ -235,6 +236,7 @@ export const useCreatePoll = () => {
       eligibleDomains,
       inviteEmails,
       resultsVisibility,
+      bannerPath,
     }: {
       title: string;
       description?: string;
@@ -251,6 +253,7 @@ export const useCreatePoll = () => {
       eligibleDomains?: string[];
       inviteEmails?: string[];
       resultsVisibility?: 'live' | 'after_vote' | 'after_close';
+      bannerPath?: string | null;
     }) => {
       if (!user) throw new Error('Must be logged in to create a poll');
       pollInputSchema.parse({ title, description, options, pollType, visibility });
@@ -274,6 +277,7 @@ export const useCreatePoll = () => {
           eligibility: eligibility || 'everyone',
           eligible_domains: eligibleDomains || [],
           results_visibility: resultsVisibility || 'live',
+          banner_path: bannerPath || null,
         })
         .select()
         .single();
