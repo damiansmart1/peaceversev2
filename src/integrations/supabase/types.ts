@@ -7243,6 +7243,9 @@ export type Database = {
           created_by: string | null
           description: string | null
           ends_at: string | null
+          group_id: string | null
+          group_order: number
+          group_title: string | null
           id: string
           is_active: boolean | null
           is_featured: boolean | null
@@ -7263,6 +7266,9 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           ends_at?: string | null
+          group_id?: string | null
+          group_order?: number
+          group_title?: string | null
           id?: string
           is_active?: boolean | null
           is_featured?: boolean | null
@@ -7283,6 +7289,9 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           ends_at?: string | null
+          group_id?: string | null
+          group_order?: number
+          group_title?: string | null
           id?: string
           is_active?: boolean | null
           is_featured?: boolean | null
