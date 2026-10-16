@@ -252,6 +252,7 @@ const ManagePollDialog = ({ poll, onClose }: { poll: Poll; onClose: () => void }
   const [bannerPath, setBannerPath] = useState<string | null>(poll.banner_path || null);
   const hasVotes = (poll.total_participants || 0) > 0;
   const editableAnswers = poll.poll_type !== 'rating' && poll.poll_type !== 'yes_no';
+  const [pollType, setPollType] = useState<string>(poll.poll_type);
   const [answers, setAnswers] = useState<EditableOption[]>(() => (poll.options || []).map((o: any) => ({ ...o })));
   const [answersTouched, setAnswersTouched] = useState(false);
   const minVis = hasVotes ? VIS_RANK[poll.results_visibility || 'live'] : 0;
@@ -272,6 +273,7 @@ const ManagePollDialog = ({ poll, onClose }: { poll: Poll; onClose: () => void }
       const newOptions = editableAnswers && answersTouched && !hasVotes ? await finaliseOptions(answers) : null;
       const updates: any = {
         ...(newOptions ? { options: newOptions } : {}),
+        ...(editableAnswers && !hasVotes && pollType !== poll.poll_type ? { poll_type: pollType } : {}),
         banner_path: newBanner,
         title: title.trim(), description: description.trim() || null, is_active: active,
         ends_at: endsAt ? new Date(endsAt).toISOString() : null,
@@ -309,6 +311,20 @@ const ManagePollDialog = ({ poll, onClose }: { poll: Poll; onClose: () => void }
           <div className="space-y-1.5"><Label>Banner</Label><BannerPicker file={bannerFile} onFile={setBannerFile} existingPath={bannerPath} onClearExisting={() => setBannerPath(null)} /></div>
           <div className="space-y-1.5"><Label>Question</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} /></div>
           <div className="space-y-1.5"><Label>Description</Label><Textarea rows={3} value={description} onChange={(e) => setDescription(e.target.value)} /></div>
+          {editableAnswers && (
+            <div className="space-y-1.5">
+              <Label>Poll type</Label>
+              <Select value={pollType} onValueChange={setPollType} disabled={hasVotes}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="single_choice">Single choice — pick one</SelectItem>
+                  <SelectItem value="multiple_choice">Multiple choice — pick several</SelectItem>
+                  <SelectItem value="ranked">Ranked — put choices in order</SelectItem>
+                </SelectContent>
+              </Select>
+              {hasVotes && <p className="text-xs text-muted-foreground">Votes exist, so the poll type can't be changed.</p>}
+            </div>
+          )}
           {editableAnswers && (
             <div className="space-y-1.5">
               <Label>Answers</Label>
