@@ -33,7 +33,7 @@ export default function Auth() {
   } = useAuth();
   useEffect(() => {
     if (user && !user.is_anonymous) {
-      navigate('/dashboard');
+      navigate('/');
     }
   }, [user, navigate]);
   const handleSignUp = async (e: React.FormEvent) => {
@@ -58,7 +58,7 @@ export default function Auth() {
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/dashboard`,
+        emailRedirectTo: `${window.location.origin}/`,
         data: {
           first_name: firstName.trim(),
           last_name: lastName.trim(),
@@ -114,7 +114,7 @@ export default function Auth() {
         title: t('auth.welcomeBack'),
         description: t('auth.signedIn')
       });
-      navigate('/dashboard');
+      navigate('/');
     }
   };
   const handleAnonymousSignIn = async () => {
@@ -134,7 +134,7 @@ export default function Auth() {
         title: t('auth.welcomeGuest'),
         description: t('auth.guestSignedIn')
       });
-      navigate('/dashboard');
+      navigate('/');
     }
   };
 
