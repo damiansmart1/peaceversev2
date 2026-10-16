@@ -8,10 +8,11 @@ import { Poll, useUserPollResponse, useSubmitPollVote, usePollResults, usePollEl
 import { ReadAloudButton, HiddenResultsNotice, OutcomePanel, DownloadResultsButton } from './PollExtras';
 import { useAdminCheck } from '@/hooks/useAdminCheck';
 import { useAuth } from '@/contexts/AuthContext';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   BarChart3, Users, Clock, Share2, MessageSquare, CheckCircle2, Vote, Star,
   ThumbsUp, ThumbsDown, TrendingUp, Lock, Sparkles, Zap, Crown, ShieldCheck, ListOrdered, UserCheck, EyeOff,
-  GripVertical, ChevronUp, ChevronDown,
+  GripVertical, ChevronUp, ChevronDown, PencilLine,
 } from 'lucide-react';
 import { formatDistanceToNow, isPast } from 'date-fns';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
@@ -54,6 +55,8 @@ export const PollCard = ({ poll: rawPoll, showFullResults = false, compact = fal
   const [showComment, setShowComment] = useState(false);
   const [celebrate, setCelebrate] = useState(false);
   const [celebrateMsg, setCelebrateMsg] = useState('');
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingVote, setPendingVote] = useState<{ selectedOptions: number[]; ratingValue: number } | null>(null);
 
   const hasVoted = !!userResponse;
   const isPollEnded = poll.ends_at ? isPast(new Date(poll.ends_at)) : false;
