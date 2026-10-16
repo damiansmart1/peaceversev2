@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,14 +14,20 @@ const emailSchema = z.string().trim().email('Invalid email address').max(255);
 const passwordSchema = z.string().min(8, 'Password must be at least 8 characters').max(100).regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Password must contain at least one uppercase letter, one lowercase letter, and one number');
 const nameSchema = z.string().min(2, 'Name must be at least 2 characters').max(50, 'Name must be less than 50 characters').regex(/^[a-zA-Z\s'-]+$/, 'Name can only contain letters, spaces, hyphens, and apostrophes');
 
+// Only allow returning to an internal page (e.g. the poll someone opened from a shared link).
+const safeRedirect = (value: string | null) =>
+  value && value.startsWith('/') && !value.startsWith('//') && !value.startsWith('/auth') ? value : '/';
+
 export default function Auth() {
   const { t } = useTranslationContext();
+  const [searchParams] = useSearchParams();
+  const returnTo = safeRedirect(searchParams.get('redirect'));
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isSignUp, setIsSignUp] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(searchParams.get('mode') === 'signup');
   const [showPassword, setShowPassword] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const {
@@ -33,9 +39,9 @@ export default function Auth() {
   } = useAuth();
   useEffect(() => {
     if (user && !user.is_anonymous) {
-      navigate('/');
+      navigate(returnTo);
     }
-  }, [user, navigate]);
+  }, [user, navigate, returnTo]);
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -58,7 +64,7 @@ export default function Auth() {
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/`,
+        emailRedirectTo: `${window.location.origin}${returnTo}`,
         data: {
           first_name: firstName.trim(),
           last_name: lastName.trim(),
@@ -114,7 +120,7 @@ export default function Auth() {
         title: t('auth.welcomeBack'),
         description: t('auth.signedIn')
       });
-      navigate('/');
+      navigate(returnTo);
     }
   };
   const handleAnonymousSignIn = async () => {

@@ -24,6 +24,8 @@ import OptionImage from '@/components/polls/OptionImage';
 import SharePopup from '@/components/SharePopup';
 import PollBanner from './PollBanner';
 import { supabase } from '@/lib/supabase-typed';
+import { Link, useLocation } from 'react-router-dom';
+import { useTranslationContext } from '@/components/TranslationProvider';
 
 interface PollCardProps {
   poll: Poll;
@@ -35,6 +37,8 @@ const LETTERS = 'ABCDEFGHIJ';
 
 export const PollCard = ({ poll: rawPoll, showFullResults = false, compact = false }: PollCardProps) => {
   const { user } = useAuth();
+  const { t } = useTranslationContext();
+  const location = useLocation();
   const { data: isAdmin } = useAdminCheck();
   const { data: sealedCounts, isLoading: loadingCounts } = usePollResults(rawPoll);
   const { data: eligible, isLoading: loadingEligible } = usePollEligibility(rawPoll);
@@ -338,9 +342,17 @@ export const PollCard = ({ poll: rawPoll, showFullResults = false, compact = fal
 
         <OutcomePanel poll={poll} canManage={canManage && (!isPollActive || !!poll.outcome_text)} />
 
-        {!user && (
-          <div className="rounded-xl border border-dashed border-primary/40 bg-primary/5 p-3 text-center text-sm text-foreground">
-            Sign in to add your voice to this poll
+        {(!user || user.is_anonymous) && isPollActive && (
+          <div className="space-y-3 rounded-xl border border-dashed border-primary/40 bg-primary/5 p-4 text-center text-sm text-foreground">
+            <p>{t(restricted ? 'participation.inviteVote' : 'participation.guestVote')}</p>
+            <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
+              <Button asChild size="sm" className="rounded-lg">
+                <Link to={`/auth?redirect=${encodeURIComponent(location.pathname + location.search)}`}>{t('participation.signInToVote')}</Link>
+              </Button>
+              <Button asChild size="sm" variant="outline" className="rounded-lg">
+                <Link to={`/auth?mode=signup&redirect=${encodeURIComponent(location.pathname + location.search)}`}>{t('participation.createAccount')}</Link>
+              </Button>
+            </div>
           </div>
         )}
         {user?.is_anonymous && (
