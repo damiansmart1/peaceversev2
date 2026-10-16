@@ -690,7 +690,7 @@ const VoteConfirmDialog = ({ poll, open, onOpenChange, pending, comment, isAnony
 
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!isPending) onOpenChange(o); }}>
-      <DialogContent className="relative max-h-[85dvh] max-w-md overflow-y-auto overflow-x-hidden rounded-2xl border-border/60 bg-card/95 p-0 backdrop-blur-xl">
+      <DialogContent className="z-[90] max-h-[85dvh] w-[calc(100vw-2rem)] max-w-md overflow-y-auto overflow-x-hidden rounded-2xl border-border/60 bg-card/95 p-0 backdrop-blur-xl">
         <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-primary via-accent to-secondary" />
         <DialogHeader className="space-y-1 px-5 pt-5 text-left">
           <DialogTitle className="font-display text-lg font-semibold leading-snug text-foreground">
