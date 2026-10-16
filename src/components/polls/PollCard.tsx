@@ -365,7 +365,7 @@ const PollResults = ({ poll, userResponse, totalVotes }: { poll: Poll; userRespo
                   <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-background/80 text-[11px] font-bold text-foreground">
                     {leading ? <Crown className="h-3.5 w-3.5 text-accent" /> : LETTERS[index]}
                   </span>
-                  <OptionImage path={option.image_path} alt={option.text} className="h-10 w-10" />
+                  <OptionImage path={option.image_path} alt={option.text} className="h-10 w-16" />
                   <span className={cn('break-words', mine && 'font-semibold text-primary')}>
                     <TranslatableText text={option.text} />
                   </span>
@@ -538,7 +538,7 @@ const PollVoting = ({
                 LETTERS[index]
               )}
             </span>
-            <OptionImage path={option.image_path} alt={option.text} className="h-14 w-14 sm:h-16 sm:w-16" />
+            <OptionImage path={option.image_path} alt={option.text} className="h-16 w-24 sm:h-20 sm:w-36" />
             <span className="flex-1 break-words text-sm font-medium text-foreground">
               <TranslatableText text={option.text} />
             </span>

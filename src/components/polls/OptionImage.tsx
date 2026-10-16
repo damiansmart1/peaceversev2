@@ -19,7 +19,7 @@ export default function OptionImage({ path, alt, className }: { path?: string | 
   if (!path) return null;
   return (
     <span className={cn('block shrink-0 overflow-hidden rounded-lg bg-muted', className)}>
-      {url && <img src={url} alt={alt} loading="lazy" className="h-full w-full object-cover" />}
+      {url && <img src={url} alt={alt} loading="lazy" className="h-full w-full object-contain" />}
     </span>
   );
 }
