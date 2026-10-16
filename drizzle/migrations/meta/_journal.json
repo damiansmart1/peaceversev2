@@ -57,6 +57,13 @@
       "when": 1792162283183,
       "tag": "0007_documents_election_ops_guest_readonly",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792162363249,
+      "tag": "0008_tighten_remaining_reads",
+      "breakpoints": true
     }
   ]
 }
