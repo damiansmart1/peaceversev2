@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { X } from 'lucide-react';
 import { usePolls, useFeaturedPolls } from '@/hooks/usePolls';
 import { PollCard } from './PollCard';
 import { CreatePollDialog } from './CreatePollDialog';
@@ -41,6 +42,23 @@ export const PollsSection = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'recent' | 'popular' | 'ending'>('recent');
   
+  const [focused, setFocused] = useState<string | null>(null);
+  useEffect(() => {
+    if (!focused) return;
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setFocused(null);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [focused]);
+  const focusProps = (key: string) => ({
+    onClickCapture: () => { if (focused !== key) setFocused(key); },
+    className: cn('relative transition-all duration-300', focused === key && 'z-50 rounded-2xl ring-2 ring-primary shadow-2xl shadow-primary/30', focused && focused !== key && 'pointer-events-none'),
+  });
+  const closeBtn = (key: string) => focused === key && (
+    <button type="button" aria-label={t('common.close')} onClick={(e) => { e.stopPropagation(); setFocused(null); }}
+      className="absolute -top-3 -right-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg">
+      <X className="h-4 w-4" />
+    </button>
+  );
   const { data: polls, isLoading } = usePolls(selectedCategory);
   const { data: featuredPolls } = useFeaturedPolls();
 
@@ -74,6 +92,12 @@ export const PollsSection = () => {
 
   return (
     <div className="space-y-8">
+      <AnimatePresence>
+        {focused && (
+          <motion.div key="focus-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-40 bg-background/85 backdrop-blur-md" onClick={() => setFocused(null)} />
+        )}
+      </AnimatePresence>
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
@@ -99,10 +123,11 @@ export const PollsSection = () => {
             {groupPolls(featuredPolls).map((item) => (
               <motion.div
                 key={itemKey(item)}
+                {...focusProps('f-'+itemKey(item))}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
               >
-                {renderItem(item, { compact: true })}
+                {closeBtn('f-'+itemKey(item))}{renderItem(item, { compact: true })}
               </motion.div>
             ))}
           </div>
@@ -227,12 +252,13 @@ export const PollsSection = () => {
                 {groupPolls(activePolls).map((item, index) => (
                   <motion.div
                     key={itemKey(item)}
+                    {...focusProps(itemKey(item))}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ delay: index * 0.05 }}
                   >
-                    {renderItem(item, {})}
+                    {closeBtn(itemKey(item))}{renderItem(item, {})}
                   </motion.div>
                 ))}
               </AnimatePresence>
@@ -251,11 +277,12 @@ export const PollsSection = () => {
               {groupPolls(closedPolls).map((item, index) => (
                 <motion.div
                   key={itemKey(item)}
+                  {...focusProps(itemKey(item))}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
                 >
-                  {renderItem(item, { showFullResults: true })}
+                  {closeBtn(itemKey(item))}{renderItem(item, { showFullResults: true })}
                 </motion.div>
               ))}
             </div>
