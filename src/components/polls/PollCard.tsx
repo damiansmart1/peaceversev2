@@ -86,25 +86,38 @@ export const PollCard = ({ poll: rawPoll, showFullResults = false, compact = fal
 
   const handleSubmit = () => {
     if (!canVote) return;
-    const onSuccess = () => {
-      setCelebrateMsg(pickCelebrationMessage(poll.settings?.thank_you_message));
-      setCelebrate(true);
-    };
     if (poll.poll_type === 'rating') {
-      submitVote.mutate(
-        { pollId: poll.id, selectedOptions: [ratingValue - 1], ratingValue, comment: showComment ? comment : undefined, isAnonymous },
-        { onSuccess },
-      );
-    } else {
-      if (selectedOptions.length === 0) {
-        toast.error('Please select at least one option');
-        return;
-      }
-      submitVote.mutate(
-        { pollId: poll.id, selectedOptions, comment: showComment ? comment : undefined, isAnonymous },
-        { onSuccess },
-      );
+      setPendingVote({ selectedOptions: [ratingValue - 1], ratingValue });
+      setConfirmOpen(true);
+      return;
     }
+    if (selectedOptions.length === 0) {
+      toast.error('Please select at least one option');
+      return;
+    }
+    setPendingVote({ selectedOptions, ratingValue });
+    setConfirmOpen(true);
+  };
+
+  const confirmVote = () => {
+    if (!pendingVote) return;
+    submitVote.mutate(
+      {
+        pollId: poll.id,
+        selectedOptions: pendingVote.selectedOptions,
+        ...(poll.poll_type === 'rating' ? { ratingValue: pendingVote.ratingValue } : {}),
+        comment: showComment ? comment : undefined,
+        isAnonymous,
+      },
+      {
+        onSuccess: () => {
+          setConfirmOpen(false);
+          setPendingVote(null);
+          setCelebrateMsg(pickCelebrationMessage(poll.settings?.thank_you_message));
+          setCelebrate(true);
+        },
+      },
+    );
   };
 
   const [shareOpen, setShareOpen] = useState(false);
@@ -141,6 +154,17 @@ export const PollCard = ({ poll: rawPoll, showFullResults = false, compact = fal
 
       <Celebration show={celebrate} message={celebrateMsg} />
       <SharePopup open={shareOpen} onOpenChange={setShareOpen} kind="poll" title={poll.title} path={`/polls/${poll.id}`} />
+      <VoteConfirmDialog
+        poll={poll}
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        pending={pendingVote}
+        comment={showComment ? comment : ''}
+        isAnonymous={isAnonymous}
+        onConfirm={confirmVote}
+        onChange={() => { setConfirmOpen(false); setPendingVote(null); }}
+        isPending={submitVote.isPending}
+      />
 
       <div className={cn('relative space-y-5 p-5 sm:p-6', compact && 'p-4 space-y-4')}>
         <PollBanner path={poll.banner_path} alt={poll.title} />
