@@ -99,7 +99,7 @@ export const useFeaturedPolls = () => {
         .eq('is_featured', true)
         .eq('visibility', 'public')
         .order('created_at', { ascending: false })
-        .limit(3);
+        .limit(6);
 
       if (error) throw error;
       return data as Poll[];
