@@ -25,6 +25,8 @@ import { format, formatDistanceToNow, isPast } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import LearningMaterials from '@/components/participation/LearningMaterials';
+import TranslatableText from '@/components/TranslatableText';
 
 interface PollCardProps {
   poll: Poll;
@@ -40,12 +42,12 @@ export const PollCard = ({ poll, showFullResults = false, compact = false }: Pol
   const [selectedOptions, setSelectedOptions] = useState<number[]>([]);
   const [ratingValue, setRatingValue] = useState<number>(3);
   const [comment, setComment] = useState('');
-  const [isAnonymous, setIsAnonymous] = useState(false);
+  const [isAnonymous, setIsAnonymous] = useState(true);
   const [showComment, setShowComment] = useState(false);
 
   const hasVoted = !!userResponse;
   const isPollEnded = poll.ends_at ? isPast(new Date(poll.ends_at)) : false;
-  const isPollActive = poll.is_active && !isPollEnded;
+  const isPollActive = poll.is_active && !isPollEnded && new Date(poll.starts_at) <= new Date();
   const canVote = user && !hasVoted && isPollActive && !user.is_anonymous;
   const showResults = hasVoted || showFullResults || !isPollActive || poll.settings?.show_results_before_vote;
 
@@ -145,9 +147,9 @@ export const PollCard = ({ poll, showFullResults = false, compact = false }: Pol
                 </Badge>
               )}
             </div>
-            <h3 className="text-lg font-semibold leading-tight">{poll.title}</h3>
+            <h3 className="text-lg font-semibold leading-tight break-words"><TranslatableText text={poll.title} /></h3>
             {poll.description && !compact && (
-              <p className="text-sm text-muted-foreground line-clamp-2">{poll.description}</p>
+              <p className="text-sm text-muted-foreground"><TranslatableText text={poll.description} /></p>
             )}
           </div>
           <div className="flex items-center gap-1">
@@ -155,7 +157,7 @@ export const PollCard = ({ poll, showFullResults = false, compact = false }: Pol
           </div>
         </div>
 
-        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
           <span className="flex items-center gap-1">
             <Users className="w-3 h-3" />
             {poll.total_participants} voters
@@ -177,8 +179,9 @@ export const PollCard = ({ poll, showFullResults = false, compact = false }: Pol
       </CardHeader>
 
       <CardContent className={cn("space-y-4", compact && "p-0")}>
+        <LearningMaterials kind="poll" id={poll.id} title={poll.title} description={poll.description || ''} proposalId={poll.proposal_id} />
         <AnimatePresence mode="wait">
-          {showResults ? (
+          {showResults && !canVote ? (
             <PollResults 
               poll={poll} 
               userResponse={userResponse} 
@@ -197,7 +200,7 @@ export const PollCard = ({ poll, showFullResults = false, compact = false }: Pol
           )}
         </AnimatePresence>
 
-        {canVote && !showResults && (
+        {canVote && (
           <div className="space-y-3 pt-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -500,7 +503,7 @@ const PollVoting = ({
               )}
             </div>
           )}
-          <span className="flex-1">{option.text}</span>
+          <span className="flex-1 min-w-0 break-words"><TranslatableText text={option.text} /></span>
         </motion.div>
       ))}
       {isMultiple && poll.settings?.max_selections && (

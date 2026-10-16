@@ -38,6 +38,11 @@ import { format, addDays } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { toast } from 'sonner';
+import MaterialEditor from '@/components/participation/MaterialEditor';
+import { saveParticipationMaterials } from '@/hooks/useParticipationMaterials';
+import { type MaterialDraft } from '@/lib/participation';
+import { useProposals } from '@/hooks/useProposals';
+import { useTranslationContext } from '@/components/TranslationProvider';
 
 const POLL_TYPES = [
   { value: 'single_choice', label: 'Single Choice', icon: Vote, description: 'Voters select one option' },
@@ -65,6 +70,12 @@ const QUICK_DURATIONS = [
 ];
 
 export const CreatePollDialog = () => {
+  const { t } = useTranslationContext();
+  const { data: proposals = [] } = useProposals();
+  const [proposalId, setProposalId] = useState('none');
+  const [materials, setMaterials] = useState<MaterialDraft[]>([]);
+  const [savedId, setSavedId] = useState<string>();
+  const [saving, setSaving] = useState(false);
   const { user } = useAuth();
   const createPoll = useCreatePoll();
   const [open, setOpen] = useState(false);
@@ -92,6 +103,7 @@ export const CreatePollDialog = () => {
     setVisibility('public');
     setShowResultsBeforeVote(false);
     setMaxSelections(3);
+    setMaterials([]); setProposalId('none'); setSavedId(undefined);
   };
 
   const handleAddOption = () => {
@@ -131,7 +143,7 @@ export const CreatePollDialog = () => {
     setEndDate(addDays(new Date(), days));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // Validation
     if (!title.trim()) {
       toast.error('Please enter a poll title');
@@ -146,7 +158,9 @@ export const CreatePollDialog = () => {
       }
     }
 
-    createPoll.mutate({
+    setSaving(true);
+    try {
+    const poll = savedId ? { id: savedId } : await createPoll.mutateAsync({
       title: title.trim(),
       description: description.trim() || undefined,
       category,
@@ -161,12 +175,14 @@ export const CreatePollDialog = () => {
       },
       endsAt: endDate?.toISOString(),
       visibility,
-    }, {
-      onSuccess: () => {
+      proposalId: proposalId === 'none' ? undefined : proposalId,
+    });
+        setSavedId(poll.id);
+        await saveParticipationMaterials('poll', poll.id, materials);
         resetForm();
         setOpen(false);
-      },
-    });
+    } catch(e) { toast.error(e instanceof Error ? e.message : t('participation.error')); }
+    finally { setSaving(false); }
   };
 
   if (!user || user.is_anonymous) {
@@ -178,7 +194,7 @@ export const CreatePollDialog = () => {
       <DialogTrigger asChild>
         <Button className="gap-2">
           <Plus className="w-4 h-4" />
-          Create Poll
+          {t('participation.createPoll')}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -418,6 +434,11 @@ export const CreatePollDialog = () => {
             </div>
           </div>
 
+          <div className="space-y-2">
+            <Label>{t('participation.proposal')}</Label>
+            <Select value={proposalId} onValueChange={setProposalId} disabled={!!savedId}><SelectTrigger className="min-w-0"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="none">{t('participation.none')}</SelectItem>{proposals.map(p => <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>)}</SelectContent></Select>
+          </div>
+          <MaterialEditor value={materials} onChange={setMaterials} />
           {/* Settings */}
           <div className="space-y-3 p-4 rounded-lg bg-muted/50">
             <Label className="text-base">Advanced Settings</Label>
@@ -442,9 +463,9 @@ export const CreatePollDialog = () => {
           </Button>
           <Button 
             onClick={handleSubmit}
-            disabled={createPoll.isPending}
+            disabled={saving}
           >
-            {createPoll.isPending ? 'Creating...' : 'Create Poll'}
+            {t(saving ? 'participation.pending' : 'participation.createPoll')}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -26,7 +26,7 @@ export const useContentTranslation = () => {
     }
 
     // Create a cache key from the text
-    const cacheKey = text.substring(0, 100); // Use first 100 chars as key
+    const cacheKey = text;
     
     // Check cache first
     if (cacheRef.current[cacheKey]?.[toLang]) {

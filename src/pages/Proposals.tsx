@@ -31,26 +31,26 @@ const Proposals = () => {
           </div>
 
           <Tabs defaultValue="polls" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 mb-6">
+            <TabsList className="flex w-full h-auto flex-wrap justify-start gap-1 mb-6">
               <TabsTrigger value="polls" className="gap-2">
                 <Landmark className="w-4 h-4" />
-                <span className="hidden sm:inline">{t('proposals.tabs.polls')}</span>
+                <span>{t('proposals.tabs.polls')}</span>
               </TabsTrigger>
               <TabsTrigger value="all" className="gap-2">
                 <ScrollText className="w-4 h-4" />
-                <span className="hidden sm:inline">{t('proposals.tabs.all')}</span>
+                <span>{t('proposals.tabs.all')}</span>
               </TabsTrigger>
               <TabsTrigger value="trending" className="gap-2">
                 <TrendingUp className="w-4 h-4" />
-                <span className="hidden sm:inline">{t('proposals.tabs.trending')}</span>
+                <span>{t('proposals.tabs.trending')}</span>
               </TabsTrigger>
               <TabsTrigger value="recent" className="gap-2">
                 <Clock className="w-4 h-4" />
-                <span className="hidden sm:inline">{t('proposals.tabs.recent')}</span>
+                <span>{t('proposals.tabs.recent')}</span>
               </TabsTrigger>
               <TabsTrigger value="archived" className="gap-2">
                 <Archive className="w-4 h-4" />
-                <span className="hidden sm:inline">{t('proposals.tabs.archived')}</span>
+                <span>{t('proposals.tabs.archived')}</span>
               </TabsTrigger>
             </TabsList>
 
