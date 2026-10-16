@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { usePolls, useFeaturedPolls } from '@/hooks/usePolls';
 import { PollCard } from './PollCard';
@@ -93,36 +94,42 @@ export const PollsSection = () => {
 
   return (
     <div className="space-y-8">
-      <AnimatePresence>
-        {focused && (
-          <motion.div key="focus-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 bg-background/85 backdrop-blur-md" onClick={() => setFocused(null)} />
-        )}
-      </AnimatePresence>
-      <AnimatePresence>
-        {focusedItem && (
-          <motion.div key="focus-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-3 sm:p-6"
-            onClick={() => setFocused(null)}>
-            <motion.div
-              initial={{ opacity: 0, scale: 0.94, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.94, y: 20 }}
-              transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-              className="relative w-full max-w-4xl max-h-[92dvh] overflow-y-auto overscroll-contain rounded-2xl bg-card ring-2 ring-primary/60 shadow-2xl shadow-primary/30"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="sticky top-0 z-10 flex justify-end p-3 pointer-events-none">
-                <button type="button" aria-label={t('common.close')} onClick={() => setFocused(null)}
-                  className="pointer-events-auto flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg">
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-              {renderItem(focusedItem.item, { showFullResults: focusedItem.showFullResults })}
+      {createPortal(
+        <AnimatePresence>
+          {focused && (
+            <motion.div key="focus-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="fixed inset-0 z-40 bg-background/85 backdrop-blur-md" onClick={() => setFocused(null)} />
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
+      {createPortal(
+        <AnimatePresence>
+          {focusedItem && (
+            <motion.div key="focus-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-3 sm:p-6"
+              onClick={() => setFocused(null)}>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.94, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.94, y: 20 }}
+                transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+                className="relative w-full max-w-4xl max-h-[92dvh] overflow-y-auto overscroll-contain rounded-2xl bg-card ring-2 ring-primary/60 shadow-2xl shadow-primary/30"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="sticky top-0 z-10 flex justify-end p-3 pointer-events-none">
+                  <button type="button" aria-label={t('common.close')} onClick={() => setFocused(null)}
+                    className="pointer-events-auto flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg">
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+                {renderItem(focusedItem.item, { showFullResults: focusedItem.showFullResults })}
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
