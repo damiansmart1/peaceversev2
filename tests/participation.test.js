@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { materialSchema, validateMaterialFile, validateBallot } from './participation';
+import { materialSchema, validateMaterialFile, validateBallot } from '../src/lib/participation';
 describe('informed and protected participation', () => {
   test('references reject executable URLs', () => {
     expect(materialSchema.safeParse({title:'Reference',context:'',language:'en',url:'javascript:alert(1)'}).success).toBe(false);
