@@ -225,6 +225,7 @@ const ManagePollDialog = ({ poll, onClose }: { poll: Poll; onClose: () => void }
   const [domains, setDomains] = useState((poll.eligible_domains || []).join(', '));
   const [invites, setInvites] = useState('');
   const [outcome, setOutcome] = useState(poll.outcome_text || '');
+  const [thankYou, setThankYou] = useState(poll.settings?.thank_you_message || '');
   const [saving, setSaving] = useState(false);
   const hasVotes = (poll.total_participants || 0) > 0;
   const minVis = hasVotes ? VIS_RANK[poll.results_visibility || 'live'] : 0;
@@ -246,6 +247,7 @@ const ManagePollDialog = ({ poll, onClose }: { poll: Poll; onClose: () => void }
         ends_at: endsAt ? new Date(endsAt).toISOString() : null,
         results_visibility: visibility, eligibility,
         eligible_domains: eligibility === 'domain' ? parseDomains(domains) : [],
+        settings: { ...(poll.settings || {}), thank_you_message: thankYou.trim().slice(0, 140) || undefined },
       };
       if (outcome.trim() && outcome.trim() !== (poll.outcome_text || '')) updates.outcome_text = outcome.trim();
       const { error } = await supabase.from('polls').update(updates).eq('id', poll.id);
@@ -315,6 +317,10 @@ const ManagePollDialog = ({ poll, onClose }: { poll: Poll; onClose: () => void }
                 )}
               </div>
             )}
+          </div>
+          <div className="space-y-1.5">
+            <Label>Message after voting</Label>
+            <Input maxLength={140} placeholder="Leave empty for a random fun message" value={thankYou} onChange={(e) => setThankYou(e.target.value)} />
           </div>
           <div className="space-y-1.5">
             <Label>Published decision</Label>

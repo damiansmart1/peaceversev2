@@ -77,6 +77,7 @@ export const CreatePollDialog = () => {
   const { t } = useTranslationContext();
   const { data: proposals = [] } = useProposals();
   const [proposalId, setProposalId] = useState('none');
+  const [thankYou, setThankYou] = useState('');
   const [groupChoice, setGroupChoice] = useState('none');
   const [eligibility, setEligibility] = useState<'everyone' | 'domain' | 'invite'>('everyone');
   const [domainsRaw, setDomainsRaw] = useState('');
