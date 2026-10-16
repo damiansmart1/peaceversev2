@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase-typed';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { pollInputSchema, validateBallot } from '@/lib/participation';
 
 export interface PollOption {
   text: string;
@@ -12,6 +13,7 @@ export interface PollOption {
 export interface Poll {
   id: string;
   title: string;
+  proposal_id?: string | null;
   description: string | null;
   category: string;
   poll_type: 'single_choice' | 'multiple_choice' | 'rating' | 'yes_no';
@@ -56,7 +58,6 @@ export const usePolls = (category?: string) => {
       let query = supabase
         .from('polls')
         .select('*')
-        .eq('is_active', true)
         .eq('visibility', 'public')
         .order('created_at', { ascending: false });
 
@@ -113,22 +114,9 @@ export const usePollById = (pollId: string) => {
 
       if (error) throw error;
 
-      // Get response counts
-      const { data: responses } = await supabase
-        .from('poll_responses')
-        .select('selected_options')
-        .eq('poll_id', pollId);
-
-      const voteCounts: Record<number, number> = {};
-      (responses || []).forEach(r => {
-        (r.selected_options || []).forEach((idx: number) => {
-          voteCounts[idx] = (voteCounts[idx] || 0) + 1;
-        });
-      });
-
       const options = (data.options as any[]).map((opt, idx) => ({
         text: typeof opt === 'string' ? opt : opt.text,
-        votes: voteCounts[idx] || 0,
+        votes: typeof opt === 'object' ? opt.votes || 0 : 0,
         color: getOptionColor(idx),
       }));
 
@@ -178,7 +166,11 @@ export const useSubmitPollVote = () => {
       comment?: string;
       isAnonymous?: boolean;
     }) => {
-      if (!user) throw new Error('Must be logged in to vote');
+      if (!user || user.is_anonymous) throw new Error('Sign in to participate');
+      const { data: current, error: currentError } = await supabase.from('polls').select('*').eq('id', pollId).single();
+      if (currentError) throw currentError;
+      validateBallot(selectedOptions, current.options.length, current.poll_type === 'multiple_choice', current.settings?.max_selections || current.options.length);
+      if ((comment || '').length > 500) throw new Error('Comment exceeds 500 characters');
 
       const { error } = await supabase.from('poll_responses').insert({
         poll_id: pollId,
@@ -191,44 +183,20 @@ export const useSubmitPollVote = () => {
 
       if (error) throw error;
 
-      // Update vote counts in poll options
-      const { data: poll } = await supabase
-        .from('polls')
-        .select('options')
-        .eq('id', pollId)
-        .single();
-
-      if (poll) {
-        const updatedOptions = (poll.options as any[]).map((opt, idx) => ({
-          ...opt,
-          votes: (opt.votes || 0) + (selectedOptions.includes(idx) ? 1 : 0),
-        }));
-
-        await supabase
-          .from('polls')
-          .update({ options: updatedOptions })
-          .eq('id', pollId);
-      }
-
-      // Track analytics
-      await supabase.from('poll_analytics').insert({
-        poll_id: pollId,
-        event_type: 'vote',
-        user_id: isAnonymous ? null : user.id,
-        metadata: { options_selected: selectedOptions.length },
-      });
+      // Counts are updated atomically by the database, never by voters.
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['poll', variables.pollId] });
       queryClient.invalidateQueries({ queryKey: ['poll-user-response', variables.pollId] });
       queryClient.invalidateQueries({ queryKey: ['polls'] });
+      queryClient.invalidateQueries({ queryKey: ['featured-polls'] });
       toast.success('Your vote has been recorded!');
     },
     onError: (error: Error) => {
       if (error.message.includes('duplicate')) {
         toast.error('You have already voted in this poll');
       } else {
-        toast.error('Failed to submit vote');
+        toast.error(error.message);
       }
     },
   });
@@ -248,6 +216,7 @@ export const useCreatePoll = () => {
       settings,
       endsAt,
       visibility,
+      proposalId,
     }: {
       title: string;
       description?: string;
@@ -257,8 +226,10 @@ export const useCreatePoll = () => {
       settings?: Poll['settings'];
       endsAt?: string;
       visibility?: string;
+      proposalId?: string;
     }) => {
       if (!user) throw new Error('Must be logged in to create a poll');
+      pollInputSchema.parse({ title, description, options, pollType, visibility });
 
       const { data, error } = await supabase
         .from('polls')
@@ -272,6 +243,7 @@ export const useCreatePoll = () => {
           created_by: user.id,
           ends_at: endsAt || null,
           visibility: visibility || 'public',
+          proposal_id: proposalId || null,
         })
         .select()
         .single();
@@ -283,8 +255,8 @@ export const useCreatePoll = () => {
       queryClient.invalidateQueries({ queryKey: ['polls'] });
       toast.success('Poll created successfully!');
     },
-    onError: () => {
-      toast.error('Failed to create poll');
+    onError: (error: Error) => {
+      toast.error(error.message);
     },
   });
 };

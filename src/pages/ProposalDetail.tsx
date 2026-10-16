@@ -17,6 +17,8 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Users, Globe2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatDistanceToNow } from 'date-fns';
+import LearningMaterials from '@/components/participation/LearningMaterials';
+import TranslatableText from '@/components/TranslatableText';
 
 const ProposalDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -69,7 +71,7 @@ const ProposalDetail = () => {
 
           <div className="space-y-4">
             <div className="flex items-start justify-between gap-4">
-              <h1 className="text-4xl font-bold text-foreground">{proposal.title}</h1>
+              <h1 className="text-2xl sm:text-4xl font-bold text-foreground min-w-0 break-words"><TranslatableText text={proposal.title} /></h1>
               <Badge variant="secondary">{proposal.status}</Badge>
             </div>
 
@@ -99,14 +101,17 @@ const ProposalDetail = () => {
 
           <div className="p-6 bg-card border border-border rounded-lg">
             <h2 className="text-xl font-semibold mb-4">Description</h2>
-            <p className="text-foreground leading-relaxed">{proposal.description}</p>
+            <p className="text-foreground leading-relaxed whitespace-pre-wrap"><TranslatableText text={proposal.description} /></p>
           </div>
 
+          <LearningMaterials kind="proposal" id={proposal.id} title={proposal.title} description={proposal.description} />
           <ProposalVoting
             proposalId={proposal.id}
             supportCount={proposal.votes_for}
             opposeCount={proposal.votes_against}
             abstainCount={proposal.votes_abstain || 0}
+            status={proposal.status}
+            endsAt={proposal.ends_at}
           />
 
           {(proposal as any).voting_method && (proposal as any).voting_method !== 'simple' && (
