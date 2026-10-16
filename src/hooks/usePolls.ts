@@ -252,6 +252,7 @@ export const useCreatePoll = () => {
       eligibleDomains?: string[];
       inviteEmails?: string[];
       resultsVisibility?: 'live' | 'after_vote' | 'after_close';
+      bannerPath?: string | null;
     }) => {
       if (!user) throw new Error('Must be logged in to create a poll');
       pollInputSchema.parse({ title, description, options, pollType, visibility });
@@ -275,6 +276,7 @@ export const useCreatePoll = () => {
           eligibility: eligibility || 'everyone',
           eligible_domains: eligibleDomains || [],
           results_visibility: resultsVisibility || 'live',
+          banner_path: bannerPath || null,
         })
         .select()
         .single();
