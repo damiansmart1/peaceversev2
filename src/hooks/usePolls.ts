@@ -8,6 +8,7 @@ export interface PollOption {
   text: string;
   votes: number;
   color?: string;
+  image_path?: string | null;
 }
 
 export interface Poll {
@@ -73,6 +74,7 @@ export const usePolls = (category?: string) => {
         const options = (poll.options as any[]).map((opt, idx) => ({
           text: typeof opt === 'string' ? opt : opt.text,
           votes: typeof opt === 'object' ? opt.votes || 0 : 0,
+          image_path: typeof opt === 'object' ? opt.image_path || null : null,
           color: getOptionColor(idx),
         }));
         return { ...poll, options };
@@ -117,6 +119,7 @@ export const usePollById = (pollId: string) => {
       const options = (data.options as any[]).map((opt, idx) => ({
         text: typeof opt === 'string' ? opt : opt.text,
         votes: typeof opt === 'object' ? opt.votes || 0 : 0,
+          image_path: typeof opt === 'object' ? opt.image_path || null : null,
         color: getOptionColor(idx),
       }));
 
@@ -213,6 +216,7 @@ export const useCreatePoll = () => {
       category,
       pollType,
       options,
+      optionImages,
       settings,
       endsAt,
       visibility,
@@ -223,6 +227,7 @@ export const useCreatePoll = () => {
       category: string;
       pollType: Poll['poll_type'];
       options: string[];
+      optionImages?: (string | null | undefined)[];
       settings?: Poll['settings'];
       endsAt?: string;
       visibility?: string;
@@ -238,7 +243,7 @@ export const useCreatePoll = () => {
           description: description || null,
           category,
           poll_type: pollType,
-          options: options.map(text => ({ text, votes: 0 })),
+          options: options.map((text, i) => optionImages?.[i] ? { text, votes: 0, image_path: optionImages[i] } : { text, votes: 0 }),
           settings: settings || {},
           created_by: user.id,
           ends_at: endsAt || null,
