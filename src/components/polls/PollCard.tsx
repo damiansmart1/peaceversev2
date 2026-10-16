@@ -21,6 +21,7 @@ import LearningMaterials from '@/components/participation/LearningMaterials';
 import TranslatableText from '@/components/TranslatableText';
 import OptionImage from '@/components/polls/OptionImage';
 import SharePopup from '@/components/SharePopup';
+import PollBanner from './PollBanner';
 
 interface PollCardProps {
   poll: Poll;
@@ -139,6 +140,7 @@ export const PollCard = ({ poll: rawPoll, showFullResults = false, compact = fal
       <SharePopup open={shareOpen} onOpenChange={setShareOpen} kind="poll" title={poll.title} path={`/polls/${poll.id}`} />
 
       <div className={cn('relative space-y-5 p-5 sm:p-6', compact && 'p-4 space-y-4')}>
+        <PollBanner path={poll.banner_path} alt={poll.title} />
         {/* Header */}
         <header className="space-y-3">
           <div className="flex flex-wrap items-center gap-2">

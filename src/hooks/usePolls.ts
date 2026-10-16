@@ -18,6 +18,7 @@ export interface Poll {
   group_id?: string | null;
   group_title?: string | null;
   group_order?: number;
+  banner_path?: string | null;
   description: string | null;
   category: string;
   poll_type: 'single_choice' | 'multiple_choice' | 'rating' | 'yes_no' | 'ranked';
