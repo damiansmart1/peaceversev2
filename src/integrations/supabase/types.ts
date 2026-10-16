@@ -6570,6 +6570,63 @@ export type Database = {
           },
         ]
       }
+      participation_materials: {
+        Row: {
+          context: string
+          created_at: string
+          created_by: string
+          id: string
+          kind: string
+          language: string
+          poll_id: string | null
+          proposal_id: string | null
+          storage_path: string | null
+          title: string
+          url: string | null
+        }
+        Insert: {
+          context?: string
+          created_at?: string
+          created_by: string
+          id?: string
+          kind: string
+          language?: string
+          poll_id?: string | null
+          proposal_id?: string | null
+          storage_path?: string | null
+          title: string
+          url?: string | null
+        }
+        Update: {
+          context?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          kind?: string
+          language?: string
+          poll_id?: string | null
+          proposal_id?: string | null
+          storage_path?: string | null
+          title?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "participation_materials_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "polls"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "participation_materials_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partner_interventions: {
         Row: {
           beneficiaries_reached: number | null
@@ -7191,6 +7248,7 @@ export type Database = {
           is_featured: boolean | null
           options: Json
           poll_type: string
+          proposal_id: string | null
           settings: Json | null
           starts_at: string | null
           title: string
@@ -7210,6 +7268,7 @@ export type Database = {
           is_featured?: boolean | null
           options?: Json
           poll_type?: string
+          proposal_id?: string | null
           settings?: Json | null
           starts_at?: string | null
           title: string
@@ -7229,6 +7288,7 @@ export type Database = {
           is_featured?: boolean | null
           options?: Json
           poll_type?: string
+          proposal_id?: string | null
           settings?: Json | null
           starts_at?: string | null
           title?: string
@@ -7237,7 +7297,15 @@ export type Database = {
           updated_at?: string | null
           visibility?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "polls_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       predictive_hotspots: {
         Row: {
