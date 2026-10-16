@@ -51,7 +51,9 @@ const HubMenu = ({ hub, isActive }: HubMenuProps) => {
         <div className="h-px bg-border my-1" />
         {links.length === 0 ? (
           <p className="px-2 py-3 text-xs text-muted-foreground">
-            Sign in to access {hub.label} tools.
+            {rolesData && rolesData.length > 0
+              ? `${hub.label} tools aren't enabled for your account yet. Ask an admin to turn them on.`
+              : `Sign in to access ${hub.label} tools.`}
           </p>
         ) : (
           links.map((link) => (
