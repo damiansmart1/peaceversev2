@@ -3,7 +3,7 @@ import { User, Session } from '@supabase/supabase-js';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useTranslationContext } from '@/components/TranslationProvider';
-import { clockSkewSeconds, isRefreshStorm } from '@/lib/authHealth';
+import { clockSkewSeconds, isRefreshStorm, localExpiresAt } from '@/lib/authHealth';
 
 interface AuthContextType {
   user: User | null;
@@ -37,6 +37,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const hadUser = useRef(false);
 
   useEffect(() => {
+    // A wrong device clock makes every fresh sign-in look expired, so the app renews it in a loop until
+    // the account is blocked and the person appears signed out. Re-express the expiry in the device's clock.
+    const correctStoredExpiry = (session: Session) => {
+      const fixed = localExpiresAt(session.access_token, Date.now());
+      if (fixed === null) return;
+      session.expires_at = fixed;
+      const auth = supabase.auth as unknown as { storage?: Storage; storageKey?: string };
+      if (!auth.storage || !auth.storageKey) return;
+      try {
+        const write = (raw: string | null) => {
+          if (!raw) return;
+          const stored = JSON.parse(raw);
+          if (stored?.access_token !== session.access_token) return;
+          stored.expires_at = fixed;
+          return auth.storage!.setItem(auth.storageKey!, JSON.stringify(stored));
+        };
+        const raw = auth.storage.getItem(auth.storageKey) as unknown;
+        return raw instanceof Promise ? raw.then(write) : write(raw as string | null);
+      } catch {
+        // Storage can be blocked; the clock warning still tells the person what to do.
+      }
+    };
+
     const warnClock = () => {
       if (warnedClock.current) return;
       warnedClock.current = true;
@@ -57,6 +80,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.access_token) {
           const skew = clockSkewSeconds(session.access_token, Date.now());
           if (skew !== null && Math.abs(skew) > 300) warnClock();
+          if (skew !== null && Math.abs(skew) > 60) correctStoredExpiry(session);
         }
         if (event === 'TOKEN_REFRESHED') {
           const now = Date.now();

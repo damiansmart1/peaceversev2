@@ -19,7 +19,7 @@ describe('sign-in health checks', () => {
 
 describe('localExpiresAt', () => {
   const tok = (iat, exp) => `h.${btoa(JSON.stringify({ iat, exp }))}.s`;
-  it('gives a device two days ahead a full 24h sign-in on its own clock', () => {
+  test('gives a device two days ahead a full 24h sign-in on its own clock', () => {
     const now = (1000 + 2 * 86400) * 1000;
     expect(localExpiresAt(tok(1000, 1000 + 86400), now)).toBe(1000 + 2 * 86400 + 86400);
   });
