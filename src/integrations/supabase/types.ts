@@ -10254,10 +10254,9 @@ export type Database = {
         Returns: undefined
       }
       is_election_admin: { Args: { _user_id: string }; Returns: boolean }
-      is_election_observer: {
-        Args: { _election_id: string; _user_id: string }
-        Returns: boolean
-      }
+      is_election_observer:
+        | { Args: { _uid: string }; Returns: boolean }
+        | { Args: { _election_id: string; _user_id: string }; Returns: boolean }
       is_election_stakeholder: { Args: { _user_id: string }; Returns: boolean }
       is_mediation_facilitator: {
         Args: { _case_id: string; _user_id: string }
@@ -10276,6 +10275,10 @@ export type Database = {
         Returns: boolean
       }
       longtransactionsenabled: { Args: never; Returns: boolean }
+      owns_observer: {
+        Args: { _observer_id: string; _uid: string }
+        Returns: boolean
+      }
       poll_results: { Args: { _poll_id: string }; Returns: number[] }
       poll_voter_eligible: { Args: { _poll_id: string }; Returns: boolean }
       populate_geometry_columns:
