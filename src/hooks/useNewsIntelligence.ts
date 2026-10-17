@@ -242,7 +242,7 @@ export const useReviewReport = () => {
               estimated_people_affected: report.estimated_people_affected,
               is_anonymous: false,
               source: 'news_intelligence',
-              credibility_score: report.credibility_score,
+              ai_credibility_score: report.credibility_score,
               ai_sentiment: 'auto_generated',
               ai_key_entities: report.actors_involved,
               tags: ['ai-generated', 'news-intelligence', ...(report.tags || [])],
