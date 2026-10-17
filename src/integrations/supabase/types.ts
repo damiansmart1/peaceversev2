@@ -1131,6 +1131,7 @@ export type Database = {
       }
       citizen_reports: {
         Row: {
+          ai_conflict_forms: string[]
           ai_key_entities: Json | null
           ai_sentiment: string | null
           ai_threat_level: string | null
@@ -1146,6 +1147,7 @@ export type Database = {
           community_impact_level: string | null
           community_response: string | null
           confidential_notes: string | null
+          conflict_forms: string[]
           created_at: string | null
           credibility_score: number | null
           description: string
@@ -1216,6 +1218,7 @@ export type Database = {
           witness_count: number | null
         }
         Insert: {
+          ai_conflict_forms?: string[]
           ai_key_entities?: Json | null
           ai_sentiment?: string | null
           ai_threat_level?: string | null
@@ -1231,6 +1234,7 @@ export type Database = {
           community_impact_level?: string | null
           community_response?: string | null
           confidential_notes?: string | null
+          conflict_forms?: string[]
           created_at?: string | null
           credibility_score?: number | null
           description: string
@@ -1301,6 +1305,7 @@ export type Database = {
           witness_count?: number | null
         }
         Update: {
+          ai_conflict_forms?: string[]
           ai_key_entities?: Json | null
           ai_sentiment?: string | null
           ai_threat_level?: string | null
@@ -1316,6 +1321,7 @@ export type Database = {
           community_impact_level?: string | null
           community_response?: string | null
           confidential_notes?: string | null
+          conflict_forms?: string[]
           created_at?: string | null
           credibility_score?: number | null
           description?: string
@@ -4001,10 +4007,12 @@ export type Database = {
           created_at: string | null
           escalation_probability: number | null
           escalation_timeline: string | null
+          human_review_required: boolean
           id: string
           impact_score: number | null
           incident_id: string
           overall_risk_score: number
+          pattern_signal: string | null
           predicted_impact_area: string[] | null
           recommended_actions: Json | null
           risk_indicators: Json | null
@@ -4022,10 +4030,12 @@ export type Database = {
           created_at?: string | null
           escalation_probability?: number | null
           escalation_timeline?: string | null
+          human_review_required?: boolean
           id?: string
           impact_score?: number | null
           incident_id: string
           overall_risk_score: number
+          pattern_signal?: string | null
           predicted_impact_area?: string[] | null
           recommended_actions?: Json | null
           risk_indicators?: Json | null
@@ -4043,10 +4053,12 @@ export type Database = {
           created_at?: string | null
           escalation_probability?: number | null
           escalation_timeline?: string | null
+          human_review_required?: boolean
           id?: string
           impact_score?: number | null
           incident_id?: string
           overall_risk_score?: number
+          pattern_signal?: string | null
           predicted_impact_area?: string[] | null
           recommended_actions?: Json | null
           risk_indicators?: Json | null
