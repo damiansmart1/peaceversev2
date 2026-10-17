@@ -1,0 +1,1 @@
+ALTER POLICY "About portraits readable" ON storage.objects USING (bucket_id = 'about-portraits' AND (public.has_role(auth.uid(), 'admin') OR EXISTS (SELECT 1 FROM public.about_people p WHERE p.image_path = storage.objects.name AND p.is_published)));

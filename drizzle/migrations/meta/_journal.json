@@ -71,6 +71,13 @@
       "when": 1792270798276,
       "tag": "0009_about_people_profiles",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1792271095987,
+      "tag": "0010_about_portrait_visibility_fix",
+      "breakpoints": true
     }
   ]
 }
