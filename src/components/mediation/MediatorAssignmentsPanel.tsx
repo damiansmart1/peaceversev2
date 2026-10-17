@@ -11,10 +11,10 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Handshake, ShieldAlert, TrendingUp, ArrowUpRight } from 'lucide-react';
 import {
   useApprovedMediators, useCaseAssignments, useProposeAssignment, useRespondToAssignment,
-  useUpdateMediationCaseConsent, scoreMediatorFit, MEDIATOR_CATEGORY_LABELS,
+  scoreMediatorFit, MEDIATOR_CATEGORY_LABELS,
   type MediatorAssignment, type MediatorAssignmentStatus,
 } from '@/hooks/useMediators';
-import type { MediationCase } from '@/hooks/useMediation';
+import { useUpdateMediationCase, type MediationCase } from '@/hooks/useMediation';
 
 const STATUS_TONE: Record<string, string> = {
   proposed: 'pill', accepted: 'pill-primary', declined: 'pill-destructive',
@@ -32,7 +32,7 @@ const MediatorAssignmentsPanel = ({ mediationCase, canEdit, isAssignedMediator }
   const { data: approved = [] } = useApprovedMediators();
   const propose = useProposeAssignment();
   const respond = useRespondToAssignment();
-  const updateConsent = useUpdateMediationCaseConsent();
+  const updateConsent = useUpdateMediationCase();
 
   const [mediatorId, setMediatorId] = useState('');
   const [suitability, setSuitability] = useState('');
