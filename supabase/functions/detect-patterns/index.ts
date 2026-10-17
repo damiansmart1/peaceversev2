@@ -152,7 +152,7 @@ serve(async (req) => {
           regions_affected: pattern.regions_affected,
           start_date: pattern.start_date ? new Date(pattern.start_date).toISOString() : null,
           recurrence_frequency: pattern.recurrence_frequency, severity_trend: pattern.severity_trend,
-          confidence_score: pattern.confidence_score, ai_analysis: pattern.ai_analysis,
+          confidence_score: pattern.confidence_score, ai_analysis: { ...pattern.ai_analysis, pattern_classification: pattern.pattern_classification || 'recurring' },
           recommendations: pattern.recommendations, is_active: true,
           last_occurrence: new Date().toISOString()
         }).select().single();
