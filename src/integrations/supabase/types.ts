@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      about_people: {
+        Row: {
+          bio: string
+          category: string
+          created_at: string
+          display_order: number
+          fun_intro: string
+          id: string
+          image_path: string | null
+          is_published: boolean
+          linkedin_url: string
+          name: string
+          organization: string
+          role_title: string
+          website_url: string
+        }
+        Insert: {
+          bio?: string
+          category?: string
+          created_at?: string
+          display_order?: number
+          fun_intro?: string
+          id?: string
+          image_path?: string | null
+          is_published?: boolean
+          linkedin_url?: string
+          name: string
+          organization?: string
+          role_title?: string
+          website_url?: string
+        }
+        Update: {
+          bio?: string
+          category?: string
+          created_at?: string
+          display_order?: number
+          fun_intro?: string
+          id?: string
+          image_path?: string | null
+          is_published?: boolean
+          linkedin_url?: string
+          name?: string
+          organization?: string
+          role_title?: string
+          website_url?: string
+        }
+        Relationships: []
+      }
       achievements: {
         Row: {
           badge_icon: string
