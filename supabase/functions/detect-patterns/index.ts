@@ -72,6 +72,7 @@ serve(async (req) => {
 
     // Pre-process data
     const categoryGroups: Record<string, any[]> = {};
+    const conflictFormGroups: Record<string, any[]> = {};
     const locationGroups: Record<string, any[]> = {};
     const perpetratorGroups: Record<string, any[]> = {};
     const temporalData: Record<string, number> = {};
@@ -79,6 +80,10 @@ serve(async (req) => {
     incidents.forEach(inc => {
       if (!categoryGroups[inc.category]) categoryGroups[inc.category] = [];
       categoryGroups[inc.category].push(inc);
+      (inc.conflict_forms || []).forEach((form: string) => {
+        if (!conflictFormGroups[form]) conflictFormGroups[form] = [];
+        conflictFormGroups[form].push(inc);
+      });
       const locationKey = `${inc.location_country}|${inc.location_city || 'unknown'}`;
       if (!locationGroups[locationKey]) locationGroups[locationKey] = [];
       locationGroups[locationKey].push(inc);
@@ -86,13 +91,26 @@ serve(async (req) => {
         if (!perpetratorGroups[inc.perpetrator_type]) perpetratorGroups[inc.perpetrator_type] = [];
         perpetratorGroups[inc.perpetrator_type].push(inc);
       }
-      const weekKey = new Date(inc.created_at).toISOString().substring(0, 10);
-      temporalData[weekKey] = (temporalData[weekKey] || 0) + 1;
+      const dayKey = new Date(inc.created_at).toISOString().substring(0, 10);
+      temporalData[dayKey] = (temporalData[dayKey] || 0) + 1;
     });
+
+    // Detect sudden increases: last 7 days vs the prior 7-day average across the window
+    const dayKeys = Object.keys(temporalData).sort();
+    const last7 = dayKeys.slice(-7).reduce((sum, k) => sum + temporalData[k], 0);
+    const priorDays = dayKeys.slice(0, Math.max(0, dayKeys.length - 7));
+    const priorAvg = priorDays.length
+      ? priorDays.reduce((sum, k) => sum + temporalData[k], 0) / Math.min(7, priorDays.length)
+      : 0;
+    const suddenIncrease = priorAvg > 0 ? Math.round(((last7 - priorAvg * 7) / (priorAvg * 7)) * 100) : 0;
 
     const patternSummary = {
       totalIncidents: incidents.length, timeframeDays,
       categoryDistribution: Object.fromEntries(Object.entries(categoryGroups).map(([k, v]) => [k, v.length])),
+      conflictFormDistribution: Object.fromEntries(Object.entries(conflictFormGroups).map(([k, v]) => [k, v.length])),
+      recent7DayCount: last7,
+      prior7DayAverage: Math.round(priorAvg * 7 * 10) / 10,
+      suddenIncreasePercent: suddenIncrease,
       topLocations: Object.entries(locationGroups).sort((a, b) => b[1].length - a[1].length).slice(0, 10).map(([loc, incs]) => ({ location: loc, count: incs.length })),
       perpetratorTypes: Object.fromEntries(Object.entries(perpetratorGroups).map(([k, v]) => [k, v.length])),
       severityBreakdown: {
@@ -111,8 +129,8 @@ serve(async (req) => {
       body: JSON.stringify({
         model: 'google/gemini-2.5-flash',
         messages: [
-          { role: 'system', content: 'You are an expert conflict analyst for early warning systems. Identify geographic, temporal, actor, escalation, and cross-border patterns.' },
-          { role: 'user', content: `Analyze ${patternSummary.totalIncidents} incidents over ${timeframeDays} days. Categories: ${Object.entries(patternSummary.categoryDistribution).map(([c, n]) => `${c}:${n}`).join(', ')}. Top locations: ${patternSummary.topLocations.map(l => `${l.location}:${l.count}`).join(', ')}. Severity: critical:${patternSummary.severityBreakdown.critical}, high:${patternSummary.severityBreakdown.high}. Provide JSON: { "patterns": [{ "pattern_name": "", "pattern_type": "", "description": "", "confidence_score": 0-100, "severity_trend": "", "countries_affected": [], "regions_affected": [], "incident_count": 0, "start_date": "", "recurrence_frequency": "", "risk_implications": [], "ai_analysis": { "key_indicators": [], "contributing_factors": [], "prediction": "" }, "recommendations": [{ "action": "", "priority": "", "target_stakeholder": "" }] }], "overall_assessment": { "trend_direction": "", "highest_concern": "", "priority_areas": [], "summary": "" } }` }
+          { role: 'system', content: 'You are an expert conflict analyst for early warning systems covering both traditional and non-traditional conflict forms (physical violence, psychological intimidation, emotional distress, political polarization, identity-based tension, online harms and misinformation, discrimination and exclusion, deteriorating trust in institutions). Identify geographic, temporal, actor, escalation, and cross-border patterns. For each pattern set pattern_classification to "isolated" (single dispute unlikely to spread), "recurring" (similar reports repeating across time or locations), or "escalating" (rising frequency, severity or spread). GUARDRAILS: every output is a provisional indicator for human review; never treat sentiment or unverified allegations as proof of future violence; avoid political profiling and collective blame — describe dynamics, not identity groups.' },
+          { role: 'user', content: `Analyze ${patternSummary.totalIncidents} incidents over ${timeframeDays} days. Categories: ${Object.entries(patternSummary.categoryDistribution).map(([c, n]) => `${c}:${n}`).join(', ')}. Reporter-described conflict forms: ${Object.entries(patternSummary.conflictFormDistribution).map(([c, n]) => `${c}:${n}`).join(', ') || 'none recorded'}. Recent 7-day reports: ${patternSummary.recent7DayCount} vs prior 7-day average ${patternSummary.prior7DayAverage} (change ${patternSummary.suddenIncreasePercent}%). Top locations: ${patternSummary.topLocations.map(l => `${l.location}:${l.count}`).join(', ')}. Severity: critical:${patternSummary.severityBreakdown.critical}, high:${patternSummary.severityBreakdown.high}. Provide JSON: { "patterns": [{ "pattern_name": "", "pattern_type": "", "description": "", "pattern_classification": "isolated|recurring|escalating", "confidence_score": 0-100, "severity_trend": "", "countries_affected": [], "regions_affected": [], "incident_count": 0, "start_date": "", "recurrence_frequency": "", "risk_implications": [], "ai_analysis": { "key_indicators": [], "contributing_factors": [], "prediction": "" }, "recommendations": [{ "action": "", "priority": "", "target_stakeholder": "" }] }], "overall_assessment": { "trend_direction": "", "highest_concern": "", "priority_areas": [], "sudden_increase_detected": true|false, "summary": "" } }` }
         ],
         response_format: { type: 'json_object' }
       }),
