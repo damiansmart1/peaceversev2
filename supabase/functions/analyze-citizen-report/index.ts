@@ -195,13 +195,16 @@ Provide analysis in this exact JSON structure:
     if (analysisError) throw analysisError;
 
     // Update report (AI outputs are provisional indicators pending human review)
-    await supabase.from('citizen_reports').update({
+    const { error: reportUpdateError } = await supabase.from('citizen_reports').update({
       ai_sentiment: analysis.sentiment,
       ai_threat_level: analysis.threat_level,
       credibility_score: analysis.credibility_score,
       ai_key_entities: analysis.key_entities,
       ai_conflict_forms: analysis.conflict_forms_detected || [],
     }).eq('id', reportId);
+    if (reportUpdateError) {
+      console.error('Report update failed:', reportUpdateError);
+    }
 
     // Escalation check
     const shouldEscalate = analysis.threat_level === 'critical' || analysis.threat_level === 'high' || analysis.requires_immediate_attention;
