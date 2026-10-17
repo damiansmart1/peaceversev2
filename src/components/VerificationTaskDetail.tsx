@@ -262,7 +262,7 @@ export const VerificationTaskDetail = ({ task, onClose }: VerificationTaskDetail
                 verifiedReports: 12,
                 totalReports: 15,
                 rejectedReports: 1,
-                accuracyScore: report?.ai_credibility_score ?? report?.credibility_score || 75,
+                accuracyScore: (report?.ai_credibility_score ?? report?.credibility_score) || 75,
                 trustLevel: report?.is_anonymous ? 'anonymous' : 'trusted',
                 badges: ['First Report', 'Accurate Reporter'],
                 recentActivity: [],
