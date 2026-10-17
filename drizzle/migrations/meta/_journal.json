@@ -85,6 +85,13 @@
       "when": 1792274717751,
       "tag": "0011_multi_form_conflict_framework",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1792274738812,
+      "tag": "0012_lov_database_migration",
+      "breakpoints": true
     }
   ]
 }
