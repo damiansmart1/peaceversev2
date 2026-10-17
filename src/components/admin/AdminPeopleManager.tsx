@@ -27,7 +27,8 @@ export default function AdminPeopleManager() {
   try {
    let payload=personSchema.parse(form);
    if(file){ const ext=validatePortrait(file);uploaded=`${crypto.randomUUID()}.${ext}`;const {error}=await supabase.storage.from('about-portraits').upload(uploaded,file,{contentType:file.type});if(error)throw error;payload={...payload,image_path:uploaded}; }
-   const result=editing ? await supabase.from('about_people').update(payload).eq('id',editing.id).select().single() : await supabase.from('about_people').insert(payload).select().single();
+   const values = {...payload, name: form.name.trim()};
+   const result=editing ? await supabase.from('about_people').update(values).eq('id',editing.id).select().single() : await supabase.from('about_people').insert(values).select().single();
    if(result.error)throw result.error;
    if(editing?.image_path && editing.image_path!==payload.image_path) await supabase.storage.from('about-portraits').remove([editing.image_path]);
    await client.invalidateQueries({queryKey:['about-people']});toast.success(t('about.saved'));setOpen(false);
