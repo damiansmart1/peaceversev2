@@ -30,7 +30,7 @@
 - [x] Show severity, confidence, geographic scope and trend separately with human-review labels.
 
 # Volunteer mediator network
-- [ ] Seed clearly labeled fictional mediation cases, mediator profiles and case activity; verify live views.
+- [x] Seed clearly labeled fictional mediation cases, mediator profiles and case activity; verify live views.
 - [x] Mediator profiles (professional / trained volunteer / community facilitator), specializations, languages, locations, credentials, availability.
 - [x] Code of conduct + safeguarding acceptance at onboarding; admin approval and credential verification.
 - [x] Mediator matching and case assignments with accept/decline, conflict-of-interest declaration, escalation and referral.
