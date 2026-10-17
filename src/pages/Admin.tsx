@@ -7,6 +7,7 @@ import { AdminContentManager } from '@/components/admin/AdminContentManager';
 import { AdminProposalsManager } from '@/components/admin/AdminProposalsManager';
 import { AdminPollsManager } from '@/components/admin/AdminPollsManager';
 import AdminPeopleManager from '@/components/admin/AdminPeopleManager';
+import AdminMediatorsManager from '@/components/admin/AdminMediatorsManager';
 import { useTranslationContext } from '@/components/TranslationProvider';
 import { AdminSafeSpacesManager } from '@/components/admin/AdminSafeSpacesManager';
 import { AdminUsersManager } from '@/components/admin/AdminUsersManager';
@@ -76,6 +77,7 @@ const Admin = () => {
       case 'proposals': return <AdminProposalsManager />;
       case 'polls': return <AdminPollsManager />;
       case 'people': return <AdminPeopleManager />;
+      case 'mediators': return <AdminMediatorsManager />;
       case 'incidents': return <AdminIncidentsManager />;
       case 'incident-timeline': return <AdminIncidentTimelineTracker />;
       case 'safe-spaces': return <AdminSafeSpacesManager />;

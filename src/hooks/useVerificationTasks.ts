@@ -25,7 +25,7 @@ export const useVerificationTasks = () => {
           citizen_reports:report_id(
             id, title, description, category, sub_category, severity_level, urgency_level,
             location_name, location_city, location_country, location_latitude, location_longitude,
-            ai_threat_level, ai_sentiment, credibility_score, is_anonymous, witness_count,
+            ai_threat_level, ai_sentiment, ai_credibility_score, credibility_score, is_anonymous, witness_count,
             media_urls, tags, created_at, verification_status, status
           )
         `)
@@ -121,7 +121,7 @@ export const useMyTasks = () => {
           citizen_reports:report_id(
             id, title, description, category, sub_category, severity_level, urgency_level,
             location_name, location_city, location_country, location_latitude, location_longitude,
-            ai_threat_level, ai_sentiment, credibility_score, is_anonymous, witness_count,
+            ai_threat_level, ai_sentiment, ai_credibility_score, credibility_score, is_anonymous, witness_count,
             media_urls, tags, created_at, verification_status
           )
         `)

@@ -11,6 +11,7 @@ interface AnalysisRequest {
   title: string;
   description: string;
   category: string;
+  conflict_forms?: string[];
 }
 
 serve(async (req) => {
@@ -57,7 +58,7 @@ serve(async (req) => {
     }
     // --- END AUTH CHECK ---
 
-    const { reportId, title, description, category } = await req.json() as AnalysisRequest;
+    const { reportId, title, description, category, conflict_forms } = await req.json() as AnalysisRequest;
 
     // Security: Input validation
     if (!reportId || !title || !description || !category) {
@@ -88,21 +89,25 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `You are an AI analyst for a humanitarian peace-building platform. Analyze citizen reports for:
+            content: `You are an AI analyst for a humanitarian peace-building platform using a multi-form conflict framework. Analyze citizen reports for:
 1. Sentiment (positive, neutral, negative, urgent)
 2. Threat level (none, low, medium, high, critical)
 3. Credibility score (0-100)
 4. Key entities (people, places, organizations mentioned)
-5. Recommended actions
+5. Conflict forms present — both traditional (physical violence, security incidents) and non-traditional (psychological intimidation and coercion; emotional distress tied to rising community tension; political polarization and election-related hostility; intercommunal, ethnic, religious or identity-based tension; online harassment, inflammatory narratives and misinformation; discrimination, exclusion and disputes over public services or resources; deteriorating relationships between communities and institutions)
+6. Recommended actions
 
-Be objective, culturally sensitive, and focus on protecting civilians.`
+GUARDRAILS: Every output is a provisional indicator requiring contextual interpretation and, where necessary, human review — sentiment, emotional language, or an unverified allegation is never proof that violence will occur. Avoid political profiling and collective blame; describe behaviours, situations and dynamics, never identity groups as inherently dangerous. Be objective, culturally sensitive, and focus on protecting civilians.`
           },
           {
             role: 'user',
             content: `Analyze this report:
 Title: ${title}
 Category: ${category}
+Reporter-described situation types: ${(conflict_forms || []).join(', ') || 'not specified'}
 Description: ${description}
+
+For conflict_forms_detected choose from: physical_violence, threats_intimidation, community_distress, political_hostility, identity_tension, online_harm, discrimination_exclusion, institutional_trust.
 
 Provide analysis in this exact JSON structure:
 {
@@ -112,8 +117,10 @@ Provide analysis in this exact JSON structure:
   "confidence_score": 0-100,
   "key_entities": ["entity1", "entity2"],
   "detected_issues": ["issue1", "issue2"],
+  "conflict_forms_detected": ["form1", "form2"],
   "recommended_actions": ["action1", "action2"],
   "requires_immediate_attention": true|false,
+  "human_review_required": true,
   "analysis_summary": "brief summary"
 }`
           }
@@ -132,11 +139,13 @@ Provide analysis in this exact JSON structure:
                 confidence_score: { type: 'number', minimum: 0, maximum: 100 },
                 key_entities: { type: 'array', items: { type: 'string' } },
                 detected_issues: { type: 'array', items: { type: 'string' } },
+                conflict_forms_detected: { type: 'array', items: { type: 'string', enum: ['physical_violence', 'threats_intimidation', 'community_distress', 'political_hostility', 'identity_tension', 'online_harm', 'discrimination_exclusion', 'institutional_trust'] } },
                 recommended_actions: { type: 'array', items: { type: 'string' } },
                 requires_immediate_attention: { type: 'boolean' },
+                human_review_required: { type: 'boolean' },
                 analysis_summary: { type: 'string' }
               },
-              required: ['sentiment', 'threat_level', 'credibility_score', 'confidence_score', 'key_entities', 'detected_issues', 'recommended_actions', 'requires_immediate_attention', 'analysis_summary'],
+              required: ['sentiment', 'threat_level', 'credibility_score', 'confidence_score', 'key_entities', 'detected_issues', 'conflict_forms_detected', 'recommended_actions', 'requires_immediate_attention', 'human_review_required', 'analysis_summary'],
               additionalProperties: false
             }
           }
@@ -185,13 +194,17 @@ Provide analysis in this exact JSON structure:
 
     if (analysisError) throw analysisError;
 
-    // Update report
-    await supabase.from('citizen_reports').update({
+    // Update report (AI outputs are provisional indicators pending human review)
+    const { error: reportUpdateError } = await supabase.from('citizen_reports').update({
       ai_sentiment: analysis.sentiment,
       ai_threat_level: analysis.threat_level,
-      credibility_score: analysis.credibility_score,
+      ai_credibility_score: Math.round(analysis.credibility_score),
       ai_key_entities: analysis.key_entities,
+      ai_conflict_forms: analysis.conflict_forms_detected || [],
     }).eq('id', reportId);
+    if (reportUpdateError) {
+      console.error('Report update failed:', reportUpdateError);
+    }
 
     // Escalation check
     const shouldEscalate = analysis.threat_level === 'critical' || analysis.threat_level === 'high' || analysis.requires_immediate_attention;

@@ -78,6 +78,34 @@
       "when": 1792271095987,
       "tag": "0010_about_portrait_visibility_fix",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1792274717751,
+      "tag": "0011_multi_form_conflict_framework",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1792274738812,
+      "tag": "0012_lov_database_migration",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1792274990869,
+      "tag": "0013_lov_database_migration",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1792275166320,
+      "tag": "0014_add_ai_credibility_score",
+      "breakpoints": true
     }
   ]
 }

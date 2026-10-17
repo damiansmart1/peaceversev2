@@ -8,6 +8,7 @@ export interface ReportSubmission {
   description: string;
   category: string;
   sub_category?: string;
+  conflict_forms?: string[];
   
   // Incident details
   incident_date?: string;

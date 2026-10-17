@@ -73,10 +73,18 @@ serve(async (req) => {
       .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
       .limit(20);
 
-    // AI analysis (keeping existing prompts)
-    const systemPrompt = `You are an expert conflict analyst and early warning system AI. Assess incident risk levels with scientific precision following UN OCHA, Sphere Standards, ICRC guidelines. Provide scores on 0-100 scale and classify threat level as: low, medium, high, critical, or imminent.`;
+    // AI analysis (multi-form conflict framework)
+    const systemPrompt = `You are an expert conflict analyst and early warning system AI for a multi-form conflict framework. Assess incidents across BOTH traditional and non-traditional conflict forms: physical violence and security incidents; psychological intimidation, fear and coercion; emotional distress tied to rising community tension; political polarization and election-related hostility; intercommunal, ethnic, religious or identity-based tension; online harassment, inflammatory narratives and misinformation; discrimination, exclusion and disputes over public services or resources; and deteriorating relationships between communities and institutions. Assess risk levels with scientific precision following UN OCHA, Sphere Standards, ICRC guidelines. Provide scores on 0-100 scale and classify threat level as: low, medium, high, critical, or imminent.
 
-    const analysisPrompt = `Analyze this incident risk:\nTitle: ${incident.title}\nCategory: ${incident.category}${incident.sub_category ? ` / ${incident.sub_category}` : ''}\nSeverity: ${incident.severity_level || 'Not specified'}\nDescription: ${incident.description}\nLocation: ${incident.location_city || 'Unknown'}, ${incident.location_country || 'Unknown'}\nCasualties: ${incident.casualties_reported || 0}, Injuries: ${incident.injuries_reported || 0}\nPeople Affected: ${incident.estimated_people_affected || 'Unknown'}\nVulnerable Groups: ${incident.vulnerable_groups_affected?.join(', ') || 'None'}\nChildren Involved: ${incident.children_involved ? 'Yes' : 'No'}\nRecurring: ${incident.recurring_issue ? 'Yes' : 'No'}\nNearby incidents (30d): ${nearbyIncidents?.length || 0}\n\nProvide JSON: { "overall_risk_score": 0-100, "threat_level": "low|medium|high|critical|imminent", "severity_score": 0-100, "urgency_score": 0-100, "impact_score": 0-100, "escalation_probability": 0-100, "contagion_risk": 0-100, "ai_confidence": 0-100, "ai_reasoning": { "primary_concerns": [], "escalation_factors": [], "mitigation_factors": [] }, "contributing_factors": { "high_risk": [], "moderate_risk": [], "low_risk": [] }, "risk_indicators": { "violence_level": "", "community_tension": "", "response_capacity": "", "external_factors": "" }, "escalation_timeline": "", "predicted_impact_area": [], "recommended_actions": [{ "action": "", "priority": "", "target": "", "category": "", "timeframe": "", "rationale": "", "resources": [], "kpis": [] }] }`;
+CRITICAL GUARDRAILS:
+- Every output is a PROVISIONAL indicator requiring contextual interpretation and, where necessary, human review. Set human_review_required true unless a human reviewer has already confirmed the assessment.
+- Never treat sentiment, emotional language, or an unverified allegation as proof that violence will occur.
+- Avoid political profiling, collective blame of communities, and unsupported predictions about individuals or groups. Describe risks in terms of behaviours, situations and dynamics — never identity groups as inherently dangerous.
+- Classify the pattern signal: "isolated" (single dispute unlikely to spread), "recurring" (similar reports repeating over time/place), or "escalating" (rising frequency, severity or spread).`;
+
+    const conflictFormsText = (incident.conflict_forms || []).join(', ') || 'not specified';
+
+    const analysisPrompt = `Analyze this incident risk:\nTitle: ${incident.title}\nCategory: ${incident.category}${incident.sub_category ? ` / ${incident.sub_category}` : ''}\nReporter-described situation types: ${conflictFormsText}\nSeverity: ${incident.severity_level || 'Not specified'}\nDescription: ${incident.description}\nLocation: ${incident.location_city || 'Unknown'}, ${incident.location_country || 'Unknown'}\nCasualties: ${incident.casualties_reported || 0}, Injuries: ${incident.injuries_reported || 0}\nPeople Affected: ${incident.estimated_people_affected || 'Unknown'}\nVulnerable Groups: ${incident.vulnerable_groups_affected?.join(', ') || 'None'}\nChildren Involved: ${incident.children_involved ? 'Yes' : 'No'}\nRecurring: ${incident.recurring_issue ? 'Yes' : 'No'}\nNearby incidents (30d): ${nearbyIncidents?.length || 0}\nNearby incident categories: ${nearbyIncidents?.map(i => i.category).join(', ') || 'none'}\n\nAssess all applicable conflict forms (physical, psychological, emotional, political, identity-based, online harms, discrimination/exclusion, institutional trust deterioration). Identify whether this looks isolated, recurring, or escalating.\n\nProvide JSON: { "overall_risk_score": 0-100, "threat_level": "low|medium|high|critical|imminent", "severity_score": 0-100, "urgency_score": 0-100, "impact_score": 0-100, "escalation_probability": 0-100, "contagion_risk": 0-100, "ai_confidence": 0-100, "pattern_signal": "isolated|recurring|escalating", "human_review_required": true, "ai_reasoning": { "primary_concerns": [], "escalation_factors": [], "mitigation_factors": [] }, "contributing_factors": { "high_risk": [], "moderate_risk": [], "low_risk": [] }, "risk_indicators": { "violence_level": "", "community_tension": "", "response_capacity": "", "external_factors": "" }, "escalation_timeline": "", "predicted_impact_area": [], "recommended_actions": [{ "action": "", "priority": "", "target": "", "category": "", "timeframe": "", "rationale": "", "resources": [], "kpis": [] }] }`;
 
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -103,7 +111,7 @@ serve(async (req) => {
     const aiResult = await aiResponse.json();
     const analysis = JSON.parse(aiResult.choices[0].message.content);
 
-    // Store risk score
+    // Store risk score (AI assessments are provisional indicators requiring human review)
     const { data: riskScore, error: insertError } = await supabase
       .from('incident_risk_scores')
       .insert({
@@ -122,6 +130,8 @@ serve(async (req) => {
         escalation_timeline: analysis.escalation_timeline,
         predicted_impact_area: analysis.predicted_impact_area,
         recommended_actions: analysis.recommended_actions,
+        pattern_signal: analysis.pattern_signal || null,
+        human_review_required: analysis.human_review_required !== false,
         calculated_by: 'ai_risk_engine'
       })
       .select()

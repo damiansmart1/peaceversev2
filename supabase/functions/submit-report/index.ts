@@ -162,6 +162,7 @@ serve(async (req) => {
         description: submission.description.trim(),
         category: submission.category,
         sub_category: submission.sub_category?.trim(),
+        conflict_forms: Array.isArray(submission.conflict_forms) ? submission.conflict_forms.slice(0, 12) : [],
         
         // Incident details
         incident_date: incidentDateTime,

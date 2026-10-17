@@ -110,6 +110,7 @@ export interface ElectionIncident {
   status: string;
   resolution_status?: string;
   verification_status: string;
+  ai_credibility_score?: number;
   credibility_score?: number;
   requires_immediate_action: boolean;
   escalated: boolean;

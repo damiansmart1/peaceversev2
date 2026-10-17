@@ -1131,6 +1131,8 @@ export type Database = {
       }
       citizen_reports: {
         Row: {
+          ai_conflict_forms: string[]
+          ai_credibility_score: number | null
           ai_key_entities: Json | null
           ai_sentiment: string | null
           ai_threat_level: string | null
@@ -1146,6 +1148,7 @@ export type Database = {
           community_impact_level: string | null
           community_response: string | null
           confidential_notes: string | null
+          conflict_forms: string[]
           created_at: string | null
           credibility_score: number | null
           description: string
@@ -1216,6 +1219,8 @@ export type Database = {
           witness_count: number | null
         }
         Insert: {
+          ai_conflict_forms?: string[]
+          ai_credibility_score?: number | null
           ai_key_entities?: Json | null
           ai_sentiment?: string | null
           ai_threat_level?: string | null
@@ -1231,6 +1236,7 @@ export type Database = {
           community_impact_level?: string | null
           community_response?: string | null
           confidential_notes?: string | null
+          conflict_forms?: string[]
           created_at?: string | null
           credibility_score?: number | null
           description: string
@@ -1301,6 +1307,8 @@ export type Database = {
           witness_count?: number | null
         }
         Update: {
+          ai_conflict_forms?: string[]
+          ai_credibility_score?: number | null
           ai_key_entities?: Json | null
           ai_sentiment?: string | null
           ai_threat_level?: string | null
@@ -1316,6 +1324,7 @@ export type Database = {
           community_impact_level?: string | null
           community_response?: string | null
           confidential_notes?: string | null
+          conflict_forms?: string[]
           created_at?: string | null
           credibility_score?: number | null
           description?: string
@@ -4001,10 +4010,12 @@ export type Database = {
           created_at: string | null
           escalation_probability: number | null
           escalation_timeline: string | null
+          human_review_required: boolean
           id: string
           impact_score: number | null
           incident_id: string
           overall_risk_score: number
+          pattern_signal: string | null
           predicted_impact_area: string[] | null
           recommended_actions: Json | null
           risk_indicators: Json | null
@@ -4022,10 +4033,12 @@ export type Database = {
           created_at?: string | null
           escalation_probability?: number | null
           escalation_timeline?: string | null
+          human_review_required?: boolean
           id?: string
           impact_score?: number | null
           incident_id: string
           overall_risk_score: number
+          pattern_signal?: string | null
           predicted_impact_area?: string[] | null
           recommended_actions?: Json | null
           risk_indicators?: Json | null
@@ -4043,10 +4056,12 @@ export type Database = {
           created_at?: string | null
           escalation_probability?: number | null
           escalation_timeline?: string | null
+          human_review_required?: boolean
           id?: string
           impact_score?: number | null
           incident_id?: string
           overall_risk_score?: number
+          pattern_signal?: string | null
           predicted_impact_area?: string[] | null
           recommended_actions?: Json | null
           risk_indicators?: Json | null
@@ -4471,8 +4486,10 @@ export type Database = {
           longitude: number | null
           metadata: Json
           organization: string | null
+          party_consent_confirmed: boolean
           progress_percent: number
           region: string | null
+          source_report_id: string | null
           started_at: string | null
           status: Database["public"]["Enums"]["mediation_case_status"]
           summary: string | null
@@ -4499,8 +4516,10 @@ export type Database = {
           longitude?: number | null
           metadata?: Json
           organization?: string | null
+          party_consent_confirmed?: boolean
           progress_percent?: number
           region?: string | null
+          source_report_id?: string | null
           started_at?: string | null
           status?: Database["public"]["Enums"]["mediation_case_status"]
           summary?: string | null
@@ -4527,8 +4546,10 @@ export type Database = {
           longitude?: number | null
           metadata?: Json
           organization?: string | null
+          party_consent_confirmed?: boolean
           progress_percent?: number
           region?: string | null
+          source_report_id?: string | null
           started_at?: string | null
           status?: Database["public"]["Enums"]["mediation_case_status"]
           summary?: string | null
@@ -4915,6 +4936,147 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      mediator_assignments: {
+        Row: {
+          case_id: string
+          conflict_of_interest_declared: string | null
+          created_at: string
+          escalation_reason: string | null
+          follow_up_notes: string | null
+          id: string
+          mediator_id: string
+          proposed_by: string | null
+          referral_notes: string | null
+          responded_at: string | null
+          status: Database["public"]["Enums"]["mediator_assignment_status"]
+          suitability_reason: string | null
+          updated_at: string
+        }
+        Insert: {
+          case_id: string
+          conflict_of_interest_declared?: string | null
+          created_at?: string
+          escalation_reason?: string | null
+          follow_up_notes?: string | null
+          id?: string
+          mediator_id: string
+          proposed_by?: string | null
+          referral_notes?: string | null
+          responded_at?: string | null
+          status?: Database["public"]["Enums"]["mediator_assignment_status"]
+          suitability_reason?: string | null
+          updated_at?: string
+        }
+        Update: {
+          case_id?: string
+          conflict_of_interest_declared?: string | null
+          created_at?: string
+          escalation_reason?: string | null
+          follow_up_notes?: string | null
+          id?: string
+          mediator_id?: string
+          proposed_by?: string | null
+          referral_notes?: string | null
+          responded_at?: string | null
+          status?: Database["public"]["Enums"]["mediator_assignment_status"]
+          suitability_reason?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mediator_assignments_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "mediation_cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mediator_assignments_mediator_id_fkey"
+            columns: ["mediator_id"]
+            isOneToOne: false
+            referencedRelation: "mediators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mediators: {
+        Row: {
+          active_cases: number
+          availability: string | null
+          bio: string | null
+          code_of_conduct_accepted_at: string | null
+          created_at: string
+          credential_verified: boolean
+          credentials: string | null
+          full_name: string
+          id: string
+          is_accepting_referrals: boolean
+          languages: string[]
+          locations_served: string[]
+          max_active_cases: number
+          mediator_category: Database["public"]["Enums"]["mediator_category"]
+          organization: string | null
+          preferred_formats: string[]
+          safeguarding_acknowledged: boolean
+          specializations: string[]
+          status: Database["public"]["Enums"]["mediator_status"]
+          updated_at: string
+          user_id: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          active_cases?: number
+          availability?: string | null
+          bio?: string | null
+          code_of_conduct_accepted_at?: string | null
+          created_at?: string
+          credential_verified?: boolean
+          credentials?: string | null
+          full_name: string
+          id?: string
+          is_accepting_referrals?: boolean
+          languages?: string[]
+          locations_served?: string[]
+          max_active_cases?: number
+          mediator_category?: Database["public"]["Enums"]["mediator_category"]
+          organization?: string | null
+          preferred_formats?: string[]
+          safeguarding_acknowledged?: boolean
+          specializations?: string[]
+          status?: Database["public"]["Enums"]["mediator_status"]
+          updated_at?: string
+          user_id: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          active_cases?: number
+          availability?: string | null
+          bio?: string | null
+          code_of_conduct_accepted_at?: string | null
+          created_at?: string
+          credential_verified?: boolean
+          credentials?: string | null
+          full_name?: string
+          id?: string
+          is_accepting_referrals?: boolean
+          languages?: string[]
+          locations_served?: string[]
+          max_active_cases?: number
+          mediator_category?: Database["public"]["Enums"]["mediator_category"]
+          organization?: string | null
+          preferred_formats?: string[]
+          safeguarding_acknowledged?: boolean
+          specializations?: string[]
+          status?: Database["public"]["Enums"]["mediator_status"]
+          updated_at?: string
+          user_id?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: []
       }
       mel_forms: {
         Row: {
@@ -10301,6 +10463,7 @@ export type Database = {
         Args: { content_id: string }
         Returns: undefined
       }
+      is_approved_mediator: { Args: { _user_id: string }; Returns: boolean }
       is_election_admin: { Args: { _user_id: string }; Returns: boolean }
       is_election_observer:
         | { Args: { _uid: string }; Returns: boolean }
@@ -11084,6 +11247,19 @@ export type Database = {
         | "cancelled"
         | "postponed"
       mediation_visibility: "all_members" | "mediators_only" | "parties_only"
+      mediator_assignment_status:
+        | "proposed"
+        | "accepted"
+        | "declined"
+        | "active"
+        | "completed"
+        | "escalated"
+        | "referred"
+      mediator_category:
+        | "professional"
+        | "trained_volunteer"
+        | "community_facilitator"
+      mediator_status: "pending" | "approved" | "suspended"
       mel_indicator_type: "impact" | "outcome" | "output" | "activity" | "input"
       mel_org_role:
         | "owner"
@@ -11373,6 +11549,21 @@ export const Constants = {
         "postponed",
       ],
       mediation_visibility: ["all_members", "mediators_only", "parties_only"],
+      mediator_assignment_status: [
+        "proposed",
+        "accepted",
+        "declined",
+        "active",
+        "completed",
+        "escalated",
+        "referred",
+      ],
+      mediator_category: [
+        "professional",
+        "trained_volunteer",
+        "community_facilitator",
+      ],
+      mediator_status: ["pending", "approved", "suspended"],
       mel_indicator_type: ["impact", "outcome", "output", "activity", "input"],
       mel_org_role: [
         "owner",

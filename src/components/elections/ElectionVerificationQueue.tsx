@@ -91,7 +91,7 @@ export default function ElectionVerificationQueue({ election }: ElectionVerifica
         comparison = (SEVERITY_CONFIG[b.severity as keyof typeof SEVERITY_CONFIG]?.priority || 0) -
                     (SEVERITY_CONFIG[a.severity as keyof typeof SEVERITY_CONFIG]?.priority || 0);
       } else if (sortBy === 'credibility') {
-        comparison = (b.credibility_score || 0) - (a.credibility_score || 0);
+        comparison = ((b.ai_credibility_score ?? b.credibility_score) || 0) - ((a.ai_credibility_score ?? a.credibility_score) || 0);
       }
 
       return sortOrder === 'asc' ? -comparison : comparison;
@@ -343,12 +343,12 @@ export default function ElectionVerificationQueue({ election }: ElectionVerifica
                         </div>
                         
                         <div className="text-right shrink-0">
-                          {incident.credibility_score && (
+                          {(incident.ai_credibility_score ?? incident.credibility_score) != null && (
                             <div className="mb-2">
                               <p className="text-xs text-muted-foreground">Credibility</p>
                               <div className="flex items-center gap-2">
-                                <Progress value={incident.credibility_score} className="w-16 h-2" />
-                                <span className="text-sm font-medium">{incident.credibility_score}%</span>
+                                <Progress value={incident.ai_credibility_score ?? incident.credibility_score} className="w-16 h-2" />
+                                <span className="text-sm font-medium">{incident.ai_credibility_score ?? incident.credibility_score}%</span>
                               </div>
                             </div>
                           )}

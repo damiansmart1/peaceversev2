@@ -22,3 +22,16 @@
 - [x] Add editable founder, team and partner profiles to About and verify admin photo publishing.
 - [x] Fix stale signed-in access checks and prevent onboarding from covering participation pages.
 - [x] Every sign-in (email, guest, email confirmation) lands on the home page; the tour no longer covers the sign-in page
+
+# Multi-form conflict early warning
+- [x] Add plain-language conflict-form capture to incident reporting (no technical terminology required).
+- [x] Extend AI analysis (report analysis, risk scoring, pattern detection) to non-traditional conflict forms with provisional-indicator framing and anti-profiling guardrails.
+- [x] Distinguish isolated vs recurring vs escalating patterns; detect sudden increases.
+- [x] Show severity, confidence, geographic scope and trend separately with human-review labels.
+
+# Volunteer mediator network
+- [x] Mediator profiles (professional / trained volunteer / community facilitator), specializations, languages, locations, credentials, availability.
+- [x] Code of conduct + safeguarding acceptance at onboarding; admin approval and credential verification.
+- [x] Mediator matching and case assignments with accept/decline, conflict-of-interest declaration, escalation and referral.
+- [x] Party consent gate before mediation begins.
+- [x] Mediator workspace: assigned cases, secure notes, follow-up recording.
