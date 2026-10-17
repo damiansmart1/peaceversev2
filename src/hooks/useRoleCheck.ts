@@ -1,14 +1,15 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase-typed';
 import type { AppRole, UserRole } from '@/types/database';
+import { useAuth } from '@/contexts/AuthContext';
 
 export type { AppRole };
 
 export const useRoleCheck = (role?: AppRole) => {
+  const { user, isLoading } = useAuth();
   return useQuery({
-    queryKey: ['user-role', role],
+    queryKey: ['user-role', role, user?.id],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) return { hasRole: false, roles: [] };
 
       // @ts-ignore - Type inference issue with Supabase generated types
@@ -20,7 +21,7 @@ export const useRoleCheck = (role?: AppRole) => {
 
       if (result.error) {
         console.error('Error fetching user roles:', result.error);
-        return { hasRole: false, roles: [] };
+        throw result.error;
       }
 
       // Filter out expired roles
@@ -34,15 +35,16 @@ export const useRoleCheck = (role?: AppRole) => {
 
       return { hasRole: activeRoles.length > 0, roles: activeRoles };
     },
-    enabled: !!role || true,
+    enabled: !isLoading && !!user && !user.is_anonymous,
   });
 };
 
 export const useHasAnyRole = (roles: AppRole[]) => {
+  const { user, isLoading } = useAuth();
   return useQuery({
-    queryKey: ['user-has-any-role', roles],
+    queryKey: ['user-has-any-role', roles, user?.id],
+    enabled: !isLoading && !!user && !user.is_anonymous,
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) return false;
 
       // @ts-ignore - Type inference issue with Supabase generated types
@@ -55,7 +57,7 @@ export const useHasAnyRole = (roles: AppRole[]) => {
 
       if (result.error) {
         console.error('Error checking roles:', result.error);
-        return false;
+        throw result.error;
       }
 
       // Check for active, non-expired roles
@@ -69,10 +71,11 @@ export const useHasAnyRole = (roles: AppRole[]) => {
 };
 
 export const useUserRoles = () => {
+  const { user, isLoading } = useAuth();
   return useQuery({
-    queryKey: ['user-all-roles'],
+    queryKey: ['user-all-roles', user?.id],
+    enabled: !isLoading && !!user && !user.is_anonymous,
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) return [];
 
       // @ts-ignore - Type inference issue with Supabase generated types
@@ -85,7 +88,7 @@ export const useUserRoles = () => {
 
       if (result.error) {
         console.error('Error fetching all user roles:', result.error);
-        return [];
+        throw result.error;
       }
 
       // Filter out expired roles

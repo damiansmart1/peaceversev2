@@ -247,8 +247,11 @@ export default function OnboardingTour() {
   const storageKey = `hasSeenOnboarding:${roleKey}`;
 
   useEffect(() => {
-    // Never cover the sign-in page; the tour belongs on the home page.
-    if (location.pathname === '/auth') return;
+    // Direct poll links and community tools must never be covered by onboarding.
+    if (location.pathname !== '/') {
+      setIsOpen(false);
+      return;
+    }
     const seen = localStorage.getItem(storageKey);
     if (!seen) {
       const t = setTimeout(() => {
