@@ -16,7 +16,8 @@ import { useContentFilters } from '@/hooks/useContentFilters';
 import { useTranslationContext } from '@/components/TranslationProvider';
 import SectionImageBanner from '@/components/SectionImageBanner';
 import { SocialHub } from '@/components/social/SocialHub';
-import { MapPinned, MessageCircleMore, UsersRound, CalendarRange, BookMarked, Award, Antenna, AudioLines, Sparkles } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { MapPinned, MessageCircleMore, UsersRound, CalendarRange, BookMarked, Award, Antenna, AudioLines, Sparkles, Vote } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import communityUnity from "@/assets/community-unity.jpg";
 import radioBroadcasting from "@/assets/radio-broadcasting.jpg";
@@ -38,6 +39,30 @@ const Community = () => {
             subtitle={t('community.subtitle')}
             className="h-96 mb-8"
           />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-7xl mx-auto">
+            {[
+              { to: "/community", icon: MessageCircleMore, label: t('community.quick.community'), desc: t('community.quick.communityDesc'), accent: "text-primary" },
+              { to: "/proposals", icon: Vote, label: t('community.quick.proposals'), desc: t('community.quick.proposalsDesc'), accent: "text-secondary" },
+              { to: "/challenges", icon: Award, label: t('community.quick.challenges'), desc: t('community.quick.challengesDesc'), accent: "text-gold" },
+              { to: "/radio", icon: Antenna, label: t('community.quick.radio'), desc: t('community.quick.radioDesc'), accent: "text-brown" },
+            ].map(({ to, icon: Icon, label, desc, accent }) => (
+              <Link
+                key={to}
+                to={to}
+                className="group flex items-start gap-3 rounded-xl border border-border/60 bg-card/80 backdrop-blur-sm p-4 transition-all hover:border-primary/40 hover:bg-primary/5 hover:shadow-peace"
+              >
+                <Icon className={`w-5 h-5 mt-0.5 flex-shrink-0 ${accent}`} />
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-foreground leading-tight group-hover:text-primary transition-colors">
+                    {label}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1 leading-snug">
+                    {desc}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
         
         <Tabs defaultValue="social" className="max-w-7xl mx-auto">

@@ -342,6 +342,14 @@ export const translations: Record<Language, Record<string, string>> = {
     'community.featured': 'Featured',
     'community.resources': 'Resources',
     'community.resourcesComingSoon': 'Community resources coming soon',
+    'community.quick.community': 'Community voices',
+    'community.quick.communityDesc': 'Stories, posts, and conversations',
+    'community.quick.proposals': 'Proposals & polls',
+    'community.quick.proposalsDesc': 'Shape policy with your vote',
+    'community.quick.challenges': 'Peace challenges',
+    'community.quick.challengesDesc': 'Take action, earn recognition',
+    'community.quick.radio': 'Peace Radio',
+    'community.quick.radioDesc': 'Listen, call in, and be heard',
     
     // Proposals
     'proposals.badge': 'Community Proposals',
