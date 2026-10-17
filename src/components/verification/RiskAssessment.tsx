@@ -111,6 +111,10 @@ export const RiskAssessment = ({
           <Shield className="w-5 h-5 text-primary" />
           AI Risk Assessment
         </CardTitle>
+        <p className="text-xs text-muted-foreground">
+          Provisional indicator — requires contextual interpretation and human review.
+          Sentiment, emotional language or an unverified allegation is never treated as proof that violence will occur.
+        </p>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Overall Risk Score */}
