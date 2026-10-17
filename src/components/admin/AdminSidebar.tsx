@@ -58,6 +58,7 @@ const menuItems = [
       { id: 'gamification', label: 'Gamification' },
       { id: 'sponsors', label: 'Sponsors' },
       { id: 'people', label: 'Founders & team' },
+      { id: 'mediators', label: 'Mediator network' },
     ],
   },
   {
