@@ -19,14 +19,17 @@ interface HubMenuProps {
 
 const HubMenu = ({ hub, isActive }: HubMenuProps) => {
   const Icon = hub.icon;
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
   const { features } = useAccessibleFeatures();
   const { data: rolesData } = useUserRoles();
   const userRoles = (rolesData?.map((r: any) => r.role) || []) as string[];
   const links = filterHubLinks(hub, features, userRoles);
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+    <DropdownMenu open={open} onOpenChange={setOpen}>
+      <div onPointerEnter={() => setOpen(true)} onPointerLeave={() => setOpen(false)}>
+        <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
           size="sm"
