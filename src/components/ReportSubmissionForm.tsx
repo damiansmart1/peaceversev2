@@ -15,6 +15,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { useCitizenReports } from '@/hooks/useCitizenReports';
+import { CONFLICT_FORMS } from '@/lib/conflictForms';
 
 const reportSchema = z.object({
   // Basic Information
@@ -134,6 +135,7 @@ export const ReportSubmissionForm = () => {
       title: '',
       description: '',
       category: 'other',
+      conflict_forms: [],
       is_anonymous: false,
       severity_level: 'medium',
       urgency_level: 'routine',
@@ -181,6 +183,7 @@ export const ReportSubmissionForm = () => {
       description: values.description,
       category: values.category,
       sub_category: values.sub_category,
+      conflict_forms: values.conflict_forms,
       
       // Incident details
       incident_date: values.incident_date,
@@ -345,6 +348,50 @@ export const ReportSubmissionForm = () => {
                     )}
                   />
                 </div>
+
+                <FormField
+                  control={form.control}
+                  name="conflict_forms"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div>
+                        <FormLabel className="text-base">What is happening? (choose all that apply)</FormLabel>
+                        <FormDescription>
+                          Pick the everyday descriptions that fit — you don't need to use technical terms.
+                          If none fit, choose "I'm not sure what to call it" and describe it below.
+                        </FormDescription>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+                        {CONFLICT_FORMS.map((cf) => (
+                          <FormItem key={cf.key}>
+                            <FormControl>
+                              <label
+                                className={`flex items-start gap-2 rounded-lg border p-3 cursor-pointer text-sm transition-colors ${
+                                  field.value?.includes(cf.key) ? 'border-primary bg-primary/5' : 'hover:bg-muted/50'
+                                }`}
+                              >
+                                <Checkbox
+                                  checked={field.value?.includes(cf.key)}
+                                  onCheckedChange={(checked) => {
+                                    const current = field.value || [];
+                                    field.onChange(checked ? [...current, cf.key] : current.filter((v) => v !== cf.key));
+                                  }}
+                                  className="mt-0.5"
+                                />
+                                <span>
+                                  <span className="font-medium leading-tight">{cf.label}</span>
+                                  <span className="block text-xs text-muted-foreground">{cf.hint}</span>
+                                </span>
+                              </label>
+                            </FormControl>
+                          </FormItem>
+                        ))}
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
 
                 <FormField
                   control={form.control}
