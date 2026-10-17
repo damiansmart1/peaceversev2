@@ -5,12 +5,14 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Users, CalendarDays, MessagesSquare, Info } from 'lucide-react';
+import { ArrowLeft, Users, CalendarDays, MessagesSquare, Info, ShieldCheck } from 'lucide-react';
 import { useMediationCase, useUpdateMediationCase, useCaseMembers } from '@/hooks/useMediation';
+import { useMyMediatorProfile, useCaseAssignments } from '@/hooks/useMediators';
 import { useAuth } from '@/contexts/AuthContext';
 import PartiesPanel from '@/components/mediation/PartiesPanel';
 import SessionsPanel from '@/components/mediation/SessionsPanel';
 import DialoguePanel from '@/components/mediation/DialoguePanel';
+import MediatorAssignmentsPanel from '@/components/mediation/MediatorAssignmentsPanel';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
 const STATUSES = ['intake', 'assessment', 'party_onboarding', 'dialogue', 'negotiation', 'drafting', 'agreement_reached', 'implementation', 'monitoring', 'closed', 'suspended', 'failed'];
@@ -67,11 +69,12 @@ const MediationCase = () => {
           </header>
 
           <Tabs defaultValue="parties">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="overview" className="gap-2"><Info className="w-4 h-4" /><span className="hidden sm:inline">Overview</span></TabsTrigger>
               <TabsTrigger value="parties" className="gap-2"><Users className="w-4 h-4" /><span className="hidden sm:inline">Parties</span></TabsTrigger>
               <TabsTrigger value="sessions" className="gap-2"><CalendarDays className="w-4 h-4" /><span className="hidden sm:inline">Sessions</span></TabsTrigger>
               <TabsTrigger value="dialogue" className="gap-2"><MessagesSquare className="w-4 h-4" /><span className="hidden sm:inline">Dialogue</span></TabsTrigger>
+              <TabsTrigger value="coordination" className="gap-2"><ShieldCheck className="w-4 h-4" /><span className="hidden sm:inline">Coordination</span></TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="mt-6">
@@ -88,6 +91,13 @@ const MediationCase = () => {
             <TabsContent value="parties" className="mt-6"><PartiesPanel caseId={mCase.id} canEdit={!!canEdit} /></TabsContent>
             <TabsContent value="sessions" className="mt-6"><SessionsPanel caseId={mCase.id} canEdit={!!canEdit} /></TabsContent>
             <TabsContent value="dialogue" className="mt-6"><DialoguePanel caseId={mCase.id} canPost={!!canPost} isFacilitator={!!canEdit} /></TabsContent>
+            <TabsContent value="coordination" className="mt-6">
+              <MediatorAssignmentsPanel
+                mediationCase={mCase}
+                canEdit={!!canEdit}
+                isAssignedMediator={!!myAssignment}
+              />
+            </TabsContent>
           </Tabs>
         </div>
       </div>
