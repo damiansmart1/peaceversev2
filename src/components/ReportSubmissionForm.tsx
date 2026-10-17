@@ -22,6 +22,7 @@ const reportSchema = z.object({
   description: z.string().min(20, 'Description must be at least 20 characters').max(10000),
   category: z.enum(['violence', 'displacement', 'human_rights', 'infrastructure', 'health', 'education', 'security', 'environmental', 'economic', 'social', 'other']),
   sub_category: z.string().optional(),
+  conflict_forms: z.array(z.string()).default([]),
   
   // Incident Details
   incident_date: z.string().optional(),
