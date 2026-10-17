@@ -1132,6 +1132,7 @@ export type Database = {
       citizen_reports: {
         Row: {
           ai_conflict_forms: string[]
+          ai_credibility_score: number | null
           ai_key_entities: Json | null
           ai_sentiment: string | null
           ai_threat_level: string | null
@@ -1219,6 +1220,7 @@ export type Database = {
         }
         Insert: {
           ai_conflict_forms?: string[]
+          ai_credibility_score?: number | null
           ai_key_entities?: Json | null
           ai_sentiment?: string | null
           ai_threat_level?: string | null
@@ -1306,6 +1308,7 @@ export type Database = {
         }
         Update: {
           ai_conflict_forms?: string[]
+          ai_credibility_score?: number | null
           ai_key_entities?: Json | null
           ai_sentiment?: string | null
           ai_threat_level?: string | null
