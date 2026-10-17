@@ -45,7 +45,7 @@ export const ThreatMonitorPanel = () => {
           location: report.location_name || 'Unknown',
           country: report.location_country || 'Unknown',
           time: new Date(report.created_at).toLocaleTimeString(),
-          threatLevel: report.credibility_score || 50,
+          threatLevel: (report.ai_credibility_score ?? report.credibility_score) || 50,
           category: report.category,
         })));
       }
@@ -74,7 +74,7 @@ export const ThreatMonitorPanel = () => {
               location: report.location_name || 'Unknown',
               country: report.location_country || 'Unknown',
               time: new Date(report.created_at).toLocaleTimeString(),
-              threatLevel: report.credibility_score || 50,
+              threatLevel: (report.ai_credibility_score ?? report.credibility_score) || 50,
               category: report.category,
               isNew: true,
             }, ...prev.slice(0, 9)]);

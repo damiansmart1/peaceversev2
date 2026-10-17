@@ -120,10 +120,10 @@ export const VerificationTaskDetail = ({ task, onClose }: VerificationTaskDetail
                     {report.witness_count} witnesses
                   </span>
                 )}
-                {report?.credibility_score && (
+                {(report?.ai_credibility_score ?? report?.credibility_score) != null && (
                   <span className="flex items-center gap-1">
                     <Target className="w-4 h-4" />
-                    AI Credibility: {report.credibility_score}%
+                    AI Credibility: {report?.ai_credibility_score ?? report?.credibility_score}%
                   </span>
                 )}
               </div>
@@ -262,7 +262,7 @@ export const VerificationTaskDetail = ({ task, onClose }: VerificationTaskDetail
                 verifiedReports: 12,
                 totalReports: 15,
                 rejectedReports: 1,
-                accuracyScore: report?.credibility_score || 75,
+                accuracyScore: report?.ai_credibility_score ?? report?.credibility_score || 75,
                 trustLevel: report?.is_anonymous ? 'anonymous' : 'trusted',
                 badges: ['First Report', 'Accurate Reporter'],
                 recentActivity: [],

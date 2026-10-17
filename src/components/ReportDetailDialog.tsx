@@ -520,7 +520,7 @@ export const ReportDetailDialog = ({ report, open, onOpenChange }: ReportDetailD
                     </CardHeader>
                     <CardContent>
                       <span className="text-2xl font-bold">
-                        {report.credibility_score ? `${(report.credibility_score * 100).toFixed(0)}%` : 'N/A'}
+                        {report.ai_credibility_score != null ? `${report.ai_credibility_score}%` : report.credibility_score ? `${(report.credibility_score * 100).toFixed(0)}%` : 'N/A'}
                       </span>
                     </CardContent>
                   </Card>
