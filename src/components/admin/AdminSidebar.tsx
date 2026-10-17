@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/collapsible';
 import { useState } from 'react';
 import peaceverselogo from '@/assets/peaceverse-logo.png';
+import { useTranslationContext } from '@/components/TranslationProvider';
 
 interface AdminSidebarProps {
   activeSection: string;
@@ -56,6 +57,7 @@ const menuItems = [
       { id: 'challenges', label: 'Challenges' },
       { id: 'gamification', label: 'Gamification' },
       { id: 'sponsors', label: 'Sponsors' },
+      { id: 'people', label: 'Founders & team' },
     ],
   },
   {
@@ -71,6 +73,7 @@ const menuItems = [
 ];
 
 export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarProps) {
+  const { t } = useTranslationContext();
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
   const [openGroups, setOpenGroups] = useState<string[]>(['operations', 'intelligence', 'engagement', 'system']);
@@ -180,7 +183,7 @@ export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarPro
                                     : 'hover:bg-muted/50 text-muted-foreground hover:text-foreground'
                                 }`}
                               >
-                                <span>{child.label}</span>
+                                <span>{child.id === 'people' ? t('about.manage') : child.label}</span>
                               </SidebarMenuButton>
                             </SidebarMenuItem>
                           ))}

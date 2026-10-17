@@ -6,6 +6,8 @@ import { AdminDashboard } from '@/components/admin/AdminDashboard';
 import { AdminContentManager } from '@/components/admin/AdminContentManager';
 import { AdminProposalsManager } from '@/components/admin/AdminProposalsManager';
 import { AdminPollsManager } from '@/components/admin/AdminPollsManager';
+import AdminPeopleManager from '@/components/admin/AdminPeopleManager';
+import { useTranslationContext } from '@/components/TranslationProvider';
 import { AdminSafeSpacesManager } from '@/components/admin/AdminSafeSpacesManager';
 import { AdminUsersManager } from '@/components/admin/AdminUsersManager';
 import { AdminChallengesManager } from '@/components/admin/AdminChallengesManager';
@@ -33,6 +35,7 @@ import { motion } from 'framer-motion';
 import adminHeroBg from '@/assets/admin-hero-bg.jpg';
 
 const Admin = () => {
+  const { t } = useTranslationContext();
   const navigate = useNavigate();
   const { data: isAdmin, isLoading } = useAdminCheck();
   const [activeSection, setActiveSection] = useState('dashboard');
@@ -58,7 +61,7 @@ const Admin = () => {
     return null;
   }
 
-  const sectionTitle = activeSection === 'dashboard' 
+  const sectionTitle = activeSection === 'people' ? t('about.manage') : activeSection === 'dashboard' 
     ? 'Dashboard' 
     : activeSection.charAt(0).toUpperCase() + activeSection.slice(1).replace(/-/g, ' ');
 
@@ -72,6 +75,7 @@ const Admin = () => {
       case 'cms': return <AdminCMSManager />;
       case 'proposals': return <AdminProposalsManager />;
       case 'polls': return <AdminPollsManager />;
+      case 'people': return <AdminPeopleManager />;
       case 'incidents': return <AdminIncidentsManager />;
       case 'incident-timeline': return <AdminIncidentTimelineTracker />;
       case 'safe-spaces': return <AdminSafeSpacesManager />;
@@ -137,9 +141,7 @@ const Admin = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <Card className="p-6 bg-card/95 backdrop-blur-sm border-border/50 shadow-lg">
-              {renderContent()}
-            </Card>
+            {activeSection === 'people' ? renderContent() : <Card className="p-6 bg-card/95 backdrop-blur-sm border-border/50 shadow-lg">{renderContent()}</Card>}
           </motion.div>
         </main>
       </div>

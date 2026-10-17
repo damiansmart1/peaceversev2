@@ -1,4 +1,6 @@
 # Participation architecture
+- Store About people in a dedicated collection with admin-only writes and published-only public reads; keep portraits private and grant reads through published profile visibility so drafts stay private.
+- Keep About profile labels in the shared translation hook's dedicated dictionary so public and admin screens use the same language.
 - Auth-backed access queries must be keyed by the current context user and wait for auth initialization; stale signed-out or prior-account checks must not block a new sign-in.
 - Auth listeners remain synchronous and startup reads cannot override newer events; this prevents lock stalls and stale account state.
 - Automatic onboarding opens only on the home page so direct participation links stay usable.
