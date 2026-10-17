@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { ChevronDown, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,17 +19,24 @@ interface HubMenuProps {
 
 const HubMenu = ({ hub, isActive }: HubMenuProps) => {
   const Icon = hub.icon;
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
   const { features } = useAccessibleFeatures();
   const { data: rolesData } = useUserRoles();
   const userRoles = (rolesData?.map((r: any) => r.role) || []) as string[];
   const links = filterHubLinks(hub, features, userRoles);
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+    <DropdownMenu open={open} onOpenChange={setOpen}>
+      <div onPointerEnter={() => setOpen(true)} onPointerLeave={() => setOpen(false)}>
+        <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
           size="sm"
+          onClick={() => {
+            setOpen(false);
+            navigate(hub.primaryPath);
+          }}
           className={cn(
             "relative flex items-center gap-1.5 px-3 py-1.5 h-9 rounded-md text-sm font-medium transition-colors",
             isActive
@@ -41,7 +49,13 @@ const HubMenu = ({ hub, isActive }: HubMenuProps) => {
           <ChevronDown className="w-3 h-3 opacity-60" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-72 p-2">
+      </div>
+      <DropdownMenuContent
+        align="start"
+        onPointerEnter={() => setOpen(true)}
+        onPointerLeave={() => setOpen(false)}
+        className="w-72 p-2"
+      >
         <div className="px-2 py-1.5">
           <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
             {hub.label}
