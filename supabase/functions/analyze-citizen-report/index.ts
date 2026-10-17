@@ -195,11 +195,10 @@ Provide analysis in this exact JSON structure:
     if (analysisError) throw analysisError;
 
     // Update report (AI outputs are provisional indicators pending human review)
-    console.log('VERSION-CHECK update block v2 reached');
     const { error: reportUpdateError } = await supabase.from('citizen_reports').update({
       ai_sentiment: analysis.sentiment,
       ai_threat_level: analysis.threat_level,
-      credibility_score: analysis.credibility_score,
+      ai_credibility_score: Math.round(analysis.credibility_score),
       ai_key_entities: analysis.key_entities,
       ai_conflict_forms: analysis.conflict_forms_detected || [],
     }).eq('id', reportId);
