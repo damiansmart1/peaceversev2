@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Siren, TrendingUp, UsersRound, Radar, BrainCircuit, Sparkles } from 'lucide-react';
+import { Siren, TrendingUp, UsersRound, Radar, Eye, MapPin } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import RecommendedActionsPanel from './RecommendedActionsPanel';
 
@@ -165,7 +165,9 @@ const RiskDashboard = ({ selectedCountry = 'ALL' }: RiskDashboardProps) => {
         <CardHeader>
           <CardTitle>High Risk Incidents Requiring Attention</CardTitle>
           <CardDescription>
-            Incidents with risk scores above 60% require immediate monitoring and potential intervention
+            Incidents with risk scores above 60% require immediate monitoring and potential intervention.
+            AI risk scores are provisional indicators: they show severity, confidence, geographic scope and
+            trend separately and require human review before any response decision.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -197,10 +199,20 @@ const RiskDashboard = ({ selectedCountry = 'ALL' }: RiskDashboardProps) => {
                     <Progress value={item.overall_risk_score} className="h-2" />
                   </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                     <div>
                       <p className="text-muted-foreground">Severity</p>
                       <p className="font-semibold">{item.severity_score}%</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Confidence</p>
+                      <p className="font-semibold">{item.ai_confidence ?? '—'}%</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Trend</p>
+                      <p className="font-semibold capitalize">
+                        {item.pattern_signal ? item.pattern_signal : 'Under review'}
+                      </p>
                     </div>
                     <div>
                       <p className="text-muted-foreground">Urgency</p>
@@ -214,6 +226,23 @@ const RiskDashboard = ({ selectedCountry = 'ALL' }: RiskDashboardProps) => {
                       <p className="text-muted-foreground">Escalation Risk</p>
                       <p className="font-semibold">{item.escalation_probability}%</p>
                     </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-xs">
+                    <MapPin className="w-3.5 h-3.5 text-muted-foreground" />
+                    <span className="text-muted-foreground">
+                      Geographic scope: {item.incident?.location_city || 'Unknown'}
+                      {item.incident?.location_country ? `, ${item.incident.location_country}` : ''}
+                    </span>
+                    <Badge
+                      variant="outline"
+                      className={item.human_review_required === false
+                        ? 'border-green-500/40 text-green-600'
+                        : 'border-amber-500/40 text-amber-600'}
+                    >
+                      <Eye className="w-3 h-3 mr-1" />
+                      {item.human_review_required === false ? 'Human reviewed' : 'Provisional — human review required'}
+                    </Badge>
                   </div>
 
                   {item.ai_reasoning && (
