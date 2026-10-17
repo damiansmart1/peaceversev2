@@ -33,17 +33,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const refreshTimes = useRef<number[]>([]);
-  const warnedClock = useRef(false);
   const hadUser = useRef(false);
 
   useEffect(() => {
-    const warnClock = () => {
-      if (warnedClock.current) return;
-      warnedClock.current = true;
-      toast.error(t('participation.clockTitle'), { description: t('participation.clockBody'), duration: 15000 });
-    };
-
+    // Sign-in expiry is kept on the device's own clock (see clockSafeAuth), so no date/time checks here.
     const lifecycle = createAuthLifecycle<Session>((nextSession) => {
       setSession(nextSession);
       setUser(nextSession?.user ?? null);
@@ -53,19 +46,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        // A freshly issued token carries the server's time; a large gap means the device clock is wrong,
-        // which makes sign-ins expire instantly and refresh in a loop until the account is rate-limited.
-        if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.access_token) {
-          const skew = clockSkewSeconds(session.access_token, Date.now());
-          if (skew !== null && Math.abs(skew) > 300) warnClock();
-          // Adjust in-memory expiry immediately; never await storage while auth holds its lock.
-          if (skew !== null && Math.abs(skew) > 60) void correctStoredExpiry(supabase.auth, session, Date.now());
-        }
-        if (event === 'TOKEN_REFRESHED') {
-          const now = Date.now();
-          refreshTimes.current = [...refreshTimes.current.filter(x => now - x < 60000), now];
-          if (isRefreshStorm(refreshTimes.current, now)) warnClock();
-        }
         if (event === 'SIGNED_OUT' && hadUser.current) {
           toast(t('participation.signedOutTitle'), { description: t('participation.signedOutBody') });
         }

@@ -50,3 +50,44 @@ export const correctStoredExpiry = async (auth: unknown, session: { access_token
     // Storage can be blocked; the clock warning still tells the person what to do.
   }
 };
+
+type KeyValueStorage = {
+  getItem: (k: string) => unknown;
+  setItem: (k: string, v: string) => unknown;
+  removeItem: (k: string) => unknown;
+  isServer?: boolean;
+};
+
+// Sign-ins must never depend on the device's date and time. Every saved sign-in gets its expiry
+// re-expressed on the device's own clock (now + the token's real lifetime), so a phone that is hours
+// or days off stays signed in and renews only when the sign-in genuinely runs out.
+export const clockSafeStorage = (inner: KeyValueStorage, now: () => number = () => Date.now()): KeyValueStorage => ({
+  ...inner,
+  getItem: (k) => inner.getItem(k),
+  removeItem: (k) => inner.removeItem(k),
+  setItem: (k, v) => {
+    let value = v;
+    try {
+      const parsed = JSON.parse(v);
+      if (parsed && typeof parsed.access_token === 'string' && typeof parsed.expires_at === 'number') {
+        const fixed = localExpiresAt(parsed.access_token, now());
+        if (fixed !== null) {
+          parsed.expires_at = fixed;
+          value = JSON.stringify(parsed);
+        }
+      }
+    } catch {
+      // Not a sign-in record; save as is.
+    }
+    return inner.setItem(k, value);
+  },
+});
+
+// Wraps the sign-in client's storage in place; safe to call more than once.
+export const installClockSafeStorage = (auth: unknown) => {
+  const holder = auth as { storage?: KeyValueStorage & { __clockSafe?: boolean } };
+  if (!holder.storage || holder.storage.__clockSafe) return;
+  const wrapped = clockSafeStorage(holder.storage) as KeyValueStorage & { __clockSafe?: boolean };
+  wrapped.__clockSafe = true;
+  holder.storage = wrapped;
+};
