@@ -24,6 +24,12 @@ const MediationCase = () => {
   const { data: mCase, isLoading } = useMediationCase(caseId);
   const { data: members = [] } = useCaseMembers(caseId);
   const updateCase = useUpdateMediationCase();
+  const { data: myMediatorProfile } = useMyMediatorProfile();
+  const { data: caseAssignments = [] } = useCaseAssignments(caseId);
+
+  const myAssignment = myMediatorProfile
+    ? caseAssignments.find((a: any) => a.mediator_id === myMediatorProfile.id && ['proposed', 'accepted', 'active'].includes(a.status))
+    : null;
 
   const myMembership = members.find((m: any) => m.user_id === user?.id);
   const isFacilitator = !!myMembership && ['lead_mediator', 'co_mediator', 'rapporteur'].includes(myMembership.member_role);
