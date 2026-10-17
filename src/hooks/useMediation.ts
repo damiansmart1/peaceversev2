@@ -27,6 +27,8 @@ export interface MediationCase {
   progress_percent: number;
   trust_index: number | null;
   tags: string[] | null;
+  party_consent_confirmed: boolean;
+  source_report_id: string | null;
   created_by: string;
   created_at: string;
 }
