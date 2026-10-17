@@ -33,6 +33,10 @@ const HubMenu = ({ hub, isActive }: HubMenuProps) => {
         <Button
           variant="ghost"
           size="sm"
+          onClick={() => {
+            setOpen(false);
+            navigate(hub.primaryPath);
+          }}
           className={cn(
             "relative flex items-center gap-1.5 px-3 py-1.5 h-9 rounded-md text-sm font-medium transition-colors",
             isActive
@@ -45,7 +49,13 @@ const HubMenu = ({ hub, isActive }: HubMenuProps) => {
           <ChevronDown className="w-3 h-3 opacity-60" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-72 p-2">
+      </div>
+      <DropdownMenuContent
+        align="start"
+        onPointerEnter={() => setOpen(true)}
+        onPointerLeave={() => setOpen(false)}
+        className="w-72 p-2"
+      >
         <div className="px-2 py-1.5">
           <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
             {hub.label}
