@@ -19,4 +19,5 @@
 - [ ] 12. Peace points for voting
 
 # Access
+- [x] Fix stale signed-in access checks and prevent onboarding from covering participation pages.
 - [x] Every sign-in (email, guest, email confirmation) lands on the home page; the tour no longer covers the sign-in page

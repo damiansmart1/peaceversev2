@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useTranslationContext } from '@/components/TranslationProvider';
 import { clockSkewSeconds, correctStoredExpiry, isRefreshStorm } from '@/lib/authHealth';
+import { createAuthLifecycle } from '@/lib/authLifecycle';
 
 interface AuthContextType {
   user: User | null;
@@ -43,21 +44,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       toast.error(t('participation.clockTitle'), { description: t('participation.clockBody'), duration: 15000 });
     };
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      hadUser.current = !!session?.user && !session.user.is_anonymous;
+    const lifecycle = createAuthLifecycle<Session>((nextSession) => {
+      setSession(nextSession);
+      setUser(nextSession?.user ?? null);
+      hadUser.current = !!nextSession?.user && !nextSession.user.is_anonymous;
       setIsLoading(false);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         // A freshly issued token carries the server's time; a large gap means the device clock is wrong,
         // which makes sign-ins expire instantly and refresh in a loop until the account is rate-limited.
         if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.access_token) {
           const skew = clockSkewSeconds(session.access_token, Date.now());
           if (skew !== null && Math.abs(skew) > 300) warnClock();
-          if (skew !== null && Math.abs(skew) > 60) await correctStoredExpiry(supabase.auth, session, Date.now());
+          // Adjust in-memory expiry immediately; never await storage while auth holds its lock.
+          if (skew !== null && Math.abs(skew) > 60) void correctStoredExpiry(supabase.auth, session, Date.now());
         }
         if (event === 'TOKEN_REFRESHED') {
           const now = Date.now();
@@ -67,14 +69,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (event === 'SIGNED_OUT' && hadUser.current) {
           toast(t('participation.signedOutTitle'), { description: t('participation.signedOutBody') });
         }
-        hadUser.current = !!session?.user && !session.user.is_anonymous;
-        setSession(session);
-        setUser(session?.user ?? null);
-        setIsLoading(false);
+        lifecycle.event(session);
       }
     );
 
-    return () => subscription.unsubscribe();
+    supabase.auth.getSession()
+      .then(({ data }) => lifecycle.initial(data.session))
+      .catch(() => lifecycle.initial(null));
+
+    return () => {
+      lifecycle.dispose();
+      subscription.unsubscribe();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
