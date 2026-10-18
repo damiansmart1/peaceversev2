@@ -1,3 +1,4 @@
+import TranslatableText from '@/components/TranslatableText';
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,6 +19,7 @@ import {
   useElectionResults
 } from '@/hooks/useElections';
 import { format, differenceInDays } from 'date-fns';
+import { fr, enUS } from 'date-fns/locale';
 import ElectionPollingStations from './ElectionPollingStations';
 import ElectionObserversPanel from './ElectionObserversPanel';
 import ElectionIncidentsList from './ElectionIncidentsList';
@@ -43,7 +45,7 @@ interface ElectionDetailViewProps {
 }
 
 export default function ElectionDetailView({ election, onBack }: ElectionDetailViewProps) {
-  const { t } = useTranslationContext();
+  const { t, language } = useTranslationContext();
   const [activeTab, setActiveTab] = useState('overview');
   
   const { data: stats, isLoading: statsLoading, refetch: refetchStats } = useElectionStats(election.id);
@@ -82,36 +84,34 @@ export default function ElectionDetailView({ election, onBack }: ElectionDetailV
           </Button>
           <div>
             <div className="flex items-center gap-3">
-              <h2 className="text-2xl font-bold">{election.name}</h2>
+              <h2 className="text-2xl font-bold"><TranslatableText text={election.name} /></h2>
               <Badge className={`${getStatusColor(election.status)} text-white`}>
-                {election.status.toUpperCase()}
+                {t(`elections.${election.status}`, election.status)}
               </Badge>
             </div>
             <div className="flex items-center gap-4 mt-1 text-muted-foreground">
               <span className="flex items-center gap-1">
                 <MapPin className="h-4 w-4" />
-                {election.country_name}
+                {new Intl.DisplayNames([language], { type: 'region' }).of(election.country_code) || election.country_name}
               </span>
-              <span className="capitalize">{election.election_type.replace('_', ' ')}</span>
+              <span className="capitalize">{t(`elections.${election.election_type}`, election.election_type.replaceAll('_', ' '))}</span>
               <span>
-                {format(new Date(election.voting_date), 'MMMM dd, yyyy')}
+                {format(new Date(election.voting_date), 'MMMM dd, yyyy', { locale: language === 'fr' ? fr : enUS })}
               </span>
             </div>
           </div>
         </div>
         <div className="text-right">
           {isElectionDay ? (
-            <Badge className="bg-amber-500 text-white text-lg px-4 py-2 animate-pulse">
-              🗳️ ELECTION DAY
-            </Badge>
+            <Badge className="bg-amber-500 text-white text-lg px-4 py-2 animate-pulse">{t('elections.election_day')}</Badge>
           ) : isPastElection ? (
             <Badge variant="outline" className="text-lg px-4 py-2">
-              {Math.abs(daysToElection)} days ago
+              {t('elections.days_ago').replace('{count}', String(Math.abs(daysToElection)))}
             </Badge>
           ) : (
             <div>
               <p className="text-3xl font-bold text-primary">{daysToElection}</p>
-              <p className="text-xs text-muted-foreground">days until election</p>
+              <p className="text-xs text-muted-foreground">{t('elections.days_until_election')}</p>
             </div>
           )}
         </div>
@@ -124,7 +124,7 @@ export default function ElectionDetailView({ election, onBack }: ElectionDetailV
             <MapPin className="h-4 w-4 text-blue-500" />
             <div>
               <p className="text-xl font-bold">{stats?.totalStations || stations?.length || 0}</p>
-              <p className="text-xs text-muted-foreground">Polling Stations</p>
+              <p className="text-xs text-muted-foreground">{t('elections.polling_stations')}</p>
             </div>
           </div>
         </Card>
@@ -133,7 +133,7 @@ export default function ElectionDetailView({ election, onBack }: ElectionDetailV
             <Users className="h-4 w-4 text-green-500" />
             <div>
               <p className="text-xl font-bold">{stats?.totalObservers || observers?.length || 0}</p>
-              <p className="text-xs text-muted-foreground">Observers</p>
+              <p className="text-xs text-muted-foreground">{t('elections.observers')}</p>
             </div>
           </div>
         </Card>
@@ -142,7 +142,7 @@ export default function ElectionDetailView({ election, onBack }: ElectionDetailV
             <AlertTriangle className="h-4 w-4 text-orange-500" />
             <div>
               <p className="text-xl font-bold">{stats?.totalIncidents || incidents?.length || 0}</p>
-              <p className="text-xs text-muted-foreground">Incidents</p>
+              <p className="text-xs text-muted-foreground">{t('elections.incidents')}</p>
             </div>
           </div>
         </Card>
@@ -151,7 +151,7 @@ export default function ElectionDetailView({ election, onBack }: ElectionDetailV
             <Vote className="h-4 w-4 text-purple-500" />
             <div>
               <p className="text-xl font-bold">{stats?.totalResults || results?.length || 0}</p>
-              <p className="text-xs text-muted-foreground">Results</p>
+              <p className="text-xs text-muted-foreground">{t('elections.results')}</p>
             </div>
           </div>
         </Card>
@@ -160,7 +160,7 @@ export default function ElectionDetailView({ election, onBack }: ElectionDetailV
             <CheckCircle2 className="h-4 w-4 text-emerald-500" />
             <div>
               <p className="text-xl font-bold">{stats?.verifiedResults || 0}</p>
-              <p className="text-xs text-muted-foreground">Verified</p>
+              <p className="text-xs text-muted-foreground">{t('elections.verified')}</p>
             </div>
           </div>
         </Card>
@@ -169,7 +169,7 @@ export default function ElectionDetailView({ election, onBack }: ElectionDetailV
             <Shield className="h-4 w-4 text-red-500" />
             <div>
               <p className="text-xl font-bold">{stats?.criticalIncidents || 0}</p>
-              <p className="text-xs text-muted-foreground">Critical</p>
+              <p className="text-xs text-muted-foreground">{t('elections.critical')}</p>
             </div>
           </div>
         </Card>
@@ -181,55 +181,55 @@ export default function ElectionDetailView({ election, onBack }: ElectionDetailV
           <TabsTrigger value="education">{t('voterEducation.title')}</TabsTrigger>
           <TabsTrigger value="overview" className="gap-1">
             <BarChart3 className="h-4 w-4" />
-            <span className="hidden sm:inline">Overview</span>
+            <span className="hidden sm:inline">{t('elections.overview')}</span>
           </TabsTrigger>
           <TabsTrigger value="realtime" className="gap-1">
             <Activity className="h-4 w-4" />
-            <span className="hidden sm:inline">Live</span>
+            <span className="hidden sm:inline">{t('elections.live')}</span>
           </TabsTrigger>
           <TabsTrigger value="timeline" className="gap-1">
             <Clock className="h-4 w-4" />
-            <span className="hidden sm:inline">Timeline</span>
+            <span className="hidden sm:inline">{t('elections.timeline')}</span>
           </TabsTrigger>
           <TabsTrigger value="stations" className="gap-1">
             <MapPin className="h-4 w-4" />
-            <span className="hidden sm:inline">Stations</span>
+            <span className="hidden sm:inline">{t('elections.stations')}</span>
           </TabsTrigger>
           <TabsTrigger value="observers" className="gap-1">
             <Users className="h-4 w-4" />
-            <span className="hidden sm:inline">Observers</span>
+            <span className="hidden sm:inline">{t('elections.observers')}</span>
           </TabsTrigger>
           <TabsTrigger value="accreditation" className="gap-1">
             <Shield className="h-4 w-4" />
-            <span className="hidden sm:inline">Accredit</span>
+            <span className="hidden sm:inline">{t('elections.accredit')}</span>
           </TabsTrigger>
           <TabsTrigger value="incidents" className="gap-1">
             <AlertTriangle className="h-4 w-4" />
-            <span className="hidden sm:inline">Incidents</span>
+            <span className="hidden sm:inline">{t('elections.incidents')}</span>
           </TabsTrigger>
           <TabsTrigger value="verification" className="gap-1">
             <CheckCircle2 className="h-4 w-4" />
-            <span className="hidden sm:inline">Verify</span>
+            <span className="hidden sm:inline">{t('elections.verify')}</span>
           </TabsTrigger>
           <TabsTrigger value="collation" className="gap-1">
             <PieChart className="h-4 w-4" />
-            <span className="hidden sm:inline">Results</span>
+            <span className="hidden sm:inline">{t('elections.results')}</span>
           </TabsTrigger>
           <TabsTrigger value="audit" className="gap-1">
             <Lock className="h-4 w-4" />
-            <span className="hidden sm:inline">Audit</span>
+            <span className="hidden sm:inline">{t('elections.audit')}</span>
           </TabsTrigger>
           <TabsTrigger value="export" className="gap-1">
             <Download className="h-4 w-4" />
-            <span className="hidden sm:inline">Export</span>
+            <span className="hidden sm:inline">{t('elections.export')}</span>
           </TabsTrigger>
           <TabsTrigger value="anomalies" className="gap-1">
             <Zap className="h-4 w-4" />
-            <span className="hidden sm:inline">Anomalies</span>
+            <span className="hidden sm:inline">{t('elections.anomalies')}</span>
           </TabsTrigger>
           <TabsTrigger value="checklists" className="gap-1">
             <ClipboardCheck className="h-4 w-4" />
-            <span className="hidden sm:inline">Checklists</span>
+            <span className="hidden sm:inline">{t('elections.checklists')}</span>
           </TabsTrigger>
           <TabsTrigger value="pvt" className="gap-1">
             <Target className="h-4 w-4" />
@@ -248,16 +248,16 @@ export default function ElectionDetailView({ election, onBack }: ElectionDetailV
             {/* Election Timeline */}
             <Card>
               <CardHeader>
-                <CardTitle>Election Timeline</CardTitle>
+                <CardTitle>{t('elections.election_timeline')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {election.registration_start && (
                   <div className="flex items-center gap-3">
                     <div className={`w-3 h-3 rounded-full ${new Date() >= new Date(election.registration_start) ? 'bg-green-500' : 'bg-muted'}`} />
                     <div className="flex-1">
-                      <p className="font-medium">Registration Period</p>
+                      <p className="font-medium">{t('elections.registration_period')}</p>
                       <p className="text-sm text-muted-foreground">
-                        {format(new Date(election.registration_start), 'MMM dd')} - {election.registration_end ? format(new Date(election.registration_end), 'MMM dd, yyyy') : 'TBD'}
+                        {format(new Date(election.registration_start), 'MMM dd', { locale: language === 'fr' ? fr : enUS })} - {election.registration_end ? format(new Date(election.registration_end), 'MMM dd, yyyy', { locale: language === 'fr' ? fr : enUS }) : t('elections.tbd')}
                       </p>
                     </div>
                   </div>
@@ -266,9 +266,9 @@ export default function ElectionDetailView({ election, onBack }: ElectionDetailV
                   <div className="flex items-center gap-3">
                     <div className={`w-3 h-3 rounded-full ${new Date() >= new Date(election.campaign_start) ? 'bg-green-500' : 'bg-muted'}`} />
                     <div className="flex-1">
-                      <p className="font-medium">Campaign Period</p>
+                      <p className="font-medium">{t('elections.campaign_period')}</p>
                       <p className="text-sm text-muted-foreground">
-                        {format(new Date(election.campaign_start), 'MMM dd')} - {election.campaign_end ? format(new Date(election.campaign_end), 'MMM dd, yyyy') : 'TBD'}
+                        {format(new Date(election.campaign_start), 'MMM dd', { locale: language === 'fr' ? fr : enUS })} - {election.campaign_end ? format(new Date(election.campaign_end), 'MMM dd, yyyy', { locale: language === 'fr' ? fr : enUS }) : t('elections.tbd')}
                       </p>
                     </div>
                   </div>
@@ -276,9 +276,9 @@ export default function ElectionDetailView({ election, onBack }: ElectionDetailV
                 <div className="flex items-center gap-3">
                   <div className={`w-3 h-3 rounded-full ${isElectionDay || isPastElection ? 'bg-green-500' : 'bg-muted'}`} />
                   <div className="flex-1">
-                    <p className="font-medium">Voting Day</p>
+                    <p className="font-medium">{t('elections.voting_day')}</p>
                     <p className="text-sm text-muted-foreground">
-                      {format(new Date(election.voting_date), 'MMMM dd, yyyy')}
+                      {format(new Date(election.voting_date), 'MMMM dd, yyyy', { locale: language === 'fr' ? fr : enUS })}
                     </p>
                   </div>
                 </div>
@@ -289,26 +289,24 @@ export default function ElectionDetailView({ election, onBack }: ElectionDetailV
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Shield className="h-5 w-5" />
-                  Security Configuration
-                </CardTitle>
+                  <Shield className="h-5 w-5" />{t('elections.security_configuration')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span>Verification Required</span>
+                  <span>{t('elections.verification_required')}</span>
                   <Badge variant={election.verification_required ? 'default' : 'secondary'}>
-                    {election.verification_required ? 'Enabled' : 'Disabled'}
+                    {election.verification_required ? t('elections.enabled') : t('elections.disabled')}
                   </Badge>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span>Multi-Signature Verification</span>
+                  <span>{t('elections.multi_signature_verification')}</span>
                   <Badge variant={election.multi_signature_required ? 'default' : 'secondary'}>
-                    {election.multi_signature_required ? 'Enabled' : 'Disabled'}
+                    {election.multi_signature_required ? t('elections.enabled') : t('elections.disabled')}
                   </Badge>
                 </div>
                 {election.multi_signature_required && (
                   <div className="flex items-center justify-between">
-                    <span>Minimum Signatures</span>
+                    <span>{t('elections.minimum_signatures')}</span>
                     <Badge variant="outline">{election.min_signatures_required}</Badge>
                   </div>
                 )}
@@ -319,15 +317,13 @@ export default function ElectionDetailView({ election, onBack }: ElectionDetailV
           {/* Verification Progress */}
           <Card>
             <CardHeader>
-              <CardTitle>Verification Progress</CardTitle>
-              <CardDescription>
-                Station setup and result verification status
-              </CardDescription>
+              <CardTitle>{t('elections.verification_progress')}</CardTitle>
+              <CardDescription>{t('elections.station_setup_and_result_verification_status')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
                 <div className="flex justify-between text-sm mb-1">
-                  <span>Stations Verified</span>
+                  <span>{t('elections.stations_verified')}</span>
                   <span>{stats?.verifiedStations || 0} / {stats?.totalStations || 0}</span>
                 </div>
                 <Progress 
@@ -337,7 +333,7 @@ export default function ElectionDetailView({ election, onBack }: ElectionDetailV
               </div>
               <div>
                 <div className="flex justify-between text-sm mb-1">
-                  <span>Observers Deployed</span>
+                  <span>{t('elections.observers_deployed')}</span>
                   <span>{stats?.deployedObservers || 0} / {stats?.accreditedObservers || 0}</span>
                 </div>
                 <Progress 
@@ -347,7 +343,7 @@ export default function ElectionDetailView({ election, onBack }: ElectionDetailV
               </div>
               <div>
                 <div className="flex justify-between text-sm mb-1">
-                  <span>Results Verified</span>
+                  <span>{t('elections.results_verified')}</span>
                   <span>{stats?.verifiedResults || 0} / {stats?.totalResults || 0}</span>
                 </div>
                 <Progress 
@@ -357,7 +353,7 @@ export default function ElectionDetailView({ election, onBack }: ElectionDetailV
               </div>
               <div>
                 <div className="flex justify-between text-sm mb-1">
-                  <span>Incidents Resolved</span>
+                  <span>{t('elections.incidents_resolved')}</span>
                   <span>{stats?.resolvedIncidents || 0} / {stats?.totalIncidents || 0}</span>
                 </div>
                 <Progress 

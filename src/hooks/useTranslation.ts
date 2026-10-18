@@ -1,3 +1,4 @@
+import { electionCopy } from '@/lib/electionCopy';
 import { useState, useEffect } from 'react';
 import { participationCopy } from '@/lib/participationCopy';
 import { accessibilityCopy } from '@/lib/accessibilityCopy';
@@ -2739,6 +2740,10 @@ export const useTranslation = () => {
   };
 
   const t = (key: string, fallback?: string): string => {
+    if (key.startsWith('elections.')) {
+      const name = key.slice('elections.'.length);
+      return electionCopy[language]?.[name] || electionCopy.en[name] || fallback || name;
+    }
     if (key.startsWith('voterEducation.')) {
       const name = key.slice('voterEducation.'.length);
       return voterEducationCopy[language]?.[name] || voterEducationCopy.en[name] || fallback || name;

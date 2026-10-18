@@ -1,3 +1,5 @@
+# French translation repair
+- [ ] Translate election overview, details, reporting and records; verify French learning content and switching.
 # Democratic participation
 # Voter education
 - [x] Add country-specific, officially sourced voter lessons and interactive knowledge checks (Kenya and South Africa; other countries await source verification).

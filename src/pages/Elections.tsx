@@ -1,3 +1,4 @@
+import TranslatableText from '@/components/TranslatableText';
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -43,6 +44,7 @@ import { useElections, useAllElectionIncidents, useElectionStats, type Election,
 import { useElectionDemo } from '@/hooks/useElectionDemo';
 import { useAdminCheck } from '@/hooks/useAdminCheck';
 import { format, differenceInDays } from 'date-fns';
+import { fr, enUS } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
 import ElectionIncidentReportForm from '@/components/elections/ElectionIncidentReportForm';
 import ElectionRealTimeDashboard from '@/components/elections/ElectionRealTimeDashboard';
@@ -74,14 +76,14 @@ const STATUS_COLORS: Record<ElectionStatus, string> = {
 };
 
 const FEATURE_HIGHLIGHTS = [
-  { icon: Shield, title: 'Multi-Signature Verification', desc: 'Cryptographic signing for result integrity' },
-  { icon: Globe, title: 'International Standards', desc: 'UN, EU, AU observation formats' },
-  { icon: Wifi, title: 'Offline-First', desc: 'Works in low-bandwidth regions' },
-  { icon: Activity, title: 'Real-Time Monitoring', desc: 'Live incident tracking dashboard' },
+  { icon: Shield, title: 'multi_signature_verification', desc: 'Cryptographic signing for result integrity' },
+  { icon: Globe, title: 'international_standards', desc: 'UN, EU, AU observation formats' },
+  { icon: Wifi, title: 'offline_first', desc: 'Works in low-bandwidth regions' },
+  { icon: Activity, title: 'real_time_monitoring', desc: 'Live incident tracking dashboard' },
 ];
 
 export default function Elections() {
-  const { t } = useTranslationContext();
+  const { t, language } = useTranslationContext();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   const [searchTerm, setSearchTerm] = useState('');
@@ -142,21 +144,16 @@ export default function Elections() {
               <div>
                 <div className="flex items-center gap-3 mb-3">
                   <Vote className="h-8 md:h-10 w-8 md:w-10 text-gold" />
-                  <h1 className="text-2xl md:text-4xl font-bold text-white">
-                    Election Monitoring Center
-                  </h1>
+                  <h1 className="text-2xl md:text-4xl font-bold text-white">{t('elections.election_monitoring_center')}</h1>
                 </div>
-                <p className="text-base md:text-lg text-white/80 max-w-2xl">
-                  International-standard election observation, incident reporting, and verification 
-                  system. Ensuring transparency, credibility, and security in democratic processes across Africa.
-                </p>
+                <p className="text-base md:text-lg text-white/80 max-w-2xl">{t('elections.international_standard_election_observation_incident_reporting_and_verification_system_ensuring_transparency_credibility_and_security_in_democratic_processes_across_africa')}</p>
                 
                 {/* Feature highlights */}
                 <div className="flex flex-wrap gap-3 mt-4">
                   {FEATURE_HIGHLIGHTS.map((feature, idx) => (
                     <div key={idx} className="flex items-center gap-2 bg-white/10 rounded-full px-3 py-1">
                       <feature.icon className="h-3 w-3 text-gold" />
-                      <span className="text-xs text-white">{feature.title}</span>
+                      <span className="text-xs text-white">{t(`elections.${t(`elections.${t(`elections.${t(`elections.${feature.title}`, feature.title)}`, feature.title)}`, feature.title)}`, feature.title)}</span>
                     </div>
                   ))}
                 </div>
@@ -166,13 +163,11 @@ export default function Elections() {
                 {/* Connection status */}
                 <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${isOnline ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
                   {isOnline ? <Wifi className="h-4 w-4 text-green-400" /> : <WifiOff className="h-4 w-4 text-red-400" />}
-                  <span className="text-xs text-white">{isOnline ? 'Online' : 'Offline Mode'}</span>
+                  <span className="text-xs text-white">{isOnline ? t('elections.online') : t('elections.offline_mode')}</span>
                 </div>
                 
                 <Button className="bg-gold text-primary-dark hover:bg-gold/90" onClick={() => setActiveTab('report')}>
-                  <AlertTriangle className="h-4 w-4 mr-2" />
-                  Report Incident
-                </Button>
+                  <AlertTriangle className="h-4 w-4 mr-2" />{t('elections.report_incident')}</Button>
               </div>
             </div>
           </div>
@@ -186,25 +181,19 @@ export default function Elections() {
                 <div className="flex items-center gap-2">
                   <Database className="h-5 w-5 text-muted-foreground" />
                   <div>
-                    <p className="font-medium">Demo Data Controls</p>
-                    <p className="text-xs text-muted-foreground">Seed realistic election data for testing</p>
+                    <p className="font-medium">{t('elections.demo_data_controls')}</p>
+                    <p className="text-xs text-muted-foreground">{t('elections.seed_realistic_election_data_for_testing')}</p>
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={clearDemoData} disabled={isDemoLoading}>
-                    Clear Demo
-                  </Button>
+                  <Button variant="outline" size="sm" onClick={clearDemoData} disabled={isDemoLoading}>{t('elections.clear_demo')}</Button>
                   <Button size="sm" onClick={seedDemoData} disabled={isDemoLoading}>
                     {isDemoLoading ? (
                       <>
-                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                        Seeding...
-                      </>
+                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />{t('elections.seeding')}</>
                     ) : (
                       <>
-                        <Zap className="h-4 w-4 mr-2" />
-                        Seed Demo Data
-                      </>
+                        <Zap className="h-4 w-4 mr-2" />{t('elections.seed_demo_data')}</>
                     )}
                   </Button>
                 </div>
@@ -219,7 +208,7 @@ export default function Elections() {
             <CardContent className="pt-4 pb-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-muted-foreground">Active</p>
+                  <p className="text-xs text-muted-foreground">{t('elections.active')}</p>
                   <p className="text-2xl font-bold">{activeElections.length}</p>
                 </div>
                 <Vote className="h-6 w-6 text-amber-500 opacity-80" />
@@ -230,7 +219,7 @@ export default function Elections() {
             <CardContent className="pt-4 pb-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-muted-foreground">Upcoming</p>
+                  <p className="text-xs text-muted-foreground">{t('elections.upcoming')}</p>
                   <p className="text-2xl font-bold">{upcomingElections.length}</p>
                 </div>
                 <Calendar className="h-6 w-6 text-blue-500 opacity-80" />
@@ -241,7 +230,7 @@ export default function Elections() {
             <CardContent className="pt-4 pb-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-muted-foreground">Incidents</p>
+                  <p className="text-xs text-muted-foreground">{t('elections.incidents')}</p>
                   <p className="text-2xl font-bold">{totalIncidents}</p>
                 </div>
                 <AlertTriangle className="h-6 w-6 text-orange-500 opacity-80" />
@@ -252,7 +241,7 @@ export default function Elections() {
             <CardContent className="pt-4 pb-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-muted-foreground">Critical</p>
+                  <p className="text-xs text-muted-foreground">{t('elections.critical')}</p>
                   <p className="text-2xl font-bold text-red-600">{criticalIncidents}</p>
                 </div>
                 <Zap className="h-6 w-6 text-red-500 opacity-80" />
@@ -263,7 +252,7 @@ export default function Elections() {
             <CardContent className="pt-4 pb-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-muted-foreground">Verified</p>
+                  <p className="text-xs text-muted-foreground">{t('elections.verified')}</p>
                   <p className="text-2xl font-bold">{verifiedIncidents}</p>
                 </div>
                 <CheckCircle2 className="h-6 w-6 text-green-500 opacity-80" />
@@ -274,7 +263,7 @@ export default function Elections() {
             <CardContent className="pt-4 pb-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-muted-foreground">Countries</p>
+                  <p className="text-xs text-muted-foreground">{t('elections.countries')}</p>
                   <p className="text-2xl font-bold">{countries.length}</p>
                 </div>
                 <Globe className="h-6 w-6 text-purple-500 opacity-80" />
@@ -289,11 +278,11 @@ export default function Elections() {
             <TabsList className="inline-flex min-w-max">
               <TabsTrigger value="overview" className="gap-1">
                 <Vote className="h-4 w-4" />
-                <span className="hidden sm:inline">Elections</span>
+                <span className="hidden sm:inline">{t('elections.elections')}</span>
               </TabsTrigger>
               <TabsTrigger value="incidents" className="gap-1">
                 <AlertTriangle className="h-4 w-4" />
-                <span className="hidden sm:inline">Incidents</span>
+                <span className="hidden sm:inline">{t('elections.incidents')}</span>
               </TabsTrigger>
               <TabsTrigger value="education" className="gap-1" aria-label={t('voterEducation.title')}>
                 <BookOpen className="h-4 w-4" />
@@ -301,21 +290,21 @@ export default function Elections() {
               </TabsTrigger>
               <TabsTrigger value="report" className="gap-1">
                 <Plus className="h-4 w-4" />
-                <span className="hidden sm:inline">Report</span>
+                <span className="hidden sm:inline">{t('elections.report')}</span>
               </TabsTrigger>
               {hasElevatedAccess && (
                 <>
                   <TabsTrigger value="verification" className="gap-1">
                     <Shield className="h-4 w-4" />
-                    <span className="hidden sm:inline">Verify</span>
+                    <span className="hidden sm:inline">{t('elections.verify')}</span>
                   </TabsTrigger>
                   <TabsTrigger value="analytics" className="gap-1">
                     <BarChart3 className="h-4 w-4" />
-                    <span className="hidden sm:inline">Analytics</span>
+                    <span className="hidden sm:inline">{t('elections.analytics')}</span>
                   </TabsTrigger>
                   <TabsTrigger value="live-results" className="gap-1">
                     <Radio className="h-4 w-4" />
-                    <span className="hidden sm:inline">Live</span>
+                    <span className="hidden sm:inline">{t('elections.live')}</span>
                   </TabsTrigger>
                   <TabsTrigger value="ussd-sms" className="gap-1">
                     <Smartphone className="h-4 w-4" />
@@ -323,11 +312,11 @@ export default function Elections() {
                   </TabsTrigger>
                   <TabsTrigger value="blockchain" className="gap-1">
                     <Link2 className="h-4 w-4" />
-                    <span className="hidden sm:inline">Audit</span>
+                    <span className="hidden sm:inline">{t('elections.audit')}</span>
                   </TabsTrigger>
                   <TabsTrigger value="biometric" className="gap-1">
                     <Fingerprint className="h-4 w-4" />
-                    <span className="hidden sm:inline">Biometric</span>
+                    <span className="hidden sm:inline">{t('elections.biometric')}</span>
                   </TabsTrigger>
                   <TabsTrigger value="ocr" className="gap-1">
                     <Camera className="h-4 w-4" />
@@ -335,11 +324,11 @@ export default function Elections() {
                   </TabsTrigger>
                   <TabsTrigger value="command" className="gap-1">
                     <Activity className="h-4 w-4" />
-                    <span className="hidden sm:inline">Command</span>
+                    <span className="hidden sm:inline">{t('elections.command')}</span>
                   </TabsTrigger>
                   <TabsTrigger value="media" className="gap-1">
                     <FileText className="h-4 w-4" />
-                    <span className="hidden sm:inline">Media</span>
+                    <span className="hidden sm:inline">{t('elections.media')}</span>
                   </TabsTrigger>
                 </>
               )}
@@ -354,7 +343,7 @@ export default function Elections() {
                   <div className="relative flex-1 min-w-[200px]">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder="Search elections..."
+                      placeholder={t('elections.search_elections')}
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="pl-9"
@@ -362,28 +351,28 @@ export default function Elections() {
                   </div>
                   <Select value={countryFilter} onValueChange={setCountryFilter}>
                     <SelectTrigger className="w-40">
-                      <SelectValue placeholder="Country" />
+                      <SelectValue placeholder={t('elections.country')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Countries</SelectItem>
+                      <SelectItem value="all">{t('elections.all_countries')}</SelectItem>
                       {countries.map((c: any) => (
-                        <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
+                        <SelectItem key={c.code} value={c.code}>{new Intl.DisplayNames([language], { type: 'region' }).of(c.code) || c.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                   <Select value={statusFilter} onValueChange={setStatusFilter}>
                     <SelectTrigger className="w-40">
-                      <SelectValue placeholder="Status" />
+                      <SelectValue placeholder={t('elections.status')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Status</SelectItem>
-                      <SelectItem value="voting">Voting</SelectItem>
-                      <SelectItem value="counting">Counting</SelectItem>
-                      <SelectItem value="scheduled">Scheduled</SelectItem>
-                      <SelectItem value="completed">Completed</SelectItem>
+                      <SelectItem value="all">{t('elections.all_status')}</SelectItem>
+                      <SelectItem value="voting">{t('elections.voting')}</SelectItem>
+                      <SelectItem value="counting">{t('elections.counting')}</SelectItem>
+                      <SelectItem value="scheduled">{t('elections.scheduled')}</SelectItem>
+                      <SelectItem value="completed">{t('elections.completed')}</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Button variant="outline" size="icon" onClick={() => refetch()}>
+                  <Button variant="outline" size="icon" aria-label={t('elections.refresh')} onClick={() => refetch()}>
                     <RefreshCw className="h-4 w-4" />
                   </Button>
                 </div>
@@ -398,13 +387,11 @@ export default function Elections() {
             ) : filteredElections?.length === 0 ? (
               <Card className="p-12 text-center">
                 <Vote className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
-                <h3 className="text-lg font-medium">No Elections Found</h3>
-                <p className="text-muted-foreground mb-4">No elections match your current filters</p>
+                <h3 className="text-lg font-medium">{t('elections.no_elections_found')}</h3>
+                <p className="text-muted-foreground mb-4">{t('elections.no_elections_match_your_current_filters')}</p>
                 {isAdmin && (
                   <Button onClick={seedDemoData} disabled={isDemoLoading}>
-                    <Zap className="h-4 w-4 mr-2" />
-                    Seed Demo Elections
-                  </Button>
+                    <Zap className="h-4 w-4 mr-2" />{t('elections.seed_demo_elections')}</Button>
                 )}
               </Card>
             ) : (
@@ -424,39 +411,39 @@ export default function Elections() {
                       <CardHeader className="pb-2">
                         <div className="flex items-start justify-between">
                           <div>
-                            <CardTitle className="line-clamp-1 text-base">{election.name}</CardTitle>
+                            <CardTitle className="line-clamp-1 text-base"><TranslatableText text={election.name} /></CardTitle>
                             <CardDescription className="flex items-center gap-1 mt-1">
                               <Globe className="h-3 w-3" />
-                              {election.country_name}
+                              {new Intl.DisplayNames([language], { type: 'region' }).of(election.country_code) || election.country_name}
                             </CardDescription>
                           </div>
                           <Badge className={STATUS_COLORS[election.status]}>
-                            {election.status}
+                            {t(`elections.${election.status}`, election.status)}
                           </Badge>
                         </div>
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-3">
                           <div className="flex items-center justify-between text-sm">
-                            <span className="text-muted-foreground">Type</span>
+                            <span className="text-muted-foreground">{t('elections.type')}</span>
                             <Badge variant="outline" className="capitalize text-xs">
-                              {election.election_type.replace('_', ' ')}
+                              {t(`elections.${election.election_type}`, election.election_type.replaceAll('_', ' '))}
                             </Badge>
                           </div>
                           <div className="flex items-center justify-between text-sm">
-                            <span className="text-muted-foreground">Date</span>
+                            <span className="text-muted-foreground">{t('elections.date')}</span>
                             <span className="font-medium text-xs">
-                              {format(new Date(election.voting_date), 'MMM dd, yyyy')}
+                              {format(new Date(election.voting_date), 'MMM dd, yyyy', { locale: language === 'fr' ? fr : enUS })}
                             </span>
                           </div>
                           <div className="flex items-center justify-between text-sm">
-                            <span className="text-muted-foreground">Countdown</span>
+                            <span className="text-muted-foreground">{t('elections.countdown')}</span>
                             {isElectionDay ? (
-                              <Badge className="bg-amber-500 text-white animate-pulse text-xs">TODAY</Badge>
+                              <Badge className="bg-amber-500 text-white animate-pulse text-xs">{t('elections.today')}</Badge>
                             ) : isPast ? (
-                              <span className="text-muted-foreground text-xs">{Math.abs(daysToElection)}d ago</span>
+                              <span className="text-muted-foreground text-xs">{t('elections.days_ago').replace('{count}', String(Math.abs(daysToElection)))}</span>
                             ) : (
-                              <span className="font-medium text-primary text-xs">{daysToElection}d</span>
+                              <span className="font-medium text-primary text-xs">{t('elections.days_remaining').replace('{count}', String(daysToElection))}</span>
                             )}
                           </div>
                           
@@ -464,15 +451,11 @@ export default function Elections() {
                           <div className="flex items-center gap-2 pt-2 border-t">
                             {election.verification_required && (
                               <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                <Shield className="h-3 w-3" />
-                                Verified
-                              </div>
+                                <Shield className="h-3 w-3" />{t('elections.verified')}</div>
                             )}
                             {election.multi_signature_required && (
                               <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                <Users className="h-3 w-3" />
-                                Multi-Sig
-                              </div>
+                                <Users className="h-3 w-3" />{t('elections.multi_sig')}</div>
                             )}
                           </div>
                         </div>
@@ -482,16 +465,12 @@ export default function Elections() {
                             e.stopPropagation();
                             setSelectedElection(election);
                           }}>
-                            <Eye className="h-3 w-3 mr-1" />
-                            View
-                          </Button>
+                            <Eye className="h-3 w-3 mr-1" />{t('elections.view')}</Button>
                           <Button size="sm" className="flex-1" onClick={(e) => {
                             e.stopPropagation();
                             setActiveTab('report');
                           }}>
-                            <AlertTriangle className="h-3 w-3 mr-1" />
-                            Report
-                          </Button>
+                            <AlertTriangle className="h-3 w-3 mr-1" />{t('elections.report')}</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -506,20 +485,16 @@ export default function Elections() {
           <TabsContent value="incidents" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Recent Election Incidents</CardTitle>
-                <CardDescription>
-                  Latest reported incidents across all monitored elections
-                </CardDescription>
+                <CardTitle>{t('elections.recent_election_incidents')}</CardTitle>
+                <CardDescription>{t('elections.latest_reported_incidents_across_all_monitored_elections')}</CardDescription>
               </CardHeader>
               <CardContent>
                 {!recentIncidents || recentIncidents.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
                     <CheckCircle2 className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>No incidents reported</p>
+                    <p>{t('elections.no_incidents_reported')}</p>
                     {isAdmin && (
-                      <Button className="mt-4" onClick={seedDemoData} disabled={isDemoLoading}>
-                        Seed Demo Data
-                      </Button>
+                      <Button className="mt-4" onClick={seedDemoData} disabled={isDemoLoading}>{t('elections.seed_demo_data')}</Button>
                     )}
                   </div>
                 ) : (
@@ -546,20 +521,18 @@ export default function Elections() {
                                         : 'bg-yellow-500'
                                   } text-white`}
                                 >
-                                  {incident.severity}
+                                  {t(`elections.${incident.severity}`, incident.severity)}
                                 </Badge>
                                 <span className="text-xs text-muted-foreground font-mono">
                                   {incident.incident_code}
                                 </span>
                                 {incident.requires_immediate_action && (
-                                  <Badge className="bg-red-600 text-white text-xs animate-pulse">
-                                    URGENT
-                                  </Badge>
+                                  <Badge className="bg-red-600 text-white text-xs animate-pulse">{t('elections.urgent')}</Badge>
                                 )}
                               </div>
-                              <h4 className="font-medium">{incident.title}</h4>
+                              <h4 className="font-medium"><TranslatableText text={incident.title} /></h4>
                               <p className="text-sm text-muted-foreground line-clamp-2">
-                                {incident.description}
+                                <TranslatableText text={incident.description} />
                               </p>
                               <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
                                 <span className="flex items-center gap-1">
@@ -568,7 +541,7 @@ export default function Elections() {
                                 </span>
                                 <span className="flex items-center gap-1">
                                   <Calendar className="h-3 w-3" />
-                                  {format(new Date(incident.incident_datetime), 'MMM dd, HH:mm')}
+                                  {format(new Date(incident.incident_datetime), 'MMM dd, HH:mm', { locale: language === 'fr' ? fr : enUS })}
                                 </span>
                               </div>
                             </div>
@@ -576,7 +549,7 @@ export default function Elections() {
                               variant="outline" 
                               className={incident.verification_status === 'verified' ? 'text-green-600 border-green-600' : 'text-amber-600 border-amber-600'}
                             >
-                              {incident.verification_status}
+                              {t(`elections.${incident.verification_status}`, incident.verification_status)}
                             </Badge>
                           </div>
                         </div>
@@ -602,8 +575,8 @@ export default function Elections() {
                 ) : (
                   <Card className="p-12 text-center">
                     <Shield className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
-                    <h3 className="text-lg font-medium">No Elections Available</h3>
-                    <p className="text-muted-foreground">Create or seed elections to access verification queue</p>
+                    <h3 className="text-lg font-medium">{t('elections.no_elections_available')}</h3>
+                    <p className="text-muted-foreground">{t('elections.create_or_seed_elections_to_access_verification_queue')}</p>
                   </Card>
                 )}
               </TabsContent>
@@ -616,8 +589,8 @@ export default function Elections() {
                 ) : (
                   <Card className="p-12 text-center">
                     <BarChart3 className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
-                    <h3 className="text-lg font-medium">No Analytics Available</h3>
-                    <p className="text-muted-foreground">Create or seed elections to view analytics</p>
+                    <h3 className="text-lg font-medium">{t('elections.no_analytics_available')}</h3>
+                    <p className="text-muted-foreground">{t('elections.create_or_seed_elections_to_view_analytics')}</p>
                   </Card>
                 )}
               </TabsContent>
