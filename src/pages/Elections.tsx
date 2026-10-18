@@ -427,7 +427,7 @@ export default function Elections() {
                           <div className="flex items-center justify-between text-sm">
                             <span className="text-muted-foreground">{t('elections.type')}</span>
                             <Badge variant="outline" className="capitalize text-xs">
-                              {t(`elections.${election.election_type}`, election.election_type.replaceAll('_', ' '))}
+                              {t(`elections.${election.election_type}`, election.election_type.replace(/_/g, ' '))}
                             </Badge>
                           </div>
                           <div className="flex items-center justify-between text-sm">

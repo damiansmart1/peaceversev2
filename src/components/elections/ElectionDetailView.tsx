@@ -94,7 +94,7 @@ export default function ElectionDetailView({ election, onBack }: ElectionDetailV
                 <MapPin className="h-4 w-4" />
                 {new Intl.DisplayNames([language], { type: 'region' }).of(election.country_code) || election.country_name}
               </span>
-              <span className="capitalize">{t(`elections.${election.election_type}`, election.election_type.replaceAll('_', ' '))}</span>
+              <span className="capitalize">{t(`elections.${election.election_type}`, election.election_type.replace(/_/g, ' '))}</span>
               <span>
                 {format(new Date(election.voting_date), 'MMMM dd, yyyy', { locale: language === 'fr' ? fr : enUS })}
               </span>

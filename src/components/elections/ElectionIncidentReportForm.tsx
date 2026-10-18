@@ -176,7 +176,7 @@ export default function ElectionIncidentReportForm({ elections }: ElectionIncide
                     </SelectTrigger>
                     <SelectContent>
                       {categories?.map(cat => (
-                        <SelectItem key={cat.id} value=<TranslatableText text={cat.name} />><TranslatableText text={cat.name} /></SelectItem>
+                        <SelectItem key={cat.id} value={cat.name}><TranslatableText text={cat.name} /></SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -193,7 +193,7 @@ export default function ElectionIncidentReportForm({ elections }: ElectionIncide
                       </SelectTrigger>
                       <SelectContent>
                         {selectedCategory.sub_categories.map(sub => (
-                          <SelectItem key=<TranslatableText text={sub} /> value=<TranslatableText text={sub} />><TranslatableText text={sub} /></SelectItem>
+                          <SelectItem key={sub} value={sub}><TranslatableText text={sub} /></SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -204,7 +204,7 @@ export default function ElectionIncidentReportForm({ elections }: ElectionIncide
               <div className="grid gap-2">
                 <Label>{t('elections.severity_level')}</Label>
                 <Select 
-                  value={t(`elections.${formData.severity}`, formData.severity)} 
+                  value={formData.severity} 
                   onValueChange={(value: IncidentSeverity) => updateField('severity', value)}
                 >
                   <SelectTrigger>
