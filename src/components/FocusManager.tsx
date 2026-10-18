@@ -11,7 +11,7 @@ export default function FocusManager() {
   const update = () => {
    const route = document.querySelector('[data-route-content]');
    if (!route) return;
-   const main = route.querySelector('main, [role="main"]') || route.querySelector('.container') || route.firstElementChild;
+   const main = route.querySelector('main, [role="main"]') || Array.from(route.querySelectorAll('.container')).find(element => !element.closest('nav,header,aside,footer')) || route.firstElementChild;
    if (!(main instanceof HTMLElement)) return;
    if (main.tagName !== 'MAIN') main.setAttribute('role','main');
    main.id='main-content'; main.tabIndex=-1;

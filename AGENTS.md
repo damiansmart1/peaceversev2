@@ -1,4 +1,7 @@
 # Participation architecture
+- Coordinate opt-in speech through the global accessibility controls, with dedicated dictation buttons inside dialogs because modal focus must remain within Radix; never intercept browser zoom or auto-start microphones.
+- Use the shared AccessibleMedia player for caption preferences, local WebVTT loading and truthful text-alternative availability; descriptions are not transcripts.
+- Keep accessibility copy in the shared translation hook's dedicated dictionary and let Radix manage menu and dialog focus; route focus management only targets primary content.
 - Store About people in a dedicated collection with admin-only writes and published-only public reads; keep portraits private and grant reads through published profile visibility so drafts stay private.
 - Keep About profile labels in the shared translation hook's dedicated dictionary so public and admin screens use the same language.
 - Auth-backed access queries must be keyed by the current context user and wait for auth initialization; stale signed-out or prior-account checks must not block a new sign-in.
