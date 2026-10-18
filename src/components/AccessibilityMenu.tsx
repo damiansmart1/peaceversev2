@@ -22,7 +22,7 @@ export default function AccessibilityMenu() {
         <Button
           variant="outline"
           size="icon"
-          className="fixed left-4 top-1/2 -translate-y-1/2 z-50 min-h-11 min-w-11 rounded-full shadow-lg"
+          className="fixed right-3 top-16 z-50 min-h-11 min-w-11 rounded-full shadow-lg"
           aria-label={t('accessibility.open_menu')}
         >
           <Accessibility className="w-5 h-5" />
