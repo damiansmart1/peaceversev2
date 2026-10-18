@@ -7,7 +7,6 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Handshake } from 'lucide-react';
 import {
   useRegisterMediator, useMyMediatorProfile, SPECIALIZATION_OPTIONS, MEDIATION_FORMATS,
@@ -79,7 +78,7 @@ const MediatorRegistrationDialog = ({ children }: { children?: React.ReactNode }
         <DialogHeader>
           <DialogTitle>{existing ? 'Update mediator profile' : 'Register as a volunteer mediator'}</DialogTitle>
         </DialogHeader>
-        <ScrollArea className="flex-1 min-h-0 pr-2">
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain pr-2">
           <div className="space-y-4 pb-2">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
