@@ -1,3 +1,4 @@
+import { useTranslationContext } from '@/components/TranslationProvider';
 import { Link } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -12,6 +13,7 @@ interface Props {
 
 /** Mobile menu (in Sheet) that lists the 4 hubs with collapsible links inside. */
 const HubMobileList = ({ onNavigate }: Props) => {
+  const { t } = useTranslationContext();
   const { features } = useAccessibleFeatures();
   const { data: rolesData } = useUserRoles();
   const userRoles = (rolesData?.map((r: any) => r.role) || []) as string[];
@@ -28,8 +30,8 @@ const HubMobileList = ({ onNavigate }: Props) => {
               <div className="flex items-center gap-3">
                 <Icon className={cn("w-5 h-5", hub.accent)} />
                 <div className="text-left">
-                  <p className="text-sm font-semibold text-foreground">{hub.label}</p>
-                  <p className="text-[11px] text-muted-foreground leading-tight">{hub.tagline}</p>
+                  <p className="text-sm font-semibold text-foreground">{t(`navigation.${hub.label}`, hub.label)}</p>
+                  <p className="text-[11px] text-muted-foreground leading-tight">{t(`navigation.${hub.tagline}`, hub.tagline)}</p>
                 </div>
               </div>
             </AccordionTrigger>
@@ -42,7 +44,7 @@ const HubMobileList = ({ onNavigate }: Props) => {
                     onClick={onNavigate}
                     className="flex items-center justify-between gap-2 py-2 px-2 rounded-md text-sm hover:bg-muted/60"
                   >
-                    <span className="text-foreground">{link.label}</span>
+                    <span className="text-foreground">{t(`navigation.${link.label}`, link.label)}</span>
                     <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
                   </Link>
                 ))}

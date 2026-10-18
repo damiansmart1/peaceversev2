@@ -34,8 +34,8 @@ const LanguageToggle = () => {
     setLanguage(langCode);
     const selectedLang = languages.find(l => l.code === langCode);
     toast({
-      title: t('language.changed') || 'Language Changed',
-      description: `${t('language.switched_to') || 'Switched to'} ${selectedLang?.nativeName || langCode}`,
+      title: langCode === 'fr' ? 'Langue changée' : t('language.changed'),
+      description: `${langCode === 'fr' ? 'Langue sélectionnée :' : t('language.switched_to')} ${selectedLang?.nativeName || langCode}`,
     });
   };
 

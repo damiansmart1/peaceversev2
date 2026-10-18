@@ -1,3 +1,4 @@
+import { navigationCopy } from '@/lib/navigationCopy';
 import { electionCopy } from '@/lib/electionCopy';
 import { useState, useEffect } from 'react';
 import { participationCopy } from '@/lib/participationCopy';
@@ -2740,6 +2741,10 @@ export const useTranslation = () => {
   };
 
   const t = (key: string, fallback?: string): string => {
+    if (key.startsWith('navigation.')) {
+      const name = key.slice('navigation.'.length);
+      return navigationCopy[language]?.[name] || navigationCopy.en[name] || fallback || name;
+    }
     if (key.startsWith('elections.')) {
       const name = key.slice('elections.'.length);
       return electionCopy[language]?.[name] || electionCopy.en[name] || fallback || name;
