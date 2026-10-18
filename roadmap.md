@@ -1,7 +1,7 @@
 # Democratic participation
 # Voter education
-- [ ] Add country-specific, officially sourced voter lessons and interactive knowledge checks.
-- [ ] Verify country switching, feedback, progress, and mobile accessibility.
+- [x] Add country-specific, officially sourced voter lessons and interactive knowledge checks (Kenya and South Africa; other countries await source verification).
+- [x] Verify country switching, feedback, progress, reading-pack download, and mobile fit.
 # Accessibility enhancements
 - [x] Activate read-aloud, opt-in dictation and supported voice navigation; simulated speech results verified with signed-in mediation form.
 - [x] Improve shared labels, announcements, focus, text sizing and contrast; verify keyboard dialog dismissal and mobile fit.
