@@ -99,6 +99,7 @@ export const AccessibilityProvider: React.FC<{ children: ReactNode }> = ({ child
     
     // Text size
     root.style.fontSize = `${clampTextSize(settings.textSize)}%`;
+    root.classList.toggle('large-text', settings.textSize > 120);
     
     root.classList.toggle('reduced-motion', settings.reducedMotion);
     // High contrast

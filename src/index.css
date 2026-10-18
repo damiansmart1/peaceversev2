@@ -669,6 +669,13 @@
     outline-offset: 3px;
   }
 
+  .large-text .desktop-hub-navigation, .large-text .desktop-language-control {
+    display: none !important;
+  }
+  .large-text .mobile-hub-trigger {
+    display: inline-flex !important;
+  }
+
   .reduced-motion *, .reduced-motion *::before, .reduced-motion *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
