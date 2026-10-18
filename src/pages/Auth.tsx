@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -216,7 +217,8 @@ export default function Auth() {
               </div>
               
               <div className="space-y-2">
-                <Input type="email" placeholder={t('auth.email')} value={email} onChange={e => setEmail(e.target.value)} required className="h-12 bg-background/50 border-primary-foreground/30 text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary" />
+                <Label htmlFor="auth-email">{t('auth.email')}</Label>
+                <Input id="auth-email" autoComplete="email" type="email" placeholder={t('auth.email')} value={email} onChange={e => setEmail(e.target.value)} required className="h-12 bg-background/50 border-primary-foreground/30 text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary" />
               </div>
 
               <Button type="submit" disabled={isLoading} className="w-full h-12 bg-gradient-to-r from-gold to-gold-light hover:from-gold-light hover:to-gold text-primary font-semibold text-lg transition-all duration-300">
@@ -234,7 +236,8 @@ export default function Auth() {
               {isSignUp && (
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
-                    <Input 
+                    <Label htmlFor="auth-first-name">{t('auth.firstName')}</Label>
+                    <Input id="auth-first-name" autoComplete="given-name"
                       type="text" 
                       placeholder={t('auth.firstName')} 
                       value={firstName} 
@@ -244,7 +247,8 @@ export default function Auth() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Input 
+                    <Label htmlFor="auth-last-name">{t('auth.lastName')}</Label>
+                    <Input id="auth-last-name" autoComplete="family-name"
                       type="text" 
                       placeholder={t('auth.lastName')} 
                       value={lastName} 
@@ -256,15 +260,18 @@ export default function Auth() {
               )}
               
               <div className="space-y-2">
-                <Input type="email" placeholder={t('auth.email')} value={email} onChange={e => setEmail(e.target.value)} required className="h-12 bg-background/50 border-primary-foreground/30 text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary" />
+                <Label htmlFor="auth-email">{t('auth.email')}</Label>
+                <Input id="auth-email" autoComplete="email" type="email" placeholder={t('auth.email')} value={email} onChange={e => setEmail(e.target.value)} required className="h-12 bg-background/50 border-primary-foreground/30 text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary" />
               </div>
               
               <div className="space-y-2 relative">
-                <Input type={showPassword ? "text" : "password"} placeholder={t('auth.password')} value={password} onChange={e => setPassword(e.target.value)} required className="h-12 bg-background/50 border-primary-foreground/30 text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary pr-12" />
+                <Label htmlFor="auth-password">{t('auth.password')}</Label>
+                <Input id="auth-password" data-no-dictation="true" autoComplete={isSignUp ? "new-password" : "current-password"} type={showPassword ? "text" : "password"} placeholder={t('auth.password')} value={password} onChange={e => setPassword(e.target.value)} required className="h-12 bg-background/50 border-primary-foreground/30 text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary pr-12" />
                 <button
                   type="button"
+                  aria-label={t('auth.password')} aria-pressed={showPassword}
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  className="absolute right-1 bottom-1 h-10 w-10 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
