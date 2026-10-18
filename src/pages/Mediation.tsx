@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useId, useState } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -26,6 +26,7 @@ const STATUS_TONE: Record<string, string> = {
 };
 
 const Mediation = () => {
+  const id = useId();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { data: cases = [], isLoading } = useMediationCases();
@@ -82,10 +83,10 @@ const Mediation = () => {
           </div>
 
           <Tabs defaultValue="cases">
-            <TabsList className="grid w-full grid-cols-3 max-w-xl">
-              <TabsTrigger value="cases" className="gap-2"><Handshake className="w-4 h-4" /><span className="hidden sm:inline">Cases</span></TabsTrigger>
-              <TabsTrigger value="network" className="gap-2"><Users className="w-4 h-4" /><span className="hidden sm:inline">Mediator network</span></TabsTrigger>
-              <TabsTrigger value="workspace" className="gap-2"><ShieldCheck className="w-4 h-4" /><span className="hidden sm:inline">My workspace</span></TabsTrigger>
+            <TabsList className="grid w-full grid-cols-3 max-w-xl h-auto">
+              <TabsTrigger value="cases" className="gap-2"><Handshake className="w-4 h-4" /><span className="text-xs sm:text-sm">Cases</span></TabsTrigger>
+              <TabsTrigger value="network" className="gap-1 min-h-11 whitespace-normal"><Users className="w-4 h-4" /><span className="text-xs sm:text-sm">Mediator network</span></TabsTrigger>
+              <TabsTrigger value="workspace" className="gap-1 min-h-11 whitespace-normal"><ShieldCheck className="w-4 h-4" /><span className="text-xs sm:text-sm">My workspace</span></TabsTrigger>
             </TabsList>
 
             <TabsContent value="cases" className="mt-6 space-y-6">
@@ -98,13 +99,13 @@ const Mediation = () => {
                   <DialogContent className="max-w-lg max-h-[85dvh] overflow-y-auto">
                     <DialogHeader><DialogTitle>Open a mediation case</DialogTitle></DialogHeader>
                     <div className="space-y-3">
-                      <div><Label>Case title *</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Boundary dispute — Kerio Valley" /></div>
-                      <div><Label>Summary</Label><Textarea rows={3} value={form.summary} onChange={(e) => setForm({ ...form, summary: e.target.value })} /></div>
+                      <div><Label htmlFor={`${id}-title`}>Case title *</Label><Input id={`${id}-title`} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Boundary dispute — Kerio Valley" /></div>
+                      <div><Label htmlFor={`${id}-summary`}>Summary</Label><Textarea id={`${id}-summary`} rows={3} value={form.summary} onChange={(e) => setForm({ ...form, summary: e.target.value })} /></div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                          <Label>Conflict type</Label>
+                          <Label htmlFor={`${id}-conflict_type`}>Conflict type</Label>
                           <Select value={form.conflict_type} onValueChange={(v) => setForm({ ...form, conflict_type: v })}>
-                            <SelectTrigger><SelectValue /></SelectTrigger>
+                            <SelectTrigger id={`${id}-conflict_type`}><SelectValue /></SelectTrigger>
                             <SelectContent>
                               {['land_and_resources', 'inter_communal', 'electoral', 'political', 'labour', 'family_and_gbv', 'business', 'other'].map((t) => (
                                 <SelectItem key={t} value={t}>{t.replace(/_/g, ' ')}</SelectItem>
@@ -113,9 +114,9 @@ const Mediation = () => {
                           </Select>
                         </div>
                         <div>
-                          <Label>Confidentiality</Label>
+                          <Label htmlFor={`${id}-confidentiality`}>Confidentiality</Label>
                           <Select value={form.confidentiality} onValueChange={(v) => setForm({ ...form, confidentiality: v })}>
-                            <SelectTrigger><SelectValue /></SelectTrigger>
+                            <SelectTrigger id={`${id}-confidentiality`}><SelectValue /></SelectTrigger>
                             <SelectContent>
                               <SelectItem value="confidential">Confidential</SelectItem>
                               <SelectItem value="restricted">Restricted</SelectItem>
@@ -125,8 +126,8 @@ const Mediation = () => {
                         </div>
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div><Label>Location</Label><Input value={form.location_name} onChange={(e) => setForm({ ...form, location_name: e.target.value })} /></div>
-                        <div><Label>Convening organisation</Label><Input value={form.organization} onChange={(e) => setForm({ ...form, organization: e.target.value })} /></div>
+                        <div><Label htmlFor={`${id}-location_name`}>Location</Label><Input id={`${id}-location_name`} value={form.location_name} onChange={(e) => setForm({ ...form, location_name: e.target.value })} /></div>
+                        <div><Label htmlFor={`${id}-organization`}>Convening organisation</Label><Input id={`${id}-organization`} value={form.organization} onChange={(e) => setForm({ ...form, organization: e.target.value })} /></div>
                       </div>
                       {sourceReportId && (
                         <p className="text-xs text-muted-foreground">
@@ -144,7 +145,7 @@ const Mediation = () => {
                 : (
                   <div className="grid gap-4 md:grid-cols-2">
                     {cases.map((c) => (
-                      <Card key={c.id} className="surface-quiet cursor-pointer hover:border-primary/50 transition-colors" onClick={() => navigate(`/mediation/${c.id}`)}>
+                      <Link key={c.id} to={`/mediation/${c.id}`} className="block rounded-md focus-visible:outline"><Card className="surface-quiet hover:border-primary/50 transition-colors">
                         <CardHeader className="pb-3">
                           <div className="flex items-start justify-between gap-2">
                             <div className="min-w-0">
@@ -165,7 +166,7 @@ const Mediation = () => {
                             <Progress value={c.progress_percent} className="h-1.5" />
                           </div>
                         </CardContent>
-                      </Card>
+                      </Card></Link>
                     ))}
                   </div>
                 )}

@@ -1,3 +1,5 @@
+import DictationButton, { appendDictation } from '@/components/DictationButton';
+import { useTranslationContext } from '@/components/TranslationProvider';
 import { useId, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -25,6 +27,7 @@ const splitList = (value: string) =>
 
 const MediatorRegistrationDialog = ({ children }: { children?: React.ReactNode }) => {
   const id = useId();
+  const { t } = useTranslationContext();
   const register = useRegisterMediator();
   const { data: existing } = useMyMediatorProfile();
   const [open, setOpen] = useState(false);
@@ -121,6 +124,7 @@ const MediatorRegistrationDialog = ({ children }: { children?: React.ReactNode }
             <div>
               <Label htmlFor={`${id}-bio`}>Short biography</Label>
               <Textarea id={`${id}-bio`} rows={2} value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} placeholder="Experience, background and approach" />
+              <DictationButton onTranscript={text=>setForm(f=>({...f,bio:appendDictation(f.bio,text)}))} />
             </div>
 
             <div>
@@ -155,6 +159,7 @@ const MediatorRegistrationDialog = ({ children }: { children?: React.ReactNode }
               <div>
                 <Label htmlFor={`${id}-credentials`}>Credentials & training</Label>
                 <Textarea id={`${id}-credentials`} rows={2} value={form.credentials} onChange={(e) => setForm({ ...form, credentials: e.target.value })} placeholder="Certificates, years of practice, referee contacts" />
+                <DictationButton onTranscript={text=>setForm(f=>({...f,credentials:appendDictation(f.credentials,text)}))} />
               </div>
               <div>
                 <Label>Preferred mediation formats</Label>
@@ -174,6 +179,7 @@ const MediatorRegistrationDialog = ({ children }: { children?: React.ReactNode }
               <Input id={`${id}-max_active_cases`} type="number" min={1} max={10} value={form.max_active_cases} onChange={(e) => setForm({ ...form, max_active_cases: parseInt(e.target.value) || 2 })} className="w-24" />
             </div>
 
+            <p className="text-xs text-muted-foreground">{t('a11y.privacy')}</p>
             <div className="rounded-lg border p-4 space-y-3 bg-muted/30">
               <p className="text-sm font-medium">Commitments</p>
               <label className="flex items-start gap-2 text-sm cursor-pointer">
