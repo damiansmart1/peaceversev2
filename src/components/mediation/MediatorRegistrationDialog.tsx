@@ -187,7 +187,7 @@ const MediatorRegistrationDialog = ({ children }: { children?: React.ReactNode }
               )}
             </div>
           </div>
-        </ScrollArea>
+        </div>
         <DialogFooter>
           <Button onClick={submit} disabled={register.isPending || !form.full_name.trim() || !form.code_of_conduct_accepted || !form.safeguarding_acknowledged || !form.languages.trim()}>
             {register.isPending ? 'Submitting…' : existing ? 'Save changes' : 'Submit application'}
