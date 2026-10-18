@@ -1,4 +1,5 @@
 # Participation architecture
+- Keep voter education in a country-keyed, officially cited lesson catalogue with translated summaries and device-only knowledge-check progress; unsupported countries must never inherit another jurisdiction's rules.
 - Coordinate opt-in speech through the global accessibility controls, with dedicated dictation buttons inside dialogs because modal focus must remain within Radix; never intercept browser zoom or auto-start microphones.
 - Use the shared AccessibleMedia player for caption preferences, local WebVTT loading and truthful text-alternative availability; descriptions are not transcripts.
 - Keep accessibility copy in the shared translation hook's dedicated dictionary and let Radix manage menu and dialog focus; route focus management only targets primary content.
