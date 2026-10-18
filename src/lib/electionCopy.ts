@@ -157,8 +157,8 @@ export const electionCopy: Record<string, Record<string, string>> = {
     "unverified": "Unverified",
     "rejected": "Rejected",
     "under_review": "Under review",
-    "days_ago": "Days ago",
-    "days_remaining": "Days remaining",
+    "days_ago": "{count} days ago",
+    "days_remaining": "{count} days",
     "refresh": "Refresh"
   },
   "fr": {

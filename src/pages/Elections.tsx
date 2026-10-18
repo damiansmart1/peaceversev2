@@ -153,7 +153,7 @@ export default function Elections() {
                   {FEATURE_HIGHLIGHTS.map((feature, idx) => (
                     <div key={idx} className="flex items-center gap-2 bg-white/10 rounded-full px-3 py-1">
                       <feature.icon className="h-3 w-3 text-gold" />
-                      <span className="text-xs text-white">{t(`elections.${t(`elections.${t(`elections.${t(`elections.${feature.title}`, feature.title)}`, feature.title)}`, feature.title)}`, feature.title)}</span>
+                      <span className="text-xs text-white">{t(`elections.${feature.title}`)}</span>
                     </div>
                   ))}
                 </div>
