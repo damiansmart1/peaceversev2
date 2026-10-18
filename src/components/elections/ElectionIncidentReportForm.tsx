@@ -1,3 +1,5 @@
+import TranslatableText from '@/components/TranslatableText';
+import { useTranslationContext } from '@/components/TranslationProvider';
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -29,6 +31,7 @@ interface ElectionIncidentReportFormProps {
 }
 
 export default function ElectionIncidentReportForm({ elections }: ElectionIncidentReportFormProps) {
+  const { t, language } = useTranslationContext();
   const [step, setStep] = useState(1);
   const [submitted, setSubmitted] = useState(false);
   const [submittedCode, setSubmittedCode] = useState('');
@@ -84,18 +87,14 @@ export default function ElectionIncidentReportForm({ elections }: ElectionIncide
           <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircle2 className="h-8 w-8 text-green-600" />
           </div>
-          <h2 className="text-2xl font-bold mb-2">Report Submitted Successfully</h2>
-          <p className="text-muted-foreground mb-4">
-            Your election incident report has been submitted for verification.
-          </p>
+          <h2 className="text-2xl font-bold mb-2">{t('elections.report_submitted_successfully')}</h2>
+          <p className="text-muted-foreground mb-4">{t('elections.your_election_incident_report_has_been_submitted_for_verification')}</p>
           <div className="bg-muted p-4 rounded-lg inline-block mb-6">
-            <p className="text-sm text-muted-foreground">Reference Code</p>
+            <p className="text-sm text-muted-foreground">{t('elections.reference_code')}</p>
             <p className="text-2xl font-mono font-bold">{submittedCode}</p>
           </div>
           <div className="flex justify-center gap-4">
-            <Button variant="outline" onClick={() => { setSubmitted(false); setStep(1); setFormData({...formData, title: '', description: ''}); }}>
-              Submit Another Report
-            </Button>
+            <Button variant="outline" onClick={() => { setSubmitted(false); setStep(1); setFormData({...formData, title: '', description: ''}); }}>{t('elections.submit_another_report')}</Button>
           </div>
         </CardContent>
       </Card>
@@ -110,10 +109,8 @@ export default function ElectionIncidentReportForm({ elections }: ElectionIncide
             <AlertTriangle className="h-6 w-6 text-orange-600" />
           </div>
           <div>
-            <CardTitle>Report Election Incident</CardTitle>
-            <CardDescription>
-              Document incidents to ensure election integrity and transparency
-            </CardDescription>
+            <CardTitle>{t('elections.report_election_incident')}</CardTitle>
+            <CardDescription>{t('elections.document_incidents_to_ensure_election_integrity_and_transparency')}</CardDescription>
           </div>
         </div>
         
@@ -123,7 +120,7 @@ export default function ElectionIncidentReportForm({ elections }: ElectionIncide
             <div key={s} className="flex-1">
               <div className={`h-2 rounded-full ${s <= step ? 'bg-primary' : 'bg-muted'}`} />
               <p className={`text-xs mt-1 ${s <= step ? 'text-primary' : 'text-muted-foreground'}`}>
-                {s === 1 ? 'Basic Info' : s === 2 ? 'Details' : 'Review'}
+                {s === 1 ? t('elections.basic_info') : s === 2 ? t('elections.details') : t('elections.review')}
               </p>
             </div>
           ))}
@@ -135,21 +132,21 @@ export default function ElectionIncidentReportForm({ elections }: ElectionIncide
           <>
             <div className="grid gap-4">
               <div className="grid gap-2">
-                <Label>Select Election *</Label>
+                <Label>{t('elections.select_election')}</Label>
                 <Select 
                   value={formData.election_id} 
                   onValueChange={(value) => updateField('election_id', value)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Choose the election this incident relates to" />
+                    <SelectValue placeholder={t('elections.choose_the_election_this_incident_relates_to')} />
                   </SelectTrigger>
                   <SelectContent>
                     {activeElections.map(election => (
                       <SelectItem key={election.id} value={election.id}>
                         <div className="flex items-center gap-2">
-                          <span>{election.name}</span>
+                          <span><TranslatableText text={election.name} /></span>
                           <Badge variant="outline" className="text-xs">
-                            {election.country_name}
+                            {new Intl.DisplayNames([language], { type: 'region' }).of(election.country_code) || election.country_name}
                           </Badge>
                         </div>
                       </SelectItem>
@@ -159,44 +156,44 @@ export default function ElectionIncidentReportForm({ elections }: ElectionIncide
               </div>
 
               <div className="grid gap-2">
-                <Label>Incident Title *</Label>
+                <Label>{t('elections.incident_title')}</Label>
                 <Input
                   value={formData.title}
                   onChange={(e) => updateField('title', e.target.value)}
-                  placeholder="Brief description of what happened"
+                  placeholder={t('elections.brief_description_of_what_happened')}
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
-                  <Label>Category *</Label>
+                  <Label>{t('elections.category')}</Label>
                   <Select 
                     value={formData.category} 
                     onValueChange={(value) => updateField('category', value)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
+                      <SelectValue placeholder={t('elections.select_category')} />
                     </SelectTrigger>
                     <SelectContent>
                       {categories?.map(cat => (
-                        <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
+                        <SelectItem key={cat.id} value={cat.name}><TranslatableText text={cat.name} /></SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 {selectedCategory && selectedCategory.sub_categories.length > 0 && (
                   <div className="grid gap-2">
-                    <Label>Sub-Category</Label>
+                    <Label>{t('elections.sub_category')}</Label>
                     <Select 
                       value={formData.sub_category} 
                       onValueChange={(value) => updateField('sub_category', value)}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select type" />
+                        <SelectValue placeholder={t('elections.select_type')} />
                       </SelectTrigger>
                       <SelectContent>
                         {selectedCategory.sub_categories.map(sub => (
-                          <SelectItem key={sub} value={sub}>{sub}</SelectItem>
+                          <SelectItem key={sub} value={sub}><TranslatableText text={sub} /></SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -205,7 +202,7 @@ export default function ElectionIncidentReportForm({ elections }: ElectionIncide
               </div>
 
               <div className="grid gap-2">
-                <Label>Severity Level *</Label>
+                <Label>{t('elections.severity_level')}</Label>
                 <Select 
                   value={formData.severity} 
                   onValueChange={(value: IncidentSeverity) => updateField('severity', value)}
@@ -216,33 +213,23 @@ export default function ElectionIncidentReportForm({ elections }: ElectionIncide
                   <SelectContent>
                     <SelectItem value="minor">
                       <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-slate-400" />
-                        Minor - No impact on voting process
-                      </div>
+                        <div className="w-3 h-3 rounded-full bg-slate-400" />{t('elections.minor_no_impact_on_voting_process')}</div>
                     </SelectItem>
                     <SelectItem value="moderate">
                       <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-yellow-500" />
-                        Moderate - Limited impact
-                      </div>
+                        <div className="w-3 h-3 rounded-full bg-yellow-500" />{t('elections.moderate_limited_impact')}</div>
                     </SelectItem>
                     <SelectItem value="serious">
                       <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-orange-500" />
-                        Serious - Significant disruption
-                      </div>
+                        <div className="w-3 h-3 rounded-full bg-orange-500" />{t('elections.serious_significant_disruption')}</div>
                     </SelectItem>
                     <SelectItem value="critical">
                       <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-red-500" />
-                        Critical - Major disruption
-                      </div>
+                        <div className="w-3 h-3 rounded-full bg-red-500" />{t('elections.critical_major_disruption')}</div>
                     </SelectItem>
                     <SelectItem value="emergency">
                       <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-red-700" />
-                        Emergency - Immediate response required
-                      </div>
+                        <div className="w-3 h-3 rounded-full bg-red-700" />{t('elections.emergency_immediate_response_required')}</div>
                     </SelectItem>
                   </SelectContent>
                 </Select>
@@ -253,9 +240,7 @@ export default function ElectionIncidentReportForm({ elections }: ElectionIncide
               className="w-full" 
               onClick={() => setStep(2)}
               disabled={!formData.election_id || !formData.title || !formData.category}
-            >
-              Continue to Details
-            </Button>
+            >{t('elections.continue_to_details')}</Button>
           </>
         )}
 
@@ -263,11 +248,11 @@ export default function ElectionIncidentReportForm({ elections }: ElectionIncide
           <>
             <div className="grid gap-4">
               <div className="grid gap-2">
-                <Label>Detailed Description *</Label>
+                <Label>{t('elections.detailed_description')}</Label>
                 <Textarea
                   value={formData.description}
                   onChange={(e) => updateField('description', e.target.value)}
-                  placeholder="Provide a detailed account of what happened. Include who was involved, what you witnessed, and any relevant circumstances."
+                  placeholder={t('elections.provide_a_detailed_account_of_what_happened_include_who_was_involved_what_you_witnessed_and_any_relevant_circumstances')}
                   rows={5}
                 />
               </div>
@@ -275,39 +260,35 @@ export default function ElectionIncidentReportForm({ elections }: ElectionIncide
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4" />
-                    Region
-                  </Label>
+                    <MapPin className="h-4 w-4" />{t('elections.region')}</Label>
                   <Input
                     value={formData.region}
                     onChange={(e) => updateField('region', e.target.value)}
-                    placeholder="e.g., Nairobi"
+                    placeholder={t('elections.e_g_nairobi')}
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label>District/Constituency</Label>
+                  <Label>{t('elections.district_constituency')}</Label>
                   <Input
                     value={formData.district}
                     onChange={(e) => updateField('district', e.target.value)}
-                    placeholder="e.g., Westlands"
+                    placeholder={t('elections.e_g_westlands')}
                   />
                 </div>
               </div>
 
               <div className="grid gap-2">
-                <Label>Specific Address/Location</Label>
+                <Label>{t('elections.specific_address_location')}</Label>
                 <Input
                   value={formData.location_address}
                   onChange={(e) => updateField('location_address', e.target.value)}
-                  placeholder="Polling station name or specific location"
+                  placeholder={t('elections.polling_station_name_or_specific_location')}
                 />
               </div>
 
               <div className="grid gap-2">
                 <Label className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  When did this happen? *
-                </Label>
+                  <Calendar className="h-4 w-4" />{t('elections.when_did_this_happen')}</Label>
                 <Input
                   type="datetime-local"
                   value={formData.incident_datetime}
@@ -317,14 +298,12 @@ export default function ElectionIncidentReportForm({ elections }: ElectionIncide
 
               <div className="border-t pt-4 space-y-4">
                 <h4 className="font-medium flex items-center gap-2">
-                  <Shield className="h-4 w-4" />
-                  Impact & Witnesses
-                </h4>
+                  <Shield className="h-4 w-4" />{t('elections.impact_witnesses')}</h4>
                 
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label>Did this disrupt voting?</Label>
-                    <p className="text-xs text-muted-foreground">The incident prevented or delayed voting</p>
+                    <Label>{t('elections.did_this_disrupt_voting')}</Label>
+                    <p className="text-xs text-muted-foreground">{t('elections.the_incident_prevented_or_delayed_voting')}</p>
                   </div>
                   <Switch
                     checked={formData.voting_disrupted}
@@ -334,8 +313,8 @@ export default function ElectionIncidentReportForm({ elections }: ElectionIncide
 
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label>Requires Immediate Action?</Label>
-                    <p className="text-xs text-muted-foreground">Flag for urgent response</p>
+                    <Label>{t('elections.requires_immediate_action')}</Label>
+                    <p className="text-xs text-muted-foreground">{t('elections.flag_for_urgent_response')}</p>
                   </div>
                   <Switch
                     checked={formData.requires_immediate_action}
@@ -345,8 +324,8 @@ export default function ElectionIncidentReportForm({ elections }: ElectionIncide
 
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label>Are there witnesses?</Label>
-                    <p className="text-xs text-muted-foreground">Other people saw what happened</p>
+                    <Label>{t('elections.are_there_witnesses')}</Label>
+                    <p className="text-xs text-muted-foreground">{t('elections.other_people_saw_what_happened')}</p>
                   </div>
                   <Switch
                     checked={formData.has_witnesses}
@@ -356,7 +335,7 @@ export default function ElectionIncidentReportForm({ elections }: ElectionIncide
 
                 {formData.has_witnesses && (
                   <div className="grid gap-2">
-                    <Label>Approximate number of witnesses</Label>
+                    <Label>{t('elections.approximate_number_of_witnesses')}</Label>
                     <Input
                       type="number"
                       min={1}
@@ -369,16 +348,12 @@ export default function ElectionIncidentReportForm({ elections }: ElectionIncide
             </div>
             
             <div className="flex gap-4">
-              <Button variant="outline" onClick={() => setStep(1)} className="flex-1">
-                Back
-              </Button>
+              <Button variant="outline" onClick={() => setStep(1)} className="flex-1">{t('elections.back')}</Button>
               <Button 
                 className="flex-1" 
                 onClick={() => setStep(3)}
                 disabled={!formData.description}
-              >
-                Review & Submit
-              </Button>
+              >{t('elections.review_submit')}</Button>
             </div>
           </>
         )}
@@ -388,15 +363,15 @@ export default function ElectionIncidentReportForm({ elections }: ElectionIncide
             <div className="space-y-4">
               <div className="bg-muted p-4 rounded-lg space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Election</span>
+                  <span className="text-muted-foreground">{t('elections.election')}</span>
                   <span className="font-medium">{selectedElection?.name}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Category</span>
+                  <span className="text-muted-foreground">{t('elections.category')}</span>
                   <span>{formData.category}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Severity</span>
+                  <span className="text-muted-foreground">{t('elections.severity')}</span>
                   <Badge className={`${
                     formData.severity === 'critical' || formData.severity === 'emergency' 
                       ? 'bg-red-500' 
@@ -404,12 +379,12 @@ export default function ElectionIncidentReportForm({ elections }: ElectionIncide
                         ? 'bg-orange-500' 
                         : 'bg-yellow-500'
                   } text-white`}>
-                    {formData.severity}
+                    {t(`elections.${formData.severity}`, formData.severity)}
                   </Badge>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Location</span>
-                  <span>{formData.region || 'Not specified'}</span>
+                  <span className="text-muted-foreground">{t('elections.location')}</span>
+                  <span>{formData.region || t('elections.not_specified')}</span>
                 </div>
               </div>
 
@@ -427,8 +402,8 @@ export default function ElectionIncidentReportForm({ elections }: ElectionIncide
                       <Eye className="h-4 w-4 text-muted-foreground" />
                     )}
                     <div>
-                      <Label>Submit Anonymously</Label>
-                      <p className="text-xs text-muted-foreground">Your identity will be protected</p>
+                      <Label>{t('elections.submit_anonymously')}</Label>
+                      <p className="text-xs text-muted-foreground">{t('elections.your_identity_will_be_protected')}</p>
                     </div>
                   </div>
                   <Switch
@@ -442,25 +417,21 @@ export default function ElectionIncidentReportForm({ elections }: ElectionIncide
                 <div className="flex items-start gap-3">
                   <Shield className="h-5 w-5 text-amber-600 mt-0.5" />
                   <div>
-                    <p className="font-medium text-amber-800 dark:text-amber-200">Verification Notice</p>
-                    <p className="text-sm text-amber-700 dark:text-amber-300">
-                      All reports are verified before publication. False reporting may result in account suspension.
-                    </p>
+                    <p className="font-medium text-amber-800 dark:text-amber-200">{t('elections.verification_notice')}</p>
+                    <p className="text-sm text-amber-700 dark:text-amber-300">{t('elections.all_reports_are_verified_before_publication_false_reporting_may_result_in_account_suspension')}</p>
                   </div>
                 </div>
               </div>
             </div>
             
             <div className="flex gap-4">
-              <Button variant="outline" onClick={() => setStep(2)} className="flex-1">
-                Back
-              </Button>
+              <Button variant="outline" onClick={() => setStep(2)} className="flex-1">{t('elections.back')}</Button>
               <Button 
                 className="flex-1" 
                 onClick={handleSubmit}
                 disabled={submitIncident.isPending}
               >
-                {submitIncident.isPending ? 'Submitting...' : 'Submit Report'}
+                {submitIncident.isPending ? t('elections.submitting') : t('elections.submit_report')}
               </Button>
             </div>
           </>

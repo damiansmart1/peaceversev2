@@ -116,7 +116,7 @@ const Navigation = () => {
                     className={`flex items-center gap-1.5 px-3 py-1.5 h-9 rounded-md text-sm font-medium ${location.pathname === '/about' ? 'text-primary bg-primary/10' : 'text-foreground/80 hover:text-foreground hover:bg-muted/50'}`}
                   >
                     <Info className="w-4 h-4" />
-                    About
+                    {t('nav.about')}
                   </Button>
                 </Link>
                 {user && !isAnonymous && (
@@ -127,7 +127,7 @@ const Navigation = () => {
                       className={`flex items-center gap-1.5 px-3 py-1.5 h-9 rounded-md text-sm font-medium ${location.pathname === '/dashboard' ? 'text-primary bg-primary/10' : 'text-foreground/80 hover:text-foreground hover:bg-muted/50'}`}
                     >
                       <CircleUserRound className="w-4 h-4" />
-                      Dashboard
+                      {t('nav.dashboard')}
                     </Button>
                   </Link>
                 )}
@@ -171,7 +171,7 @@ const Navigation = () => {
                 }}>
                       <Button variant="ghost" size="sm" onClick={handleSignOut} className="flex items-center gap-1 sm:gap-1.5 h-8 px-2 sm:px-3 rounded-lg bg-destructive/10 hover:bg-destructive text-destructive hover:text-destructive-foreground transition-all">
                         <Power className="w-3.5 h-3.5 flex-shrink-0" />
-                        <span className="text-xs font-medium whitespace-nowrap">Sign Out</span>
+                        <span className="text-xs font-medium whitespace-nowrap">{t('common.signOut')}</span>
                       </Button>
                     </motion.div>
                   </> : <motion.div whileHover={{
@@ -182,7 +182,7 @@ const Navigation = () => {
                     <Button size="sm" onClick={() => navigate('/auth')} className="relative flex items-center gap-1 sm:gap-1.5 h-8 px-2 sm:px-3 rounded-lg overflow-hidden group bg-primary hover:bg-primary-dark text-primary-foreground shadow-peace">
                       <div className="absolute inset-0 bg-gradient-to-r from-gold/20 to-secondary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                       <Sparkles className="w-3.5 h-3.5 relative z-10 flex-shrink-0" />
-                      <span className="font-semibold text-xs relative z-10 whitespace-nowrap">Sign In</span>
+                      <span className="font-semibold text-xs relative z-10 whitespace-nowrap">{t('common.signIn')}</span>
                     </Button>
                   </motion.div>}
               </div>
@@ -215,14 +215,14 @@ const Navigation = () => {
                     <SheetClose asChild>
                       <Link to="/about" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-foreground/80 hover:bg-muted/50">
                         <Info className="w-5 h-5 text-gold/70" />
-                        About
+                        {t('nav.about')}
                       </Link>
                     </SheetClose>
                     {user && !isAnonymous && (
                       <SheetClose asChild>
                         <Link to="/dashboard" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-foreground/80 hover:bg-muted/50">
                           <CircleUserRound className="w-5 h-5 text-gold/70" />
-                          My Dashboard
+                          {t('nav.dashboard')}
                         </Link>
                       </SheetClose>
                     )}
@@ -233,17 +233,17 @@ const Navigation = () => {
                   
                   <div className="mt-8 pt-6 border-t border-border/30 space-y-4">
                     <div className="flex items-center justify-between px-1 py-2">
-                      <span className="text-sm font-medium text-foreground/70">Theme</span>
+                      <span className="text-sm font-medium text-foreground/70">{t('navigation.Theme')}</span>
                       <ThemeToggle />
                     </div>
                     <div className="flex items-center justify-between px-1 py-2">
-                      <span className="text-sm font-medium text-foreground/70">Language</span>
+                      <span className="text-sm font-medium text-foreground/70">{t('common.language')}</span>
                       <LanguageToggle />
                     </div>
                     
                     {isLoading ? <div className="flex items-center justify-center gap-2 text-muted-foreground py-4">
                         <div className="w-5 h-5 border-2 border-gold border-t-transparent rounded-full animate-spin" />
-                        <span className="text-sm">Loading...</span>
+                        <span className="text-sm">{t('common.loading')}</span>
                       </div> : user ? <>
                         <div className="px-3 py-3 bg-muted/50 rounded-xl border border-border/50">
                           <p className="text-sm font-semibold text-foreground truncate">
@@ -257,18 +257,18 @@ const Navigation = () => {
                         {isAdmin && <SheetClose asChild>
                             <Button variant="outline" onClick={() => navigate('/admin')} className="w-full justify-start gap-2 h-11 rounded-lg bg-primary/10 border-primary/30">
                               <Bolt className="w-4 h-4" />
-                              Admin Portal
+                              {t('nav.admin')}
                             </Button>
                           </SheetClose>}
                         
                         <Button variant="ghost" onClick={handleSignOut} className="w-full justify-start gap-2 h-11 rounded-lg bg-destructive/10 hover:bg-destructive text-destructive hover:text-destructive-foreground">
                           <Power className="w-4 h-4" />
-                          {isAnonymous ? 'Sign Out (Guest)' : 'Sign Out'}
+                          {t('common.signOut')}
                         </Button>
                       </> : <SheetClose asChild>
                         <Button onClick={() => navigate('/auth')} className="w-full gap-2 h-11 rounded-lg font-semibold bg-primary hover:bg-primary-dark text-primary-foreground">
                           <Sparkles className="w-4 h-4" />
-                          Sign In
+                          {t('common.signIn')}
                         </Button>
                       </SheetClose>}
                   </div>

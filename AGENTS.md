@@ -13,3 +13,5 @@
 - Keep participation copy in a dedicated dictionary consumed by the shared translation hook; new participation screens follow existing language selection.
 - Use plain-text downloadable reading packs and opt-in media loading; weak connections should not require downloading images or video to understand a consultation.- Sealed-result polls tally into a private table and reveal counts only through a server function after close; never write their counts to the public poll row.
 - Save sign-in expiry on the device's own clock via a storage wrapper installed before the app starts; sign-in must never depend on the device's date and time.
+
+- Keep election and navigation labels in dedicated dictionaries consumed by the shared translation hook; translate displayed content without changing stored identifiers or form option values.

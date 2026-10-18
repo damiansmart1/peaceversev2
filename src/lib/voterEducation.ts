@@ -26,3 +26,11 @@ export function readEducationProgress(country: EducationCountry): string[] {
 export function saveEducationProgress(country: EducationCountry, completed: string[]) {
   try { localStorage.setItem(`voter-education-v1-${country.code}`, JSON.stringify(completed)); } catch { /* Session learning remains available. */ }
 }
+// Translate citation labels only; retain the exact article numbers and official source URLs.
+export function educationCitation(lesson: EducationLesson, language: string) {
+  if (language !== 'fr') return lesson.citation;
+  return lesson.citation.replace('Constitution of Kenya', 'Constitution du Kenya')
+    .replace('Constitution of South Africa', 'Constitution de l’Afrique du Sud')
+    .replace('Articles ', 'articles ').replace('Article ', 'article ')
+    .replace('sections ', 'articles ').replace('section ', 'article ').replace(' and ', ' et ');
+}

@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
-import { isCorrectEducationAnswer, readEducationProgress, saveEducationProgress, type EducationCountry } from '@/lib/voterEducation';
+import { educationCitation, isCorrectEducationAnswer, readEducationProgress, saveEducationProgress, type EducationCountry } from '@/lib/voterEducation';
 
 function LearningPath({ country }: { country: EducationCountry }) {
   const { t, language } = useTranslationContext();
@@ -33,7 +33,7 @@ function LearningPath({ country }: { country: EducationCountry }) {
   const download = () => {
     const content = [text(country.code), text('scope'), ...country.lessons.map(item => {
       const translation = item.copy[language] || item.copy.en;
-      return `${text(item.id)}\n${translation.summary}\n${item.citation}\n${item.sourceUrl}`;
+      return `${text(item.id)}\n${translation.summary}\n${educationCitation(item, language)}\n${item.sourceUrl}`;
     }), country.commissionUrl].join('\n\n');
     const url = URL.createObjectURL(new Blob([content], { type: 'text/plain;charset=utf-8' }));
     const link = document.createElement('a'); link.href = url; link.download = `peaceverse-voter-education-${country.code}.txt`; link.click();
@@ -60,7 +60,7 @@ function LearningPath({ country }: { country: EducationCountry }) {
         <header className="space-y-2"><p className="eyebrow">{text('lesson')} {index + 1} / {country.lessons.length}</p><h3 className="text-xl font-semibold">{text(lesson.id)}</h3></header>
         <p className="leading-relaxed whitespace-pre-line">{copy.summary}</p>
         <div className="border-l-2 border-primary pl-4 space-y-2">
-          <p className="text-sm font-medium">{text('evidence')} · {lesson.citation}</p>
+          <p className="text-sm font-medium">{text('evidence')} · {educationCitation(lesson, language)}</p>
           <Button asChild variant="link" className="h-auto p-0 whitespace-normal text-start"><a href={lesson.sourceUrl} target="_blank" rel="noopener noreferrer">{text('read')}<ExternalLink className="h-3.5 w-3.5 ml-2 shrink-0" /></a></Button>
         </div>
         <fieldset className="border-t border-border pt-5 space-y-4">
@@ -84,7 +84,7 @@ function LearningPath({ country }: { country: EducationCountry }) {
 }
 
 export default function VoterEducation({ catalogue, initialCountry = 'KE' }: { catalogue: Record<string, EducationCountry>; initialCountry?: string }) {
-  const { t } = useTranslationContext();
+  const { t, language } = useTranslationContext();
   const [code, setCode] = useState(initialCountry.toUpperCase());
   const text = (key: string) => t(`voterEducation.${key}`);
   const { data: countries = [], error } = useQuery({
@@ -95,7 +95,7 @@ export default function VoterEducation({ catalogue, initialCountry = 'KE' }: { c
       return data;
     },
   });
-  const choices = new Map(countries.map(country => [country.code.toUpperCase(), country.name]));
+  const choices = new Map(countries.map(country => [country.code.toUpperCase(), new Intl.DisplayNames([language], { type: 'region' }).of(country.code.toUpperCase()) || country.name]));
   Object.keys(catalogue).forEach(country => choices.set(country, text(country)));
   if (!choices.has(code)) choices.set(code, code);
   const country = catalogue[code];

@@ -9,7 +9,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Languages, Check } from 'lucide-react';
 import { useTranslationContext } from './TranslationProvider';
-import { Language } from '@/hooks/useTranslation';
+import { Language, translations } from '@/hooks/useTranslation';
 import { useToast } from '@/hooks/use-toast';
 
 const LanguageToggle = () => {
@@ -34,8 +34,8 @@ const LanguageToggle = () => {
     setLanguage(langCode);
     const selectedLang = languages.find(l => l.code === langCode);
     toast({
-      title: t('language.changed') || 'Language Changed',
-      description: `${t('language.switched_to') || 'Switched to'} ${selectedLang?.nativeName || langCode}`,
+      title: translations[langCode]['language.changed'] || translations.en['language.changed'],
+      description: `${translations[langCode]['language.switched_to'] || translations.en['language.switched_to']} ${selectedLang?.nativeName || langCode}`,
     });
   };
 
