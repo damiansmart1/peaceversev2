@@ -1,3 +1,4 @@
+import AccessibleMedia from '@/components/AccessibleMedia';
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -269,14 +270,7 @@ const ContentFeed = () => {
     if (item.file_type === 'video') {
       return (
         <div className="relative group overflow-hidden rounded-xl bg-muted/20">
-          <video
-            controls
-            className="w-full max-h-[600px] object-contain rounded-xl"
-            preload="metadata"
-          >
-            <source src={item.file_url} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
+          <AccessibleMedia kind="video" src={item.file_url} title={item.title} description={getExcerpt(item.description,10000)} className="w-full max-h-[600px] object-contain rounded-md" />
         </div>
       );
     } else if (item.file_type === 'image') {
@@ -302,10 +296,7 @@ const ContentFeed = () => {
               <p className="text-sm text-muted-foreground">Audio Story</p>
             </div>
           </div>
-          <audio controls className="w-full" preload="metadata">
-            <source src={item.file_url} />
-            Your browser does not support the audio tag.
-          </audio>
+          <AccessibleMedia kind="audio" src={item.file_url} title={item.title} description={getExcerpt(item.description,10000)} className="w-full" />
         </div>
       );
     }

@@ -1,3 +1,4 @@
+import AccessibleMedia from '@/components/AccessibleMedia';
 import { useCMSContent } from '@/hooks/useCMS';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -31,14 +32,6 @@ export default function CMSAudio({
   }
 
   return (
-    <audio
-      src={src}
-      className={className}
-      controls={controls}
-      autoPlay={autoPlay}
-      loop={loop}
-    >
-      Your browser does not support the audio element.
-    </audio>
+    <AccessibleMedia kind="audio" src={src} title={data?.title || contentKey} description={data?.content || undefined} className={className} />
   );
 }

@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import DictationButton, { appendDictation } from '@/components/DictationButton';
+import { useTranslationContext } from '@/components/TranslationProvider';
+import { useId, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,6 +26,8 @@ const splitList = (value: string) =>
   value.split(',').map((s) => s.trim()).filter(Boolean);
 
 const MediatorRegistrationDialog = ({ children }: { children?: React.ReactNode }) => {
+  const id = useId();
+  const { t } = useTranslationContext();
   const register = useRegisterMediator();
   const { data: existing } = useMyMediatorProfile();
   const [open, setOpen] = useState(false);
@@ -82,13 +86,13 @@ const MediatorRegistrationDialog = ({ children }: { children?: React.ReactNode }
           <div className="space-y-4 pb-2">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <Label>Full name *</Label>
-                <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} placeholder="Your name" />
+                <Label htmlFor={`${id}-full_name`}>Full name *</Label>
+                <Input id={`${id}-full_name`} value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} placeholder="Your name" />
               </div>
               <div>
-                <Label>Mediator category *</Label>
+                <Label htmlFor={`${id}-mediator_category`}>Mediator category *</Label>
                 <Select value={form.mediator_category} onValueChange={(v) => setForm({ ...form, mediator_category: v as MediatorCategory })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger id={`${id}-mediator_category`}><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {(Object.keys(MEDIATOR_CATEGORY_LABELS) as MediatorCategory[]).map((c) => (
                       <SelectItem key={c} value={c}>{MEDIATOR_CATEGORY_LABELS[c]}</SelectItem>
@@ -103,13 +107,13 @@ const MediatorRegistrationDialog = ({ children }: { children?: React.ReactNode }
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <Label>Organisation / training body</Label>
-                <Input value={form.organization} onChange={(e) => setForm({ ...form, organization: e.target.value })} placeholder="e.g. Accredited mediation training provider" />
+                <Label htmlFor={`${id}-organization`}>Organisation / training body</Label>
+                <Input id={`${id}-organization`} value={form.organization} onChange={(e) => setForm({ ...form, organization: e.target.value })} placeholder="e.g. Accredited mediation training provider" />
               </div>
               <div>
-                <Label>Availability</Label>
+                <Label htmlFor={`${id}-availability`}>Availability</Label>
                 <Select value={form.availability} onValueChange={(v) => setForm({ ...form, availability: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger id={`${id}-availability`}><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {AVAILABILITY_OPTIONS.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}
                   </SelectContent>
@@ -118,41 +122,44 @@ const MediatorRegistrationDialog = ({ children }: { children?: React.ReactNode }
             </div>
 
             <div>
-              <Label>Short biography</Label>
-              <Textarea rows={2} value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} placeholder="Experience, background and approach" />
+              <Label htmlFor={`${id}-bio`}>Short biography</Label>
+              <Textarea id={`${id}-bio`} rows={2} value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} placeholder="Experience, background and approach" />
+              <DictationButton onTranscript={text=>setForm(f=>({...f,bio:appendDictation(f.bio,text)}))} />
             </div>
 
             <div>
               <Label>Areas of specialization</Label>
               <div className="flex flex-wrap gap-2 mt-1">
                 {SPECIALIZATION_OPTIONS.map((s) => (
-                  <button
+                  <Button variant="outline"
                     key={s}
                     type="button"
+                    aria-pressed={form.specializations.includes(s)}
                     onClick={() => toggle('specializations', s)}
                     className={`rounded-full border px-3 py-1 text-xs transition-colors ${form.specializations.includes(s) ? 'bg-primary text-primary-foreground border-primary' : 'hover:bg-muted'}`}
                   >
                     {s}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <Label>Languages spoken * (comma separated)</Label>
-                <Input value={form.languages} onChange={(e) => setForm({ ...form, languages: e.target.value })} placeholder="English, Swahili, Somali" />
+                <Label htmlFor={`${id}-languages`}>Languages spoken * (comma separated)</Label>
+                <Input id={`${id}-languages`} value={form.languages} onChange={(e) => setForm({ ...form, languages: e.target.value })} placeholder="English, Swahili, Somali" />
               </div>
               <div>
-                <Label>Communities / locations served (comma separated)</Label>
-                <Input value={form.locations_served} onChange={(e) => setForm({ ...form, locations_served: e.target.value })} placeholder="Turkana, West Pokot" />
+                <Label htmlFor={`${id}-locations_served`}>Communities / locations served (comma separated)</Label>
+                <Input id={`${id}-locations_served`} value={form.locations_served} onChange={(e) => setForm({ ...form, locations_served: e.target.value })} placeholder="Turkana, West Pokot" />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <Label>Credentials & training</Label>
-                <Textarea rows={2} value={form.credentials} onChange={(e) => setForm({ ...form, credentials: e.target.value })} placeholder="Certificates, years of practice, referee contacts" />
+                <Label htmlFor={`${id}-credentials`}>Credentials & training</Label>
+                <Textarea id={`${id}-credentials`} rows={2} value={form.credentials} onChange={(e) => setForm({ ...form, credentials: e.target.value })} placeholder="Certificates, years of practice, referee contacts" />
+                <DictationButton onTranscript={text=>setForm(f=>({...f,credentials:appendDictation(f.credentials,text)}))} />
               </div>
               <div>
                 <Label>Preferred mediation formats</Label>
@@ -168,10 +175,11 @@ const MediatorRegistrationDialog = ({ children }: { children?: React.ReactNode }
             </div>
 
             <div>
-              <Label>Maximum simultaneous cases</Label>
-              <Input type="number" min={1} max={10} value={form.max_active_cases} onChange={(e) => setForm({ ...form, max_active_cases: parseInt(e.target.value) || 2 })} className="w-24" />
+              <Label htmlFor={`${id}-max_active_cases`}>Maximum simultaneous cases</Label>
+              <Input id={`${id}-max_active_cases`} type="number" min={1} max={10} value={form.max_active_cases} onChange={(e) => setForm({ ...form, max_active_cases: parseInt(e.target.value) || 2 })} className="w-24" />
             </div>
 
+            <p className="text-xs text-muted-foreground">{t('a11y.privacy')}</p>
             <div className="rounded-lg border p-4 space-y-3 bg-muted/30">
               <p className="text-sm font-medium">Commitments</p>
               <label className="flex items-start gap-2 text-sm cursor-pointer">

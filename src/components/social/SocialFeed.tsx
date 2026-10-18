@@ -1,3 +1,4 @@
+import AccessibleMedia from '@/components/AccessibleMedia';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase-typed';
@@ -355,26 +356,13 @@ export const SocialFeed = ({ userId, showAll = true }: SocialFeedProps) => {
                     </div>
                   )}
                   {post.file_type?.startsWith('video') && (
-                    <div className="relative w-full max-h-[300px] sm:max-h-[350px] md:max-h-[400px] bg-black">
-                      <video
-                        src={post.file_url}
-                        className="w-full h-full object-contain"
-                        controls
-                        preload="metadata"
-                        playsInline
-                        controlsList="nodownload"
-                        style={{ maxHeight: '400px' }}
-                      />
+                    <div className="relative w-full max-h-[300px] sm:max-h-[350px] md:bg-muted">
+                      <AccessibleMedia kind="video" src={post.file_url || ''} title={post.title} description={post.description || undefined} className="w-full max-h-[400px] object-contain" />
                     </div>
                   )}
                   {post.file_type?.startsWith('audio') && (
                     <div className="p-4 sm:p-6 bg-gradient-to-br from-primary/10 to-secondary/10">
-                      <audio 
-                        src={post.file_url} 
-                        controls 
-                        className="w-full" 
-                        preload="metadata"
-                      />
+                      <AccessibleMedia kind="audio" src={post.file_url || ''} title={post.title} description={post.description || undefined} className="w-full" />
                     </div>
                   )}
                   <div className="p-3 sm:p-4">

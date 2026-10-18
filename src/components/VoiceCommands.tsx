@@ -1,197 +1,98 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAccessibility } from '@/contexts/AccessibilityContext';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Mic, MicOff, Volume2 } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
 import { useTranslationContext } from '@/components/TranslationProvider';
-
-// Extend Window interface for Speech Recognition
-declare global {
-  interface Window {
-    SpeechRecognition: any;
-    webkitSpeechRecognition: any;
-  }
-}
+import { Button } from '@/components/ui/button';
+import { Mic, MicOff, Volume2, Pause, Play, Square } from 'lucide-react';
+import { appendDictation, isDictationTarget, recognitionConstructor, speechLocale, voiceDestination, type SpeechEngine } from '@/lib/accessibilitySpeech';
 
 export default function VoiceCommands() {
-  const { settings, announce } = useAccessibility();
-  const { t } = useTranslationContext();
-  const navigate = useNavigate();
-  const [isListening, setIsListening] = useState(false);
-  const [recognition, setRecognition] = useState<any>(null);
-  const [lastCommand, setLastCommand] = useState<string>('');
-
-  useEffect(() => {
-    if (!settings.voiceNavigation) return;
-
-    // Check for Speech Recognition API support
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      toast({
-        title: t('voice.not_supported'),
-        description: t('voice.not_supported_desc'),
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    const recognitionInstance = new SpeechRecognition();
-    recognitionInstance.continuous = true;
-    recognitionInstance.interimResults = false;
-    recognitionInstance.lang = 'en-US'; // TODO: Use current language from context
-
-    recognitionInstance.onresult = (event) => {
-      const last = event.results.length - 1;
-      const command = event.results[last][0].transcript.toLowerCase().trim();
-      setLastCommand(command);
-      handleVoiceCommand(command);
-    };
-
-    recognitionInstance.onerror = (event) => {
-      console.error('Speech recognition error:', event.error);
-      setIsListening(false);
-    };
-
-    recognitionInstance.onend = () => {
-      if (settings.voiceNavigation && isListening) {
-        recognitionInstance.start();
-      }
-    };
-
-    setRecognition(recognitionInstance);
-
-    return () => {
-      if (recognitionInstance) {
-        recognitionInstance.stop();
-      }
-    };
-  }, [settings.voiceNavigation]);
-
-  const handleVoiceCommand = (command: string) => {
-    announce(`Command recognized: ${command}`, 'polite');
-
-    // Navigation commands
-    if (command.includes('go home') || command.includes('home page')) {
-      navigate('/');
-      speak('Navigating to home');
-    } else if (command.includes('community') || command.includes('voice') || command.includes('stories') || command.includes('radio') || command.includes('challenges')) {
-      navigate('/community');
-      speak('Navigating to Community Hub');
-    } else if (command.includes('proposals') || command.includes('polls')) {
-      navigate('/proposals');
-      speak('Navigating to Polls and Proposals');
-    } else if (command.includes('incident') || command.includes('report')) {
-      navigate('/incidents');
-      speak('Navigating to Incident Reporting');
-    } else if (command.includes('verification') || command.includes('verify')) {
-      navigate('/verification');
-      speak('Navigating to Verification');
-    } else if (command.includes('safety')) {
-      navigate('/safety');
-      speak('Navigating to Safety Portal');
-    } else if (command.includes('profile')) {
-      navigate('/profile');
-      speak('Navigating to profile');
-    } else if (command.includes('help')) {
-      navigate('/help');
-      speak('Navigating to help');
-    }
-    // Action commands
-    else if (command.includes('scroll down')) {
-      window.scrollBy({ top: 500, behavior: 'smooth' });
-      speak(t('voice.scrolling_down'));
-    } else if (command.includes('scroll up')) {
-      window.scrollBy({ top: -500, behavior: 'smooth' });
-      speak(t('voice.scrolling_up'));
-    } else if (command.includes('go back')) {
-      window.history.back();
-      speak(t('voice.going_back'));
-    } else if (command.includes('refresh')) {
-      window.location.reload();
-      speak(t('voice.refreshing'));
-    }
-    // Unknown command
+ const {settings, announce} = useAccessibility();
+ const {t, language} = useTranslationContext();
+ const navigate = useNavigate();
+ const location = useLocation();
+ const [listening, setListening] = useState<'dictation' | 'navigation' | null>(null);
+ const [reading, setReading] = useState(false);
+ const [paused, setPaused] = useState(false);
+ const [message, setMessage] = useState('');
+ const engine = useRef<SpeechEngine | null>(null);
+ const field = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
+ const selected = useRef('');
+ const report = (text: string) => {setMessage(text); announce(text);};
+ const stop = () => {engine.current?.abort(); engine.current = null; setListening(null); window.speechSynthesis?.cancel(); setReading(false); setPaused(false);};
+ useEffect(() => {
+  const remember = (event: FocusEvent) => {if (event.target instanceof Element && isDictationTarget(event.target)) field.current = event.target;};
+  const selection = () => {const active = document.activeElement; if (active instanceof Element && active.closest('[data-speech-controls]')) return; selected.current = window.getSelection()?.toString() || '';};
+  document.addEventListener('focusin',remember); document.addEventListener('selectionchange',selection);
+  return () => {document.removeEventListener('focusin',remember); document.removeEventListener('selectionchange',selection);};
+ }, []);
+ useEffect(() => {stop(); return () => {engine.current?.abort(); window.speechSynthesis?.cancel();};}, [location.pathname, language, settings.textToSpeech, settings.speechToText, settings.voiceNavigation]);
+ const read = () => {
+  stop();
+  if (!('speechSynthesis' in window)) {report(t('a11y.noSpeech')); return;}
+  const scope = document.querySelector('main, [role="main"]');
+  const text = selected.current.trim() || (scope instanceof HTMLElement ? scope.innerText : '');
+  if (!text.trim()) {report(t('a11y.empty')); return;}
+  // Queue bounded chunks so long pages remain readable in browsers with utterance limits.
+  const chunks = text.match(/[\s\S]{1,220}(?:\s|$)|[\s\S]{1,220}/g) || [text];
+  setReading(true); setPaused(false);
+  const next = (index: number) => {
+   if (index >= chunks.length) {setReading(false); return;}
+   const utterance = new SpeechSynthesisUtterance(chunks[index]); utterance.lang = speechLocale(language);
+   const voices = window.speechSynthesis.getVoices();
+   const voice = voices.find(v => v.lang.toLowerCase().startsWith(language)); if (voice) utterance.voice = voice;
+   utterance.onend = () => next(index+1);
+   utterance.onerror = () => {setReading(false);};
+   window.speechSynthesis.speak(utterance);
+  };
+  next(0);
+ };
+ const start = (mode: 'dictation' | 'navigation') => {
+  stop();
+  const Constructor = recognitionConstructor(); if (!Constructor) {report(t('a11y.unsupported')); return;}
+  const target = field.current;
+  if (mode === 'dictation' && (!target?.isConnected || !isDictationTarget(target))) {report(t('a11y.target')); return;}
+  const recognition = new Constructor(); engine.current = recognition;
+  recognition.lang = speechLocale(language); recognition.continuous = false; recognition.interimResults = false;
+  recognition.onresult = event => {
+   const transcript = event.results[0]?.[0]?.transcript?.trim(); if (!transcript) return;
+   if (mode === 'dictation' && target?.isConnected && isDictationTarget(target)) {
+    const setter = Object.getOwnPropertyDescriptor(target instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype,'value')?.set;
+    setter?.call(target,appendDictation(target.value,transcript)); target.dispatchEvent(new Event('input',{bubbles:true})); target.focus();
+   } else if (mode === 'navigation') {
+    const destination = voiceDestination(transcript,language);
+    if (destination) {navigate(destination); report(t('a11y.opened'));}
     else {
-      speak(t('voice.command_not_recognized'));
+     const command = transcript.toLowerCase().replace(/[.!?,]/g,'').trim();
+     if (['scroll down','sogeza chini','défiler vers le bas'].includes(command)) window.scrollBy({top:500,behavior:settings.reducedMotion?'instant':'smooth'});
+     else if (['scroll up','sogeza juu','défiler vers le haut'].includes(command)) window.scrollBy({top:-500,behavior:settings.reducedMotion?'instant':'smooth'});
+     else if (['go back','rudi nyuma','retour'].includes(command)) navigate(-1);
+     else report(t('a11y.unknown'));
     }
+   }
   };
-
-  const speak = (text: string) => {
-    if (!settings.textToSpeech) return;
-    
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 1.0;
-    utterance.pitch = 1.0;
-    utterance.volume = 1.0;
-    window.speechSynthesis.speak(utterance);
+  recognition.onerror = event => {
+   if (event.error === 'aborted') return;
+   const key = {'not-allowed':'denied','service-not-allowed':'denied','audio-capture':'noAudio','no-speech':'noMatch',network:'network'}[event.error] || 'error';
+   report(t(`a11y.${key}`)); setListening(null);
   };
-
-  const toggleListening = () => {
-    if (!recognition) return;
-
-    if (isListening) {
-      recognition.stop();
-      setIsListening(false);
-      announce(t('voice.stopped'), 'polite');
-    } else {
-      recognition.start();
-      setIsListening(true);
-      announce(t('voice.started'), 'polite');
-      speak(t('voice.listening'));
-    }
-  };
-
-  const showCommands = () => {
-    const commands = [
-      'Go home', 'Voice', 'Community', 'Proposals', 
-      'Challenges', 'Radio', 'Profile', 'Help',
-      'Scroll down', 'Scroll up', 'Go back', 'Refresh'
-    ];
-    speak(`Available commands: ${commands.join(', ')}`);
-  };
-
-  if (!settings.voiceNavigation) return null;
-
-  return (
-    <div className="fixed bottom-24 right-4 z-50">
-      <Card className="p-4 space-y-3 shadow-lg">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <Volume2 className="w-5 h-5 text-primary" />
-            <span className="font-semibold text-sm">{t('voice.commands')}</span>
-          </div>
-          <Badge variant={isListening ? 'default' : 'secondary'}>
-            {isListening ? t('voice.listening') : t('voice.inactive')}
-          </Badge>
-        </div>
-        
-        {lastCommand && (
-          <p className="text-xs text-muted-foreground">
-            {t('voice.last_command')}: "{lastCommand}"
-          </p>
-        )}
-
-        <div className="flex gap-2">
-          <Button
-            size="sm"
-            onClick={toggleListening}
-            variant={isListening ? 'destructive' : 'default'}
-            className="flex-1"
-          >
-            {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-            <span className="ml-2">
-              {isListening ? t('voice.stop') : t('voice.start')}
-            </span>
-          </Button>
-          
-          <Button size="sm" variant="outline" onClick={showCommands}>
-            <Volume2 className="w-4 h-4" />
-          </Button>
-        </div>
-      </Card>
-    </div>
-  );
+  recognition.onend = () => {if(engine.current === recognition) {engine.current = null; setListening(null);}};
+  try {recognition.start(); setMessage(''); setListening(mode);} catch {report(t('a11y.error'));}
+ };
+ if (!settings.textToSpeech && !settings.speechToText && !settings.voiceNavigation) return null;
+ return <section data-speech-controls aria-label={t('a11y.audio')} className="fixed bottom-24 right-3 z-40 w-[min(24rem,calc(100vw-1.5rem))] border border-border rounded-md bg-popover text-popover-foreground p-3 shadow-lg space-y-2">
+  <div className="flex flex-wrap gap-2">
+   {settings.textToSpeech && <>
+    <Button size="sm" className="min-h-11 h-auto whitespace-normal text-start" onClick={read}><Volume2 className="h-4 w-4 shrink-0" />{t('a11y.read')}</Button>
+    {reading && <Button size="icon" variant="outline" className="min-h-11 min-w-11" aria-label={t(`a11y.${paused?'resume':'pause'}`)} onClick={() => {if(paused) window.speechSynthesis.resume(); else window.speechSynthesis.pause(); setPaused(!paused);}}>{paused?<Play />:<Pause />}</Button>}
+   </>}
+   {settings.speechToText && <Button size="sm" variant="outline" className="min-h-11 h-auto whitespace-normal text-start" onMouseDown={e=>e.preventDefault()} onClick={() => start('dictation')} disabled={!!listening}><Mic className="h-4 w-4 shrink-0" />{t('a11y.dictate')}</Button>}
+   {settings.voiceNavigation && <Button size="sm" variant="outline" className="min-h-11 h-auto whitespace-normal text-start" onClick={() => start('navigation')} disabled={!!listening}><Mic className="h-4 w-4 shrink-0" />{t('a11y.listen')}</Button>}
+   {(listening || reading) && <Button size="icon" variant="outline" className="min-h-11 min-w-11" onClick={stop} aria-label={t('a11y.stop')}>{listening?<MicOff />:<Square />}</Button>}
+  </div>
+  {settings.voiceNavigation && <p className="text-xs text-muted-foreground">{t('a11y.commands')}</p>}
+  {settings.speechToText && <p className="text-xs text-muted-foreground">{t('a11y.target')}</p>}
+  {(settings.speechToText || settings.voiceNavigation) && <p className="text-xs text-muted-foreground">{t('a11y.privacy')}</p>}
+  <p role="status" className="text-sm">{listening?t('a11y.listening'):message}</p>
+ </section>;
 }

@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+
+import { clampTextSize } from '@/lib/accessibilitySpeech';
 
 export interface AccessibilitySettings {
   // Visual
@@ -12,6 +14,7 @@ export interface AccessibilitySettings {
   audioDescriptions: boolean;
   screenReader: boolean;
   textToSpeech: boolean;
+  speechToText: boolean;
   
   // Interaction
   keyboardOnly: boolean;
@@ -48,6 +51,7 @@ const defaultSettings: AccessibilitySettings = {
   audioDescriptions: false,
   screenReader: false,
   textToSpeech: false,
+  speechToText: false,
   keyboardOnly: false,
   focusHighlight: true,
   simplifiedMode: false,
@@ -63,10 +67,12 @@ const AccessibilityContext = createContext<AccessibilityContextType | undefined>
 
 export const AccessibilityProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [settings, setSettings] = useState<AccessibilitySettings>(() => {
-    const stored = localStorage.getItem('accessibility_settings');
+    let stored: string | null = null;
+    try { stored = localStorage.getItem('accessibility_settings'); } catch { /* Storage can be blocked. */ }
     if (stored) {
       try {
-        return { ...defaultSettings, ...JSON.parse(stored) };
+        const saved = JSON.parse(stored);
+        return { ...defaultSettings, ...saved, textSize: clampTextSize(Number(saved.textSize ?? 100)) };
       } catch {
         return defaultSettings;
       }
@@ -86,14 +92,16 @@ export const AccessibilityProvider: React.FC<{ children: ReactNode }> = ({ child
   const [announcer, setAnnouncer] = useState<{ message: string; priority: string } | null>(null);
 
   useEffect(() => {
-    localStorage.setItem('accessibility_settings', JSON.stringify(settings));
+    try { localStorage.setItem('accessibility_settings', JSON.stringify(settings)); } catch { /* Preferences still work for this session. */ }
     
     // Apply settings to document
     const root = document.documentElement;
     
     // Text size
-    root.style.fontSize = `${settings.textSize}%`;
+    root.style.fontSize = `${clampTextSize(settings.textSize)}%`;
+    root.classList.toggle('large-text', settings.textSize > 120);
     
+    root.classList.toggle('reduced-motion', settings.reducedMotion);
     // High contrast
     root.classList.toggle('high-contrast', settings.highContrast);
     
@@ -117,36 +125,27 @@ export const AccessibilityProvider: React.FC<{ children: ReactNode }> = ({ child
     root.classList.toggle('reading-mode', settings.readingMode);
   }, [settings]);
 
-  const updateSetting = <K extends keyof AccessibilitySettings>(
+  const updateSetting = useCallback(<K extends keyof AccessibilitySettings>(
     key: K,
     value: AccessibilitySettings[K]
   ) => {
-    setSettings(prev => ({ ...prev, [key]: value }));
-  };
+    setSettings(prev => ({ ...prev, [key]: key === 'textSize' ? clampTextSize(Number(value)) : value }));
+  }, []);
 
   const resetSettings = () => {
     setSettings(defaultSettings);
-    localStorage.removeItem('accessibility_settings');
+    try { localStorage.removeItem('accessibility_settings'); } catch { /* Storage can be blocked. */ }
   };
 
-  const announce = (message: string, priority: 'polite' | 'assertive' = 'polite') => {
+  const announce = useCallback((message: string, priority: 'polite' | 'assertive' = 'polite') => {
     setAnnouncer({ message, priority });
-    setTimeout(() => setAnnouncer(null), 100);
-  };
+  }, []);
 
   return (
     <AccessibilityContext.Provider value={{ settings, updateSetting, resetSettings, announce }}>
       {children}
-      {announcer && (
-        <div
-          role="status"
-          aria-live={announcer.priority as 'polite' | 'assertive'}
-          aria-atomic="true"
-          className="sr-only"
-        >
-          {announcer.message}
-        </div>
-      )}
+      <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">{announcer?.priority === 'polite' ? announcer.message : ''}</div>
+      <div role="alert" aria-live="assertive" aria-atomic="true" className="sr-only">{announcer?.priority === 'assertive' ? announcer.message : ''}</div>
     </AccessibilityContext.Provider>
   );
 };

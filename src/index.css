@@ -608,14 +608,14 @@
   }
 
   /* Dyslexia-Friendly Font */
-  @import url('https://fonts.googleapis.com/css2?family=OpenDyslexic&display=swap');
+
 
   .dyslexic-font {
-    font-family: 'OpenDyslexic', sans-serif !important;
+    font-family: Verdana, sans-serif !important;
   }
 
   .dyslexic-font * {
-    font-family: 'OpenDyslexic', sans-serif !important;
+    font-family: Verdana, sans-serif !important;
   }
 
   /* Enhanced Focus Indicators */
@@ -626,7 +626,7 @@
   }
 
   /* High Contrast Mode */
-  .high-contrast {
+  .high-contrast, .dark.high-contrast {
     --background: 0 0% 100%;
     --foreground: 0 0% 0%;
     --card: 0 0% 98%;
@@ -634,6 +634,18 @@
     --primary: 210 100% 30%;
     --primary-foreground: 0 0% 100%;
     --border: 0 0% 20%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+    --muted: 0 0% 94%;
+    --muted-foreground: 0 0% 20%;
+    --secondary: 136 37% 24%;
+    --secondary-foreground: 0 0% 100%;
+    --accent: 26 47% 30%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 80% 35%;
+    --destructive-foreground: 0 0% 100%;
+    --input: 0 0% 60%;
+    --ring: 210 100% 30%;
   }
 
   /* Simplified Mode */
@@ -647,15 +659,28 @@
   }
 
   /* Reading Mode */
-  .reading-mode {
-    font-size: 118% !important;
-    line-height: 1.8 !important;
+  .reading-mode main p, .reading-mode [role="main"] p {
+    line-height: 1.9;
+    word-spacing: 0.1em;
   }
 
-  .reading-mode * {
-    max-width: 70ch !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 3px;
+  }
+
+  .large-text .desktop-hub-navigation, .large-text .desktop-language-control {
+    display: none !important;
+  }
+  .large-text .mobile-hub-trigger {
+    display: inline-flex !important;
+  }
+
+  .reduced-motion *, .reduced-motion *::before, .reduced-motion *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 
   /* Skip to main content */

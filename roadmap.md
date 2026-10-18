@@ -1,4 +1,9 @@
 # Democratic participation
+# Accessibility enhancements
+- [x] Activate read-aloud, opt-in dictation and supported voice navigation; simulated speech results verified with signed-in mediation form.
+- [x] Improve shared labels, announcements, focus, text sizing and contrast; verify keyboard dialog dismissal and mobile fit.
+- [x] Connect caption preferences, local WebVTT loading and truthful media text alternatives. Existing missing transcripts/captions require publisher content; real microphone/audio and assistive-device testing remains external.
+
 - [x] Add validated photo, video and reference materials to proposals and polls.
 - [x] Connect polls to proposal accountability; improve informed, private voting.
 - [x] Add low-data reading packs and multilingual learning materials.

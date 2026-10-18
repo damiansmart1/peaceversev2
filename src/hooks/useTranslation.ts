@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { participationCopy } from '@/lib/participationCopy';
+import { accessibilityCopy } from '@/lib/accessibilityCopy';
 import { aboutCopy } from '@/lib/aboutCopy';
 
 export type Language = 'en' | 'sw' | 'fr' | 'ar' | 'so' | 'am' | 'es' | 'pt' | 'zh' | 'hi' | 'de';
@@ -2737,6 +2738,10 @@ export const useTranslation = () => {
   };
 
   const t = (key: string, fallback?: string): string => {
+    if (key.startsWith('a11y.')) {
+      const name = key.slice(5);
+      return accessibilityCopy[language]?.[name] || accessibilityCopy.en[name] || fallback || name;
+    }
     if (key.startsWith('about.')) {
       const name = key.slice('about.'.length);
       return aboutCopy[language]?.[name] || aboutCopy.en[name] || fallback || name;

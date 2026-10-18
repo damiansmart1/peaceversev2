@@ -24,6 +24,7 @@ export const PageTransition = ({
 
   return (
     <div
+      data-route-content
       key={pathname}
       className={cn(className)}
       style={{

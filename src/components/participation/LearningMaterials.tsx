@@ -1,3 +1,4 @@
+import AccessibleMedia from '@/components/AccessibleMedia';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
@@ -34,7 +35,7 @@ function MaterialItem({ material, lowData }: { material: Material; lowData: bool
       {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
       {fileError && <p role="alert" className="text-sm text-destructive">{fileError.message}</p>}
       {src && !lowData && material.kind==='image' && <img src={src} alt={material.title} className="max-h-64 w-full object-contain rounded-md" loading="lazy" decoding="async" />}
-      {src && !lowData && material.kind==='video' && <video src={src} controls preload="none" className="max-h-64 w-full rounded-md" aria-label={material.title} />}
+      {src && !lowData && material.kind==='video' && <AccessibleMedia kind="video" src={src} title={material.title} description={material.context} className="max-h-64 w-full rounded-md" />}
       {src && <Button variant="outline" size="sm" asChild><a href={src} target="_blank" rel="noopener noreferrer"><ExternalLink className="h-4 w-4 mr-1" />{t('participation.open')}</a></Button>}
     </div>}
   </article>;
