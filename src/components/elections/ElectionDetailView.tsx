@@ -79,7 +79,7 @@ export default function ElectionDetailView({ election, onBack }: ElectionDetailV
       {/* Header */}
       <div className="flex items-start justify-between">
         <div className="flex items-start gap-4">
-          <Button variant="ghost" size="icon" onClick={onBack}>
+          <Button variant="ghost" size="icon" aria-label={t('common.back')} onClick={onBack}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>

@@ -1880,6 +1880,7 @@ export const translations: Record<Language, Record<string, string>> = {
   
   // French translations
   fr: {
+    'language.select': 'Choisir une langue',
     'nav.home': 'Accueil',
     'nav.about': 'À propos',
     'nav.contact': 'Contact',
