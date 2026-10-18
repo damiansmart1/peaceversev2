@@ -241,6 +241,8 @@ export default function ElectionDetailView({ election, onBack }: ElectionDetailV
           </TabsTrigger>
         </TabsList>
 
+        <TabsContent value="education"><VoterEducation key={election.country_code} catalogue={voterEducationCatalogue} initialCountry={election.country_code} /></TabsContent>
+
         <TabsContent value="overview" className="space-y-4">
           <div className="grid md:grid-cols-2 gap-4">
             {/* Election Timeline */}
