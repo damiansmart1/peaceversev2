@@ -1,61 +1,29 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAccessibility } from '@/contexts/AccessibilityContext';
+import { useTranslationContext } from '@/components/TranslationProvider';
 
-/**
- * FocusManager handles focus management for accessibility
- * - Moves focus to main content on route change
- * - Manages focus trap for modals
- * - Restores focus after dialogs close
- */
+// Radix owns dialog focus. This component only manages route content focus.
 export default function FocusManager() {
-  const location = useLocation();
-  const { announce } = useAccessibility();
-  const previousFocusRef = useRef<HTMLElement | null>(null);
-
-  useEffect(() => {
-    // On route change, focus main content and announce
-    const main = document.getElementById('main-content');
-    if (main) {
-      // Small delay to ensure content is rendered
-      setTimeout(() => {
-        main.focus();
-        
-        // Announce page change
-        const title = document.title.split('|')[0].trim();
-        announce(`Navigated to ${title}`, 'assertive');
-      }, 100);
-    }
-  }, [location.pathname, announce]);
-
-  useEffect(() => {
-    // Store focus before opening dialogs
-    const handleDialogOpen = (event: Event) => {
-      const target = event.target as HTMLElement;
-      if (target.getAttribute('role') === 'dialog') {
-        previousFocusRef.current = document.activeElement as HTMLElement;
-      }
-    };
-
-    // Restore focus after closing dialogs
-    const handleDialogClose = (event: Event) => {
-      const target = event.target as HTMLElement;
-      if (target.getAttribute('role') === 'dialog' && previousFocusRef.current) {
-        setTimeout(() => {
-          previousFocusRef.current?.focus();
-          previousFocusRef.current = null;
-        }, 100);
-      }
-    };
-
-    document.addEventListener('focusin', handleDialogOpen);
-    document.addEventListener('focusout', handleDialogClose);
-
-    return () => {
-      document.removeEventListener('focusin', handleDialogOpen);
-      document.removeEventListener('focusout', handleDialogClose);
-    };
-  }, []);
-
-  return null;
+ const {pathname} = useLocation(); const {announce} = useAccessibility(); const {t} = useTranslationContext();
+ useEffect(() => {
+  let focused = false;
+  const update = () => {
+   const route = document.querySelector('[data-route-content]');
+   if (!route) return;
+   const main = route.querySelector('main, [role="main"]') || route.querySelector('.container') || route.firstElementChild;
+   if (!(main instanceof HTMLElement)) return;
+   if (main.tagName !== 'MAIN') main.setAttribute('role','main');
+   main.id='main-content'; main.tabIndex=-1;
+   if (!focused && !document.querySelector('[role="dialog"]')) {
+    focused=true; main.focus({preventScroll:true});
+    announce(`${t('a11y.opened')}: ${main.querySelector('h1')?.textContent || document.title}`);
+   }
+  };
+  const timer=window.setTimeout(update,150);
+  const observer=new MutationObserver(update);
+  const route=document.querySelector('[data-route-content]'); if(route) observer.observe(route,{childList:true,subtree:true});
+  return ()=>{window.clearTimeout(timer);observer.disconnect();};
+ },[pathname,announce]);
+ return null;
 }
