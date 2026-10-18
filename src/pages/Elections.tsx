@@ -8,6 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Progress } from '@/components/ui/progress';
 import Navigation from '@/components/Navigation';
+import VoterEducation from '@/components/elections/VoterEducation';
+import { voterEducationCatalogue } from '@/lib/voterEducationCatalogue';
+import { useTranslationContext } from '@/components/TranslationProvider';
 import { 
   Vote, 
   AlertTriangle, 
@@ -34,6 +37,7 @@ import {
   Fingerprint,
   Smartphone,
   Camera,
+  BookOpen,
 } from 'lucide-react';
 import { useElections, useAllElectionIncidents, useElectionStats, type Election, type ElectionStatus } from '@/hooks/useElections';
 import { useElectionDemo } from '@/hooks/useElectionDemo';
@@ -77,6 +81,7 @@ const FEATURE_HIGHLIGHTS = [
 ];
 
 export default function Elections() {
+  const { t } = useTranslationContext();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   const [searchTerm, setSearchTerm] = useState('');
@@ -290,6 +295,10 @@ export default function Elections() {
                 <AlertTriangle className="h-4 w-4" />
                 <span className="hidden sm:inline">Incidents</span>
               </TabsTrigger>
+              <TabsTrigger value="education" className="gap-1" aria-label={t('voterEducation.title')}>
+                <BookOpen className="h-4 w-4" />
+                <span>{t('voterEducation.title')}</span>
+              </TabsTrigger>
               <TabsTrigger value="report" className="gap-1">
                 <Plus className="h-4 w-4" />
                 <span className="hidden sm:inline">Report</span>
@@ -491,6 +500,8 @@ export default function Elections() {
               </div>
             )}
           </TabsContent>
+
+          <TabsContent value="education"><VoterEducation catalogue={voterEducationCatalogue} /></TabsContent>
 
           <TabsContent value="incidents" className="space-y-4">
             <Card>

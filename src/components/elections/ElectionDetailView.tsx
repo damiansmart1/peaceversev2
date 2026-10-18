@@ -33,6 +33,9 @@ import StatisticalAnomalyDetector from './StatisticalAnomalyDetector';
 import ObservationChecklist from './ObservationChecklist';
 import PVTDashboard from './PVTDashboard';
 import ObserverGPSTracker from './ObserverGPSTracker';
+import VoterEducation from './VoterEducation';
+import { voterEducationCatalogue } from '@/lib/voterEducationCatalogue';
+import { useTranslationContext } from '@/components/TranslationProvider';
 
 interface ElectionDetailViewProps {
   election: Election;
@@ -40,6 +43,7 @@ interface ElectionDetailViewProps {
 }
 
 export default function ElectionDetailView({ election, onBack }: ElectionDetailViewProps) {
+  const { t } = useTranslationContext();
   const [activeTab, setActiveTab] = useState('overview');
   
   const { data: stats, isLoading: statsLoading, refetch: refetchStats } = useElectionStats(election.id);
@@ -174,6 +178,7 @@ export default function ElectionDetailView({ election, onBack }: ElectionDetailV
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="flex flex-wrap gap-1 h-auto p-1 w-full max-w-5xl">
+          <TabsTrigger value="education">{t('voterEducation.title')}</TabsTrigger>
           <TabsTrigger value="overview" className="gap-1">
             <BarChart3 className="h-4 w-4" />
             <span className="hidden sm:inline">Overview</span>
