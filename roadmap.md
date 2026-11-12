@@ -1,6 +1,7 @@
 # French translation repair
 - [x] Translate election overview, details, reporting and records; verify French learning content and switching.
 # Forum showcase video
+- [ ] Replace the forum showcase narration with the uploaded recording; clean audio, retime scenes and captions, and verify the under-one-minute output.
 - [x] Rework the PeaceVerse showcase to 58.8 seconds covering all five forum talking points; scene/transition layouts and duration checked. New AI narration; listening and precise caption alignment remain for review. Cyber-safety training and youth circles identified as programme approaches, not demonstrated app features.
 # Democratic participation
 # Voter education
