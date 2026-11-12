@@ -1,5 +1,7 @@
 # French translation repair
 - [x] Translate election overview, details, reporting and records; verify French learning content and switching.
+# Forum showcase video
+- [ ] Rework the PeaceVerse showcase to under one minute covering voice-first access, verified early warning to action, cyber-safety, youth dialogue and youth peacebuilding; inspect and deliver the revised video.
 # Democratic participation
 # Voter education
 - [x] Add country-specific, officially sourced voter lessons and interactive knowledge checks (Kenya and South Africa; other countries await source verification).
